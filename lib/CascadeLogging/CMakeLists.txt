@@ -1,0 +1,2 @@
+add_library(CascadeLogging src/cascade_logging.cpp)
+target_include_directories(CascadeLogging PUBLIC include)

@@ -1,0 +1,15 @@
+# ninja log v5
+228	250	1644632553700796498	lib/CascadeEngine/libCascadeEngine.a	6af3861e167c58a1
+250	281	1644632553730796499	CascadeApplication	ece2171d32f08b92
+205	228	1644632553677796497	build/CascadeLogging/libCascadeLogging.a	c8b90274012b4731
+1	204	1644632553654796496	build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/testb.cpp.o	ad54651dfde7ad
+0	12	1644632553462796486	CMakeFiles/CascadeApplication.dir/main.cpp.o	a200fd36ddbc925b
+1	12	1644632553462796486	lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/test.cpp.o	d5f6dc4885ed2f7f
+0	14	1644632921284813886	CMakeFiles/CascadeApplication.dir/main.cpp.o	a200fd36ddbc925b
+0	162	1644632921432813893	lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/entry_point.cpp.o	c25088a5c54c3e8c
+0	209	1644632921479813896	build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/cascade_logging.cpp.o	9c76e16da5956e62
+209	232	1644632921501813897	build/CascadeLogging/libCascadeLogging.a	4f9fa7ab5902946
+232	255	1644632921524813898	lib/CascadeEngine/libCascadeEngine.a	9b4d3c217c9ecf47
+0	153	1644632943298814928	lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/entry_point.cpp.o	c25088a5c54c3e8c
+153	177	1644632943321814929	lib/CascadeEngine/libCascadeEngine.a	9b4d3c217c9ecf47
+177	210	1644632943355814930	CascadeApplication	ece2171d32f08b92
