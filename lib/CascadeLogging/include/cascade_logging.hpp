@@ -1,3 +1,1 @@
-#include <string>
-
-void Log(std::string message);
+#include "../src/logger.hpp"

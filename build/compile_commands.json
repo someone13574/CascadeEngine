@@ -1,17 +1,22 @@
 [
 {
   "directory": "/home/owen/Code/C++/CascadeEngine/build",
-  "command": "/usr/bin/c++ -I/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/include -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include -g -std=gnu++17 -o CMakeFiles/CascadeApplication.dir/main.cpp.o -c /home/owen/Code/C++/CascadeEngine/main.cpp",
-  "file": "/home/owen/Code/C++/CascadeEngine/main.cpp"
+  "command": "/usr/bin/c++ -I/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/include -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include -pthread -g -std=gnu++17 -o CMakeFiles/CascadeApplication.dir/src/main.cpp.o -c /home/owen/Code/C++/CascadeEngine/src/main.cpp",
+  "file": "/home/owen/Code/C++/CascadeEngine/src/main.cpp"
 },
 {
   "directory": "/home/owen/Code/C++/CascadeEngine/build",
-  "command": "/usr/bin/c++ -I/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/include -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include -g -std=gnu++17 -o lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/entry_point.cpp.o -c /home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/src/entry_point.cpp",
+  "command": "/usr/bin/c++ -I/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/include -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include -pthread --define-macro LOG_LEVEL_ALL -g -std=gnu++17 -o lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/entry_point.cpp.o -c /home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/src/entry_point.cpp",
   "file": "/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/src/entry_point.cpp"
 },
 {
   "directory": "/home/owen/Code/C++/CascadeEngine/build",
-  "command": "/usr/bin/c++ -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include -g -std=gnu++17 -o build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/cascade_logging.cpp.o -c /home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/cascade_logging.cpp",
-  "file": "/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/cascade_logging.cpp"
+  "command": "/usr/bin/c++ -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include -pthread -g -std=gnu++17 -o build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/log_stream.cpp.o -c /home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/log_stream.cpp",
+  "file": "/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/log_stream.cpp"
+},
+{
+  "directory": "/home/owen/Code/C++/CascadeEngine/build",
+  "command": "/usr/bin/c++ -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include -pthread -g -std=gnu++17 -o build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/logger.cpp.o -c /home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/logger.cpp",
+  "file": "/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/logger.cpp"
 }
 ]

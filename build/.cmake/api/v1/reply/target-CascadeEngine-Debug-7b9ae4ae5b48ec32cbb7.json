@@ -3,7 +3,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "build/CascadeLogging/libCascadeLogging.a"
+			"path" : "lib/CascadeEngine/libCascadeEngine.a"
 		}
 	],
 	"backtrace" : 1,
@@ -12,11 +12,12 @@
 		"commands" : 
 		[
 			"add_library",
+			"target_link_libraries",
 			"target_include_directories"
 		],
 		"files" : 
 		[
-			"lib/CascadeLogging/CMakeLists.txt"
+			"lib/CascadeEngine/CMakeLists.txt"
 		],
 		"nodes" : 
 		[
@@ -26,13 +27,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 1,
+				"line" : 6,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 2,
+				"line" : 7,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 8,
 				"parent" : 0
 			}
 		]
@@ -43,7 +50,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g"
+					"fragment" : "-pthread --define-macro LOG_LEVEL_ALL -g"
 				},
 				{
 					"fragment" : "-std=gnu++17"
@@ -51,6 +58,10 @@
 			],
 			"includes" : 
 			[
+				{
+					"backtrace" : 3,
+					"path" : "/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/include"
+				},
 				{
 					"backtrace" : 2,
 					"path" : "/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include"
@@ -71,13 +82,20 @@
 			]
 		}
 	],
-	"id" : "CascadeLogging::@66e60dfce65ff41d24f7",
-	"name" : "CascadeLogging",
-	"nameOnDisk" : "libCascadeLogging.a",
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 2,
+			"id" : "CascadeLogging::@66e60dfce65ff41d24f7"
+		}
+	],
+	"id" : "CascadeEngine::@08bf45cbafee40360854",
+	"name" : "CascadeEngine",
+	"nameOnDisk" : "libCascadeEngine.a",
 	"paths" : 
 	{
-		"build" : "build/CascadeLogging",
-		"source" : "lib/CascadeLogging"
+		"build" : "lib/CascadeEngine",
+		"source" : "lib/CascadeEngine"
 	},
 	"sourceGroups" : 
 	[
@@ -94,7 +112,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "lib/CascadeLogging/src/cascade_logging.cpp",
+			"path" : "lib/CascadeEngine/src/entry_point.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

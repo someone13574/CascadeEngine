@@ -1,9 +1,8 @@
 {
-	"archive" : {},
 	"artifacts" : 
 	[
 		{
-			"path" : "lib/CascadeEngine/libCascadeEngine.a"
+			"path" : "CascadeApplication"
 		}
 	],
 	"backtrace" : 1,
@@ -11,13 +10,12 @@
 	{
 		"commands" : 
 		[
-			"add_library",
-			"target_link_libraries",
-			"target_include_directories"
+			"add_executable",
+			"target_link_libraries"
 		],
 		"files" : 
 		[
-			"lib/CascadeEngine/CMakeLists.txt"
+			"CMakeLists.txt"
 		],
 		"nodes" : 
 		[
@@ -27,19 +25,13 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 3,
+				"line" : 13,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 4,
-				"parent" : 0
-			},
-			{
-				"command" : 2,
-				"file" : 0,
-				"line" : 5,
+				"line" : 14,
 				"parent" : 0
 			}
 		]
@@ -50,7 +42,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g"
+					"fragment" : "-pthread -g"
 				},
 				{
 					"fragment" : "-std=gnu++17"
@@ -59,7 +51,7 @@
 			"includes" : 
 			[
 				{
-					"backtrace" : 3,
+					"backtrace" : 2,
 					"path" : "/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/include"
 				},
 				{
@@ -86,16 +78,44 @@
 	[
 		{
 			"backtrace" : 2,
+			"id" : "CascadeEngine::@08bf45cbafee40360854"
+		},
+		{
+			"backtrace" : 2,
 			"id" : "CascadeLogging::@66e60dfce65ff41d24f7"
 		}
 	],
-	"id" : "CascadeEngine::@08bf45cbafee40360854",
-	"name" : "CascadeEngine",
-	"nameOnDisk" : "libCascadeEngine.a",
+	"id" : "CascadeApplication::@6890427a1f51a3e7e1df",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "-pthread -g",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "",
+				"role" : "flags"
+			},
+			{
+				"backtrace" : 2,
+				"fragment" : "lib/CascadeEngine/libCascadeEngine.a",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "build/CascadeLogging/libCascadeLogging.a",
+				"role" : "libraries"
+			}
+		],
+		"language" : "CXX"
+	},
+	"name" : "CascadeApplication",
+	"nameOnDisk" : "CascadeApplication",
 	"paths" : 
 	{
-		"build" : "lib/CascadeEngine",
-		"source" : "lib/CascadeEngine"
+		"build" : ".",
+		"source" : "."
 	},
 	"sourceGroups" : 
 	[
@@ -112,9 +132,9 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "lib/CascadeEngine/src/entry_point.cpp",
+			"path" : "src/main.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
-	"type" : "STATIC_LIBRARY"
+	"type" : "EXECUTABLE"
 }

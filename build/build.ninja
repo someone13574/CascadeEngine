@@ -49,12 +49,12 @@ cmake_ninja_workdir = /home/owen/Code/C++/CascadeEngine/build/
 
 build cmake_object_order_depends_target_CascadeApplication: phony || cmake_object_order_depends_target_CascadeEngine cmake_object_order_depends_target_CascadeLogging
 
-build CMakeFiles/CascadeApplication.dir/main.cpp.o: CXX_COMPILER__CascadeApplication_Debug /home/owen/Code/C++/CascadeEngine/main.cpp || cmake_object_order_depends_target_CascadeApplication
-  DEP_FILE = CMakeFiles/CascadeApplication.dir/main.cpp.o.d
-  FLAGS = -g -std=gnu++17
+build CMakeFiles/CascadeApplication.dir/src/main.cpp.o: CXX_COMPILER__CascadeApplication_Debug /home/owen/Code/C++/CascadeEngine/src/main.cpp || cmake_object_order_depends_target_CascadeApplication
+  DEP_FILE = CMakeFiles/CascadeApplication.dir/src/main.cpp.o.d
+  FLAGS = -pthread -g -std=gnu++17
   INCLUDES = -I/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/include -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include
   OBJECT_DIR = CMakeFiles/CascadeApplication.dir
-  OBJECT_FILE_DIR = CMakeFiles/CascadeApplication.dir
+  OBJECT_FILE_DIR = CMakeFiles/CascadeApplication.dir/src
 
 
 # =============================================================================
@@ -64,8 +64,8 @@ build CMakeFiles/CascadeApplication.dir/main.cpp.o: CXX_COMPILER__CascadeApplica
 #############################################
 # Link the executable CascadeApplication
 
-build CascadeApplication: CXX_EXECUTABLE_LINKER__CascadeApplication_Debug CMakeFiles/CascadeApplication.dir/main.cpp.o | lib/CascadeEngine/libCascadeEngine.a build/CascadeLogging/libCascadeLogging.a || build/CascadeLogging/libCascadeLogging.a lib/CascadeEngine/libCascadeEngine.a
-  FLAGS = -g
+build CascadeApplication: CXX_EXECUTABLE_LINKER__CascadeApplication_Debug CMakeFiles/CascadeApplication.dir/src/main.cpp.o | lib/CascadeEngine/libCascadeEngine.a build/CascadeLogging/libCascadeLogging.a || build/CascadeLogging/libCascadeLogging.a lib/CascadeEngine/libCascadeEngine.a
+  FLAGS = -pthread -g
   LINK_LIBRARIES = lib/CascadeEngine/libCascadeEngine.a  build/CascadeLogging/libCascadeLogging.a
   OBJECT_DIR = CMakeFiles/CascadeApplication.dir
   POST_BUILD = :
@@ -113,7 +113,7 @@ build cmake_object_order_depends_target_CascadeEngine: phony || cmake_object_ord
 
 build lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/entry_point.cpp.o: CXX_COMPILER__CascadeEngine_Debug /home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/src/entry_point.cpp || cmake_object_order_depends_target_CascadeEngine
   DEP_FILE = lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/entry_point.cpp.o.d
-  FLAGS = -g -std=gnu++17
+  FLAGS = -pthread --define-macro LOG_LEVEL_ALL -g -std=gnu++17
   INCLUDES = -I/home/owen/Code/C++/CascadeEngine/lib/CascadeEngine/include -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include
   OBJECT_DIR = lib/CascadeEngine/CMakeFiles/CascadeEngine.dir
   OBJECT_FILE_DIR = lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src
@@ -127,7 +127,7 @@ build lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/entry_point.cpp.o: CXX_
 # Link the static library lib/CascadeEngine/libCascadeEngine.a
 
 build lib/CascadeEngine/libCascadeEngine.a: CXX_STATIC_LIBRARY_LINKER__CascadeEngine_Debug lib/CascadeEngine/CMakeFiles/CascadeEngine.dir/src/entry_point.cpp.o || build/CascadeLogging/libCascadeLogging.a
-  LANGUAGE_COMPILE_FLAGS = -g
+  LANGUAGE_COMPILE_FLAGS = -pthread --define-macro LOG_LEVEL_ALL -g
   OBJECT_DIR = lib/CascadeEngine/CMakeFiles/CascadeEngine.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -172,9 +172,16 @@ build lib/CascadeEngine/rebuild_cache: phony lib/CascadeEngine/CMakeFiles/rebuil
 
 build cmake_object_order_depends_target_CascadeLogging: phony || build/CascadeLogging/CMakeFiles/CascadeLogging.dir
 
-build build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/cascade_logging.cpp.o: CXX_COMPILER__CascadeLogging_Debug /home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/cascade_logging.cpp || cmake_object_order_depends_target_CascadeLogging
-  DEP_FILE = build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/cascade_logging.cpp.o.d
-  FLAGS = -g -std=gnu++17
+build build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/log_stream.cpp.o: CXX_COMPILER__CascadeLogging_Debug /home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/log_stream.cpp || cmake_object_order_depends_target_CascadeLogging
+  DEP_FILE = build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/log_stream.cpp.o.d
+  FLAGS = -pthread -g -std=gnu++17
+  INCLUDES = -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include
+  OBJECT_DIR = build/CascadeLogging/CMakeFiles/CascadeLogging.dir
+  OBJECT_FILE_DIR = build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src
+
+build build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/logger.cpp.o: CXX_COMPILER__CascadeLogging_Debug /home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/src/logger.cpp || cmake_object_order_depends_target_CascadeLogging
+  DEP_FILE = build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/logger.cpp.o.d
+  FLAGS = -pthread -g -std=gnu++17
   INCLUDES = -I/home/owen/Code/C++/CascadeEngine/lib/CascadeLogging/include
   OBJECT_DIR = build/CascadeLogging/CMakeFiles/CascadeLogging.dir
   OBJECT_FILE_DIR = build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src
@@ -187,8 +194,8 @@ build build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/cascade_logging.cpp
 #############################################
 # Link the static library build/CascadeLogging/libCascadeLogging.a
 
-build build/CascadeLogging/libCascadeLogging.a: CXX_STATIC_LIBRARY_LINKER__CascadeLogging_Debug build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/cascade_logging.cpp.o
-  LANGUAGE_COMPILE_FLAGS = -g
+build build/CascadeLogging/libCascadeLogging.a: CXX_STATIC_LIBRARY_LINKER__CascadeLogging_Debug build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/log_stream.cpp.o build/CascadeLogging/CMakeFiles/CascadeLogging.dir/src/logger.cpp.o
+  LANGUAGE_COMPILE_FLAGS = -pthread -g
   OBJECT_DIR = build/CascadeLogging/CMakeFiles/CascadeLogging.dir
   POST_BUILD = :
   PRE_LINK = :
