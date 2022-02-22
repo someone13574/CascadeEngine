@@ -3,22 +3,25 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <time.h>
 #include <utility>
+
+#if defined(_MSC_VER)
+#define localtime_r(T, Tm) (localtime_s(Tm, T) ? NULL : Tm)
+#endif
 
 #define FILL_LENGTH 42
 
 namespace cascade_logging
 {
     Logger::Logger() { m_print_thread = std::thread(Print_Loop, this); }
-
     Logger::~Logger()
     {
         m_loop_active = false;
         m_condition_varable.notify_all();
         m_print_thread.join();
 
-        while (!m_message_queue.empty())
-        {
+        while (!m_message_queue.empty()) {
             std::cout << m_message_queue.front() << std::endl;
             m_message_queue.pop();
         }
@@ -27,15 +30,12 @@ namespace cascade_logging
     void Logger::Print_Loop(Logger* instance)
     {
         std::unique_lock<std::mutex> lock_guard(instance->m_queue_mutex);
-        while (instance->m_loop_active)
-        {
-            while (!instance->m_message_queue.empty())
-            {
+        while (instance->m_loop_active) {
+            while (!instance->m_message_queue.empty()) {
                 std::cout << instance->m_message_queue.front() << std::endl;
                 instance->m_message_queue.pop();
             }
-            instance->m_condition_varable.wait(lock_guard,
-                                               [instance]
+            instance->m_condition_varable.wait(lock_guard, [instance]
                                                {
                                                    return !instance->m_loop_active || !instance->m_message_queue.empty();
                                                });
@@ -49,7 +49,8 @@ namespace cascade_logging
         // Format time
         time_t time = std::chrono::system_clock::to_time_t(message.time);
 
-        std::chrono::seconds::rep milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(message.time.time_since_epoch()).count() % 1000;
+        std::chrono::seconds::rep milliseconds
+            = std::chrono::duration_cast<std::chrono::milliseconds>(message.time.time_since_epoch()).count() % 1000;
 
         tm local_time;
         localtime_r(&time, &local_time);
@@ -69,16 +70,33 @@ namespace cascade_logging
         // Add correct log level
         switch (message.severity)
         {
-            case Severity_Level::FATAL: final_message += "[fatal] "; break;
-            case Severity_Level::ERROR: final_message += "[error] "; break;
-            case Severity_Level::WARN: final_message += "[warn]  "; break;
-            case Severity_Level::INFO: final_message += "[info]  "; break;
-            case Severity_Level::DEBUG: final_message += "[debug] "; break;
-            case Severity_Level::TRACE: final_message += "[trace] "; break;
+            case Severity_Level::FATAL:
+                final_message += "[fatal] ";
+                break;
+            case Severity_Level::ERROR:
+                final_message += "[error] ";
+                break;
+            case Severity_Level::WARN:
+                final_message += "[warn]  ";
+                break;
+            case Severity_Level::INFO:
+                final_message += "[info]  ";
+                break;
+            case Severity_Level::DEBUG:
+                final_message += "[debug] ";
+                break;
+            case Severity_Level::TRACE:
+                final_message += "[trace] ";
+                break;
         }
 
-        // Convert file path to file name and line
+// Convert file path to file name and line
+#if defined(_MSC_VER)
+        message.file.erase(0, message.file.find_last_of("\\") + 1);
+#else
         message.file.erase(0, message.file.find_last_of("/") + 1);
+#endif
+
         message.file = "[" + message.file + ":" + std::to_string(message.line) + "]";
 
         // Fill spaces after location
@@ -92,4 +110,4 @@ namespace cascade_logging
         m_message_queue.push(std::move(final_message));
         m_condition_varable.notify_all();
     }
-}    // namespace cascade_logging
+} // namespace cascade_logging

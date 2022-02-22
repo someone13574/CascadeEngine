@@ -77,5 +77,6 @@
     "clang-format.language.cuda.fallbackStyle": "Mozilla",
     "clang-format.assumeFilename": ".clang-format",
     "clang-format.language.javascript.fallbackStyle": "",
-    "clang-format.language.typescript.fallbackStyle": ""
+    "clang-format.language.typescript.fallbackStyle": "",
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

@@ -1,5 +1,6 @@
-set(CMAKE_CXX_FLAGS "-pthread")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+if (UNIX)
+    set(CMAKE_CXX_FLAGS "-pthread")
+endif (UNIX)
 
 add_library(CascadeLogging
     src/log_stream.cpp

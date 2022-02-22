@@ -1,5 +1,8 @@
-set(CMAKE_CXX_FLAGS "-pthread --define-macro LOG_LEVEL_ALL")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+if (UNIX)
+    set(CMAKE_CXX_FLAGS "-pthread")
+endif (UNIX)
+
+add_compile_definitions(LOG_LEVEL_ALL)
 
 add_subdirectory(../CascadeLogging ../../build/CascadeLogging)
 
