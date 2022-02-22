@@ -21,7 +21,8 @@ namespace cascade_logging
         m_condition_varable.notify_all();
         m_print_thread.join();
 
-        while (!m_message_queue.empty()) {
+        while (!m_message_queue.empty())
+        {
             std::cout << m_message_queue.front() << std::endl;
             m_message_queue.pop();
         }
@@ -30,15 +31,14 @@ namespace cascade_logging
     void Logger::Print_Loop(Logger* instance)
     {
         std::unique_lock<std::mutex> lock_guard(instance->m_queue_mutex);
-        while (instance->m_loop_active) {
-            while (!instance->m_message_queue.empty()) {
+        while (instance->m_loop_active)
+        {
+            while (!instance->m_message_queue.empty())
+            {
                 std::cout << instance->m_message_queue.front() << std::endl;
                 instance->m_message_queue.pop();
             }
-            instance->m_condition_varable.wait(lock_guard, [instance]
-                                               {
-                                                   return !instance->m_loop_active || !instance->m_message_queue.empty();
-                                               });
+            instance->m_condition_varable.wait(lock_guard, [instance] { return !instance->m_loop_active || !instance->m_message_queue.empty(); });
         }
     }
 
@@ -49,8 +49,7 @@ namespace cascade_logging
         // Format time
         time_t time = std::chrono::system_clock::to_time_t(message.time);
 
-        std::chrono::seconds::rep milliseconds
-            = std::chrono::duration_cast<std::chrono::milliseconds>(message.time.time_since_epoch()).count() % 1000;
+        std::chrono::seconds::rep milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(message.time.time_since_epoch()).count() % 1000;
 
         tm local_time;
         localtime_r(&time, &local_time);

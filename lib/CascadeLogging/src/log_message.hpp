@@ -17,10 +17,10 @@ namespace cascade_logging
 
     struct Log_Message
     {
-        std::string                                        message;
-        std::string                                        file;
-        unsigned int                                       line;
-        Severity_Level                                     severity;
+        std::string message;
+        std::string file;
+        unsigned int line;
+        Severity_Level severity;
         std::chrono::time_point<std::chrono::system_clock> time;
     };
-}    // namespace cascade_logging
+} // namespace cascade_logging
