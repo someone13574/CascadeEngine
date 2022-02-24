@@ -13,7 +13,7 @@ namespace cascade_logging
 {
     class Redirect
     {
-      public:
+    public:
         Redirect(){};
 
         template <class T>
@@ -25,7 +25,7 @@ namespace cascade_logging
 
     class Logger
     {
-      private:
+    private:
         std::queue<std::string> m_message_queue;
         std::thread m_print_thread;
         std::mutex m_queue_mutex;
@@ -33,10 +33,10 @@ namespace cascade_logging
 
         bool m_loop_active = true;
 
-      private:
+    private:
         static void Print_Loop(Logger* instance);
 
-      public:
+    public:
         Logger();
         ~Logger();
 

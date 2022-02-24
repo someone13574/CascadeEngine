@@ -11,14 +11,14 @@ namespace cascade_logging
 
     class Log_Stream : public std::ostringstream
     {
-      private:
+    private:
         Logger& m_logger;
         std::string m_occurence_file;
         unsigned int m_occurence_line;
         Severity_Level m_message_severity;
         std::chrono::time_point<std::chrono::system_clock> m_occurence_time;
 
-      public:
+    public:
         Log_Stream(Logger& logger, std::string file, unsigned int line, Severity_Level severity);
         ~Log_Stream();
     };
