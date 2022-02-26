@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-if (UNIX)
-    set(CMAKE_SHARED_LINKER_FLAGS "-Wall -Wextra -pthread -lxcb -g")
-endif (UNIX)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 

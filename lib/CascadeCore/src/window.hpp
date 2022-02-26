@@ -3,7 +3,7 @@
 #include "application.hpp"
 #include "event_manager.hpp"
 
-#if defined __unix__
+#if defined __linux__
 
 #include <memory>
 #include <string>

@@ -1,7 +1,7 @@
-#include "window.hpp"
 #include "cascade_logging.hpp"
+#include "window.hpp"
 
-#if defined __unix__
+#if defined __linux__
 
 #include <cstring>
 #include <unistd.h>
