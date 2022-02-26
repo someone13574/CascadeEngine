@@ -3,6 +3,8 @@
 #include "application.hpp"
 #include "event_manager.hpp"
 
+#if defined __unix__
+
 #include <memory>
 #include <string>
 #include <xcb/xcb.h>
@@ -48,3 +50,41 @@ namespace CascadeCore
         Application* Get_Owner_Application();
     };
 } // namespace CascadeCore
+
+#elif defined _WIN32 || WIN32
+
+#include <memory>
+#include <string>
+
+namespace CascadeCore
+{
+    class Application;
+    class Event_Manager;
+
+    class Window
+    {
+    public:
+        static void Close_Window_Event(void* data);
+
+    private:
+        unsigned int m_window_width;
+        unsigned int m_window_height;
+        std::string m_window_title;
+
+        Application* m_owner_application;
+        std::shared_ptr<Event_Manager> m_event_manager_ptr;
+
+    public:
+        Window(unsigned int width, unsigned int height, std::string title, Application* owner);
+        ~Window();
+
+        void Update_Event_Types();
+        void Process_Events();
+        void Send_Close_Event();
+
+        std::shared_ptr<Event_Manager> Get_Event_Manager();
+        Application* Get_Owner_Application();
+    };
+} // namespace CascadeCore
+
+#endif

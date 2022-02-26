@@ -1,5 +1,7 @@
-#include "cascade_logging.hpp"
 #include "window.hpp"
+#include "cascade_logging.hpp"
+
+#if defined __unix__
 
 #include <cstring>
 #include <unistd.h>
@@ -168,3 +170,49 @@ namespace CascadeCore
         return m_owner_application;
     }
 } // namespace CascadeCore
+
+#elif defined _WIN32 || WIN32
+
+namespace CascadeCore
+{
+    Window::Window(unsigned int width, unsigned int height, std::string title, Application* owner)
+        : m_window_width(width), m_window_height(height), m_window_title(title), m_event_manager_ptr(std::make_shared<Event_Manager>(this)), m_owner_application(owner)
+    {
+        LOG_DEBUG << "Creating a new window for '" << m_owner_application->Get_Application_Name() << "'";
+
+        LOG_DEBUG << "Window created";
+    }
+
+    Window::~Window()
+    {
+        LOG_DEBUG << "Started window cleanup";
+
+        LOG_TRACE << "Window cleanup complete";
+    }
+
+    void Window::Update_Event_Types()
+    {
+        LOG_TRACE << "Updated event masks";
+    }
+
+    void Window::Process_Events()
+    {
+    }
+
+    void Window::Send_Close_Event()
+    {
+        LOG_TRACE << "Sending close event to event loop";
+    }
+
+    std::shared_ptr<Event_Manager> Window::Get_Event_Manager()
+    {
+        return m_event_manager_ptr;
+    }
+
+    Application* Window::Get_Owner_Application()
+    {
+        return m_owner_application;
+    }
+} // namespace CascadeCore
+
+#endif

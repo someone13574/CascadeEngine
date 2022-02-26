@@ -1,12 +1,15 @@
+cmake_minimum_required(VERSION 3.10)
+
 if (UNIX)
     set(CMAKE_SHARED_LINKER_FLAGS "-Wall -Wextra -pthread -lxcb -g")
 endif (UNIX)
 
-add_compile_definitions(LOG_LEVEL_ALL)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_subdirectory(../CascadeLogging ../../build/CascadeLogging)
+add_subdirectory(../CascadeLogging ../../build/build)
 
-add_library(CascadeCore SHARED
+add_library(CascadeCore STATIC
     src/event_manager.cpp
     src/window.cpp
     src/application.cpp)

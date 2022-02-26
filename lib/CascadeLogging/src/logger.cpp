@@ -14,7 +14,10 @@
 
 namespace cascade_logging
 {
-    Logger::Logger() { m_print_thread = std::thread(Print_Loop, this); }
+    Logger::Logger()
+    {
+        m_print_thread = std::thread(Print_Loop, this);
+    }
     Logger::~Logger()
     {
         m_loop_active = false;
@@ -89,12 +92,8 @@ namespace cascade_logging
                 break;
         }
 
-// Convert file path to file name and line
-#if defined(_MSC_VER)
-        message.file.erase(0, message.file.find_last_of("\\") + 1);
-#else
+        // Convert file path to file name and line
         message.file.erase(0, message.file.find_last_of("/") + 1);
-#endif
 
         message.file = "[" + message.file + ":" + std::to_string(message.line) + "]";
 

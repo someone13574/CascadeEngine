@@ -8,6 +8,4 @@ int main()
     application.Create_Window(300, 300);
 
     application.Wait_For_Windows_To_Exit();
-
-    return 0;
 }

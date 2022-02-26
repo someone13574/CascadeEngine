@@ -1,5 +1,5 @@
-#include "cascade_logging.hpp"
 #include "event_manager.hpp"
+#include "cascade_logging.hpp"
 
 namespace CascadeCore
 {

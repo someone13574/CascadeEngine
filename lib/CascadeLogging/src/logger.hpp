@@ -50,7 +50,8 @@ namespace cascade_logging
     };
 } // namespace cascade_logging
 
-#if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN || defined LOG_LEVEL_ERROR || defined LOG_LEVEL_FATAL
+#if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN || defined LOG_LEVEL_ERROR \
+    || defined LOG_LEVEL_FATAL
 #define LOG_FATAL cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::FATAL)
 #else
 #define LOG_FATAL cascade_logging::Redirect()
