@@ -7,12 +7,12 @@ namespace cascade_logging
 {
     enum Severity_Level
     {
-        TRACE,
-        DEBUG,
-        INFO,
-        WARN,
-        ERROR,
-        FATAL
+        LEVEL_TRACE,
+        LEVEL_DEBUG,
+        LEVEL_INFO,
+        LEVEL_WARN,
+        LEVEL_ERROR,
+        LEVEL_FATAL
     };
 
     struct Log_Message

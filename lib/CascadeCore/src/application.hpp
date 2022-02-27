@@ -24,8 +24,12 @@ namespace CascadeCore
         std::vector<std::thread> m_event_threads;
         std::vector<std::shared_ptr<Window>> m_windows;
 
+        bool m_window_creation_in_progress = false;
+        std::shared_ptr<Window> m_created_window_ptr;
+
     private:
         static void Event_Loop(Application* instance, unsigned int window_index);
+        static void Create_Window_Thread(Application* instance, unsigned int width, unsigned int height);
 
     public:
         Application(std::string name, std::string version);

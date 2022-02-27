@@ -72,22 +72,22 @@ namespace cascade_logging
         // Add correct log level
         switch (message.severity)
         {
-            case Severity_Level::FATAL:
+            case Severity_Level::LEVEL_FATAL:
                 final_message += "[fatal] ";
                 break;
-            case Severity_Level::ERROR:
+            case Severity_Level::LEVEL_ERROR:
                 final_message += "[error] ";
                 break;
-            case Severity_Level::WARN:
+            case Severity_Level::LEVEL_WARN:
                 final_message += "[warn]  ";
                 break;
-            case Severity_Level::INFO:
+            case Severity_Level::LEVEL_INFO:
                 final_message += "[info]  ";
                 break;
-            case Severity_Level::DEBUG:
+            case Severity_Level::LEVEL_DEBUG:
                 final_message += "[debug] ";
                 break;
-            case Severity_Level::TRACE:
+            case Severity_Level::LEVEL_TRACE:
                 final_message += "[trace] ";
                 break;
         }

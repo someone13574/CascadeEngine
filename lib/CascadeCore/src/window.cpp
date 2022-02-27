@@ -1,5 +1,5 @@
-#include "cascade_logging.hpp"
 #include "window.hpp"
+#include "cascade_logging.hpp"
 
 #if defined __linux__
 
@@ -171,16 +171,99 @@ namespace CascadeCore
     }
 } // namespace CascadeCore
 
-#elif defined _WIN32 || WIN32
+#elif defined _WIN32 || defined WIN32
 
 namespace CascadeCore
 {
+    static TCHAR szWindowClass[] = _T("window_class");
+    static TCHAR szTitle[] = _T("Test title");
+
+    LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
     Window::Window(unsigned int width, unsigned int height, std::string title, Application* owner)
         : m_window_width(width), m_window_height(height), m_window_title(title), m_event_manager_ptr(std::make_shared<Event_Manager>(this)), m_owner_application(owner)
     {
         LOG_DEBUG << "Creating a new window for '" << m_owner_application->Get_Application_Name() << "'";
 
+        static bool window_class_registered = false;
+
+        if (!window_class_registered)
+        {
+            LOG_TRACE << "Window class not registered, registering...";
+
+            WNDCLASSEX window_class;
+            window_class.cbSize = sizeof(WNDCLASSEX);
+            window_class.style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+            window_class.lpfnWndProc = WndProc;
+            window_class.cbClsExtra = 0;
+            window_class.cbWndExtra = 0;
+            window_class.hInstance = NULL;
+            window_class.hIcon = NULL;
+            window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
+            window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+            window_class.lpszMenuName = NULL;
+            window_class.lpszClassName = szWindowClass;
+            window_class.hIconSm = NULL;
+
+            if (!RegisterClassEx(&window_class))
+            {
+                LOG_FATAL << "Failed to register the window class. Exiting...";
+                exit(1);
+            }
+            else
+            {
+                LOG_TRACE << "Successfully registered the window class";
+                window_class_registered = true;
+            }
+        }
+        else
+        {
+            LOG_TRACE << "Window class already registered.";
+        }
+
+        m_window = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL, NULL, NULL);
+
+        if (!m_window)
+        {
+            LOG_FATAL << "Failed to create a win32 window";
+            exit(1);
+        }
+        else
+        {
+            LOG_TRACE << "Successfully created a win32 window";
+        }
+
         LOG_DEBUG << "Window created";
+    }
+
+    LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+        PAINTSTRUCT ps;
+        HDC hdc;
+        TCHAR greeting[] = _T("Hello, World!");
+
+        switch (message)
+        {
+            case WM_PAINT:
+                hdc = BeginPaint(hWnd, &ps);
+
+                // Here your application is laid out.
+                // For this introduction, we just print out "Hello, World!"
+                // in the top left corner.
+                TextOut(hdc, 5, 5, greeting, _tcslen(greeting));
+                // End application-specific layout section.
+
+                EndPaint(hWnd, &ps);
+                break;
+            case WM_DESTROY:
+                PostQuitMessage(0);
+                break;
+            default:
+                return DefWindowProc(hWnd, message, wParam, lParam);
+                break;
+        }
+
+        return 0;
     }
 
     Window::~Window()
@@ -197,6 +280,18 @@ namespace CascadeCore
 
     void Window::Process_Events()
     {
+        MSG message;
+
+        if (!GetMessage(&message, NULL, 0, 0))
+        {
+            Event_Manager::Window_Close_Event event_struct = {};
+            event_struct.window_to_close = this;
+
+            m_event_manager_ptr->Execute_Window_Close_Event(event_struct);
+        }
+
+        TranslateMessage(&message);
+        DispatchMessage(&message);
     }
 
     void Window::Send_Close_Event()

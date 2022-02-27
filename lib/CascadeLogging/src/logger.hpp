@@ -52,37 +52,37 @@ namespace cascade_logging
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN || defined LOG_LEVEL_ERROR \
     || defined LOG_LEVEL_FATAL
-#define LOG_FATAL cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::FATAL)
+#define LOG_FATAL cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_FATAL)
 #else
 #define LOG_FATAL cascade_logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN || defined LOG_LEVEL_ERROR
-#define LOG_ERROR cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::ERROR)
+#define LOG_ERROR cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_ERROR)
 #else
 #define LOG_ERROR cascade_logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN
-#define LOG_WARN cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::WARN)
+#define LOG_WARN cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_WARN)
 #else
 #define LOG_WARN cascade_logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO
-#define LOG_INFO cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::INFO)
+#define LOG_INFO cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_INFO)
 #else
 #define LOG_INFO cascade_logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG
-#define LOG_DEBUG cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::DEBUG)
+#define LOG_DEBUG cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_DEBUG)
 #else
 #define LOG_DEBUG cascade_logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE
-#define LOG_TRACE cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::TRACE)
+#define LOG_TRACE cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_TRACE)
 #else
 #define LOG_TRACE cascade_logging::Redirect()
 #endif

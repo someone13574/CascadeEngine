@@ -54,7 +54,11 @@ namespace CascadeCore
 #elif defined _WIN32 || WIN32
 
 #include <memory>
+#include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <tchar.h>
+#include <windows.h>
 
 namespace CascadeCore
 {
@@ -73,6 +77,8 @@ namespace CascadeCore
 
         Application* m_owner_application;
         std::shared_ptr<Event_Manager> m_event_manager_ptr;
+
+        HWND m_window;
 
     public:
         Window(unsigned int width, unsigned int height, std::string title, Application* owner);
