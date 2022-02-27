@@ -83,7 +83,10 @@ namespace CascadeCore
             std::this_thread::sleep_for(std::chrono::milliseconds(15));
         }
 
-        return m_created_window_ptr;
+        std::shared_ptr<Window> tmp_window_ptr = m_created_window_ptr;
+        m_created_window_ptr.reset();
+
+        return tmp_window_ptr;
     }
 
     void Application::Create_Window_Thread(Application* instance, unsigned int width, unsigned int height)
