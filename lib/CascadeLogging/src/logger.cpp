@@ -104,6 +104,22 @@ namespace cascade_logging
         // Add message
         final_message += message.message;
 
+        // Color message
+        switch (message.severity)
+        {
+            case Severity_Level::LEVEL_FATAL:
+                final_message = "\033[31;1m" + final_message + "\033[0m";
+                break;
+            case Severity_Level::LEVEL_ERROR:
+                final_message = "\033[31m" + final_message + "\033[0m";
+                break;
+            case Severity_Level::LEVEL_WARN:
+                final_message = "\033[33m" + final_message + "\033[0m";
+                break;
+            default:
+                break;
+        }
+
         std::lock_guard<std::mutex> lock(m_queue_mutex);
         m_message_queue.push(std::move(final_message));
         m_condition_varable.notify_all();
