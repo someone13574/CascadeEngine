@@ -59,9 +59,9 @@ namespace cascade_logging
 
         std::ostringstream time_string_stream;
         time_string_stream << "[";
-        time_string_stream << local_time.tm_year + 1900 << "-";
+        time_string_stream << std::setfill('0') << std::setw(2) << local_time.tm_mday << "-";
         time_string_stream << std::setfill('0') << std::setw(2) << local_time.tm_mon << "-";
-        time_string_stream << std::setfill('0') << std::setw(2) << local_time.tm_mday << "] [";
+        time_string_stream << local_time.tm_year + 1900 << "] [";
         time_string_stream << std::setfill('0') << std::setw(2) << local_time.tm_hour << ":";
         time_string_stream << std::setfill('0') << std::setw(2) << local_time.tm_min << ":";
         time_string_stream << std::setfill('0') << std::setw(2) << local_time.tm_sec << ".";
