@@ -1,5 +1,7 @@
 #include "cascade_logging.hpp"
 
+#include "VulkanWrapper/instance_wrapper.hpp"
+
 #include <iomanip>
 #include <string.h>
 #include <vector>
@@ -21,31 +23,46 @@ namespace CascadeGraphicsDebugging
 
         bool Is_Vulkan_Supported()
         {
+            LOG_INFO << "Checking vulkan support";
+
+            std::vector<const char*> required_extensions = CascadeGraphics::Vulkan::Instance::Get_Required_Instance_Extensions();
+            std::vector<bool> extensions_satisfied(required_extensions.size());
+
             unsigned int extension_count = Get_Supported_Extension_Count();
-            std::vector<VkExtensionProperties> extensions(extension_count);
+            std::vector<VkExtensionProperties> supported_extensions(extension_count);
+            vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, supported_extensions.data());
 
-            vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data());
-
-            bool vulkan_supported = false;
-
-            for (unsigned int i = 0; i < extensions.size(); i++)
+            for (unsigned int i = 0; i < supported_extensions.size(); i++)
             {
-                LOG_INFO << "Extension supported:     Spec Version: " << std::setw(2) << extensions[i].specVersion << "     Extension: " << extensions[i].extensionName;
+                LOG_TRACE << "Extension supported: " << supported_extensions[i].extensionName;
 
-#if defined __linux__
-                vulkan_supported |= strcmp(extensions[i].extensionName, "VK_KHR_xcb_surface") == 0;
-#elif defined _WIN32 || defined WIN32
-                vulkan_supported |= strcmp(extensions[i].extensionName, "VK_KHR_win32_surface") == 0;
-#endif
+                for (unsigned int j = 0; j < required_extensions.size(); j++)
+                {
+                    if (strcmp(required_extensions[j], supported_extensions[i].extensionName) == 0)
+                    {
+                        extensions_satisfied[j] = true;
+                    }
+                }
+            }
+
+            bool vulkan_supported = true;
+            for (unsigned int i = 0; i < required_extensions.size(); i++)
+            {
+                if (!extensions_satisfied[i])
+                {
+                    vulkan_supported = false;
+                    LOG_ERROR << "Missing support for vulkan extension: " << required_extensions[i];
+                }
             }
 
             if (vulkan_supported)
             {
-                LOG_DEBUG << "Vulkan is supported on this device.";
+                LOG_DEBUG << "This device has all the required vulkan extensions";
             }
             else
             {
-                LOG_ERROR << "Vulkan is not supported on this device.";
+                LOG_FATAL << "This device is missing a required vulkan extension!";
+                exit(EXIT_FAILURE);
             }
 
             return vulkan_supported;

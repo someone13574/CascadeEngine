@@ -19,7 +19,7 @@ namespace CascadeGraphics
             m_application_info.engineVersion = VK_MAKE_VERSION(0, 1, 0);
             m_application_info.apiVersion = VK_API_VERSION_1_0;
 
-            Get_Required_Instance_Extensions();
+            m_required_instance_extensions = Get_Required_Instance_Extensions();
 
             VkInstanceCreateInfo instance_create_info = {};
             instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -48,22 +48,23 @@ namespace CascadeGraphics
             LOG_TRACE << "Finished destroying Vulkan instance.";
         }
 
-        void Instance::Get_Required_Instance_Extensions()
+        std::vector<const char*> Instance::Get_Required_Instance_Extensions()
         {
             LOG_TRACE << "Getting required instance extensions";
 
-            m_required_instance_extensions.clear();
-            m_required_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+            std::vector<const char*> required_instance_extensions;
+            required_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 
 #if defined CASCADE_ENABLE_DEBUG_LAYERS
-            m_required_instance_extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+            required_instance_extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 #endif
 
 #if defined __linux__
-            m_required_instance_extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
+            required_instance_extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
 #elif defined _WIN32 || defined WIN32
-            m_required_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+            required_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #endif
+            return required_instance_extensions;
         }
     } // namespace Vulkan
 } // namespace CascadeGraphics
