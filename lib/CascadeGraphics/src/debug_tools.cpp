@@ -43,7 +43,7 @@ namespace CascadeGraphicsDebugging
             }
             else
             {
-                LOG_DEBUG << "Vulkan is not supported on this device.";
+                LOG_ERROR << "Vulkan is not supported on this device.";
             }
 
             return vulkan_supported;
