@@ -34,6 +34,8 @@ namespace CascadeGraphicsDebugging
 
 #if defined __linux__
                 vulkan_supported |= strcmp(extensions[i].extensionName, "VK_KHR_xcb_surface") == 0;
+#elif defined _WIN32 || defined WIN32
+                vulkan_supported |= strcmp(extensions[i].extensionName, "VK_KHR_win32_surface") == 0;
 #endif
             }
 
