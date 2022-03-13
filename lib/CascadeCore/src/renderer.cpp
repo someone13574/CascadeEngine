@@ -11,7 +11,7 @@ namespace CascadeCore
     {
         LOG_INFO << "Initializing renderer";
 
-        CascadeGraphicsDebugging::Get_Supported_Extension_Count();
+        CascadeGraphicsDebugging::Vulkan::Is_Vulkan_Supported();
 
         LOG_TRACE << "Renderer initialized";
     }
