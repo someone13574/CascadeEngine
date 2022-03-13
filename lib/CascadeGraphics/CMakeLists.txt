@@ -10,7 +10,9 @@ if(WIN32)
     find_package(Vulkan REQUIRED)
 endif(WIN32)
 
-add_library(CascadeGraphics STATIC src/debug_tools.cpp)
+add_library(CascadeGraphics STATIC
+    src/debug_tools.cpp
+    src/VulkanWrapper/instance_wrapper.cpp)
 
 if(UNIX)
     target_include_directories(CascadeGraphics

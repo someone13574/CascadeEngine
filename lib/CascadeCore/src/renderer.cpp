@@ -1,9 +1,8 @@
 #include "renderer.hpp"
 
+#include "cascade_graphics.hpp"
 #include "cascade_graphics_debug.hpp"
 #include "cascade_logging.hpp"
-
-#include <vulkan/vulkan.hpp>
 
 namespace CascadeCore
 {
@@ -12,6 +11,8 @@ namespace CascadeCore
         LOG_INFO << "Initializing renderer";
 
         CascadeGraphicsDebugging::Vulkan::Is_Vulkan_Supported();
+
+        CascadeGraphics::Vulkan::Instance("Application name", 0);
 
         LOG_TRACE << "Renderer initialized";
     }
