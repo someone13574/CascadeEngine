@@ -79,6 +79,7 @@ namespace CascadeCore
 
         Application* m_owner_application;
         std::shared_ptr<Event_Manager> m_event_manager_ptr;
+        std::shared_ptr<Renderer> m_renderer;
 
         HWND m_window;
 
