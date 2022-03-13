@@ -11,7 +11,7 @@ namespace CascadeCore
     Window::Window(unsigned int width, unsigned int height, std::string title, Application* owner)
         : m_window_width(width), m_window_height(height), m_window_title(title), m_event_manager_ptr(std::make_shared<Event_Manager>(this)), m_owner_application(owner)
     {
-        LOG_DEBUG << "Creating a new window for '" << m_owner_application->Get_Application_Name() << "'";
+        LOG_INFO << "Creating a new window for '" << m_owner_application->Get_Application_Name() << "'";
 
         m_xcb_connection = xcb_connect(NULL, NULL);
 
@@ -39,12 +39,14 @@ namespace CascadeCore
         xcb_map_window(m_xcb_connection, m_xcb_window);
         xcb_flush(m_xcb_connection);
 
-        LOG_DEBUG << "Window created";
+        m_renderer = std::make_shared<Renderer>();
+
+        LOG_TRACE << "Window created";
     }
 
     Window::~Window()
     {
-        LOG_DEBUG << "Started window cleanup";
+        LOG_INFO << "Started window cleanup";
 
         free(m_xcb_event);
         xcb_destroy_window(m_xcb_connection, m_xcb_window);

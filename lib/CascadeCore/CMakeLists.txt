@@ -7,6 +7,7 @@ add_subdirectory(../CascadeLogging ../../build/build)
 
 add_library(CascadeCore STATIC
     src/event_manager.cpp
+    src/renderer.cpp
     src/window.cpp
     src/application.cpp)
 

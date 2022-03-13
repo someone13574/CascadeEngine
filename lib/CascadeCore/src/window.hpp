@@ -2,6 +2,7 @@
 
 #include "application.hpp"
 #include "event_manager.hpp"
+#include "renderer.hpp"
 
 #if defined __linux__
 
@@ -26,6 +27,7 @@ namespace CascadeCore
 
         Application* m_owner_application;
         std::shared_ptr<Event_Manager> m_event_manager_ptr;
+        std::shared_ptr<Renderer> m_renderer;
 
         xcb_connection_t* m_xcb_connection;
         xcb_screen_t* m_xcb_screen;

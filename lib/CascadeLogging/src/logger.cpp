@@ -116,6 +116,9 @@ namespace cascade_logging
             case Severity_Level::LEVEL_WARN:
                 final_message = "\033[33m" + final_message + "\033[0m";
                 break;
+            case Severity_Level::LEVEL_DEBUG:
+                final_message = "\033[34;1m" + final_message + "\033[0m";
+                break;
             case Severity_Level::LEVEL_TRACE:
                 final_message = "\033[2m" + final_message + "\033[0m";
             default:

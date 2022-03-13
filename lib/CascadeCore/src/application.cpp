@@ -13,7 +13,7 @@ namespace CascadeCore
 
     Application::~Application()
     {
-        LOG_DEBUG << "Cleaning up '" << m_application_name << "'";
+        LOG_INFO << "Cleaning up '" << m_application_name << "'";
 
         for (unsigned int i = 0; i < m_windows.size(); i++)
         {
@@ -34,7 +34,7 @@ namespace CascadeCore
 
     void Application::Event_Loop(Application* instance, unsigned int window_index)
     {
-        LOG_DEBUG << "Starting event loop #" << window_index << " for '" << instance->m_application_name << "'";
+        LOG_INFO << "Starting event loop #" << window_index << " for '" << instance->m_application_name << "'";
 
         while (instance->m_event_thread_active[window_index])
         {
@@ -44,7 +44,7 @@ namespace CascadeCore
         instance->m_windows[window_index].reset();
         instance->m_active_event_threads--;
 
-        LOG_DEBUG << "Event loop #" << window_index << " has finished for '" << instance->m_application_name << "'";
+        LOG_INFO << "Event loop #" << window_index << " has finished for '" << instance->m_application_name << "'";
     }
 
     std::string Application::Get_Application_Name()
