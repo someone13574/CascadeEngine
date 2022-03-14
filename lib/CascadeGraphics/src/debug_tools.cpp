@@ -1,11 +1,11 @@
 #include "cascade_logging.hpp"
 
 #include "VulkanWrapper/instance_wrapper.hpp"
+#include "vulkan_header.hpp"
 
 #include <iomanip>
 #include <string.h>
 #include <vector>
-#include <vulkan/vulkan.hpp>
 
 namespace CascadeGraphicsDebugging
 {
@@ -23,7 +23,7 @@ namespace CascadeGraphicsDebugging
 
         bool Is_Vulkan_Supported()
         {
-            LOG_INFO << "Checking vulkan support";
+            LOG_INFO << "Checking Vulkan support";
 
             std::vector<const char*> required_extensions = CascadeGraphics::Vulkan::Instance::Get_Required_Instance_Extensions();
             std::vector<bool> extensions_satisfied(required_extensions.size());
@@ -34,38 +34,38 @@ namespace CascadeGraphicsDebugging
 
             for (unsigned int i = 0; i < supported_extensions.size(); i++)
             {
-                LOG_TRACE << "Extension supported: " << supported_extensions[i].extensionName;
-
-                for (unsigned int j = 0; j < required_extensions.size(); j++)
-                {
-                    if (strcmp(required_extensions[j], supported_extensions[i].extensionName) == 0)
-                    {
-                        extensions_satisfied[j] = true;
-                    }
-                }
+                LOG_TRACE << "Vulkan extension supported: " << supported_extensions[i].extensionName;
             }
 
             bool vulkan_supported = true;
             for (unsigned int i = 0; i < required_extensions.size(); i++)
             {
-                if (!extensions_satisfied[i])
+                bool found_extension = false;
+                for (unsigned int j = 0; j < supported_extensions.size(); j++)
                 {
+                    if (strcmp(required_extensions[i], supported_extensions[j].extensionName) == 0)
+                    {
+                        found_extension = true;
+                    }
+                }
+
+                if (!found_extension)
+                {
+                    LOG_ERROR << "Missing support for Vulkan extension: " << required_extensions[i];
                     vulkan_supported = false;
-                    LOG_ERROR << "Missing support for vulkan extension: " << required_extensions[i];
                 }
             }
 
             if (vulkan_supported)
             {
-                LOG_DEBUG << "This device has all the required vulkan extensions";
+                LOG_DEBUG << "This device has all the required Vulkan extensions";
+                return true;
             }
             else
             {
-                LOG_FATAL << "This device is missing a required vulkan extension!";
+                LOG_FATAL << "This device is missing a required Vulkan extension!";
                 exit(EXIT_FAILURE);
             }
-
-            return vulkan_supported;
         }
     } // namespace Vulkan
 } // namespace CascadeGraphicsDebugging

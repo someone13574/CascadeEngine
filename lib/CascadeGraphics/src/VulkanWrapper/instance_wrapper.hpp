@@ -21,6 +21,8 @@ namespace CascadeGraphics
 
         public:
             static std::vector<const char*> Get_Required_Instance_Extensions();
+
+            VkInstance* Get_Instance();
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

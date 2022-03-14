@@ -12,7 +12,8 @@ endif(WIN32)
 
 add_library(CascadeGraphics STATIC
     src/debug_tools.cpp
-    src/VulkanWrapper/instance_wrapper.cpp)
+    src/VulkanWrapper/instance_wrapper.cpp
+    src/VulkanWrapper/validation_layer_wrapper.cpp)
 
 if(UNIX)
     target_include_directories(CascadeGraphics
