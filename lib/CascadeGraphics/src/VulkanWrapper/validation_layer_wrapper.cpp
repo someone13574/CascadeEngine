@@ -11,34 +11,34 @@ namespace CascadeGraphicsDebugging
         Validation_Layer::Validation_Layer(std::shared_ptr<CascadeGraphics::Vulkan::Instance> instance_ptr) : m_instance_ptr(instance_ptr)
         {
 #if defined CASCADE_ENABLE_DEBUG_LAYERS
-            LOG_INFO << "Creating Vulkan validation layer";
+            LOG_INFO << "Vulkan: creating validation layer debug messenger";
 
             VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Generate_Messenger_Create_Info();
 
-            VkResult messeneger_creation_result;
+            VkResult messenger_creation_result;
             auto create_messenger_function = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(*(m_instance_ptr->Get_Instance()), "vkCreateDebugUtilsMessengerEXT");
             if (create_messenger_function != nullptr)
             {
-                messeneger_creation_result = create_messenger_function(*(m_instance_ptr->Get_Instance()), &messenger_create_info, nullptr, &m_debug_messenger);
+                messenger_creation_result = create_messenger_function(*(m_instance_ptr->Get_Instance()), &messenger_create_info, nullptr, &m_debug_messenger);
             }
             else
             {
-                messeneger_creation_result = VK_ERROR_EXTENSION_NOT_PRESENT;
+                messenger_creation_result = VK_ERROR_EXTENSION_NOT_PRESENT;
             }
 
-            if (messeneger_creation_result != VK_SUCCESS)
+            if (messenger_creation_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Vulkan debug messeneger creation failed with VkResult: " << messeneger_creation_result;
+                LOG_FATAL << "Vulkan: debug messenger creation failed with VkResult " << messenger_creation_result;
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Finished creating vulkan validation layer";
+            LOG_TRACE << "Vulkan: finished creating validation layer debug messenger";
 #endif
         }
 
         Validation_Layer::~Validation_Layer()
         {
-            LOG_INFO << "Destroying Vulkan validation layer";
+            LOG_INFO << "Vulkan: destroying validation layer debug messenger";
 
             auto destroy_messenger_function = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(*(m_instance_ptr->Get_Instance()), "vkDestroyDebugUtilsMessengerEXT");
             if (destroy_messenger_function != nullptr)
@@ -47,11 +47,11 @@ namespace CascadeGraphicsDebugging
             }
             else
             {
-                LOG_FATAL << "Couldn't get vkDestroyDebugUtilsMessengerEXT proc addr";
+                LOG_FATAL << "Vulkan: couldn't get vkDestroyDebugUtilsMessengerEXT proc addr";
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Finished destroying Vulkan validation layer";
+            LOG_TRACE << "Vulkan: finished destroying validation layer debug messenger";
         }
 
         static VKAPI_ATTR VkBool32 VKAPI_CALL Validation_Layer_Callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -67,17 +67,17 @@ namespace CascadeGraphicsDebugging
                     {
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
                         {
-                            LOG_TRACE << "Vulkan validation layer general message: " << p_callback_data->pMessage;
+                            LOG_TRACE << "Vulkan Validation Layer (general message): " << p_callback_data->pMessage;
                             break;
                         }
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
                         {
-                            LOG_TRACE << "Vulkan validation layer specification message: " << p_callback_data->pMessage;
+                            LOG_TRACE << "Vulkan Validation Layer (specification message): " << p_callback_data->pMessage;
                             break;
                         }
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
                         {
-                            LOG_TRACE << "Vulkan validation layer performance message: " << p_callback_data->pMessage;
+                            LOG_TRACE << "Vulkan Validation Layer (performance message): " << p_callback_data->pMessage;
                             break;
                         }
                     }
@@ -89,17 +89,17 @@ namespace CascadeGraphicsDebugging
                     {
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
                         {
-                            LOG_INFO << "Vulkan validation layer general message: " << p_callback_data->pMessage;
+                            LOG_INFO << "Vulkan Validation Layer (general message): " << p_callback_data->pMessage;
                             break;
                         }
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
                         {
-                            LOG_INFO << "Vulkan validation layer specification message: " << p_callback_data->pMessage;
+                            LOG_INFO << "Vulkan Validation Layer (specification message): " << p_callback_data->pMessage;
                             break;
                         }
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
                         {
-                            LOG_INFO << "Vulkan validation layer performance message: " << p_callback_data->pMessage;
+                            LOG_INFO << "Vulkan Validation Layer (performance message): " << p_callback_data->pMessage;
                             break;
                         }
                     }
@@ -111,17 +111,17 @@ namespace CascadeGraphicsDebugging
                     {
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
                         {
-                            LOG_WARN << "Vulkan validation layer general message: " << p_callback_data->pMessage;
+                            LOG_WARN << "Vulkan Validation Layer (general message): " << p_callback_data->pMessage;
                             break;
                         }
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
                         {
-                            LOG_WARN << "Vulkan validation layer specification message: " << p_callback_data->pMessage;
+                            LOG_WARN << "Vulkan Validation Layer (specification message): " << p_callback_data->pMessage;
                             break;
                         }
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
                         {
-                            LOG_WARN << "Vulkan validation layer performance message: " << p_callback_data->pMessage;
+                            LOG_WARN << "Vulkan Validation Layer (performance message): " << p_callback_data->pMessage;
                             break;
                         }
                     }
@@ -133,17 +133,17 @@ namespace CascadeGraphicsDebugging
                     {
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
                         {
-                            LOG_ERROR << "Vulkan validation layer general message: " << p_callback_data->pMessage;
+                            LOG_ERROR << "Vulkan Validation Layer (general message): " << p_callback_data->pMessage;
                             break;
                         }
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
                         {
-                            LOG_ERROR << "Vulkan validation layer specification message: " << p_callback_data->pMessage;
+                            LOG_ERROR << "Vulkan Validation Layer (specification message): " << p_callback_data->pMessage;
                             break;
                         }
                         case VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT:
                         {
-                            LOG_ERROR << "Vulkan validation layer performance message: " << p_callback_data->pMessage;
+                            LOG_ERROR << "Vulkan Validation Layer (performance message): " << p_callback_data->pMessage;
                             break;
                         }
                     }
@@ -161,6 +161,8 @@ namespace CascadeGraphicsDebugging
 
         bool Validation_Layer::Check_Validation_Layer_Support(std::vector<const char*> layers_to_check)
         {
+            LOG_INFO << "Vulkan: checking validation layer support";
+
             unsigned int layer_count;
             vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
 
@@ -169,7 +171,7 @@ namespace CascadeGraphicsDebugging
 
             for (unsigned int i = 0; i < supported_layers.size(); i++)
             {
-                LOG_TRACE << "Validation layer supported: " << supported_layers[i].layerName;
+                LOG_TRACE << "Vulkan: validation layer supported " << supported_layers[i].layerName;
             }
 
             bool requested_layers_satisfied = true;
@@ -183,19 +185,19 @@ namespace CascadeGraphicsDebugging
 
                 if (!layer_found)
                 {
-                    LOG_ERROR << "Missing support for requested validation layer: " << layers_to_check[i];
+                    LOG_ERROR << "Vulkan: missing support for requested validation layer " << layers_to_check[i];
                     requested_layers_satisfied = false;
                 }
             }
 
             if (requested_layers_satisfied)
             {
-                LOG_DEBUG << "All requested validation layers satisfied";
+                LOG_DEBUG << "Vulkan: all requested validation layers satisfied";
                 return true;
             }
             else
             {
-                LOG_FATAL << "A requested validation layer is not present";
+                LOG_FATAL << "Vulkan: a requested validation layer is not present";
                 exit(EXIT_FAILURE);
             }
         }

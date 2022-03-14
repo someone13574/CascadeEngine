@@ -10,7 +10,7 @@ namespace CascadeGraphics
     {
         Instance::Instance(const char* application_name, unsigned int application_version)
         {
-            LOG_INFO << "Creating Vulkan instance.";
+            LOG_INFO << "Vulkan: creating instance";
 
             CascadeGraphicsDebugging::Vulkan::Is_Vulkan_Supported();
 
@@ -52,25 +52,25 @@ namespace CascadeGraphics
             VkResult instance_creation_result = vkCreateInstance(&instance_create_info, nullptr, &m_instance);
             if (instance_creation_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Vulkan Instance creation failed with VkResult: " << instance_creation_result;
+                LOG_FATAL << "Vulkan: instance creation failed with VkResult " << instance_creation_result;
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Finished creating Vulkan instance.";
+            LOG_TRACE << "Vulkan: finished creating instance";
         }
 
         Instance::~Instance()
         {
-            LOG_INFO << "Destroying Vulkan instance";
+            LOG_INFO << "Vulkan: destroying instance";
 
             vkDestroyInstance(m_instance, nullptr);
 
-            LOG_TRACE << "Finished destroying Vulkan instance.";
+            LOG_TRACE << "Vulkan: finished destroying instance";
         }
 
         std::vector<const char*> Instance::Get_Required_Instance_Extensions()
         {
-            LOG_TRACE << "Getting required instance extensions";
+            LOG_TRACE << "Vulkan: getting required instance extensions";
 
             std::vector<const char*> required_instance_extensions;
             required_instance_extensions.push_back("VK_KHR_surface\0");

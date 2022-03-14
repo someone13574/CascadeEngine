@@ -16,14 +16,14 @@ namespace CascadeGraphicsDebugging
             unsigned int extension_count = 0;
             vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
 
-            LOG_DEBUG << "This device supports " << extension_count << " vulkan extensions.";
+            LOG_DEBUG << "Vulkan: this device supports " << extension_count << " extensions";
 
             return extension_count;
         }
 
         bool Is_Vulkan_Supported()
         {
-            LOG_INFO << "Checking Vulkan support";
+            LOG_INFO << "Vulkan: checking Vulkan support";
 
             std::vector<const char*> required_extensions = CascadeGraphics::Vulkan::Instance::Get_Required_Instance_Extensions();
             std::vector<bool> extensions_satisfied(required_extensions.size());
@@ -34,7 +34,7 @@ namespace CascadeGraphicsDebugging
 
             for (unsigned int i = 0; i < supported_extensions.size(); i++)
             {
-                LOG_TRACE << "Vulkan extension supported: " << supported_extensions[i].extensionName;
+                LOG_TRACE << "Vulkan: extension supported " << supported_extensions[i].extensionName;
             }
 
             bool vulkan_supported = true;
@@ -48,19 +48,19 @@ namespace CascadeGraphicsDebugging
 
                 if (!found_extension)
                 {
-                    LOG_ERROR << "Missing support for Vulkan extension: " << required_extensions[i];
+                    LOG_ERROR << "Vulkan: missing support for extension " << required_extensions[i];
                     vulkan_supported = false;
                 }
             }
 
             if (vulkan_supported)
             {
-                LOG_DEBUG << "This device has all the required Vulkan extensions";
+                LOG_DEBUG << "Vulkan: this device has all the required extensions";
                 return true;
             }
             else
             {
-                LOG_FATAL << "This device is missing a required Vulkan extension!";
+                LOG_FATAL << "Vulkan: this device is missing a required extension";
                 exit(EXIT_FAILURE);
             }
         }
