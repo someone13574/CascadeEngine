@@ -13,8 +13,6 @@ namespace CascadeGraphicsDebugging
 #if defined CASCADE_ENABLE_DEBUG_LAYERS
             LOG_INFO << "Creating Vulkan validation layer";
 
-            Check_Validation_Layer_Support(ENABLED_VALIDATION_LAYERS);
-
             VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Generate_Messenger_Create_Info();
 
             VkResult messeneger_creation_result;
