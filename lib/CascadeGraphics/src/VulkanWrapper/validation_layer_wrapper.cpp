@@ -2,7 +2,7 @@
 
 #include "cascade_logging.hpp"
 
-#include <string.h>
+#include <cstring>
 
 namespace CascadeGraphicsDebugging
 {
@@ -180,7 +180,7 @@ namespace CascadeGraphicsDebugging
                 bool layer_found = false;
                 for (unsigned int j = 0; j < supported_layers.size(); j++)
                 {
-                    layer_found = strcmp(layers_to_check[i], supported_layers[j].layerName) == 0;
+                    layer_found |= strcmp(layers_to_check[i], supported_layers[j].layerName) == 0;
                 }
 
                 if (!layer_found)

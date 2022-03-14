@@ -3,8 +3,8 @@
 #include "VulkanWrapper/instance_wrapper.hpp"
 #include "vulkan_header.hpp"
 
+#include <cstring>
 #include <iomanip>
-#include <string.h>
 #include <vector>
 
 namespace CascadeGraphicsDebugging
@@ -43,10 +43,7 @@ namespace CascadeGraphicsDebugging
                 bool found_extension = false;
                 for (unsigned int j = 0; j < supported_extensions.size(); j++)
                 {
-                    if (strcmp(required_extensions[i], supported_extensions[j].extensionName) == 0)
-                    {
-                        found_extension = true;
-                    }
+                    found_extension |= strcmp(required_extensions[i], supported_extensions[j].extensionName) == 0;
                 }
 
                 if (!found_extension)
