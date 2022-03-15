@@ -39,7 +39,7 @@ namespace CascadeCore
         xcb_map_window(m_xcb_connection, m_xcb_window);
         xcb_flush(m_xcb_connection);
 
-        m_renderer = std::make_shared<Renderer>();
+        m_renderer = std::make_shared<Renderer>(m_xcb_connection, &m_xcb_window);
 
         LOG_TRACE << "Window created";
     }

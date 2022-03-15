@@ -73,16 +73,16 @@ namespace CascadeGraphics
             LOG_TRACE << "Vulkan: getting required instance extensions";
 
             std::vector<const char*> required_instance_extensions;
-            required_instance_extensions.push_back("VK_KHR_surface\0");
+            required_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 
 #if defined CASCADE_ENABLE_DEBUG_LAYERS
-            required_instance_extensions.push_back("VK_EXT_debug_utils\0");
+            required_instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 
 #if defined __linux__
-            required_instance_extensions.push_back("VK_KHR_xcb_surface\0");
+            required_instance_extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
 #elif defined _WIN32 || defined WIN32
-            required_instance_extensions.push_back("VK_KHR_win32_surface\0");
+            required_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #endif
             return required_instance_extensions;
         }

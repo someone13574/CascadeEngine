@@ -5,9 +5,10 @@
 
 #include <memory>
 
+#if defined __linux__
 namespace CascadeCore
 {
-    Renderer::Renderer()
+    Renderer::Renderer(xcb_connection_t* connection_ptr, xcb_window_t* window_ptr)
     {
         LOG_INFO << "Initializing renderer";
 
@@ -26,6 +27,8 @@ namespace CascadeCore
         std::shared_ptr<CascadeGraphics::Vulkan::Device> logical_device_ptr
             = std::make_shared<CascadeGraphics::Vulkan::Device>(queue_manager_ptr, validation_layer_ptr, physical_device_ptr);
 
+        std::shared_ptr<CascadeGraphics::Vulkan::Surface> surface_ptr = std::make_shared<CascadeGraphics::Vulkan::Surface>(connection_ptr, window_ptr, instance_ptr);
+
         LOG_TRACE << "Renderer initialized";
     }
 
@@ -36,3 +39,4 @@ namespace CascadeCore
         LOG_TRACE << "Renderer cleanup finished";
     }
 } // namespace CascadeCore
+#endif

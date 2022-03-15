@@ -16,7 +16,8 @@ add_library(CascadeGraphics STATIC
     src/VulkanWrapper/validation_layer_wrapper.cpp
     src/VulkanWrapper/physical_device_wrapper.cpp
     src/VulkanWrapper/queue_wrapper.cpp
-    src/VulkanWrapper/device_wrapper.cpp)
+    src/VulkanWrapper/device_wrapper.cpp
+    src/VulkanWrapper/surface_wrapper.cpp)
 
 if(UNIX)
     target_include_directories(CascadeGraphics
