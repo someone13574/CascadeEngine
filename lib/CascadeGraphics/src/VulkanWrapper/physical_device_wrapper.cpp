@@ -54,12 +54,9 @@ namespace CascadeGraphics
                 LOG_FATAL << "Vulkan: could not find a suitable gpu";
                 exit(EXIT_FAILURE);
             }
-            else
-            {
-                LOG_DEBUG << "Vulkan: selected device " << best_rated_device_properties.deviceName;
 
-                m_physical_device = best_rated_device;
-            }
+            LOG_DEBUG << "Vulkan: selected device " << best_rated_device_properties.deviceName;
+            m_physical_device = best_rated_device;
         }
 
         bool Physical_Device::Is_Device_Suitable(VkPhysicalDevice physical_device,
@@ -90,6 +87,11 @@ namespace CascadeGraphics
             LOG_TRACE << "Vulkan: " << physical_device_properties.deviceName << " has a rating of " << rating;
 
             return rating;
+        }
+
+        VkPhysicalDevice* Physical_Device::Get_Physical_Device()
+        {
+            return &m_physical_device;
         }
     } // namespace Vulkan
 } // namespace CascadeGraphics

@@ -5,11 +5,14 @@
 
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace CascadeGraphics
 {
     namespace Vulkan
     {
+        class Physical_Device;
+
         class Queue_Manager
         {
         public:
@@ -23,15 +26,23 @@ namespace CascadeGraphics
             };
 
         private:
+            bool m_queue_family_indices_set = false;
             Queue_Family_Indices m_queue_family_indices;
             bool m_queue_types_required[5] = {false, false, false, false, false};
+            std::vector<VkQueue> m_queues;
 
         public:
             Queue_Manager(bool graphics_required, bool compute_required, bool transfer_required, bool sparse_binding_required, bool protected_required);
             ~Queue_Manager();
 
         public:
+            void Set_Queue_Family_Indices(std::shared_ptr<Physical_Device> physical_device_ptr);
+            void Get_Device_Queue_Handles(VkDevice* device_ptr);
+
             bool Physical_Device_Has_Required_Queues(VkPhysicalDevice physical_device);
+            Queue_Family_Indices Get_Queue_Family_Indices();
+            bool Is_Feature_Enabled(unsigned int feature_index);
+            std::vector<VkDeviceQueueCreateInfo> Generate_Queue_Create_Infos();
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

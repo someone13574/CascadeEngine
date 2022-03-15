@@ -12,10 +12,19 @@ namespace CascadeCore
         LOG_INFO << "Initializing renderer";
 
         std::shared_ptr<CascadeGraphics::Vulkan::Instance> instance_ptr = std::make_shared<CascadeGraphics::Vulkan::Instance>("Application name", 0);
-        CascadeGraphicsDebugging::Vulkan::Validation_Layer validation_layer(instance_ptr);
-        std::shared_ptr<CascadeGraphics::Vulkan::Queue_Manager> queue_manager_ptr = std::make_shared<CascadeGraphics::Vulkan::Queue_Manager>(false, true, false, false, false);
+
+        std::shared_ptr<CascadeGraphicsDebugging::Vulkan::Validation_Layer> validation_layer_ptr
+            = std::make_shared<CascadeGraphicsDebugging::Vulkan::Validation_Layer>(instance_ptr);
+
+        std::shared_ptr<CascadeGraphics::Vulkan::Queue_Manager> queue_manager_ptr = std::make_shared<CascadeGraphics::Vulkan::Queue_Manager>(true, true, false, false, false);
+
         std::shared_ptr<CascadeGraphics::Vulkan::Physical_Device> physical_device_ptr
             = std::make_shared<CascadeGraphics::Vulkan::Physical_Device>(instance_ptr, queue_manager_ptr);
+
+        queue_manager_ptr->Set_Queue_Family_Indices(physical_device_ptr);
+
+        std::shared_ptr<CascadeGraphics::Vulkan::Device> logical_device_ptr
+            = std::make_shared<CascadeGraphics::Vulkan::Device>(queue_manager_ptr, validation_layer_ptr, physical_device_ptr);
 
         LOG_TRACE << "Renderer initialized";
     }

@@ -28,6 +28,9 @@ namespace CascadeGraphics
 
         public:
             Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
+
+        public:
+            VkPhysicalDevice* Get_Physical_Device();
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics
