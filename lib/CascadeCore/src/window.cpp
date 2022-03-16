@@ -187,6 +187,8 @@ namespace CascadeCore
     {
         LOG_INFO << "Creating a new window for '" << m_owner_application->Get_Application_Name() << "'";
 
+        m_hinstance = GetModuleHandle(0);
+
         static bool window_class_registered = false;
 
         if (!window_class_registered)
@@ -199,7 +201,7 @@ namespace CascadeCore
             window_class.lpfnWndProc = WndProc;
             window_class.cbClsExtra = 0;
             window_class.cbWndExtra = 0;
-            window_class.hInstance = NULL;
+            window_class.hInstance = m_hinstance;
             window_class.hIcon = NULL;
             window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
             window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
@@ -235,7 +237,7 @@ namespace CascadeCore
             LOG_TRACE << "Successfully created a win32 window";
         }
 
-        m_renderer = std::make_shared<Renderer>();
+        m_renderer = std::make_shared<Renderer>(&m_hinstance, &m_window);
 
         LOG_TRACE << "Window created";
     }

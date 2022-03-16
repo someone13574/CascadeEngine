@@ -53,7 +53,7 @@ namespace CascadeCore
     };
 } // namespace CascadeCore
 
-#elif defined _WIN32 || WIN32
+#elif defined _WIN32 || defined WIN32
 
 #include <memory>
 #include <stdlib.h>
@@ -82,6 +82,7 @@ namespace CascadeCore
         std::shared_ptr<Renderer> m_renderer;
 
         HWND m_window;
+        HINSTANCE m_hinstance;
 
     public:
         Window(unsigned int width, unsigned int height, std::string title, Application* owner);
