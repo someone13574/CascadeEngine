@@ -23,8 +23,8 @@ namespace CascadeCore
         values[0] = m_xcb_screen->white_pixel;
         values[1] = 0;
 
-        xcb_create_window(m_xcb_connection, XCB_COPY_FROM_PARENT, m_xcb_window, m_xcb_screen->root, 0, 0, m_window_width, m_window_height, 10, XCB_WINDOW_CLASS_INPUT_OUTPUT,
-                          m_xcb_screen->root_visual, mask, values);
+        xcb_create_window(m_xcb_connection, XCB_COPY_FROM_PARENT, m_xcb_window, m_xcb_screen->root, 0, 0, m_window_width, m_window_height, 10, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_xcb_screen->root_visual,
+                          mask, values);
 
         Set_Property(XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, m_window_title.length(), const_cast<char*>(m_window_title.c_str()));
 
@@ -242,30 +242,15 @@ namespace CascadeCore
         LOG_TRACE << "Window created";
     }
 
-    LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+    LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     {
-        PAINTSTRUCT ps;
-        HDC hdc;
-        TCHAR greeting[] = _T("Hello, World!");
-
         switch (message)
         {
-            case WM_PAINT:
-                hdc = BeginPaint(hWnd, &ps);
-
-                // Here your application is laid out.
-                // For this introduction, we just print out "Hello, World!"
-                // in the top left corner.
-                TextOut(hdc, 5, 5, greeting, _tcslen(greeting));
-                // End application-specific layout section.
-
-                EndPaint(hWnd, &ps);
-                break;
             case WM_DESTROY:
                 PostQuitMessage(0);
                 break;
             default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
+                return DefWindowProc(hwnd, message, wparam, lparam);
                 break;
         }
 
@@ -274,14 +259,10 @@ namespace CascadeCore
 
     Window::~Window()
     {
-        LOG_INFO << "Started window cleanup";
-
-        LOG_TRACE << "Window cleanup complete";
     }
 
     void Window::Update_Event_Types()
     {
-        LOG_TRACE << "Updated event masks";
     }
 
     void Window::Process_Events()
@@ -302,7 +283,6 @@ namespace CascadeCore
 
     void Window::Send_Close_Event()
     {
-        LOG_TRACE << "Sending close event to event loop";
     }
 
     std::shared_ptr<Event_Manager> Window::Get_Event_Manager()
