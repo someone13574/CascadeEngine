@@ -33,8 +33,7 @@ namespace CascadeGraphics
             instance_create_info.ppEnabledExtensionNames = m_required_instance_extensions.data();
 
 #if defined CASCADE_ENABLE_DEBUG_LAYERS
-            CascadeGraphicsDebugging::Vulkan::Validation_Layer::Check_Validation_Layer_Support(
-                CascadeGraphicsDebugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers());
+            CascadeGraphicsDebugging::Vulkan::Validation_Layer::Check_Validation_Layer_Support(CascadeGraphicsDebugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers());
 
             std::vector<const char*> enabled_validation_layers = CascadeGraphicsDebugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers();
             instance_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
@@ -75,7 +74,7 @@ namespace CascadeGraphics
             std::vector<const char*> required_instance_extensions;
             required_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 
-#if defined CASCADE_ENABLE_DEBUG_LAYERS
+#if defined CSD_ENABLE_DEBUG_LAYERS
             required_instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 

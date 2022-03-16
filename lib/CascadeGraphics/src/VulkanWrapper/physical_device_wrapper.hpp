@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace CascadeGraphics
 {
@@ -23,6 +24,8 @@ namespace CascadeGraphics
 
         private:
             bool Is_Device_Suitable(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features);
+            bool Check_Device_Extension_Support(VkPhysicalDevice physical_device);
+
             unsigned int Rate_Device(VkPhysicalDeviceProperties physical_device_properties);
 
         public:
@@ -30,6 +33,7 @@ namespace CascadeGraphics
 
         public:
             VkPhysicalDevice* Get_Physical_Device();
+            std::vector<const char*> Get_Required_Extensions();
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

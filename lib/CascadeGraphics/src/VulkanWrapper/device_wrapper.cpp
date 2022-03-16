@@ -19,13 +19,15 @@ namespace CascadeGraphics
 
             VkPhysicalDeviceFeatures physical_device_features = {};
 
+            std::vector<const char*> required_extensions = physical_device_ptr->Get_Required_Extensions();
+
             VkDeviceCreateInfo device_create_info = {};
             device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
             device_create_info.pNext = NULL;
             device_create_info.flags = 0;
             device_create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
             device_create_info.pQueueCreateInfos = queue_create_infos.data();
-#if defined CASCADE_ENABLE_DEBUG_LAYERS
+#if defined CSD_ENABLE_DEBUG_LAYERS
             std::vector<const char*> enabled_validation_layers = CascadeGraphicsDebugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers();
             device_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
             device_create_info.ppEnabledLayerNames = enabled_validation_layers.data();
@@ -33,8 +35,8 @@ namespace CascadeGraphics
             device_create_info.enabledLayerCount = 0;
             device_create_info.ppEnabledLayerNames = NULL;
 #endif
-            device_create_info.enabledExtensionCount = 0;
-            device_create_info.ppEnabledExtensionNames = NULL;
+            device_create_info.enabledExtensionCount = required_extensions.size();
+            device_create_info.ppEnabledExtensionNames = required_extensions.data();
 
             VkResult device_creation_result = vkCreateDevice(*(physical_device_ptr->Get_Physical_Device()), &device_create_info, nullptr, &m_device);
             if (device_creation_result != VK_SUCCESS)

@@ -10,7 +10,7 @@ namespace CascadeGraphicsDebugging
     {
         Validation_Layer::Validation_Layer(std::shared_ptr<CascadeGraphics::Vulkan::Instance> instance_ptr) : m_instance_ptr(instance_ptr)
         {
-#if defined CASCADE_ENABLE_DEBUG_LAYERS
+#if defined CSD_ENABLE_DEBUG_LAYERS
             LOG_INFO << "Vulkan: creating validation layer debug messenger";
 
             VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Generate_Messenger_Create_Info();
@@ -208,10 +208,9 @@ namespace CascadeGraphicsDebugging
             messenger_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
             messenger_create_info.pNext = NULL;
             messenger_create_info.flags = 0;
-            messenger_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
-                                                    | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-            messenger_create_info.messageType
-                = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+            messenger_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+                                                    | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+            messenger_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
             messenger_create_info.pfnUserCallback = Validation_Layer_Callback;
             messenger_create_info.pUserData = NULL;
 
@@ -223,5 +222,4 @@ namespace CascadeGraphicsDebugging
             return {"VK_LAYER_KHRONOS_validation"};
         }
     } // namespace Vulkan
-
 } // namespace CascadeGraphicsDebugging
