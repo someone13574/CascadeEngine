@@ -2,7 +2,9 @@
 
 #include "../vulkan_header.hpp"
 #include "physical_device_wrapper.hpp"
+#include "surface_wrapper.hpp"
 
+#include <map>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -23,16 +25,25 @@ namespace CascadeGraphics
                 std::optional<unsigned int> m_transfer_index;
                 std::optional<unsigned int> m_sparse_binding_index;
                 std::optional<unsigned int> m_protected_index;
+                std::optional<unsigned int> m_present_index;
             };
 
         private:
             bool m_queue_family_indices_set = false;
+            bool m_queue_types_required[6] = {false, false, false, false, false, false};
             Queue_Family_Indices m_queue_family_indices;
-            bool m_queue_types_required[5] = {false, false, false, false, false};
-            std::vector<VkQueue> m_queues;
+            std::map<int, VkQueue> m_queues;
+
+            std::shared_ptr<Surface> m_surface_ptr;
 
         public:
-            Queue_Manager(bool graphics_required, bool compute_required, bool transfer_required, bool sparse_binding_required, bool protected_required);
+            Queue_Manager(bool graphics_required,
+                          bool compute_required,
+                          bool transfer_required,
+                          bool sparse_binding_required,
+                          bool protected_required,
+                          bool present_required,
+                          std::shared_ptr<Surface> surface_ptr);
             ~Queue_Manager();
 
         public:

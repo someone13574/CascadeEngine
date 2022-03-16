@@ -59,9 +59,7 @@ namespace CascadeGraphics
             m_physical_device = best_rated_device;
         }
 
-        bool Physical_Device::Is_Device_Suitable(VkPhysicalDevice physical_device,
-                                                 VkPhysicalDeviceProperties physical_device_properties,
-                                                 VkPhysicalDeviceFeatures physical_device_features)
+        bool Physical_Device::Is_Device_Suitable(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features)
         {
             LOG_TRACE << "Vulkan: checking physical device " << physical_device_properties.deviceName << " suitablity";
 

@@ -23,6 +23,9 @@ namespace CascadeGraphics
         public:
             Surface(xcb_connection_t* connection_ptr, xcb_window_t* window_ptr, std::shared_ptr<Instance> instance_ptr);
             ~Surface();
+
+        public:
+            VkSurfaceKHR* Get_Surface();
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics
@@ -46,6 +49,9 @@ namespace CascadeGraphics
         public:
             Surface(HINSTANCE* hinstance_ptr, HWND* hwnd_ptr, std::shared_ptr<Instance> instance_ptr);
             ~Surface();
+
+        public:
+            VkSurfaceKHR* Get_Surface();
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

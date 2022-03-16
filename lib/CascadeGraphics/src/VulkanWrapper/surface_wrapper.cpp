@@ -38,6 +38,11 @@ namespace CascadeGraphics
 
             LOG_TRACE << "Vulkan: finished destroying surface";
         }
+
+        VkSurfaceKHR* Surface::Get_Surface()
+        {
+            return &m_surface;
+        }
     } // namespace Vulkan
 } // namespace CascadeGraphics
 
@@ -76,6 +81,11 @@ namespace CascadeGraphics
             vkDestroySurfaceKHR(*(m_instance_ptr->Get_Instance()), m_surface, nullptr);
 
             LOG_TRACE << "Vulkan: finished destroying surface";
+        }
+
+        VkSurfaceKHR* Surface::Get_Surface()
+        {
+            return &m_surface;
         }
     } // namespace Vulkan
 } // namespace CascadeGraphics

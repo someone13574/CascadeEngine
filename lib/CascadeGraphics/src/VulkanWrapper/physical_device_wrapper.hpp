@@ -22,8 +22,7 @@ namespace CascadeGraphics
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
 
         private:
-            bool
-            Is_Device_Suitable(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features);
+            bool Is_Device_Suitable(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features);
             unsigned int Rate_Device(VkPhysicalDeviceProperties physical_device_properties);
 
         public:
