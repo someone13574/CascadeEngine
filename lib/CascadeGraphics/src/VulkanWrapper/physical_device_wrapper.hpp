@@ -3,6 +3,7 @@
 #include "../vulkan_header.hpp"
 #include "instance_wrapper.hpp"
 #include "queue_wrapper.hpp"
+#include "surface_wrapper.hpp"
 
 #include <memory>
 #include <optional>
@@ -21,6 +22,7 @@ namespace CascadeGraphics
 
         private:
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
+            std::shared_ptr<Surface> m_surface_ptr;
 
         private:
             bool Is_Device_Suitable(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features);
@@ -29,7 +31,7 @@ namespace CascadeGraphics
             unsigned int Rate_Device(VkPhysicalDeviceProperties physical_device_properties);
 
         public:
-            Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
+            Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr);
 
         public:
             VkPhysicalDevice* Get_Physical_Device();

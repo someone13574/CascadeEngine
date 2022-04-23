@@ -5,4 +5,5 @@
 #include "../src/VulkanWrapper/physical_device_wrapper.hpp"
 #include "../src/VulkanWrapper/queue_wrapper.hpp"
 #include "../src/VulkanWrapper/surface_wrapper.hpp"
+#include "../src/VulkanWrapper/swapchain_wrapper.hpp"
 #include "../src/VulkanWrapper/validation_layer_wrapper.hpp"

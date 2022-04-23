@@ -2,6 +2,8 @@
 
 #include "cascade_logging.hpp"
 
+#include "swapchain_wrapper.hpp"
+
 #include <cstring>
 #include <string>
 
@@ -9,7 +11,8 @@ namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        Physical_Device::Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr) : m_queue_manager_ptr(queue_manager_ptr)
+        Physical_Device::Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr)
+            : m_queue_manager_ptr(queue_manager_ptr), m_surface_ptr(surface_ptr)
         {
             LOG_INFO << "Vulkan: choosing physical device";
 
@@ -74,12 +77,16 @@ namespace CascadeGraphics
                 return false;
             }
 
+            if (!Swapchain::Is_Swapchain_Adequate(&physical_device, m_surface_ptr))
+            {
+                return false;
+            }
             return true;
         }
 
         bool Physical_Device::Check_Device_Extension_Support(VkPhysicalDevice physical_device)
         {
-            LOG_INFO << "Vulkan: checking physical device extension support";
+            LOG_TRACE << "Vulkan: checking physical device extension support";
 
             std::vector<const char*> required_extensions = Get_Required_Extensions();
 
