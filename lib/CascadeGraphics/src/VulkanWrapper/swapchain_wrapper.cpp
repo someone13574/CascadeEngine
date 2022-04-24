@@ -8,8 +8,13 @@ namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        Swapchain::Swapchain(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Surface> surface_ptr, unsigned int width, unsigned int height)
-            : m_physical_device_ptr(physical_device_ptr), m_surface_ptr(surface_ptr)
+        Swapchain::Swapchain(std::shared_ptr<Device> logical_device_ptr,
+                             std::shared_ptr<Physical_Device> physical_device_ptr,
+                             std::shared_ptr<Surface> surface_ptr,
+                             std::shared_ptr<Queue_Manager> queue_manager_ptr,
+                             unsigned int width,
+                             unsigned int height)
+            : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_surface_ptr(surface_ptr), m_queue_manager_ptr(queue_manager_ptr)
         {
             LOG_INFO << "Vulkan: creating swapchain";
 
@@ -19,12 +24,60 @@ namespace CascadeGraphics
             Select_Swapchain_Extent(width, height);
             Select_Swapchain_Image_Count();
 
+            VkSwapchainCreateInfoKHR swapchain_create_info = {};
+            swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+            swapchain_create_info.pNext = NULL;
+            swapchain_create_info.flags = 0;
+            swapchain_create_info.surface = *(m_surface_ptr->Get_Surface());
+            swapchain_create_info.minImageCount = m_swapchain_image_count;
+            swapchain_create_info.imageFormat = m_surface_format.format;
+            swapchain_create_info.imageColorSpace = m_surface_format.colorSpace;
+            swapchain_create_info.imageExtent = m_swapchain_extent;
+            swapchain_create_info.imageArrayLayers = 1;
+            swapchain_create_info.imageUsage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+            swapchain_create_info.preTransform = m_surface_capabilities.currentTransform;
+            swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+            swapchain_create_info.presentMode = m_present_mode;
+            swapchain_create_info.clipped = VK_TRUE;
+            swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
+
+            if (m_queue_manager_ptr->Get_Queue_Family_Indices().m_present_index.value() == m_queue_manager_ptr->Get_Queue_Family_Indices().m_transfer_index.value())
+            {
+                LOG_TRACE << "Vulkan: swapchain being created with VK_SHARING_MODE_CONCURRENT";
+
+                unsigned int queue_family_indices[]
+                    = {m_queue_manager_ptr->Get_Queue_Family_Indices().m_present_index.value(), m_queue_manager_ptr->Get_Queue_Family_Indices().m_transfer_index.value()};
+
+                swapchain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+                swapchain_create_info.queueFamilyIndexCount = 2;
+                swapchain_create_info.pQueueFamilyIndices = queue_family_indices;
+            }
+            else
+            {
+                LOG_TRACE << "Vulkan: swapchain being created with VK_SHARING_MODE_EXCLUSIVE";
+
+                swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                swapchain_create_info.queueFamilyIndexCount = 0;
+                swapchain_create_info.pQueueFamilyIndices = nullptr;
+            }
+
+            VALIDATE_VKRESULT(vkCreateSwapchainKHR(*(m_logical_device_ptr->Get_Device()), &swapchain_create_info, nullptr, &m_swapchain), "Vulkan: failed to create swapchain");
+
+            LOG_TRACE << "Vulkan: getting swapchain images";
+
+            VALIDATE_VKRESULT(vkGetSwapchainImagesKHR(*(m_logical_device_ptr->Get_Device()), m_swapchain, &m_swapchain_image_count, nullptr), "Vulkan: failed to get swapchain image count");
+            m_swapchain_images.resize(m_swapchain_image_count);
+            VALIDATE_VKRESULT(vkGetSwapchainImagesKHR(*(m_logical_device_ptr->Get_Device()), m_swapchain, &m_swapchain_image_count, m_swapchain_images.data()),
+                              "Vulkan: failed to get swapchain images");
+
             LOG_TRACE << "Vulkan: finished creating swapchain";
         }
 
         Swapchain::~Swapchain()
         {
             LOG_INFO << "Vulkan: destroying swapchain";
+
+            vkDestroySwapchainKHR(*(m_logical_device_ptr->Get_Device()), m_swapchain, nullptr);
 
             LOG_TRACE << "Vulkan: finished destroying swapchain";
         }
