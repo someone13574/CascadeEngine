@@ -30,8 +30,10 @@ namespace CascadeGraphics
             VkPresentModeKHR m_present_mode;
             VkExtent2D m_swapchain_extent;
             unsigned int m_swapchain_image_count;
+
             VkSwapchainKHR m_swapchain;
             std::vector<VkImage> m_swapchain_images;
+            std::vector<VkImageView> m_swapchain_image_views;
 
         private:
             void Get_Swapchain_Support();
@@ -39,6 +41,9 @@ namespace CascadeGraphics
             void Select_Present_Mode();
             void Select_Swapchain_Extent(unsigned int width, unsigned int height);
             void Select_Swapchain_Image_Count();
+            void Create_Swapchain();
+            void Get_Swapchain_Images();
+            void Create_Swapchain_Image_Views();
 
         public:
             Swapchain(std::shared_ptr<Device> logical_device_ptr,
