@@ -225,7 +225,11 @@ namespace CascadeCore
             LOG_TRACE << "Window class already registered.";
         }
 
-        m_window = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL, NULL, NULL);
+        RECT window_rect = {0, 0, (LONG)width, (LONG)height};
+        AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, FALSE);
+
+        m_window = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top,
+                                NULL, NULL, NULL, NULL);
 
         if (!m_window)
         {
