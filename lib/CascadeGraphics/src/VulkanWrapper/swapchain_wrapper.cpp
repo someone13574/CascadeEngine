@@ -2,17 +2,22 @@
 
 #include "../debug_tools.hpp"
 
+#include <algorithm>
+
 namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        Swapchain::Swapchain(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Surface> surface_ptr) : m_physical_device_ptr(physical_device_ptr), m_surface_ptr(surface_ptr)
+        Swapchain::Swapchain(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Surface> surface_ptr, unsigned int width, unsigned int height)
+            : m_physical_device_ptr(physical_device_ptr), m_surface_ptr(surface_ptr)
         {
             LOG_INFO << "Vulkan: creating swapchain";
 
             Get_Swapchain_Support();
             Select_Swapchain_Format();
             Select_Present_Mode();
+            Select_Swapchain_Extent(width, height);
+            Select_Swapchain_Image_Count();
 
             LOG_TRACE << "Vulkan: finished creating swapchain";
         }
@@ -121,6 +126,32 @@ namespace CascadeGraphics
             m_present_mode = m_supported_present_modes[0];
 
             LOG_DEBUG << "Vulkan: selected present mode " << m_present_mode;
+        }
+
+        void Swapchain::Select_Swapchain_Extent(unsigned int width, unsigned int height)
+        {
+            LOG_TRACE << "Vulkan: selecting swapchain extent";
+
+            m_swapchain_extent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+
+            m_swapchain_extent.width = std::clamp(m_swapchain_extent.width, m_surface_capabilities.minImageExtent.width, m_surface_capabilities.maxImageExtent.width);
+            m_swapchain_extent.height = std::clamp(m_swapchain_extent.height, m_surface_capabilities.minImageExtent.height, m_surface_capabilities.maxImageExtent.height);
+
+            LOG_DEBUG << "Vulkan: set swapchain extent to " << m_swapchain_extent.width << "x" << m_swapchain_extent.height;
+        }
+
+        void Swapchain::Select_Swapchain_Image_Count()
+        {
+            LOG_TRACE << "Vulkan: selecting swapchain image count";
+
+            m_swapchain_image_count = m_surface_capabilities.minImageCount + 1;
+
+            if (m_surface_capabilities.maxImageCount != 0 && m_swapchain_image_count > m_surface_capabilities.maxImageCount)
+            {
+                m_swapchain_image_count = m_surface_capabilities.maxImageCount;
+            }
+
+            LOG_DEBUG << "Vulkan: selected swapchain image count of " << m_swapchain_image_count;
         }
 
         bool Swapchain::Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface> surface_ptr)

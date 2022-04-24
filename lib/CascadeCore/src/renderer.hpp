@@ -13,7 +13,7 @@ namespace CascadeCore
         unsigned int m_height;
 
     public:
-        Renderer(xcb_connection_t* connection_ptr, xcb_window_t* window_ptr);
+        Renderer(xcb_connection_t* connection_ptr, xcb_window_t* window_ptr, unsigned int width, unsigned int height);
         ~Renderer();
     };
 } // namespace CascadeCore
@@ -31,7 +31,7 @@ namespace CascadeCore
         unsigned int m_height;
 
     public:
-        Renderer(HINSTANCE* hinstance_ptr, HWND* hwnd_ptr);
+        Renderer(HINSTANCE* hinstance_ptr, HWND* hwnd_ptr, unsigned int width, unsigned int height);
         ~Renderer();
     };
 } // namespace CascadeCore

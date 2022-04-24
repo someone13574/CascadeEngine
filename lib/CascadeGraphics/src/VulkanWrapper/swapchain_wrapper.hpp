@@ -24,14 +24,18 @@ namespace CascadeGraphics
 
             VkSurfaceFormatKHR m_surface_format;
             VkPresentModeKHR m_present_mode;
+            VkExtent2D m_swapchain_extent;
+            unsigned int m_swapchain_image_count;
 
         private:
             void Get_Swapchain_Support();
             void Select_Swapchain_Format();
             void Select_Present_Mode();
+            void Select_Swapchain_Extent(unsigned int width, unsigned int height);
+            void Select_Swapchain_Image_Count();
 
         public:
-            Swapchain(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Surface> surface_ptr);
+            Swapchain(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Surface> surface_ptr, unsigned int width, unsigned int height);
             ~Swapchain();
 
         public:

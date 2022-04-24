@@ -9,7 +9,7 @@
 
 namespace CascadeCore
 {
-    Renderer::Renderer(xcb_connection_t* connection_ptr, xcb_window_t* window_ptr)
+    Renderer::Renderer(xcb_connection_t* connection_ptr, xcb_window_t* window_ptr, unsigned int width, unsigned int height) : m_width(width), m_height(height)
     {
         LOG_INFO << "Initializing renderer";
 
@@ -27,7 +27,7 @@ namespace CascadeCore
 
         std::shared_ptr<CascadeGraphics::Vulkan::Device> logical_device_ptr = std::make_shared<CascadeGraphics::Vulkan::Device>(queue_manager_ptr, validation_layer_ptr, physical_device_ptr);
 
-        std::shared_ptr<CascadeGraphics::Vulkan::Swapchain> swapchain_ptr = std::make_shared<CascadeGraphics::Vulkan::Swapchain>(physical_device_ptr, surface_ptr);
+        std::shared_ptr<CascadeGraphics::Vulkan::Swapchain> swapchain_ptr = std::make_shared<CascadeGraphics::Vulkan::Swapchain>(physical_device_ptr, surface_ptr, m_width, m_height);
 
         LOG_TRACE << "Renderer initialized";
     }
@@ -44,7 +44,7 @@ namespace CascadeCore
 
 namespace CascadeCore
 {
-    Renderer::Renderer(HINSTANCE* hinstance_ptr, HWND* hwnd_ptr)
+    Renderer::Renderer(HINSTANCE* hinstance_ptr, HWND* hwnd_ptr, unsigned int width, unsigned int height) : m_width(width), m_height(height)
     {
         LOG_INFO << "Initializing renderer";
 
@@ -62,7 +62,7 @@ namespace CascadeCore
 
         std::shared_ptr<CascadeGraphics::Vulkan::Device> logical_device_ptr = std::make_shared<CascadeGraphics::Vulkan::Device>(queue_manager_ptr, validation_layer_ptr, physical_device_ptr);
 
-        std::shared_ptr<CascadeGraphics::Vulkan::Swapchain> swapchain_ptr = std::make_shared<CascadeGraphics::Vulkan::Swapchain>(physical_device_ptr, surface_ptr);
+        std::shared_ptr<CascadeGraphics::Vulkan::Swapchain> swapchain_ptr = std::make_shared<CascadeGraphics::Vulkan::Swapchain>(physical_device_ptr, surface_ptr, m_width, m_height);
 
         LOG_TRACE << "Renderer initialized";
     }
