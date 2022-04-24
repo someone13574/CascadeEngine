@@ -56,7 +56,7 @@ namespace CascadeCore
 
         std::shared_ptr<CascadeGraphics::Vulkan::Queue_Manager> queue_manager_ptr = std::make_shared<CascadeGraphics::Vulkan::Queue_Manager>(true, true, false, false, false, true, surface_ptr);
 
-        std::shared_ptr<CascadeGraphics::Vulkan::Physical_Device> physical_device_ptr = std::make_shared<CascadeGraphics::Vulkan::Physical_Device>(instance_ptr, queue_manager_ptr);
+        std::shared_ptr<CascadeGraphics::Vulkan::Physical_Device> physical_device_ptr = std::make_shared<CascadeGraphics::Vulkan::Physical_Device>(instance_ptr, queue_manager_ptr, surface_ptr);
 
         queue_manager_ptr->Set_Queue_Family_Indices(physical_device_ptr);
 
