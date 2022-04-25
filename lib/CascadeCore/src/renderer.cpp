@@ -33,9 +33,16 @@ namespace CascadeCore
         std::shared_ptr<CascadeGraphics::Vulkan::Storage_Manager> storage_manager_ptr
             = std::make_shared<CascadeGraphics::Vulkan::Storage_Manager>(logical_device_ptr, physical_device_ptr, queue_manager_ptr);
 
-        storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
-        storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
-        storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
+        storage_manager_ptr->Create_Buffer("geometry_buffer", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
+        storage_manager_ptr->Create_Buffer("geometry_buffer", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
+        storage_manager_ptr->Create_Buffer("geometry_buffer", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
+
+        storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, {width, height},
+                                          {false, true, true, false, false, false});
+        storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, {width, height},
+                                          {false, true, true, false, false, false});
+        storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, {width, height},
+                                          {false, true, true, false, false, false});
 
         std::shared_ptr<CascadeGraphics::Vulkan::Pipeline> pipeline_ptr = std::make_shared<CascadeGraphics::Vulkan::Pipeline>(logical_device_ptr);
 
@@ -81,6 +88,13 @@ namespace CascadeCore
         storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
         storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
         storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
+
+        storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, {width, height},
+                                          {false, true, true, false, false, false});
+        storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, {width, height},
+                                          {false, true, true, false, false, false});
+        storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, {width, height},
+                                          {false, true, true, false, false, false});
 
         std::shared_ptr<CascadeGraphics::Vulkan::Pipeline> pipeline_ptr = std::make_shared<CascadeGraphics::Vulkan::Pipeline>(logical_device_ptr);
 
