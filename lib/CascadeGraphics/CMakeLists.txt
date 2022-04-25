@@ -17,7 +17,10 @@ add_library(CascadeGraphics STATIC
     src/VulkanWrapper/queue_wrapper.cpp
     src/VulkanWrapper/device_wrapper.cpp
     src/VulkanWrapper/surface_wrapper.cpp
-    src/VulkanWrapper/swapchain_wrapper.cpp)
+    src/VulkanWrapper/swapchain_wrapper.cpp
+    src/VulkanWrapper/pipeline_wrapper.cpp
+    src/VulkanWrapper/storage_manager.cpp
+    src/debug_tools.cpp)
 
 if(UNIX)
     target_include_directories(CascadeGraphics

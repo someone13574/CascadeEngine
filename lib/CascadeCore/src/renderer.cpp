@@ -30,6 +30,15 @@ namespace CascadeCore
         std::shared_ptr<CascadeGraphics::Vulkan::Swapchain> swapchain_ptr
             = std::make_shared<CascadeGraphics::Vulkan::Swapchain>(logical_device_ptr, physical_device_ptr, surface_ptr, queue_manager_ptr, m_width, m_height);
 
+        std::shared_ptr<CascadeGraphics::Vulkan::Storage_Manager> storage_manager_ptr
+            = std::make_shared<CascadeGraphics::Vulkan::Storage_Manager>(logical_device_ptr, physical_device_ptr, queue_manager_ptr);
+
+        storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
+        storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
+        storage_manager_ptr->Create_Buffer("rt", sizeof(unsigned int) * 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, {false, true, false, false, false, false});
+
+        std::shared_ptr<CascadeGraphics::Vulkan::Pipeline> pipeline_ptr = std::make_shared<CascadeGraphics::Vulkan::Pipeline>(logical_device_ptr);
+
         LOG_TRACE << "Renderer initialized";
     }
 
@@ -65,6 +74,10 @@ namespace CascadeCore
 
         std::shared_ptr<CascadeGraphics::Vulkan::Swapchain> swapchain_ptr
             = std::make_shared<CascadeGraphics::Vulkan::Swapchain>(logical_device_ptr, physical_device_ptr, surface_ptr, queue_manager_ptr, m_width, m_height);
+
+        std::shared_ptr<CascadeGraphics::Vulkan::Storage_Manager> storage_manager_ptr = std::make_shared<CascadeGraphics::Vulkan::Storage_Manager>();
+
+        std::shared_ptr<CascadeGraphics::Vulkan::Pipeline> pipeline_ptr = std::make_shared<CascadeGraphics::Vulkan::Pipeline>(logical_device_ptr);
 
         LOG_TRACE << "Renderer initialized";
     }
