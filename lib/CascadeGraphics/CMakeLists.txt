@@ -39,7 +39,7 @@ target_link_libraries(CascadeGraphics CascadeLogging)
 if(UNIX)
     set(GLSL_COMMAND "/usr/bin/glslangValidator")
 else()
-    set(GLSL_COMMAND "$ENV{VULKAN_SDK}/bin/glslangValidator.exe")
+    set(GLSL_COMMAND "$ENV{VULKAN_SDK}/Bin/glslangValidator.exe")
 endif(UNIX)
 
 file(GLOB_RECURSE GLSL_SOURCE_FILES
