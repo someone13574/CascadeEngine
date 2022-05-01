@@ -11,9 +11,21 @@ namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        struct Shader
+        enum Shader_Type
+        {
+            COMPUTE,
+            VERTEX,
+            FRAGMENT
+        };
+
+        struct Shader_Info
         {
             std::string label;
+            Shader_Type shader_type;
+        };
+        struct Shader
+        {
+            Shader_Info shader_info;
             std::string path;
             VkShaderModule shader_module;
         };
@@ -29,8 +41,11 @@ namespace CascadeGraphics
             Shader_Manager(std::shared_ptr<Device> logical_device_ptr);
             ~Shader_Manager();
 
+        public:
             void Add_Shader(std::string label, std::string path);
+
             VkShaderModule* Get_Shader_Module(std::string label);
+            std::vector<Shader_Info> Get_Shaders_Details();
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

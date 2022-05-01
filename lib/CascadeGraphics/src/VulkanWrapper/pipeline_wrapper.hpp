@@ -7,6 +7,7 @@
 #include "storage_manager.hpp"
 
 #include <memory>
+#include <vector>
 
 namespace CascadeGraphics
 {
@@ -19,7 +20,7 @@ namespace CascadeGraphics
             std::shared_ptr<Storage_Manager> m_storage_manager_ptr;
             std::shared_ptr<Shader_Manager> m_shader_manager_ptr;
 
-            VkPipeline m_pipeline;
+            std::vector<VkPipeline> m_pipelines;
             VkPipelineLayout m_pipeline_layout;
 
         private:
