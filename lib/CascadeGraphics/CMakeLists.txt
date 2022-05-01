@@ -20,6 +20,7 @@ add_library(CascadeGraphics STATIC
     src/VulkanWrapper/swapchain_wrapper.cpp
     src/VulkanWrapper/pipeline_wrapper.cpp
     src/VulkanWrapper/storage_manager.cpp
+    src/VulkanWrapper/shader_manager.cpp
     src/debug_tools.cpp)
 
 if(UNIX)
@@ -34,3 +35,34 @@ else()
 endif(UNIX)
 
 target_link_libraries(CascadeGraphics CascadeLogging)
+
+if(UNIX)
+    set(GLSL_COMMAND "/usr/bin/glslangValidator")
+else()
+    set(GLSL_COMMAND "$ENV{VULKAN_SDK}/bin/glslangValidator.exe")
+endif(UNIX)
+
+file(GLOB_RECURSE GLSL_SOURCE_FILES
+    "src/Shaders/*.comp")
+
+foreach(GLSL_FILE ${GLSL_SOURCE_FILES})
+    get_filename_component(FILE_NAME ${GLSL_FILE} NAME)
+    set(SPIRV_FILE "${PROJECT_BINARY_DIR}/src/Shaders/${FILE_NAME}.spv")
+    add_custom_command(
+        OUTPUT ${SPIRV_FILE}
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_BINARY_DIR}/src/Shaders/"
+        COMMAND ${GLSL_COMMAND} -V ${GLSL_FILE} -o ${SPIRV_FILE}
+        DEPENDS ${GLSL_FILE}
+    )
+    list(APPEND SPIRV_BINARY_FILES ${SPIRV_FILE})
+endforeach(GLSL_FILE ${GLSL_SOURCE_FILES})
+
+add_custom_target(Shaders
+    DEPENDS ${SPIRV_BINARY_FILES})
+
+add_dependencies(CascadeGraphics Shaders)
+add_custom_command(TARGET CascadeGraphics POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:CascadeGraphics>/src/Shaders"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${PROJECT_BINARY_DIR}/src/Shaders"
+    "$<TARGET_FILE_DIR:CascadeGraphics>/src/Shaders")
