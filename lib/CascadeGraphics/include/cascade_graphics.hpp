@@ -1,9 +1,11 @@
 #include "../src/vulkan_header.hpp"
 
+#include "../src/VulkanWrapper/command_buffer_manager.hpp"
+#include "../src/VulkanWrapper/descriptor_set_manager.hpp"
 #include "../src/VulkanWrapper/device_wrapper.hpp"
 #include "../src/VulkanWrapper/instance_wrapper.hpp"
 #include "../src/VulkanWrapper/physical_device_wrapper.hpp"
-#include "../src/VulkanWrapper/pipeline_wrapper.hpp"
+#include "../src/VulkanWrapper/pipeline_manager.hpp"
 #include "../src/VulkanWrapper/queue_wrapper.hpp"
 #include "../src/VulkanWrapper/shader_manager.hpp"
 #include "../src/VulkanWrapper/storage_manager.hpp"

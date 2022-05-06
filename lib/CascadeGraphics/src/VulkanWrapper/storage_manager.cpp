@@ -19,12 +19,10 @@ namespace CascadeGraphics
         {
             LOG_INFO << "Vulkan: cleaning up storage";
 
-            vkDestroyDescriptorSetLayout(*(m_logical_device_ptr->Get_Device()), m_descriptor_set_layout, nullptr);
-            vkDestroyDescriptorPool(*(m_logical_device_ptr->Get_Device()), m_descriptor_pool, nullptr);
-
             for (unsigned int i = 0; i < m_buffers.size(); i++)
             {
-                LOG_TRACE << "Vulkan: destroying buffer " << m_buffers[i].label << "-" << m_buffers[i].id;
+                LOG_TRACE << "Vulkan: destroying buffer " << m_buffers[i].resource_id.label << "-" << m_buffers[i].resource_id.index;
+
                 vkDestroyBuffer(*(m_logical_device_ptr->Get_Device()), m_buffers[i].buffer, nullptr);
                 vkFreeMemory(*(m_logical_device_ptr->Get_Device()), m_buffers[i].buffer_memory, nullptr);
             }
@@ -32,7 +30,8 @@ namespace CascadeGraphics
 
             for (unsigned int i = 0; i < m_images.size(); i++)
             {
-                LOG_TRACE << "Vulkan: destorying image " << m_images[i].label << "-" << m_images[i].id;
+                LOG_TRACE << "Vulkan: destorying image " << m_images[i].resource_id.label << "-" << m_images[i].resource_id.index;
+
                 vkDestroyImage(*(m_logical_device_ptr->Get_Device()), m_images[i].image, nullptr);
                 vkDestroyImageView(*(m_logical_device_ptr->Get_Device()), m_images[i].image_view, nullptr);
                 vkFreeMemory(*(m_logical_device_ptr->Get_Device()), m_images[i].image_memory, nullptr);
@@ -42,13 +41,13 @@ namespace CascadeGraphics
             LOG_TRACE << "Vulkan: finished cleaning up storage";
         }
 
-        unsigned int Storage_Manager::Get_Next_Buffer_Id(const char* label)
+        unsigned int Storage_Manager::Get_Next_Buffer_Id(std::string label)
         {
             unsigned int count = 0;
 
             for (unsigned int i = 0; i < m_buffers.size(); i++)
             {
-                if (strcmp(label, m_buffers[i].label) == 0)
+                if (label == m_buffers[i].resource_id.label)
                 {
                     count++;
                 }
@@ -57,13 +56,13 @@ namespace CascadeGraphics
             return count;
         }
 
-        unsigned int Storage_Manager::Get_Next_Image_Id(const char* label)
+        unsigned int Storage_Manager::Get_Next_Image_Id(std::string label)
         {
             unsigned int count = 0;
 
             for (unsigned int i = 0; i < m_images.size(); i++)
             {
-                if (strcmp(label, m_images[i].label) == 0)
+                if (label == m_images[i].resource_id.label)
                 {
                     count++;
                 }
@@ -105,109 +104,7 @@ namespace CascadeGraphics
             return queue_families_vector;
         }
 
-        void Storage_Manager::Create_Descriptor_Set_Layout()
-        {
-            LOG_INFO << "Vulkan: creating descriptor set layout";
-
-            unsigned int binding = 0;
-            std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_bindings;
-
-            for (unsigned int i = 0; i < m_buffers.size(); i++)
-            {
-                LOG_TRACE << "Vulkan: adding descriptor set layout binding for buffer " << m_buffers[i].label << "-" << m_buffers[i].id;
-
-                descriptor_set_layout_bindings.resize(descriptor_set_layout_bindings.size() + 1);
-
-                descriptor_set_layout_bindings.back() = {};
-                descriptor_set_layout_bindings.back().binding = binding++;
-                descriptor_set_layout_bindings.back().descriptorType = m_buffers[i].buffer_type;
-                descriptor_set_layout_bindings.back().descriptorCount = 1;
-                descriptor_set_layout_bindings.back().stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-                descriptor_set_layout_bindings.back().pImmutableSamplers = nullptr;
-            }
-
-            for (unsigned int i = 0; i < m_images.size(); i++)
-            {
-                LOG_TRACE << "Vulkan: adding descriptor set layout binding for image " << m_images[i].label << "-" << m_images[i].id;
-
-                descriptor_set_layout_bindings.resize(descriptor_set_layout_bindings.size() + 1);
-
-                descriptor_set_layout_bindings.back() = {};
-                descriptor_set_layout_bindings.back().binding = binding++;
-                descriptor_set_layout_bindings.back().descriptorType = m_images[i].image_type;
-                descriptor_set_layout_bindings.back().descriptorCount = 1;
-                descriptor_set_layout_bindings.back().stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-                descriptor_set_layout_bindings.back().pImmutableSamplers = nullptr;
-            }
-
-            VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {};
-            descriptor_set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-            descriptor_set_layout_create_info.pNext = NULL;
-            descriptor_set_layout_create_info.flags = 0;
-            descriptor_set_layout_create_info.bindingCount = descriptor_set_layout_bindings.size();
-            descriptor_set_layout_create_info.pBindings = descriptor_set_layout_bindings.data();
-
-            VALIDATE_VKRESULT(vkCreateDescriptorSetLayout(*(m_logical_device_ptr->Get_Device()), &descriptor_set_layout_create_info, nullptr, &m_descriptor_set_layout),
-                              "Vulkan: failed to create descriptor set layout");
-
-            LOG_TRACE << "Vulkan: finished create descriptor set layout";
-        }
-
-        void Storage_Manager::Create_Descriptor_Pool()
-        {
-            LOG_INFO << "Vulkan: creating descriptor pool";
-
-            std::vector<VkDescriptorPoolSize> descriptor_pool_sizes(m_buffers.size() + m_images.size());
-
-            for (unsigned int i = 0; i < m_buffers.size(); i++)
-            {
-                LOG_TRACE << "Vulkan: adding buffer " << m_buffers[i].label << "-" << m_buffers[i].id << " to descriptor pool";
-
-                descriptor_pool_sizes[i] = {};
-                descriptor_pool_sizes[i].type = m_buffers[i].buffer_type;
-                descriptor_pool_sizes[i].descriptorCount = 1;
-            }
-
-            for (unsigned int i = 0; i < m_images.size(); i++)
-            {
-                LOG_TRACE << "Vulkan: adding image " << m_images[i].label << "-" << m_images[i].id << " to descriptor pool";
-
-                descriptor_pool_sizes[i + m_buffers.size()] = {};
-                descriptor_pool_sizes[i + m_buffers.size()].type = m_images[i].image_type;
-                descriptor_pool_sizes[i + m_buffers.size()].descriptorCount = 1;
-            }
-
-            VkDescriptorPoolCreateInfo descriptor_pool_create_info = {};
-            descriptor_pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-            descriptor_pool_create_info.pNext = NULL;
-            descriptor_pool_create_info.flags = 0;
-            descriptor_pool_create_info.maxSets = 1;
-            descriptor_pool_create_info.poolSizeCount = descriptor_pool_sizes.size();
-            descriptor_pool_create_info.pPoolSizes = descriptor_pool_sizes.data();
-
-            VALIDATE_VKRESULT(vkCreateDescriptorPool(*(m_logical_device_ptr->Get_Device()), &descriptor_pool_create_info, nullptr, &m_descriptor_pool), "Vulkan: failed to create descriptor pool");
-
-            LOG_TRACE << "Vulkan: finished creating descriptor pool";
-        }
-
-        void Storage_Manager::Allocate_Descriptor_Set()
-        {
-            LOG_INFO << "Vulkan: allocating descriptor set";
-
-            VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
-            descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-            descriptor_set_allocate_info.pNext = NULL;
-            descriptor_set_allocate_info.descriptorPool = m_descriptor_pool;
-            descriptor_set_allocate_info.descriptorSetCount = 1;
-            descriptor_set_allocate_info.pSetLayouts = &m_descriptor_set_layout;
-
-            VALIDATE_VKRESULT(vkAllocateDescriptorSets(*(m_logical_device_ptr->Get_Device()), &descriptor_set_allocate_info, &m_descriptor_set), "Vulkan: failed to allocate descriptor set");
-
-            LOG_TRACE << "Vulkan: finished allocating descriptor set";
-        }
-
-        void
-        Storage_Manager::Create_Buffer(const char* label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families)
+        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families)
         {
             std::vector<unsigned int> queue_families = Get_Queue_Families(resouce_queue_families);
 
@@ -215,9 +112,10 @@ namespace CascadeGraphics
 
             m_buffers.resize(m_buffers.size() + 1);
             m_buffers.back() = {};
-            m_buffers.back().label = label;
-            m_buffers.back().id = buffer_id;
-            m_buffers.back().buffer_type = buffer_type;
+            m_buffers.back().resource_id.index = buffer_id;
+            m_buffers.back().resource_id.label = label;
+            m_buffers.back().resource_id.type = Resource_Type::BUFFER;
+            m_buffers.back().descriptor_type = buffer_type;
 
             LOG_INFO << "Vulkan: creating buffer " << label << "-" << buffer_id;
 
@@ -261,12 +159,7 @@ namespace CascadeGraphics
             LOG_TRACE << "Vulkan: finished creating buffer " << label << "-" << buffer_id;
         }
 
-        void Storage_Manager::Create_Image(const char* label,
-                                           VkFormat image_format,
-                                           VkImageUsageFlags image_usage,
-                                           VkDescriptorType image_type,
-                                           VkExtent2D image_size,
-                                           Resouce_Queue_Families resouce_queue_families)
+        void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, Resouce_Queue_Families resouce_queue_families)
         {
             std::vector<unsigned int> queue_families = Get_Queue_Families(resouce_queue_families);
 
@@ -274,9 +167,10 @@ namespace CascadeGraphics
 
             m_images.resize(m_images.size() + 1);
             m_images.back() = {};
-            m_images.back().label = label;
-            m_images.back().id = image_id;
-            m_images.back().image_type = image_type;
+            m_images.back().resource_id.index = image_id;
+            m_images.back().resource_id.label = label;
+            m_images.back().resource_id.type = Resource_Type::IMAGE;
+            m_images.back().descriptor_type = image_type;
 
             LOG_INFO << "Vulkan: creating image " << label << "-" << image_id;
 
@@ -344,16 +238,57 @@ namespace CascadeGraphics
             LOG_TRACE << "Vulkan: finished creating image " << label << "-" << image_id;
         }
 
-        void Storage_Manager::Create_Descriptor_Set()
+        Storage_Manager::Resource_Data Storage_Manager::Get_Resource_Data(Resource_ID resource_id)
         {
-            Create_Descriptor_Set_Layout();
-            Create_Descriptor_Pool();
-            Allocate_Descriptor_Set();
+            if (resource_id.type == BUFFER)
+            {
+                for (unsigned int i = 0; i < m_buffers.size(); i++)
+                {
+                    if (m_buffers[i].resource_id == resource_id)
+                    {
+                        return {resource_id, m_buffers[i].descriptor_type};
+                    }
+                }
+            }
+            else
+            {
+                for (unsigned int i = 0; i < m_images.size(); i++)
+                {
+                    if (m_images[i].resource_id == resource_id)
+                    {
+                        return {resource_id, m_images[i].descriptor_type};
+                    }
+                }
+            }
+
+            LOG_ERROR << "Vulkan: resource " << resource_id.label << "-" << resource_id.index << " does not exist";
+            exit(EXIT_FAILURE);
         }
 
-        VkDescriptorSetLayout* Storage_Manager::Get_Descriptor_Set_Layout()
+        bool Storage_Manager::Does_Resource_Exist(Resource_ID resource_id)
         {
-            return &m_descriptor_set_layout;
+            if (resource_id.type == BUFFER)
+            {
+                for (unsigned int i = 0; i < m_buffers.size(); i++)
+                {
+                    if (m_buffers[i].resource_id == resource_id)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                for (unsigned int i = 0; i < m_images.size(); i++)
+                {
+                    if (m_images[i].resource_id == resource_id)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     } // namespace Vulkan
 } // namespace CascadeGraphics
