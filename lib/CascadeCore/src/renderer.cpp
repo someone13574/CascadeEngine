@@ -66,6 +66,8 @@ namespace CascadeCore
 
 namespace CascadeCore
 {
+    namespace CGV = CascadeGraphics::Vulkan;
+
     Renderer::Renderer(HINSTANCE* hinstance_ptr, HWND* hwnd_ptr, unsigned int width, unsigned int height) : m_width(width), m_height(height)
     {
         LOG_INFO << "Initializing renderer";
@@ -92,7 +94,7 @@ namespace CascadeCore
 
         std::shared_ptr<CGV::Shader_Manager> shader_manager_ptr = std::make_shared<CGV::Shader_Manager>(logical_device_ptr);
 
-        shader_manager_ptr->Add_Shader("render_shader", "/home/owen/Documents/Code/C++/CascadeEngine/build/build/build/CascadeGraphics/src/Shaders/render.comp.spv");
+        shader_manager_ptr->Add_Shader("render_shader", "C:/Users/Owen Law/Documents/Code/C++/CascadeEngine/build/build/build/CascadeGraphics/src/Shaders/render.comp.spv");
 
         std::shared_ptr<CGV::Command_Buffer_Manager> command_buffer_manager_ptr = std::make_shared<CGV::Command_Buffer_Manager>();
 
