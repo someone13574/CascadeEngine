@@ -92,6 +92,7 @@ namespace CascadeGraphics
             void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families);
             void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, Resouce_Queue_Families resouce_queue_families);
 
+            VkImage* Get_Image(Resource_ID resource_id);
             Resource_Data Get_Resource_Data(Resource_ID resource_id);
             bool Does_Resource_Exist(Resource_ID resource_id);
         };

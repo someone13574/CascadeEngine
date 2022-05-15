@@ -121,7 +121,7 @@ namespace CascadeGraphics
 
             VkBufferCreateInfo buffer_create_info = {};
             buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-            buffer_create_info.pNext = NULL;
+            buffer_create_info.pNext = nullptr;
             buffer_create_info.flags = 0;
             buffer_create_info.size = buffer_size;
             buffer_create_info.usage = buffer_usage;
@@ -149,7 +149,7 @@ namespace CascadeGraphics
 
             VkMemoryAllocateInfo memory_allocate_info = {};
             memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-            memory_allocate_info.pNext = NULL;
+            memory_allocate_info.pNext = nullptr;
             memory_allocate_info.allocationSize = memory_requirements.size;
             memory_allocate_info.memoryTypeIndex = memory_type_index;
 
@@ -176,7 +176,7 @@ namespace CascadeGraphics
 
             VkImageCreateInfo image_create_info = {};
             image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-            image_create_info.pNext = NULL;
+            image_create_info.pNext = nullptr;
             image_create_info.flags = 0;
             image_create_info.imageType = VK_IMAGE_TYPE_2D;
             image_create_info.format = image_format;
@@ -209,7 +209,7 @@ namespace CascadeGraphics
 
             VkMemoryAllocateInfo memory_allocate_info = {};
             memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-            memory_allocate_info.pNext = NULL;
+            memory_allocate_info.pNext = nullptr;
             memory_allocate_info.allocationSize = memory_requirements.size;
             memory_allocate_info.memoryTypeIndex = memory_type_index;
 
@@ -218,7 +218,7 @@ namespace CascadeGraphics
 
             VkImageViewCreateInfo image_view_create_info = {};
             image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            image_view_create_info.pNext = NULL;
+            image_view_create_info.pNext = nullptr;
             image_view_create_info.flags = 0;
             image_view_create_info.image = m_images.back().image;
             image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -236,6 +236,20 @@ namespace CascadeGraphics
             VALIDATE_VKRESULT(vkCreateImageView(*(m_logical_device_ptr->Get_Device()), &image_view_create_info, nullptr, &m_images.back().image_view), "Vulkan: failed to create image view");
 
             LOG_TRACE << "Vulkan: finished creating image " << label << "-" << image_id;
+        }
+
+        VkImage* Storage_Manager::Get_Image(Resource_ID resource_id)
+        {
+            for (unsigned int i = 0; i < m_images.size(); i++)
+            {
+                if (m_images[i].resource_id == resource_id)
+                {
+                    return &m_images[i].image;
+                }
+            }
+
+            LOG_ERROR << "Vulkan: image with resource id '" << resource_id.label << "-" << resource_id.index << "' does not exist";
+            exit(EXIT_FAILURE);
         }
 
         Storage_Manager::Resource_Data Storage_Manager::Get_Resource_Data(Resource_ID resource_id)

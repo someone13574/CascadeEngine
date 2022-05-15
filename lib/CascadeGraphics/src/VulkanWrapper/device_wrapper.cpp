@@ -9,9 +9,7 @@ namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        Device::Device(std::shared_ptr<Queue_Manager> queue_manager_ptr,
-                       std::shared_ptr<CascadeGraphicsDebugging::Vulkan::Validation_Layer> validation_layer_ptr,
-                       std::shared_ptr<Physical_Device> physical_device_ptr)
+        Device::Device(std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<CascadeGraphicsDebugging::Vulkan::Validation_Layer> validation_layer_ptr, std::shared_ptr<Physical_Device> physical_device_ptr)
         {
             LOG_INFO << "Vulkan: creating logical device";
 
@@ -23,7 +21,7 @@ namespace CascadeGraphics
 
             VkDeviceCreateInfo device_create_info = {};
             device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-            device_create_info.pNext = NULL;
+            device_create_info.pNext = nullptr;
             device_create_info.flags = 0;
             device_create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
             device_create_info.pQueueCreateInfos = queue_create_infos.data();
@@ -33,7 +31,7 @@ namespace CascadeGraphics
             device_create_info.ppEnabledLayerNames = enabled_validation_layers.data();
 #else
             device_create_info.enabledLayerCount = 0;
-            device_create_info.ppEnabledLayerNames = NULL;
+            device_create_info.ppEnabledLayerNames = nullptr;
 #endif
             device_create_info.enabledExtensionCount = required_extensions.size();
             device_create_info.ppEnabledExtensionNames = required_extensions.data();

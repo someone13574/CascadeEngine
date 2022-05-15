@@ -8,13 +8,7 @@ namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        Queue_Manager::Queue_Manager(bool graphics_required,
-                                     bool compute_required,
-                                     bool transfer_required,
-                                     bool sparse_binding_required,
-                                     bool protected_required,
-                                     bool present_required,
-                                     std::shared_ptr<Surface> surface_ptr)
+        Queue_Manager::Queue_Manager(bool graphics_required, bool compute_required, bool transfer_required, bool sparse_binding_required, bool protected_required, bool present_required, std::shared_ptr<Surface> surface_ptr)
             : m_surface_ptr(surface_ptr)
         {
             LOG_INFO << "Vulkan: creating queue manager";
@@ -60,9 +54,8 @@ namespace CascadeGraphics
                 VkBool32 family_has_present = false;
                 vkGetPhysicalDeviceSurfaceSupportKHR(*(physical_device_ptr->Get_Physical_Device()), i, *(m_surface_ptr->Get_Surface()), &family_has_present);
 
-                LOG_TRACE << "Vulkan: found queue family (Count: " << queue_families[i].queueCount << ")" << ((family_has_graphics) ? " (Graphics)" : "") << ((family_has_compute) ? " (Compute)" : "")
-                          << ((family_has_transfer) ? " (Transfer)" : "") << ((family_has_sparse_binding) ? " (Sparse binding)" : "") << ((family_has_protected) ? " (Protected)" : "")
-                          << ((family_has_present) ? " (Present)" : "");
+                LOG_TRACE << "Vulkan: found queue family (Count: " << queue_families[i].queueCount << ")" << ((family_has_graphics) ? " (Graphics)" : "") << ((family_has_compute) ? " (Compute)" : "") << ((family_has_transfer) ? " (Transfer)" : "")
+                          << ((family_has_sparse_binding) ? " (Sparse binding)" : "") << ((family_has_protected) ? " (Protected)" : "") << ((family_has_present) ? " (Present)" : "");
 
                 if (m_queue_types_required[0] && family_has_graphics && !m_queue_family_indices.m_graphics_index.has_value())
                 {
@@ -217,8 +210,7 @@ namespace CascadeGraphics
             std::vector<VkQueueFamilyProperties> queue_families(queue_families_count);
             vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_families_count, queue_families.data());
 
-            bool queue_requirement_staisfied[6]
-                = {!m_queue_types_required[0], !m_queue_types_required[1], !m_queue_types_required[2], !m_queue_types_required[3], !m_queue_types_required[4], !m_queue_types_required[5]};
+            bool queue_requirement_staisfied[6] = {!m_queue_types_required[0], !m_queue_types_required[1], !m_queue_types_required[2], !m_queue_types_required[3], !m_queue_types_required[4], !m_queue_types_required[5]};
             for (unsigned int i = 0; i < queue_families_count; i++)
             {
                 bool family_has_graphics = queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT;
@@ -230,9 +222,8 @@ namespace CascadeGraphics
                 VkBool32 family_has_present = false;
                 vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, *(m_surface_ptr->Get_Surface()), &family_has_present);
 
-                LOG_TRACE << "Vulkan: found queue family (Count: " << queue_families[i].queueCount << ")" << ((family_has_graphics) ? " (Graphics)" : "") << ((family_has_compute) ? " (Compute)" : "")
-                          << ((family_has_transfer) ? " (Transfer)" : "") << ((family_has_sparse_binding) ? " (Sparse binding)" : "") << ((family_has_protected) ? " (Protected)" : "")
-                          << ((family_has_present) ? " (Present)" : "");
+                LOG_TRACE << "Vulkan: found queue family (Count: " << queue_families[i].queueCount << ")" << ((family_has_graphics) ? " (Graphics)" : "") << ((family_has_compute) ? " (Compute)" : "") << ((family_has_transfer) ? " (Transfer)" : "")
+                          << ((family_has_sparse_binding) ? " (Sparse binding)" : "") << ((family_has_protected) ? " (Protected)" : "") << ((family_has_present) ? " (Present)" : "");
 
                 queue_requirement_staisfied[0] |= family_has_graphics;
                 queue_requirement_staisfied[1] |= family_has_compute;
@@ -316,7 +307,7 @@ namespace CascadeGraphics
             {
                 VkDeviceQueueCreateInfo device_queue_create_info = {};
                 device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                device_queue_create_info.pNext = NULL;
+                device_queue_create_info.pNext = nullptr;
                 device_queue_create_info.flags = (unique_queue_family_index == protected_index) ? VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT : 0;
                 device_queue_create_info.queueFamilyIndex = unique_queue_family_index;
                 device_queue_create_info.queueCount = 1;

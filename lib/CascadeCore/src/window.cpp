@@ -13,7 +13,7 @@ namespace CascadeCore
     {
         LOG_INFO << "Creating a new window for '" << m_owner_application->Get_Application_Name() << "'";
 
-        m_xcb_connection = xcb_connect(NULL, NULL);
+        m_xcb_connection = xcb_connect(nullptr, nullptr);
 
         m_xcb_screen = xcb_setup_roots_iterator(xcb_get_setup(m_xcb_connection)).data;
         m_xcb_window = xcb_generate_id(m_xcb_connection);
@@ -23,8 +23,7 @@ namespace CascadeCore
         values[0] = m_xcb_screen->white_pixel;
         values[1] = 0;
 
-        xcb_create_window(m_xcb_connection, XCB_COPY_FROM_PARENT, m_xcb_window, m_xcb_screen->root, 0, 0, m_window_width, m_window_height, 10, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_xcb_screen->root_visual,
-                          mask, values);
+        xcb_create_window(m_xcb_connection, XCB_COPY_FROM_PARENT, m_xcb_window, m_xcb_screen->root, 0, 0, m_window_width, m_window_height, 10, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_xcb_screen->root_visual, mask, values);
 
         Set_Property(XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, m_window_title.length(), const_cast<char*>(m_window_title.c_str()));
 
@@ -62,14 +61,8 @@ namespace CascadeCore
 
     void Window::Update_Event_Types()
     {
-        unsigned int event_types[8] = {0,
-                                       XCB_EVENT_MASK_BUTTON_PRESS,
-                                       XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE,
-                                       XCB_EVENT_MASK_POINTER_MOTION,
-                                       XCB_EVENT_MASK_ENTER_WINDOW,
-                                       XCB_EVENT_MASK_LEAVE_WINDOW,
-                                       XCB_EVENT_MASK_KEY_PRESS,
-                                       XCB_EVENT_MASK_KEY_RELEASE};
+        unsigned int event_types[8] = {
+            0, XCB_EVENT_MASK_BUTTON_PRESS, XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE, XCB_EVENT_MASK_POINTER_MOTION, XCB_EVENT_MASK_ENTER_WINDOW, XCB_EVENT_MASK_LEAVE_WINDOW, XCB_EVENT_MASK_KEY_PRESS, XCB_EVENT_MASK_KEY_RELEASE};
 
         unsigned int enabled_events[] = {0};
 
@@ -202,12 +195,12 @@ namespace CascadeCore
             window_class.cbClsExtra = 0;
             window_class.cbWndExtra = 0;
             window_class.hInstance = m_hinstance;
-            window_class.hIcon = NULL;
-            window_class.hCursor = LoadCursor(NULL, IDC_ARROW);
+            window_class.hIcon = nullptr;
+            window_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
             window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-            window_class.lpszMenuName = NULL;
+            window_class.lpszMenuName = nullptr;
             window_class.lpszClassName = szWindowClass;
-            window_class.hIconSm = NULL;
+            window_class.hIconSm = nullptr;
 
             if (!RegisterClassEx(&window_class))
             {
@@ -228,8 +221,7 @@ namespace CascadeCore
         RECT window_rect = {0, 0, (LONG)width, (LONG)height};
         AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, FALSE);
 
-        m_window = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top,
-                                NULL, NULL, NULL, NULL);
+        m_window = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, nullptr, nullptr, nullptr, nullptr);
 
         if (!m_window)
         {
@@ -273,7 +265,7 @@ namespace CascadeCore
     {
         MSG message;
 
-        if (!GetMessage(&message, NULL, 0, 0))
+        if (!GetMessage(&message, nullptr, 0, 0))
         {
             Event_Manager::Window_Close_Event event_struct = {};
             event_struct.window_to_close = this;

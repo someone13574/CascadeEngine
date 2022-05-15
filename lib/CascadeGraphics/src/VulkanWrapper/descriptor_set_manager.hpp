@@ -47,6 +47,7 @@ namespace CascadeGraphics
 
             VkDescriptorSet* Get_Descriptor_Set(std::string label);
             VkDescriptorSetLayout* Get_Descriptor_Set_Layout(std::string label);
+            std::vector<Storage_Manager::Resource_ID> Get_Resources(std::string resource_grouping_label);
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

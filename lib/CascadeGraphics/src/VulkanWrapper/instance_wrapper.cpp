@@ -72,7 +72,7 @@ namespace CascadeGraphics
 
             m_application_info = {};
             m_application_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-            m_application_info.pNext = NULL;
+            m_application_info.pNext = nullptr;
             m_application_info.pApplicationName = application_name;
             m_application_info.applicationVersion = application_version;
             m_application_info.pEngineName = "Cascade";
@@ -99,9 +99,9 @@ namespace CascadeGraphics
             instance_create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&messenger_create_info;
 #else
             instance_create_info.enabledLayerCount = 0;
-            instance_create_info.ppEnabledLayerNames = NULL;
+            instance_create_info.ppEnabledLayerNames = nullptr;
 
-            instance_create_info.pNext = NULL;
+            instance_create_info.pNext = nullptr;
 #endif
 
             VkResult instance_creation_result = vkCreateInstance(&instance_create_info, nullptr, &m_instance);

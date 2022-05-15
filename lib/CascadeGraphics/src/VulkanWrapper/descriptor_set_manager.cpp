@@ -60,13 +60,13 @@ namespace CascadeGraphics
 
             VkDescriptorPoolCreateInfo descriptor_pool_create_info = {};
             descriptor_pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-            descriptor_pool_create_info.pNext = NULL;
+            descriptor_pool_create_info.pNext = nullptr;
             descriptor_pool_create_info.flags = 0;
             descriptor_pool_create_info.maxSets = m_resource_groupings.size();
             descriptor_pool_create_info.poolSizeCount = descriptor_pool_sizes.size();
             descriptor_pool_create_info.pPoolSizes = descriptor_pool_sizes.data();
 
-            VALIDATE_VKRESULT(vkCreateDescriptorPool(*(m_logical_device_ptr->Get_Device()), &descriptor_pool_create_info, NULL, &m_descriptor_pool), "Vulkan: failed to create descriptor pool");
+            VALIDATE_VKRESULT(vkCreateDescriptorPool(*(m_logical_device_ptr->Get_Device()), &descriptor_pool_create_info, nullptr, &m_descriptor_pool), "Vulkan: failed to create descriptor pool");
 
             LOG_TRACE << "Vulkan: finished creating descriptor pool";
         }
@@ -115,12 +115,12 @@ namespace CascadeGraphics
                 descriptor_set_layout_bindings[i].descriptorType = m_storage_manager_ptr->Get_Resource_Data(resources[i]).descriptor_type;
                 descriptor_set_layout_bindings[i].descriptorCount = 1;
                 descriptor_set_layout_bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-                descriptor_set_layout_bindings[i].pImmutableSamplers = NULL;
+                descriptor_set_layout_bindings[i].pImmutableSamplers = nullptr;
             }
 
             VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {};
             descriptor_set_layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-            descriptor_set_layout_create_info.pNext = NULL;
+            descriptor_set_layout_create_info.pNext = nullptr;
             descriptor_set_layout_create_info.flags = 0;
             descriptor_set_layout_create_info.bindingCount = descriptor_set_layout_bindings.size();
             descriptor_set_layout_create_info.pBindings = descriptor_set_layout_bindings.data();
@@ -138,7 +138,7 @@ namespace CascadeGraphics
 
             VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
             descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-            descriptor_set_allocate_info.pNext = NULL;
+            descriptor_set_allocate_info.pNext = nullptr;
             descriptor_set_allocate_info.descriptorPool = m_descriptor_pool;
             descriptor_set_allocate_info.descriptorSetCount = m_descriptor_sets.size();
             descriptor_set_allocate_info.pSetLayouts = m_descriptor_set_layouts.data();
@@ -171,6 +171,20 @@ namespace CascadeGraphics
             }
 
             LOG_ERROR << "Vulkan: no descriptor set with label '" << label << "'";
+            exit(EXIT_FAILURE);
+        }
+
+        std::vector<Storage_Manager::Resource_ID> Descriptor_Set_Manager::Get_Resources(std::string resource_grouping_label)
+        {
+            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            {
+                if (m_resource_groupings[i].label == resource_grouping_label)
+                {
+                    return m_resource_groupings[i].resources;
+                }
+            }
+
+            LOG_ERROR << "Vulkan: cannot find resource grouping with label '" << resource_grouping_label << "'";
             exit(EXIT_FAILURE);
         }
     } // namespace Vulkan

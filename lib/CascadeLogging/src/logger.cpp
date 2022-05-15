@@ -7,7 +7,7 @@
 #include <utility>
 
 #if defined(_MSC_VER)
-#define localtime_r(T, Tm) (localtime_s(Tm, T) ? NULL : Tm)
+#define localtime_r(T, Tm) (localtime_s(Tm, T) ? nullptr : Tm)
 #endif
 
 #define FILL_LENGTH 42

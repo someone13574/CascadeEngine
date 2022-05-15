@@ -14,7 +14,7 @@ namespace CascadeGraphics
 
             VkXcbSurfaceCreateInfoKHR xcb_surface_create_info = {};
             xcb_surface_create_info.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-            xcb_surface_create_info.pNext = NULL;
+            xcb_surface_create_info.pNext = nullptr;
             xcb_surface_create_info.flags = 0;
             xcb_surface_create_info.connection = connection_ptr;
             xcb_surface_create_info.window = *window_ptr;
@@ -58,7 +58,7 @@ namespace CascadeGraphics
 
             VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
             win32_surface_create_info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-            win32_surface_create_info.pNext = NULL;
+            win32_surface_create_info.pNext = nullptr;
             win32_surface_create_info.flags = 0;
             win32_surface_create_info.hinstance = *hinstance_ptr;
             win32_surface_create_info.hwnd = *hwnd_ptr;

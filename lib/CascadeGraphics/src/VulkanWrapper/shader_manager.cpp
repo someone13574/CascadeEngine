@@ -61,7 +61,7 @@ namespace CascadeGraphics
 
             VkShaderModuleCreateInfo shader_module_create_info = {};
             shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-            shader_module_create_info.pNext = NULL;
+            shader_module_create_info.pNext = nullptr;
             shader_module_create_info.flags = 0;
             shader_module_create_info.codeSize = shader_buffer.size();
             shader_module_create_info.pCode = reinterpret_cast<const uint32_t*>(shader_buffer.data());
@@ -69,9 +69,8 @@ namespace CascadeGraphics
             size_t last_index = path.find_last_of(".");
             if (last_index == std::string::npos)
             {
-                LOG_ERROR
-                    << "Vulkan: SPIR-V doesn't have a file extension. Ensure the name of shader binaries are formatted like this 'shader_name.shader_type.spv' with shader_type being comp, frag, "
-                       "vert, etc...";
+                LOG_ERROR << "Vulkan: SPIR-V doesn't have a file extension. Ensure the name of shader binaries are formatted like this 'shader_name.shader_type.spv' with shader_type being comp, frag, "
+                             "vert, etc...";
                 exit(EXIT_FAILURE);
             }
             std::string file_extension = path.substr(0, last_index);
@@ -109,8 +108,7 @@ namespace CascadeGraphics
             m_shaders.back().shader_info.label = label;
             m_shaders.back().shader_info.shader_type = shader_type;
             m_shaders.back().path = path;
-            VALIDATE_VKRESULT(vkCreateShaderModule(*(m_logical_device_ptr->Get_Device()), &shader_module_create_info, nullptr, &m_shaders.back().shader_module),
-                              "Vulkan: failed to create shader module");
+            VALIDATE_VKRESULT(vkCreateShaderModule(*(m_logical_device_ptr->Get_Device()), &shader_module_create_info, nullptr, &m_shaders.back().shader_module), "Vulkan: failed to create shader module");
 
             LOG_TRACE << "Vulkan: finished adding shader";
         }
