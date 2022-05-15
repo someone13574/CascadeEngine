@@ -5,6 +5,7 @@
 #include "storage_manager.hpp"
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -12,15 +13,21 @@ namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        class Descriptor_Set_Manager
+        class Resource_Grouping_Manager
         {
         private:
+            struct Descriptor_Set_Info
+            {
+                VkDescriptorSet* descriptor_set_ptr;
+                VkDescriptorSetLayout* descriptor_set_layout_ptr;
+            };
+
             struct Resource_Grouping
             {
                 std::string label;
-                VkDescriptorSet* descriptor_set_ptr;
-                VkDescriptorSetLayout* descriptor_set_layout_ptr;
+
                 std::vector<Storage_Manager::Resource_ID> resources;
+                std::optional<Descriptor_Set_Info> descriptor_set_info;
             };
 
         private:
@@ -38,15 +45,15 @@ namespace CascadeGraphics
             void Create_Descriptor_Pool();
 
         public:
-            Descriptor_Set_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr);
-            ~Descriptor_Set_Manager();
+            Resource_Grouping_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr);
+            ~Resource_Grouping_Manager();
 
         public:
-            void Add_Descriptor_Set(std::string label, std::vector<Storage_Manager::Resource_ID> resources);
+            void Add_Resource_Grouping(std::string label, std::vector<Storage_Manager::Resource_ID> resources, bool add_descriptor_set);
             void Allocate_Descriptor_Sets();
 
-            VkDescriptorSet* Get_Descriptor_Set(std::string label);
-            VkDescriptorSetLayout* Get_Descriptor_Set_Layout(std::string label);
+            VkDescriptorSet* Get_Descriptor_Set(std::string resource_grouping_label);
+            VkDescriptorSetLayout* Get_Descriptor_Set_Layout(std::string resource_grouping_label);
             std::vector<Storage_Manager::Resource_ID> Get_Resources(std::string resource_grouping_label);
         };
     } // namespace Vulkan

@@ -6,11 +6,11 @@ namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        Command_Buffer_Manager::Command_Buffer_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr,
+        Command_Buffer_Manager::Command_Buffer_Manager(std::shared_ptr<Resource_Grouping_Manager> resource_grouping_manager_ptr,
                                                        std::shared_ptr<Device> logical_device_ptr,
                                                        std::shared_ptr<Pipeline_Manager> pipeline_manager_ptr,
                                                        std::shared_ptr<Storage_Manager> storage_manager_ptr)
-            : m_descriptor_set_manager_ptr(descriptor_set_manager_ptr), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr)
+            : m_resource_grouping_manager_ptr(resource_grouping_manager_ptr), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr)
         {
         }
 
@@ -106,7 +106,7 @@ namespace CascadeGraphics
 
             Allocate_Command_Buffer(m_command_buffers.size() - 1, command_pool_index);
 
-            std::vector<Storage_Manager::Resource_ID> resource_identifiers = m_descriptor_set_manager_ptr->Get_Resources(resource_group_label);
+            std::vector<Storage_Manager::Resource_ID> resource_identifiers = m_resource_grouping_manager_ptr->Get_Resources(resource_group_label);
             for (unsigned int i = 0; i < resource_identifiers.size(); i++)
             {
                 if (resource_identifiers[i].type == Storage_Manager::IMAGE)
@@ -166,7 +166,7 @@ namespace CascadeGraphics
                 case Pipeline_Manager::Pipeline_Type::COMPUTE:
                 {
                     vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline_Layout(m_command_buffers[command_buffer_index].pipeline_label), 0, 1,
-                                            m_descriptor_set_manager_ptr->Get_Descriptor_Set(m_command_buffers[command_buffer_index].descriptor_set_label), 0, nullptr);
+                                            m_resource_grouping_manager_ptr->Get_Descriptor_Set(m_command_buffers[command_buffer_index].descriptor_set_label), 0, nullptr);
                     break;
                 }
                 default:

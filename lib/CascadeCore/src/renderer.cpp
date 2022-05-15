@@ -38,14 +38,14 @@ namespace CascadeCore
         std::shared_ptr<CGV::Shader_Manager> shader_manager_ptr = std::make_shared<CGV::Shader_Manager>(logical_device_ptr);
         shader_manager_ptr->Add_Shader("render_shader", "/home/owen/Documents/Code/C++/CascadeEngine/build/build/build/CascadeGraphics/src/Shaders/render.comp.spv");
 
-        std::shared_ptr<CGV::Descriptor_Set_Manager> descriptor_set_manager_ptr = std::make_shared<CGV::Descriptor_Set_Manager>(logical_device_ptr, storage_manager_ptr);
-        descriptor_set_manager_ptr->Add_Descriptor_Set("main_descriptor_set", {{0, "render_target", CGV::Storage_Manager::IMAGE}});
-        descriptor_set_manager_ptr->Allocate_Descriptor_Sets();
+        std::shared_ptr<CGV::Resource_Grouping_Manager> resource_grouping_manager = std::make_shared<CGV::Resource_Grouping_Manager>(logical_device_ptr, storage_manager_ptr);
+        resource_grouping_manager->Add_Resource_Grouping("main_descriptor_set", {{0, "render_target", CGV::Storage_Manager::IMAGE}}, true);
+        resource_grouping_manager->Allocate_Descriptor_Sets();
 
-        std::shared_ptr<CGV::Pipeline_Manager> pipeline_manager_ptr = std::make_shared<CGV::Pipeline_Manager>(descriptor_set_manager_ptr, logical_device_ptr, storage_manager_ptr, shader_manager_ptr);
+        std::shared_ptr<CGV::Pipeline_Manager> pipeline_manager_ptr = std::make_shared<CGV::Pipeline_Manager>(resource_grouping_manager, logical_device_ptr, storage_manager_ptr, shader_manager_ptr);
         pipeline_manager_ptr->Add_Compute_Pipeline("main_render_pipeline", "main_descriptor_set", "render_shader");
 
-        std::shared_ptr<CGV::Command_Buffer_Manager> command_buffer_manager_ptr = std::make_shared<CGV::Command_Buffer_Manager>(descriptor_set_manager_ptr, logical_device_ptr, pipeline_manager_ptr, storage_manager_ptr);
+        std::shared_ptr<CGV::Command_Buffer_Manager> command_buffer_manager_ptr = std::make_shared<CGV::Command_Buffer_Manager>(resource_grouping_manager, logical_device_ptr, pipeline_manager_ptr, storage_manager_ptr);
         command_buffer_manager_ptr->Add_Command_Buffer("execute_render", queue_manager_ptr->Get_Queue_Family_Indices().m_compute_index.value(), "main_descriptor_set", "main_render_pipeline");
         command_buffer_manager_ptr->Begin_Recording("execute_render", (VkCommandBufferUsageFlagBits)0);
         command_buffer_manager_ptr->Image_Memory_Barrier("execute_render", {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);

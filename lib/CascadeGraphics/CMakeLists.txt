@@ -22,7 +22,7 @@ add_library(CascadeGraphics STATIC
     src/VulkanWrapper/storage_manager.cpp
     src/VulkanWrapper/shader_manager.cpp
     src/VulkanWrapper/command_buffer_manager.cpp
-    src/VulkanWrapper/descriptor_set_manager.cpp
+    src/VulkanWrapper/resource_grouping_manager.cpp
     src/debug_tools.cpp)
 
 if(UNIX)

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../vulkan_header.hpp"
-#include "descriptor_set_manager.hpp"
 #include "device_wrapper.hpp"
 #include "pipeline_manager.hpp"
+#include "resource_grouping_manager.hpp"
 #include "storage_manager.hpp"
 
 #include <memory>
@@ -46,7 +46,7 @@ namespace CascadeGraphics
             };
 
         private:
-            std::shared_ptr<Descriptor_Set_Manager> m_descriptor_set_manager_ptr;
+            std::shared_ptr<Resource_Grouping_Manager> m_resource_grouping_manager_ptr;
             std::shared_ptr<Device> m_logical_device_ptr;
             std::shared_ptr<Pipeline_Manager> m_pipeline_manager_ptr;
             std::shared_ptr<Storage_Manager> m_storage_manager_ptr;
@@ -60,7 +60,7 @@ namespace CascadeGraphics
             unsigned int Get_Command_Buffer_Index(std::string label);
 
         public:
-            Command_Buffer_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr,
+            Command_Buffer_Manager(std::shared_ptr<Resource_Grouping_Manager> resource_grouping_manager_ptr,
                                    std::shared_ptr<Device> logical_device_ptr,
                                    std::shared_ptr<Pipeline_Manager> pipeline_manager_ptr,
                                    std::shared_ptr<Storage_Manager> storage_manager_ptr);
