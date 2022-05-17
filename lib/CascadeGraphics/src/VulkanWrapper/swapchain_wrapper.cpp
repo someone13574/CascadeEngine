@@ -288,5 +288,15 @@ namespace CascadeGraphics
 
             return true;
         }
+
+        unsigned int Swapchain::Get_Swapchain_Image_Count()
+        {
+            return m_swapchain_image_count;
+        }
+
+        VkImage* Swapchain::Get_Swapchain_Image(unsigned int index)
+        {
+            return &m_swapchain_images[index];
+        }
     } // namespace Vulkan
 } // namespace CascadeGraphics

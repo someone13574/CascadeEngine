@@ -52,6 +52,7 @@ namespace CascadeGraphics
             void Add_Resource_Grouping(std::string label, std::vector<Storage_Manager::Resource_ID> resources, bool add_descriptor_set);
             void Allocate_Descriptor_Sets();
 
+            bool Resource_Group_Has_Descriptor_Set(std::string resource_group_label);
             VkDescriptorSet* Get_Descriptor_Set(std::string resource_grouping_label);
             VkDescriptorSetLayout* Get_Descriptor_Set_Layout(std::string resource_grouping_label);
             std::vector<Storage_Manager::Resource_ID> Get_Resources(std::string resource_grouping_label);

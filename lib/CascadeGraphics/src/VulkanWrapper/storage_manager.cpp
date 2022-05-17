@@ -10,8 +10,8 @@ namespace CascadeGraphics
 {
     namespace Vulkan
     {
-        Storage_Manager::Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr)
-            : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_queue_manager_ptr(queue_manager_ptr)
+        Storage_Manager::Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Swapchain> swapchain_ptr)
+            : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_queue_manager_ptr(queue_manager_ptr), m_swapchain_ptr(swapchain_ptr)
         {
         }
 
@@ -30,11 +30,14 @@ namespace CascadeGraphics
 
             for (unsigned int i = 0; i < m_images.size(); i++)
             {
-                LOG_TRACE << "Vulkan: destorying image " << m_images[i].resource_id.label << "-" << m_images[i].resource_id.index;
+                if (m_images[i].resource_id.type == Resource_Type::IMAGE)
+                {
+                    LOG_TRACE << "Vulkan: destorying image " << m_images[i].resource_id.label << "-" << m_images[i].resource_id.index;
 
-                vkDestroyImage(*(m_logical_device_ptr->Get_Device()), m_images[i].image, nullptr);
-                vkDestroyImageView(*(m_logical_device_ptr->Get_Device()), m_images[i].image_view, nullptr);
-                vkFreeMemory(*(m_logical_device_ptr->Get_Device()), m_images[i].image_memory, nullptr);
+                    vkDestroyImage(*(m_logical_device_ptr->Get_Device()), m_images[i].image_info->image, nullptr);
+                    vkDestroyImageView(*(m_logical_device_ptr->Get_Device()), m_images[i].image_info->image_view, nullptr);
+                    vkFreeMemory(*(m_logical_device_ptr->Get_Device()), m_images[i].image_info->image_memory, nullptr);
+                }
             }
             m_images.clear();
 
@@ -165,12 +168,14 @@ namespace CascadeGraphics
 
             unsigned int image_id = Get_Next_Image_Id(label);
 
+            Image_Info image_info = {};
+            image_info.descriptor_type = image_type;
+
             m_images.resize(m_images.size() + 1);
             m_images.back() = {};
             m_images.back().resource_id.index = image_id;
             m_images.back().resource_id.label = label;
             m_images.back().resource_id.type = Resource_Type::IMAGE;
-            m_images.back().descriptor_type = image_type;
 
             LOG_INFO << "Vulkan: creating image " << label << "-" << image_id;
 
@@ -189,10 +194,10 @@ namespace CascadeGraphics
             image_create_info.sharingMode = (queue_families.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
             image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-            VALIDATE_VKRESULT(vkCreateImage(*(m_logical_device_ptr->Get_Device()), &image_create_info, nullptr, &m_images.back().image), "Vulkan: failed to create image");
+            VALIDATE_VKRESULT(vkCreateImage(*(m_logical_device_ptr->Get_Device()), &image_create_info, nullptr, &image_info.image), "Vulkan: failed to create image");
 
             VkMemoryRequirements memory_requirements;
-            vkGetImageMemoryRequirements(*(m_logical_device_ptr->Get_Device()), m_images.back().image, &memory_requirements);
+            vkGetImageMemoryRequirements(*(m_logical_device_ptr->Get_Device()), image_info.image, &memory_requirements);
 
             VkPhysicalDeviceMemoryProperties memory_properties;
             vkGetPhysicalDeviceMemoryProperties(*(m_physical_device_ptr->Get_Physical_Device()), &memory_properties);
@@ -213,14 +218,14 @@ namespace CascadeGraphics
             memory_allocate_info.allocationSize = memory_requirements.size;
             memory_allocate_info.memoryTypeIndex = memory_type_index;
 
-            VALIDATE_VKRESULT(vkAllocateMemory(*(m_logical_device_ptr->Get_Device()), &memory_allocate_info, nullptr, &m_images.back().image_memory), "Vulkan: failed to allocate image memory");
-            VALIDATE_VKRESULT(vkBindImageMemory(*(m_logical_device_ptr->Get_Device()), m_images.back().image, m_images.back().image_memory, 0), "Vulkan: fail to bind image memory");
+            VALIDATE_VKRESULT(vkAllocateMemory(*(m_logical_device_ptr->Get_Device()), &memory_allocate_info, nullptr, &image_info.image_memory), "Vulkan: failed to allocate image memory");
+            VALIDATE_VKRESULT(vkBindImageMemory(*(m_logical_device_ptr->Get_Device()), image_info.image, image_info.image_memory, 0), "Vulkan: fail to bind image memory");
 
             VkImageViewCreateInfo image_view_create_info = {};
             image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             image_view_create_info.pNext = nullptr;
             image_view_create_info.flags = 0;
-            image_view_create_info.image = m_images.back().image;
+            image_view_create_info.image = image_info.image;
             image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
             image_view_create_info.format = image_format;
             image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -233,9 +238,38 @@ namespace CascadeGraphics
             image_view_create_info.subresourceRange.baseArrayLayer = 0;
             image_view_create_info.subresourceRange.layerCount = 1;
 
-            VALIDATE_VKRESULT(vkCreateImageView(*(m_logical_device_ptr->Get_Device()), &image_view_create_info, nullptr, &m_images.back().image_view), "Vulkan: failed to create image view");
+            VALIDATE_VKRESULT(vkCreateImageView(*(m_logical_device_ptr->Get_Device()), &image_view_create_info, nullptr, &image_info.image_view), "Vulkan: failed to create image view");
+
+            m_images.back().image_info = image_info;
 
             LOG_TRACE << "Vulkan: finished creating image " << label << "-" << image_id;
+        }
+
+        void Storage_Manager::Add_Swapchain(std::string label)
+        {
+            LOG_INFO << "Vulkan: adding swapchain's images to storage manager under label " << label;
+
+            for (unsigned int i = 0; i < m_images.size(); i++)
+            {
+                if (m_images[i].resource_id.label == label)
+                {
+                    LOG_ERROR << "Vulkan: cannot have pre-existing resources share label '" << label << "' with swapchain";
+                    exit(EXIT_FAILURE);
+                }
+            }
+
+            for (unsigned int i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
+            {
+                m_images.resize(m_images.size() + 1);
+                m_images.back() = {};
+                m_images.back().resource_id.index = i;
+                m_images.back().resource_id.label = label;
+                m_images.back().resource_id.type = Resource_Type::SWAPCHAIN_IMAGE;
+
+                LOG_TRACE << "Vulkan: adding swapchain image " << i;
+            }
+
+            LOG_TRACE << "Vulkan: finished adding swapchain's images";
         }
 
         VkImage* Storage_Manager::Get_Image(Resource_ID resource_id)
@@ -244,9 +278,17 @@ namespace CascadeGraphics
             {
                 if (m_images[i].resource_id == resource_id)
                 {
-                    return &m_images[i].image;
+                    if (m_images[i].resource_id.type == Resource_Type::IMAGE)
+                    {
+                        return &m_images[i].image_info->image;
+                    }
+                    else if (m_images[i].resource_id.type == Resource_Type::SWAPCHAIN_IMAGE)
+                    {
+                        return m_swapchain_ptr->Get_Swapchain_Image(resource_id.index);
+                    }
                 }
             }
+
 
             LOG_ERROR << "Vulkan: image with resource id '" << resource_id.label << "-" << resource_id.index << "' does not exist";
             exit(EXIT_FAILURE);
@@ -270,7 +312,15 @@ namespace CascadeGraphics
                 {
                     if (m_images[i].resource_id == resource_id)
                     {
-                        return {resource_id, m_images[i].descriptor_type};
+                        if (m_images[i].resource_id.type == Resource_Type::IMAGE)
+                        {
+                            return {resource_id, m_images[i].image_info->descriptor_type};
+                        }
+                        else
+                        {
+                            LOG_ERROR << "Vulkan: cannot get descriptor type of swapchain image";
+                            exit(EXIT_FAILURE);
+                        }
                     }
                 }
             }
@@ -291,7 +341,7 @@ namespace CascadeGraphics
                     }
                 }
             }
-            else
+            else if (resource_id.type == IMAGE || resource_id.type == SWAPCHAIN_IMAGE)
             {
                 for (unsigned int i = 0; i < m_images.size(); i++)
                 {

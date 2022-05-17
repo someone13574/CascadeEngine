@@ -46,16 +46,14 @@ namespace CascadeGraphics
             void Create_Swapchain_Image_Views();
 
         public:
-            Swapchain(std::shared_ptr<Device> logical_device_ptr,
-                      std::shared_ptr<Physical_Device> physical_device_ptr,
-                      std::shared_ptr<Surface> surface_ptr,
-                      std::shared_ptr<Queue_Manager> queue_manager_ptr,
-                      unsigned int width,
-                      unsigned int height);
+            Swapchain(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Surface> surface_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, unsigned int width, unsigned int height);
             ~Swapchain();
 
         public:
             static bool Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface> surface_ptr);
+
+            unsigned int Get_Swapchain_Image_Count();
+            VkImage* Get_Swapchain_Image(unsigned int index);
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

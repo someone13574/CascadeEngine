@@ -5,8 +5,10 @@
 #include "device_wrapper.hpp"
 #include "physical_device_wrapper.hpp"
 #include "queue_wrapper.hpp"
+#include "swapchain_wrapper.hpp"
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -30,7 +32,8 @@ namespace CascadeGraphics
             enum Resource_Type
             {
                 BUFFER,
-                IMAGE
+                IMAGE,
+                SWAPCHAIN_IMAGE
             };
 
             struct Resource_ID
@@ -61,20 +64,26 @@ namespace CascadeGraphics
                 VkDescriptorType descriptor_type;
             };
 
-            struct Image_Resource
+            struct Image_Info
             {
-                Resource_ID resource_id;
-
                 VkImage image;
                 VkImageView image_view;
                 VkDeviceMemory image_memory;
                 VkDescriptorType descriptor_type;
             };
 
+            struct Image_Resource
+            {
+                Resource_ID resource_id;
+
+                std::optional<Image_Info> image_info;
+            };
+
         private:
             std::shared_ptr<Device> m_logical_device_ptr;
             std::shared_ptr<Physical_Device> m_physical_device_ptr;
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
+            std::shared_ptr<Swapchain> m_swapchain_ptr;
 
             std::vector<Buffer_Resource> m_buffers;
             std::vector<Image_Resource> m_images;
@@ -85,12 +94,14 @@ namespace CascadeGraphics
             std::vector<unsigned int> Get_Queue_Families(Resouce_Queue_Families resouce_queue_families);
 
         public:
-            Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
+            Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Swapchain> swapchain_ptr);
             ~Storage_Manager();
 
         public:
             void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families);
             void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, Resouce_Queue_Families resouce_queue_families);
+
+            void Add_Swapchain(std::string label);
 
             VkImage* Get_Image(Resource_ID resource_id);
             Resource_Data Get_Resource_Data(Resource_ID resource_id);

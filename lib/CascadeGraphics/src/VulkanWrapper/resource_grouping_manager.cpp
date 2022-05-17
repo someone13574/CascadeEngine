@@ -87,6 +87,7 @@ namespace CascadeGraphics
                 }
             }
 
+            bool contains_swapchain_image = false;
             for (unsigned int i = 0; i < resources.size(); i++)
             {
                 if (!m_storage_manager_ptr->Does_Resource_Exist(resources[i]))
@@ -94,8 +95,17 @@ namespace CascadeGraphics
                     LOG_ERROR << "Vulkan: resource " << resources[i].label << "-" << resources[i].index << " does not exist";
                     exit(EXIT_FAILURE);
                 }
+                if (resources[i].type == Storage_Manager::SWAPCHAIN_IMAGE)
+                {
+                    contains_swapchain_image = true;
+                }
 
-                LOG_TRACE << "Vulkan: include resource " << resources[i].label << "-" << resources[i].index;
+                LOG_TRACE << "Vulkan: including resource " << resources[i].label << "-" << resources[i].index;
+            }
+            if (add_descriptor_set && contains_swapchain_image)
+            {
+                LOG_ERROR << "Vulkan: cannot create descriptor set with swapchain image";
+                exit(EXIT_FAILURE);
             }
 
             m_resource_groupings.resize(m_resource_groupings.size() + 1);
@@ -159,6 +169,20 @@ namespace CascadeGraphics
             VALIDATE_VKRESULT(vkAllocateDescriptorSets(*(m_logical_device_ptr->Get_Device()), &descriptor_set_allocate_info, m_descriptor_sets.data()), "Vulkan: failed to allocate descriptor sets");
 
             LOG_TRACE << "Vulkan: allocated descriptor set";
+        }
+
+        bool Resource_Grouping_Manager::Resource_Group_Has_Descriptor_Set(std::string resource_group_label)
+        {
+            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            {
+                if (m_resource_groupings[i].label == resource_group_label)
+                {
+                    return m_resource_groupings[i].descriptor_set_info.has_value();
+                }
+            }
+
+            LOG_ERROR << "Vulkan: no resource group with label '" << resource_group_label << "'";
+            exit(EXIT_FAILURE);
         }
 
         VkDescriptorSet* Resource_Grouping_Manager::Get_Descriptor_Set(std::string resource_grouping_label)

@@ -75,7 +75,7 @@ namespace CascadeGraphics
             exit(EXIT_FAILURE);
         }
 
-        void Command_Buffer_Manager::Add_Command_Buffer(std::string label, unsigned int queue_family, std::string resource_group_label, std::string pipeline_label)
+        void Command_Buffer_Manager::Add_Command_Buffer(std::string label, unsigned int queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label)
         {
             LOG_INFO << "Vulkan: adding command buffer";
 
@@ -101,15 +101,21 @@ namespace CascadeGraphics
             m_command_buffers.resize(m_command_buffers.size() + 1);
             m_command_buffers.back() = {};
             m_command_buffers.back().label = label;
-            m_command_buffers.back().descriptor_set_label = resource_group_label;
+            m_command_buffers.back().resource_group_labels = resource_group_labels;
             m_command_buffers.back().pipeline_label = pipeline_label;
 
             Allocate_Command_Buffer(m_command_buffers.size() - 1, command_pool_index);
 
-            std::vector<Storage_Manager::Resource_ID> resource_identifiers = m_resource_grouping_manager_ptr->Get_Resources(resource_group_label);
+            std::vector<Storage_Manager::Resource_ID> resource_identifiers;
+            for (unsigned int i = 0; i < resource_group_labels.size(); i++)
+            {
+                std::vector<Storage_Manager::Resource_ID> resource_group_resources = m_resource_grouping_manager_ptr->Get_Resources(resource_group_labels[i]);
+                resource_identifiers.insert(resource_identifiers.end(), resource_group_resources.begin(), resource_group_resources.end());
+            }
+
             for (unsigned int i = 0; i < resource_identifiers.size(); i++)
             {
-                if (resource_identifiers[i].type == Storage_Manager::IMAGE)
+                if (resource_identifiers[i].type == Storage_Manager::Resource_Type::IMAGE || resource_identifiers[i].type == Storage_Manager::Resource_Type::SWAPCHAIN_IMAGE)
                 {
                     m_command_buffers.back().image_resource_states.resize(m_command_buffers.back().image_resource_states.size() + 1);
 
@@ -165,8 +171,14 @@ namespace CascadeGraphics
             {
                 case Pipeline_Manager::Pipeline_Type::COMPUTE:
                 {
-                    vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline_Layout(m_command_buffers[command_buffer_index].pipeline_label), 0, 1,
-                                            m_resource_grouping_manager_ptr->Get_Descriptor_Set(m_command_buffers[command_buffer_index].descriptor_set_label), 0, nullptr);
+                    for (unsigned int i = 0; i < m_command_buffers[command_buffer_index].resource_group_labels.size(); i++)
+                    {
+                        if (m_resource_grouping_manager_ptr->Resource_Group_Has_Descriptor_Set(m_command_buffers[command_buffer_index].resource_group_labels[i]))
+                        {
+                            vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline_Layout(m_command_buffers[command_buffer_index].pipeline_label), 0, 1,
+                                                    m_resource_grouping_manager_ptr->Get_Descriptor_Set(m_command_buffers[command_buffer_index].resource_group_labels[i]), 0, nullptr);
+                        }
+                    }
                     break;
                 }
                 default:
@@ -190,9 +202,9 @@ namespace CascadeGraphics
         {
             LOG_TRACE << "Vulkan: image memory barrier in command buffer '" << command_buffer_label << "'";
 
-            if (resource_id.type != Storage_Manager::Resource_Type::IMAGE)
+            if (!(resource_id.type == Storage_Manager::Resource_Type::IMAGE || resource_id.type == Storage_Manager::Resource_Type::SWAPCHAIN_IMAGE))
             {
-                LOG_ERROR << "Vulkan: resource type must be an image";
+                LOG_ERROR << "Vulkan: resource type must be an image or swapchain image";
                 exit(EXIT_FAILURE);
             }
 
@@ -209,7 +221,7 @@ namespace CascadeGraphics
 
             if (resource_index == -1)
             {
-                LOG_ERROR << "Vulkan: no image resources with the id '" << resource_id.label << "-" << resource_id.index << "' exist";
+                LOG_ERROR << "Vulkan: no image resources with the id '" << resource_id.label << "-" << resource_id.index << "' exists in provided resource groupings";
                 exit(EXIT_FAILURE);
             }
 

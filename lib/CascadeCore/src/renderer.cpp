@@ -32,22 +32,25 @@ namespace CascadeCore
 
         std::shared_ptr<CGV::Swapchain> swapchain_ptr = std::make_shared<CGV::Swapchain>(logical_device_ptr, physical_device_ptr, surface_ptr, queue_manager_ptr, m_width, m_height);
 
-        std::shared_ptr<CGV::Storage_Manager> storage_manager_ptr = std::make_shared<CGV::Storage_Manager>(logical_device_ptr, physical_device_ptr, queue_manager_ptr);
+        std::shared_ptr<CGV::Storage_Manager> storage_manager_ptr = std::make_shared<CGV::Storage_Manager>(logical_device_ptr, physical_device_ptr, queue_manager_ptr, swapchain_ptr);
         storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, {width, height}, {false, true, true, false, false, false});
+        storage_manager_ptr->Add_Swapchain("swapchain");
 
         std::shared_ptr<CGV::Shader_Manager> shader_manager_ptr = std::make_shared<CGV::Shader_Manager>(logical_device_ptr);
         shader_manager_ptr->Add_Shader("render_shader", "/home/owen/Documents/Code/C++/CascadeEngine/build/build/build/CascadeGraphics/src/Shaders/render.comp.spv");
 
         std::shared_ptr<CGV::Resource_Grouping_Manager> resource_grouping_manager = std::make_shared<CGV::Resource_Grouping_Manager>(logical_device_ptr, storage_manager_ptr);
         resource_grouping_manager->Add_Resource_Grouping("main_descriptor_set", {{0, "render_target", CGV::Storage_Manager::IMAGE}}, true);
+        resource_grouping_manager->Add_Resource_Grouping("swapchain", {{0, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, {1, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, {2, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}}, false);
         resource_grouping_manager->Allocate_Descriptor_Sets();
 
         std::shared_ptr<CGV::Pipeline_Manager> pipeline_manager_ptr = std::make_shared<CGV::Pipeline_Manager>(resource_grouping_manager, logical_device_ptr, storage_manager_ptr, shader_manager_ptr);
         pipeline_manager_ptr->Add_Compute_Pipeline("main_render_pipeline", "main_descriptor_set", "render_shader");
 
         std::shared_ptr<CGV::Command_Buffer_Manager> command_buffer_manager_ptr = std::make_shared<CGV::Command_Buffer_Manager>(resource_grouping_manager, logical_device_ptr, pipeline_manager_ptr, storage_manager_ptr);
-        command_buffer_manager_ptr->Add_Command_Buffer("execute_render", queue_manager_ptr->Get_Queue_Family_Indices().m_compute_index.value(), "main_descriptor_set", "main_render_pipeline");
+        command_buffer_manager_ptr->Add_Command_Buffer("execute_render", queue_manager_ptr->Get_Queue_Family_Indices().m_compute_index.value(), {"main_descriptor_set", "swapchain"}, "main_render_pipeline");
         command_buffer_manager_ptr->Begin_Recording("execute_render", (VkCommandBufferUsageFlagBits)0);
+        command_buffer_manager_ptr->Image_Memory_Barrier("execute_render", {0, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Image_Memory_Barrier("execute_render", {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         command_buffer_manager_ptr->Dispatch_Compute_Shader("execute_render", std::ceil(m_width / 32.0), std::ceil(m_width / 32.0), 1);
         command_buffer_manager_ptr->End_Recording("execute_render");
@@ -91,6 +94,7 @@ namespace CascadeCore
 
         std::shared_ptr<CGV::Storage_Manager> storage_manager_ptr = std::make_shared<CGV::Storage_Manager>(logical_device_ptr, physical_device_ptr, queue_manager_ptr);
         storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, {width, height}, {false, true, true, false, false, false});
+        storage_manager_ptr->Add_Swapchain("swapchain", swapchain_ptr);
 
         std::shared_ptr<CGV::Shader_Manager> shader_manager_ptr = std::make_shared<CGV::Shader_Manager>(logical_device_ptr);
         shader_manager_ptr->Add_Shader("render_shader", "C:/Users/Owen Law/Documents/Code/C++/CascadeEngine/build/build/build/CascadeGraphics/src/Shaders/render.comp.spv");

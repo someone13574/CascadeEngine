@@ -38,7 +38,7 @@ namespace CascadeGraphics
             struct Command_Buffer
             {
                 std::string label;
-                std::string descriptor_set_label;
+                std::vector<std::string> resource_group_labels;
                 std::string pipeline_label;
 
                 VkCommandBuffer command_buffer;
@@ -67,7 +67,7 @@ namespace CascadeGraphics
             ~Command_Buffer_Manager();
 
         public:
-            void Add_Command_Buffer(std::string label, unsigned int queue_family, std::string resource_group_label, std::string pipeline_label);
+            void Add_Command_Buffer(std::string label, unsigned int queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label);
 
             void Begin_Recording(std::string label, VkCommandBufferUsageFlagBits usage_flags);
             void End_Recording(std::string label);
