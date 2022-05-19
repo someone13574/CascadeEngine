@@ -73,6 +73,7 @@ namespace CascadeGraphics
             void End_Recording(std::string label);
             void Image_Memory_Barrier(std::string command_buffer_label, Storage_Manager::Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
             void Dispatch_Compute_Shader(std::string command_buffer_label, unsigned int group_count_x, unsigned int group_count_y, unsigned int group_count_z);
+            void Copy_Image(std::string command_buffer_label, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id);
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

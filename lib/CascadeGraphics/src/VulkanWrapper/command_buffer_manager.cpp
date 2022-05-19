@@ -259,5 +259,54 @@ namespace CascadeGraphics
 
             vkCmdDispatch(m_command_buffers[Get_Command_Buffer_Index(command_buffer_label)].command_buffer, group_count_x, group_count_y, group_count_z);
         }
+
+        void Command_Buffer_Manager::Copy_Image(std::string command_buffer_label, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id)
+        {
+            LOG_INFO << "Vulkan: copying image " << source_resource_id.label << "-" << source_resource_id.index << " to " << destination_resource_id.label << "-" << destination_resource_id.index << " in command buffer " << command_buffer_label;
+
+            unsigned int command_buffer_index = Get_Command_Buffer_Index(command_buffer_label);
+
+            int source_index = -1;
+            int destination_index = -1;
+            for (unsigned int i = 0; i < m_command_buffers[command_buffer_index].image_resource_states.size(); i++)
+            {
+                if (m_command_buffers[command_buffer_index].image_resource_states[i].resource_id == source_resource_id)
+                {
+                    source_index = i;
+                }
+                if (m_command_buffers[command_buffer_index].image_resource_states[i].resource_id == destination_resource_id)
+                {
+                    destination_index = i;
+                }
+            }
+
+            if (source_index == -1 || destination_index == -1)
+            {
+                LOG_ERROR << "Vulkan: cannot copy to image not added to command buffer";
+                exit(EXIT_FAILURE);
+            }
+
+            VkOffset3D region_offset = {};
+            region_offset.x = 0;
+            region_offset.y = 0;
+            region_offset.z = 0;
+
+            VkExtent3D region_extent = {};
+            region_extent.width = 1280;
+            region_extent.height = 720;
+            region_extent.depth = 1;
+
+            VkImageCopy copy_region = {};
+            copy_region.srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            copy_region.srcOffset = region_offset;
+            copy_region.dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            copy_region.dstOffset = region_offset;
+            copy_region.extent = region_extent;
+
+            vkCmdCopyImage(m_command_buffers[command_buffer_index].command_buffer, *m_storage_manager_ptr->Get_Image(source_resource_id), m_command_buffers[command_buffer_index].image_resource_states[source_index].current_image_layout,
+                           *m_storage_manager_ptr->Get_Image(destination_resource_id), m_command_buffers[command_buffer_index].image_resource_states[destination_index].current_image_layout, 1, &copy_region);
+
+            LOG_TRACE << "Vulkan: recorded copy command";
+        }
     } // namespace Vulkan
 } // namespace CascadeGraphics
