@@ -141,6 +141,11 @@ namespace CascadeCore
         }
     }
 
+    void Window::Render_Frame()
+    {
+        m_renderer->Render_Frame();
+    }
+
     void Window::Send_Close_Event()
     {
         LOG_TRACE << "Sending close event to event loop";
@@ -283,6 +288,11 @@ namespace CascadeCore
 
         TranslateMessage(&message);
         DispatchMessage(&message);
+    }
+
+    void Window::Render_Frame()
+    {
+        m_renderer->Render_Frame();
     }
 
     void Window::Send_Close_Event()

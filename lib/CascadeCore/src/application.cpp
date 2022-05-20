@@ -17,14 +17,19 @@ namespace CascadeCore
 
         for (unsigned int i = 0; i < m_windows.size(); i++)
         {
-            if (m_event_thread_active[i])
+            if (m_event_thread_active[i] || m_rendering_thread_active[i])
             {
+                m_rendering_thread_active[i] = false;
                 m_event_thread_active[i] = false;
+
                 m_windows[i]->Send_Close_Event();
+
+                m_rendering_threads[i].join();
                 m_event_threads[i].join();
             }
             else
             {
+                m_rendering_threads[i].join();
                 m_event_threads[i].join();
             }
         }
@@ -41,10 +46,23 @@ namespace CascadeCore
             instance->m_windows[window_index]->Process_Events();
         }
 
-        instance->m_windows[window_index].reset();
         instance->m_active_event_threads--;
 
         LOG_INFO << "Event loop #" << window_index << " has finished for '" << instance->m_application_name << "'";
+    }
+
+    void Application::Rendering_Loop(Application* instance, unsigned int window_index)
+    {
+        LOG_INFO << "Starting rendering loop #" << window_index << " for '" << instance->m_application_name << "'";
+
+        while (instance->m_rendering_thread_active[window_index])
+        {
+            instance->m_windows[window_index]->Render_Frame();
+        }
+
+        instance->m_active_rendering_threads--;
+
+        LOG_INFO << "Rendering loop #" << window_index << " has finished for '" << instance->m_application_name << "'";
     }
 
     std::string Application::Get_Application_Name()
@@ -58,16 +76,17 @@ namespace CascadeCore
 
         LOG_TRACE << "'" << event_data->window_to_close->Get_Owner_Application()->m_application_name << "' has received a close window event";
 
-        unsigned int window_index_in_application = 0;
+        unsigned int window_index = 0;
         for (unsigned int i = 0; i < event_data->window_to_close->Get_Owner_Application()->m_windows.size(); i++)
         {
             if (event_data->window_to_close->Get_Owner_Application()->m_windows[i].get() == event_data->window_to_close)
             {
-                window_index_in_application = i;
+                window_index = i;
             }
         }
 
-        event_data->window_to_close->Get_Owner_Application()->m_event_thread_active[window_index_in_application] = false;
+        event_data->window_to_close->Get_Owner_Application()->m_rendering_thread_active[window_index] = false;
+        event_data->window_to_close->Get_Owner_Application()->m_event_thread_active[window_index] = false;
     }
 
     std::shared_ptr<Window> Application::Create_Window(unsigned int width, unsigned int height)
@@ -80,12 +99,16 @@ namespace CascadeCore
         m_active_event_threads++;
         m_event_threads.push_back(std::thread(Event_Loop, this, m_windows.size() - 1));
 
+        m_rendering_thread_active.push_back(true);
+        m_active_rendering_threads++;
+        m_rendering_threads.push_back(std::thread(Rendering_Loop, this, m_windows.size() - 1));
+
         return window_ptr;
     }
 
     void Application::Wait_For_Windows_To_Exit()
     {
-        while (m_active_event_threads != 0)
+        while (m_active_event_threads != 0 || m_active_rendering_threads != 0)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(15));
         }

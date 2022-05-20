@@ -22,10 +22,16 @@ namespace CascadeCore
         unsigned int m_active_event_threads = 0;
         std::vector<bool> m_event_thread_active;
         std::vector<std::thread> m_event_threads;
+
+        unsigned int m_active_rendering_threads = 0;
+        std::vector<bool> m_rendering_thread_active;
+        std::vector<std::thread> m_rendering_threads;
+
         std::vector<std::shared_ptr<Window>> m_windows;
 
     private:
         static void Event_Loop(Application* instance, unsigned int window_index);
+        static void Rendering_Loop(Application* instance, unsigned int window_index);
 
     public:
         Application(std::string name, std::string version);

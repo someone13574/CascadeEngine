@@ -23,5 +23,7 @@ namespace CascadeCore
     public:
         Renderer(CascadeGraphics::Vulkan::Surface::Window_Data window_data, unsigned int width, unsigned int height);
         ~Renderer();
+
+        void Render_Frame();
     };
 } // namespace CascadeCore

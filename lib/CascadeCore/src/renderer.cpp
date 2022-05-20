@@ -95,4 +95,8 @@ namespace CascadeCore
 
         LOG_TRACE << "Renderer cleanup finished";
     }
+
+    void Renderer::Render_Frame()
+    {
+    }
 } // namespace CascadeCore

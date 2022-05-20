@@ -46,6 +46,7 @@ namespace CascadeCore
 
         void Update_Event_Types();
         void Process_Events();
+        void Render_Frame();
         void Send_Close_Event();
 
         std::shared_ptr<Event_Manager> Get_Event_Manager();
@@ -90,6 +91,7 @@ namespace CascadeCore
 
         void Update_Event_Types();
         void Process_Events();
+        void Render_Frame();
         void Send_Close_Event();
 
         std::shared_ptr<Event_Manager> Get_Event_Manager();
