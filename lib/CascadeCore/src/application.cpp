@@ -72,35 +72,15 @@ namespace CascadeCore
 
     std::shared_ptr<Window> Application::Create_Window(unsigned int width, unsigned int height)
     {
-        m_window_creation_in_progress = true;
+        std::shared_ptr<Window> window_ptr = std::make_shared<Window>(width, height, m_application_name, this);
+        m_windows.push_back(window_ptr);
+        window_ptr->Get_Event_Manager()->Add_Event(Window::Close_Window_Event, Event_Manager::Event_Type::WINDOW_CLOSE);
 
         m_event_thread_active.push_back(true);
         m_active_event_threads++;
-        m_event_threads.push_back(std::thread(Create_Window_Thread, this, width, height));
+        m_event_threads.push_back(std::thread(Event_Loop, this, m_windows.size() - 1));
 
-        while (m_window_creation_in_progress)
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(15));
-        }
-
-        std::shared_ptr<Window> tmp_window_ptr = m_created_window_ptr;
-        m_created_window_ptr.reset();
-
-        return tmp_window_ptr;
-    }
-
-    void Application::Create_Window_Thread(Application* instance, unsigned int width, unsigned int height)
-    {
-        std::shared_ptr<Window> window_ptr = std::make_shared<Window>(width, height, instance->m_application_name, instance);
-
-        window_ptr->Get_Event_Manager()->Add_Event(Window::Close_Window_Event, Event_Manager::Event_Type::WINDOW_CLOSE);
-
-        instance->m_windows.push_back(window_ptr);
-
-        instance->m_created_window_ptr = window_ptr;
-        instance->m_window_creation_in_progress = false;
-
-        Event_Loop(instance, instance->m_windows.size() - 1);
+        return window_ptr;
     }
 
     void Application::Wait_For_Windows_To_Exit()
