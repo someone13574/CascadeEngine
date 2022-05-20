@@ -38,7 +38,11 @@ namespace CascadeCore
         xcb_map_window(m_xcb_connection, m_xcb_window);
         xcb_flush(m_xcb_connection);
 
-        m_renderer = std::make_shared<Renderer>(m_xcb_connection, &m_xcb_window, m_window_width, m_window_height);
+        CascadeGraphics::Vulkan::Surface::Window_Data window_data = {};
+        window_data.connection_ptr = m_xcb_connection;
+        window_data.window_ptr = &m_xcb_window;
+
+        m_renderer = std::make_shared<Renderer>(window_data, m_window_width, m_window_height);
 
         LOG_TRACE << "Window created";
     }
@@ -233,7 +237,11 @@ namespace CascadeCore
             LOG_TRACE << "Successfully created a win32 window";
         }
 
-        m_renderer = std::make_shared<Renderer>(&m_hinstance, &m_window, m_window_width, m_window_height);
+        CascadeGraphics::Vulkan::Surface::Window_Data window_data = {};
+        window_data.hinstance_ptr = &m_hinstance;
+        window_data.hwindow_ptr = &m_window;
+
+        m_renderer = std::make_shared<Renderer>(window_data, m_window_width, m_window_height);
 
         LOG_TRACE << "Window created";
     }
