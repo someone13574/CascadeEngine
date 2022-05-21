@@ -104,6 +104,9 @@ namespace CascadeGraphics
             void Add_Swapchain(std::string label);
 
             VkImage* Get_Image(Resource_ID resource_id);
+            VkImageView* Get_Image_View(Resource_ID resource_id);
+            VkBuffer* Get_Buffer(Resource_ID resource_id);
+
             Resource_Data Get_Resource_Data(Resource_ID resource_id);
             bool Does_Resource_Exist(Resource_ID resource_id);
         };

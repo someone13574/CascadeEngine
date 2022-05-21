@@ -74,6 +74,99 @@ namespace CascadeGraphics
             LOG_TRACE << "Vulkan: finished creating descriptor pool";
         }
 
+        void Resource_Grouping_Manager::Allocate_Descriptor_Sets()
+        {
+            LOG_INFO << "Vulkan: allocating descriptor sets";
+
+            Create_Descriptor_Pool();
+
+            VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
+            descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            descriptor_set_allocate_info.pNext = nullptr;
+            descriptor_set_allocate_info.descriptorPool = m_descriptor_pool;
+            descriptor_set_allocate_info.descriptorSetCount = m_descriptor_sets.size();
+            descriptor_set_allocate_info.pSetLayouts = m_descriptor_set_layouts.data();
+
+            VALIDATE_VKRESULT(vkAllocateDescriptorSets(*(m_logical_device_ptr->Get_Device()), &descriptor_set_allocate_info, m_descriptor_sets.data()), "Vulkan: failed to allocate descriptor sets");
+
+            LOG_TRACE << "Vulkan: allocated descriptor set";
+        }
+
+        void Resource_Grouping_Manager::Create_Write_Descriptor_Sets()
+        {
+            LOG_INFO << "Vulkan: creating write descriptor sets";
+
+            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            {
+                if (m_resource_groupings[i].descriptor_set_info.has_value())
+                {
+                    LOG_TRACE << "Vulkan: creating write descriptor sets for resource grouping '" << m_resource_groupings[i].label << "'";
+
+                    std::vector<std::pair<std::optional<VkDescriptorBufferInfo>, std::optional<VkDescriptorImageInfo>>> descriptor_infos;
+                    for (unsigned int j = 0; j < m_resource_groupings[i].resources.size(); j++)
+                    {
+                        if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::BUFFER)
+                        {
+                            descriptor_infos.resize(descriptor_infos.size() + 1);
+                            descriptor_infos.back().first = {*m_storage_manager_ptr->Get_Buffer(m_resource_groupings[i].resources[j]), 0, VK_WHOLE_SIZE};
+                        }
+                        else if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::IMAGE)
+                        {
+                            VkSamplerCreateInfo sampler_create_info = {};
+                            sampler_create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+                            sampler_create_info.pNext = nullptr;
+                            sampler_create_info.flags = 0;
+                            sampler_create_info.magFilter = VK_FILTER_NEAREST;
+                            sampler_create_info.minFilter = VK_FILTER_NEAREST;
+                            sampler_create_info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+                            sampler_create_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                            sampler_create_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                            sampler_create_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                            sampler_create_info.mipLodBias = 0;
+                            sampler_create_info.anisotropyEnable = VK_FALSE;
+                            sampler_create_info.maxAnisotropy = 0;
+                            sampler_create_info.compareEnable = VK_FALSE;
+                            sampler_create_info.compareOp = VK_COMPARE_OP_ALWAYS;
+                            sampler_create_info.minLod = 0;
+                            sampler_create_info.maxLod = 0;
+                            sampler_create_info.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+                            sampler_create_info.unnormalizedCoordinates = VK_FALSE;
+
+                            VkSampler sampler;
+                            VALIDATE_VKRESULT(vkCreateSampler(*(m_logical_device_ptr->Get_Device()), &sampler_create_info, nullptr, &sampler), "Vulkan: failed to create image sampler");
+
+
+                            descriptor_infos.resize(descriptor_infos.size() + 1);
+                            descriptor_infos.back().second = {sampler, *m_storage_manager_ptr->Get_Image_View(m_resource_groupings[i].resources[j]), VK_IMAGE_LAYOUT_GENERAL};
+                        }
+
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.resize(m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size() + 1);
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back() = {};
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pNext = nullptr;
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstSet = *m_resource_groupings[i].descriptor_set_info->descriptor_set_ptr;
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstBinding = j;
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstArrayElement = 0;
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorCount = 1;
+                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
+
+                        if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::BUFFER)
+                        {
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = &descriptor_infos[i].first.value();
+                        }
+                        else if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::IMAGE)
+                        {
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = &descriptor_infos[i].second.value();
+                        }
+                    }
+
+                    vkUpdateDescriptorSets(*(m_logical_device_ptr->Get_Device()), m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size(), m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.data(), 0, nullptr);
+                }
+            }
+
+            LOG_TRACE << "Vulkan: finished creating write descriptor sets";
+        }
+
         void Resource_Grouping_Manager::Add_Resource_Grouping(std::string label, std::vector<Storage_Manager::Resource_ID> resources, bool add_descriptor_set)
         {
             LOG_INFO << "Vulkan: adding resource grouping with label " << label;
@@ -153,22 +246,10 @@ namespace CascadeGraphics
             LOG_TRACE << "Vulkan: added resource grouping";
         }
 
-        void Resource_Grouping_Manager::Allocate_Descriptor_Sets()
+        void Resource_Grouping_Manager::Create_Descriptor_Sets()
         {
-            LOG_INFO << "Vulkan: allocating descriptor sets";
-
-            Create_Descriptor_Pool();
-
-            VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {};
-            descriptor_set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-            descriptor_set_allocate_info.pNext = nullptr;
-            descriptor_set_allocate_info.descriptorPool = m_descriptor_pool;
-            descriptor_set_allocate_info.descriptorSetCount = m_descriptor_sets.size();
-            descriptor_set_allocate_info.pSetLayouts = m_descriptor_set_layouts.data();
-
-            VALIDATE_VKRESULT(vkAllocateDescriptorSets(*(m_logical_device_ptr->Get_Device()), &descriptor_set_allocate_info, m_descriptor_sets.data()), "Vulkan: failed to allocate descriptor sets");
-
-            LOG_TRACE << "Vulkan: allocated descriptor set";
+            Allocate_Descriptor_Sets();
+            Create_Write_Descriptor_Sets();
         }
 
         bool Resource_Grouping_Manager::Resource_Group_Has_Descriptor_Set(std::string resource_group_label)

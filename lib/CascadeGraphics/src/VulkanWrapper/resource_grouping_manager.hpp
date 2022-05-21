@@ -7,6 +7,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace CascadeGraphics
@@ -20,6 +21,8 @@ namespace CascadeGraphics
             {
                 VkDescriptorSet* descriptor_set_ptr;
                 VkDescriptorSetLayout* descriptor_set_layout_ptr;
+
+                std::vector<VkWriteDescriptorSet> write_descriptor_sets;
             };
 
             struct Resource_Grouping
@@ -43,6 +46,8 @@ namespace CascadeGraphics
 
         private:
             void Create_Descriptor_Pool();
+            void Allocate_Descriptor_Sets();
+            void Create_Write_Descriptor_Sets();
 
         public:
             Resource_Grouping_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr);
@@ -50,7 +55,7 @@ namespace CascadeGraphics
 
         public:
             void Add_Resource_Grouping(std::string label, std::vector<Storage_Manager::Resource_ID> resources, bool add_descriptor_set);
-            void Allocate_Descriptor_Sets();
+            void Create_Descriptor_Sets();
 
             bool Resource_Group_Has_Descriptor_Set(std::string resource_group_label);
             VkDescriptorSet* Get_Descriptor_Set(std::string resource_grouping_label);

@@ -294,6 +294,40 @@ namespace CascadeGraphics
             exit(EXIT_FAILURE);
         }
 
+        VkImageView* Storage_Manager::Get_Image_View(Resource_ID resource_id)
+        {
+            for (unsigned int i = 0; i < m_images.size(); i++)
+            {
+                if (m_images[i].resource_id == resource_id)
+                {
+                    if (m_images[i].resource_id.type == Resource_Type::IMAGE)
+                    {
+                        return &m_images[i].image_info->image_view;
+                    }
+                }
+            }
+
+            LOG_ERROR << "Vulkan: image with resource id '" << resource_id.label << "-" << resource_id.index << "' does not exist";
+            exit(EXIT_FAILURE);
+        }
+
+        VkBuffer* Storage_Manager::Get_Buffer(Resource_ID resource_id)
+        {
+            for (unsigned int i = 0; i < m_buffers.size(); i++)
+            {
+                if (m_buffers[i].resource_id == resource_id)
+                {
+                    if (m_buffers[i].resource_id.type == Resource_Type::BUFFER)
+                    {
+                        return &m_buffers[i].buffer;
+                    }
+                }
+            }
+
+            LOG_ERROR << "Vulkan: buffer with resource id '" << resource_id.label << "-" << resource_id.index << "' does not exist";
+            exit(EXIT_FAILURE);
+        }
+
         Storage_Manager::Resource_Data Storage_Manager::Get_Resource_Data(Resource_ID resource_id)
         {
             if (resource_id.type == BUFFER)
