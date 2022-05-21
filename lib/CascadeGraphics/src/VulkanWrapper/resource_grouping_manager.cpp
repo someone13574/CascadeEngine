@@ -102,13 +102,28 @@ namespace CascadeGraphics
                 {
                     LOG_TRACE << "Vulkan: creating write descriptor sets for resource grouping '" << m_resource_groupings[i].label << "'";
 
-                    std::vector<std::pair<std::optional<VkDescriptorBufferInfo>, std::optional<VkDescriptorImageInfo>>> descriptor_infos;
                     for (unsigned int j = 0; j < m_resource_groupings[i].resources.size(); j++)
                     {
                         if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::BUFFER)
                         {
-                            descriptor_infos.resize(descriptor_infos.size() + 1);
-                            descriptor_infos.back().first = {*m_storage_manager_ptr->Get_Buffer(m_resource_groupings[i].resources[j]), 0, VK_WHOLE_SIZE};
+                            VkDescriptorBufferInfo buffer_descriptor_info = {};
+                            buffer_descriptor_info.buffer = *m_storage_manager_ptr->Get_Buffer(m_resource_groupings[i].resources[j]);
+                            buffer_descriptor_info.offset = 0;
+                            buffer_descriptor_info.range = VK_WHOLE_SIZE;
+
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.resize(m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size() + 1);
+
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back() = {};
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pNext = nullptr;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstSet = *m_resource_groupings[i].descriptor_set_info->descriptor_set_ptr;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstBinding = j;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstArrayElement = 0;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorCount = 1;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = &buffer_descriptor_info;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = nullptr;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pTexelBufferView = nullptr;
                         }
                         else if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::IMAGE)
                         {
@@ -135,28 +150,24 @@ namespace CascadeGraphics
                             VkSampler sampler;
                             VALIDATE_VKRESULT(vkCreateSampler(*(m_logical_device_ptr->Get_Device()), &sampler_create_info, nullptr, &sampler), "Vulkan: failed to create image sampler");
 
+                            VkDescriptorImageInfo image_descriptor_info = {};
+                            image_descriptor_info.sampler = sampler;
+                            image_descriptor_info.imageView = *m_storage_manager_ptr->Get_Image_View(m_resource_groupings[i].resources[j]);
+                            image_descriptor_info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
-                            descriptor_infos.resize(descriptor_infos.size() + 1);
-                            descriptor_infos.back().second = {sampler, *m_storage_manager_ptr->Get_Image_View(m_resource_groupings[i].resources[j]), VK_IMAGE_LAYOUT_GENERAL};
-                        }
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.resize(m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size() + 1);
 
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.resize(m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size() + 1);
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back() = {};
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pNext = nullptr;
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstSet = *m_resource_groupings[i].descriptor_set_info->descriptor_set_ptr;
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstBinding = j;
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstArrayElement = 0;
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorCount = 1;
-                        m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
-
-                        if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::BUFFER)
-                        {
-                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = &descriptor_infos[j].first.value();
-                        }
-                        else if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::IMAGE)
-                        {
-                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = &descriptor_infos[j].second.value();
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back() = {};
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pNext = nullptr;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstSet = *m_resource_groupings[i].descriptor_set_info->descriptor_set_ptr;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstBinding = j;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstArrayElement = 0;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorCount = 1;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = nullptr;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = &image_descriptor_info;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pTexelBufferView = nullptr;
                         }
                     }
 
