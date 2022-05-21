@@ -89,6 +89,7 @@ namespace CascadeCore
         Window(unsigned int width, unsigned int height, std::string title, Application* owner);
         ~Window();
 
+        void Create_Window();
         void Update_Event_Types();
         void Process_Events();
         void Render_Frame();

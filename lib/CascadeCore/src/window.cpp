@@ -187,6 +187,10 @@ namespace CascadeCore
     Window::Window(unsigned int width, unsigned int height, std::string title, Application* owner)
         : m_window_width(width), m_window_height(height), m_window_title(title), m_event_manager_ptr(std::make_shared<Event_Manager>(this)), m_owner_application(owner)
     {
+    }
+
+    void Window::Create_Window()
+    {
         LOG_INFO << "Creating a new window for '" << m_owner_application->Get_Application_Name() << "'";
 
         m_hinstance = GetModuleHandle(0);
@@ -227,7 +231,7 @@ namespace CascadeCore
             LOG_TRACE << "Window class already registered.";
         }
 
-        RECT window_rect = {0, 0, (LONG)width, (LONG)height};
+        RECT window_rect = {0, 0, (LONG)m_window_width, (LONG)m_window_height};
         AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, FALSE);
 
         m_window = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, nullptr, nullptr, nullptr, nullptr);

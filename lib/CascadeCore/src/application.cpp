@@ -41,6 +41,10 @@ namespace CascadeCore
     {
         LOG_INFO << "Starting event loop #" << window_index << " for '" << instance->m_application_name << "'";
 
+#if defined _WIN32 || defined WIN32
+        instance->m_windows[window_index]->Create_Window();
+#endif
+
         while (instance->m_event_thread_active[window_index])
         {
             instance->m_windows[window_index]->Process_Events();
