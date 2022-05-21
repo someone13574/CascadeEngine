@@ -10,7 +10,5 @@ void main()
 {
     ivec2 id = ivec2(gl_GlobalInvocationID.xy);
 
-    vec4 color = vec4(id.x & id.y);
-
-    imageStore(render_target, id, color);
+    imageStore(render_target, id, vec4(1.0, 0.0, 0.0, 1.0));
 }

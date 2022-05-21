@@ -37,18 +37,13 @@ namespace CascadeGraphics
             std::shared_ptr<Surface> m_surface_ptr;
 
         public:
-            Queue_Manager(bool graphics_required,
-                          bool compute_required,
-                          bool transfer_required,
-                          bool sparse_binding_required,
-                          bool protected_required,
-                          bool present_required,
-                          std::shared_ptr<Surface> surface_ptr);
+            Queue_Manager(bool graphics_required, bool compute_required, bool transfer_required, bool sparse_binding_required, bool protected_required, bool present_required, std::shared_ptr<Surface> surface_ptr);
             ~Queue_Manager();
 
         public:
             void Set_Queue_Family_Indices(std::shared_ptr<Physical_Device> physical_device_ptr);
             void Get_Device_Queue_Handles(VkDevice* device_ptr);
+            VkQueue* Get_Queue(unsigned int queue_type_index);
 
             bool Physical_Device_Has_Required_Queues(VkPhysicalDevice physical_device);
             Queue_Family_Indices Get_Queue_Family_Indices();

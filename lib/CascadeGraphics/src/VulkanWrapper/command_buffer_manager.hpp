@@ -16,6 +16,18 @@ namespace CascadeGraphics
     {
         class Command_Buffer_Manager
         {
+        public:
+            struct Identifier
+            {
+                std::string label;
+                unsigned int index;
+
+                bool operator==(Identifier other_identifier)
+                {
+                    return label == other_identifier.label && index == other_identifier.index;
+                }
+            };
+
         private:
             struct Image_Resource_State
             {
@@ -37,7 +49,8 @@ namespace CascadeGraphics
 
             struct Command_Buffer
             {
-                std::string label;
+                Identifier identifier;
+
                 std::vector<std::string> resource_group_labels;
                 std::string pipeline_label;
 
@@ -57,7 +70,8 @@ namespace CascadeGraphics
         private:
             void Create_Command_Pool(unsigned int queue_family);
             void Allocate_Command_Buffer(unsigned int command_buffer_index, unsigned int command_pool_index);
-            unsigned int Get_Command_Buffer_Index(std::string label);
+            unsigned int Get_Command_Buffer_Index(Identifier identifier);
+            unsigned int Get_Next_Index(std::string label);
 
         public:
             Command_Buffer_Manager(std::shared_ptr<Resource_Grouping_Manager> resource_grouping_manager_ptr,
@@ -69,11 +83,13 @@ namespace CascadeGraphics
         public:
             void Add_Command_Buffer(std::string label, unsigned int queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label);
 
-            void Begin_Recording(std::string label, VkCommandBufferUsageFlagBits usage_flags);
-            void End_Recording(std::string label);
-            void Image_Memory_Barrier(std::string command_buffer_label, Storage_Manager::Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
-            void Dispatch_Compute_Shader(std::string command_buffer_label, unsigned int group_count_x, unsigned int group_count_y, unsigned int group_count_z);
-            void Copy_Image(std::string command_buffer_label, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id);
+            void Begin_Recording(Identifier identifier, VkCommandBufferUsageFlagBits usage_flags);
+            void End_Recording(Identifier identifier);
+            void Image_Memory_Barrier(Identifier identifier, Storage_Manager::Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
+            void Dispatch_Compute_Shader(Identifier identifier, unsigned int group_count_x, unsigned int group_count_y, unsigned int group_count_z);
+            void Copy_Image(Identifier identifier, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id);
+
+            VkCommandBuffer* Get_Command_Buffer(Identifier identifier);
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

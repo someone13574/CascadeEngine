@@ -289,6 +289,11 @@ namespace CascadeGraphics
             return true;
         }
 
+        VkSwapchainKHR* Swapchain::Get_Swapchain()
+        {
+            return &m_swapchain;
+        }
+
         unsigned int Swapchain::Get_Swapchain_Image_Count()
         {
             return m_swapchain_image_count;

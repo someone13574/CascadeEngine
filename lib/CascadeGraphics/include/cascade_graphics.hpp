@@ -1,5 +1,7 @@
 #include "../src/vulkan_header.hpp"
 
+#include "../src/debug_tools.hpp"
+
 #include "../src/VulkanWrapper/command_buffer_manager.hpp"
 #include "../src/VulkanWrapper/device_wrapper.hpp"
 #include "../src/VulkanWrapper/instance_wrapper.hpp"
@@ -11,4 +13,5 @@
 #include "../src/VulkanWrapper/storage_manager.hpp"
 #include "../src/VulkanWrapper/surface_wrapper.hpp"
 #include "../src/VulkanWrapper/swapchain_wrapper.hpp"
+#include "../src/VulkanWrapper/synchronization_manager.hpp"
 #include "../src/VulkanWrapper/validation_layer_wrapper.hpp"

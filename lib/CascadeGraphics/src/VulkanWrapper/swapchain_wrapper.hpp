@@ -52,6 +52,7 @@ namespace CascadeGraphics
         public:
             static bool Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface> surface_ptr);
 
+            VkSwapchainKHR* Get_Swapchain();
             unsigned int Get_Swapchain_Image_Count();
             VkImage* Get_Swapchain_Image(unsigned int index);
         };

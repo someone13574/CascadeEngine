@@ -199,6 +199,11 @@ namespace CascadeGraphics
             LOG_TRACE << "Vulkan: got device queue handles";
         }
 
+        VkQueue* Queue_Manager::Get_Queue(unsigned int queue_type_index)
+        {
+            return &m_queues.find(queue_type_index)->second;
+        }
+
         bool Queue_Manager::Physical_Device_Has_Required_Queues(VkPhysicalDevice physical_device)
         {
             LOG_TRACE << "Vulkan: checking if physical device has required queues";
