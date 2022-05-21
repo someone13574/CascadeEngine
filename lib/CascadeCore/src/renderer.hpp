@@ -24,6 +24,8 @@ namespace CascadeCore
 
         unsigned int m_current_frame = 0;
 
+        bool m_initialized = false;
+
     private:
         std::shared_ptr<CGV::Instance> instance_ptr;
         std::shared_ptr<CGV::Surface> surface_ptr;

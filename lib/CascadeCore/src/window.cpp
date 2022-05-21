@@ -253,6 +253,8 @@ namespace CascadeCore
         m_renderer = std::make_shared<Renderer>(window_data, m_window_width, m_window_height);
 
         LOG_TRACE << "Window created";
+
+        m_renderer_initialized = true;
     }
 
     LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
@@ -296,7 +298,10 @@ namespace CascadeCore
 
     void Window::Render_Frame()
     {
-        m_renderer->Render_Frame();
+        if (m_renderer_initialized)
+        {
+            m_renderer->Render_Frame();
+        }
     }
 
     void Window::Send_Close_Event()

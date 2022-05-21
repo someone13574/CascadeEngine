@@ -85,6 +85,8 @@ namespace CascadeCore
         HWND m_window;
         HINSTANCE m_hinstance;
 
+        bool m_renderer_initialized = false;
+
     public:
         Window(unsigned int width, unsigned int height, std::string title, Application* owner);
         ~Window();

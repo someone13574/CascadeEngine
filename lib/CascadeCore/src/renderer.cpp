@@ -11,6 +11,8 @@ namespace CascadeCore
 {
     Renderer::Renderer(CascadeGraphics::Vulkan::Surface::Window_Data window_data, unsigned int width, unsigned int height) : m_width(width), m_height(height)
     {
+        m_initialized = false;
+
         LOG_INFO << "Initializing renderer";
 
         instance_ptr = std::make_shared<CGV::Instance>("Application name", 0);
@@ -101,6 +103,8 @@ namespace CascadeCore
         synchronization_manager_ptr->Add_Fence("image_in_flight", VK_NULL_HANDLE);
 
         LOG_INFO << "Renderer initialized";
+
+        m_initialized = true;
     }
 
     Renderer::~Renderer()
@@ -112,48 +116,51 @@ namespace CascadeCore
 
     void Renderer::Render_Frame()
     {
-        vkWaitForFences(*(logical_device_ptr->Get_Device()), 1, synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}), VK_TRUE, UINT64_MAX);
-
-        unsigned int image_index;
-        VALIDATE_VKRESULT(
-            vkAcquireNextImageKHR(*(logical_device_ptr->Get_Device()), *(swapchain_ptr->Get_Swapchain()), UINT64_MAX, *synchronization_manager_ptr->Get_Semaphore({"swapchain_image_available", m_current_frame}), VK_NULL_HANDLE, &image_index),
-            "Vulkan: failed to acquire next swapchain image");
-
-        if (*synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}) != VK_NULL_HANDLE)
+        if (m_initialized)
         {
-            vkWaitForFences(*(logical_device_ptr->Get_Device()), 1, synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}), VK_TRUE, UINT64_MAX);
+            vkWaitForFences(*(logical_device_ptr->Get_Device()), 1, synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}), VK_TRUE, UINT64_MAX);
+
+            unsigned int image_index;
+            VALIDATE_VKRESULT(
+                vkAcquireNextImageKHR(*(logical_device_ptr->Get_Device()), *(swapchain_ptr->Get_Swapchain()), UINT64_MAX, *synchronization_manager_ptr->Get_Semaphore({"swapchain_image_available", m_current_frame}), VK_NULL_HANDLE, &image_index),
+                "Vulkan: failed to acquire next swapchain image");
+
+            if (*synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}) != VK_NULL_HANDLE)
+            {
+                vkWaitForFences(*(logical_device_ptr->Get_Device()), 1, synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}), VK_TRUE, UINT64_MAX);
+            }
+            *(synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame})) = *(synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}));
+
+            VkPipelineStageFlags pipeline_wait_stage_mask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+
+            VkSubmitInfo submit_info = {};
+            submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submit_info.pNext = nullptr;
+            submit_info.waitSemaphoreCount = 1;
+            submit_info.pWaitSemaphores = synchronization_manager_ptr->Get_Semaphore({"swapchain_image_available", m_current_frame});
+            submit_info.pWaitDstStageMask = &pipeline_wait_stage_mask;
+            submit_info.commandBufferCount = 1;
+            submit_info.pCommandBuffers = command_buffer_manager_ptr->Get_Command_Buffer({"render_frame", image_index});
+            submit_info.signalSemaphoreCount = 1;
+            submit_info.pSignalSemaphores = synchronization_manager_ptr->Get_Semaphore({"render_finished", m_current_frame});
+
+            vkResetFences(*(logical_device_ptr->Get_Device()), 1, synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}));
+
+            VALIDATE_VKRESULT(vkQueueSubmit(*(queue_manager_ptr->Get_Queue(1)), 1, &submit_info, *synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame})), "Vulkan: failed to submit queue");
+
+            VkPresentInfoKHR present_info = {};
+            present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+            present_info.pNext = nullptr;
+            present_info.waitSemaphoreCount = 1;
+            present_info.pWaitSemaphores = synchronization_manager_ptr->Get_Semaphore({"render_finished", m_current_frame});
+            present_info.swapchainCount = 1;
+            present_info.pSwapchains = swapchain_ptr->Get_Swapchain();
+            present_info.pImageIndices = &image_index;
+            present_info.pResults = nullptr;
+
+            VALIDATE_VKRESULT(vkQueuePresentKHR(*(queue_manager_ptr->Get_Queue(5)), &present_info), "Vulkan: failed to present");
+
+            m_current_frame = (m_current_frame + 1) % 3;
         }
-        *(synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame})) = *(synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}));
-
-        VkPipelineStageFlags pipeline_wait_stage_mask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-
-        VkSubmitInfo submit_info = {};
-        submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submit_info.pNext = nullptr;
-        submit_info.waitSemaphoreCount = 1;
-        submit_info.pWaitSemaphores = synchronization_manager_ptr->Get_Semaphore({"swapchain_image_available", m_current_frame});
-        submit_info.pWaitDstStageMask = &pipeline_wait_stage_mask;
-        submit_info.commandBufferCount = 1;
-        submit_info.pCommandBuffers = command_buffer_manager_ptr->Get_Command_Buffer({"render_frame", image_index});
-        submit_info.signalSemaphoreCount = 1;
-        submit_info.pSignalSemaphores = synchronization_manager_ptr->Get_Semaphore({"render_finished", m_current_frame});
-
-        vkResetFences(*(logical_device_ptr->Get_Device()), 1, synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}));
-
-        VALIDATE_VKRESULT(vkQueueSubmit(*(queue_manager_ptr->Get_Queue(1)), 1, &submit_info, *synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame})), "Vulkan: failed to submit queue");
-
-        VkPresentInfoKHR present_info = {};
-        present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        present_info.pNext = nullptr;
-        present_info.waitSemaphoreCount = 1;
-        present_info.pWaitSemaphores = synchronization_manager_ptr->Get_Semaphore({"render_finished", m_current_frame});
-        present_info.swapchainCount = 1;
-        present_info.pSwapchains = swapchain_ptr->Get_Swapchain();
-        present_info.pImageIndices = &image_index;
-        present_info.pResults = nullptr;
-
-        VALIDATE_VKRESULT(vkQueuePresentKHR(*(queue_manager_ptr->Get_Queue(5)), &present_info), "Vulkan: failed to present");
-
-        m_current_frame = (m_current_frame + 1) % 3;
     }
 } // namespace CascadeCore
