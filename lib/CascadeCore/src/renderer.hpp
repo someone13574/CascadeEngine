@@ -27,6 +27,8 @@ namespace CascadeCore
         bool m_initialized = false;
 
     private:
+        CascadeGraphics::Camera m_camera;
+
         std::shared_ptr<CGV::Instance> instance_ptr;
         std::shared_ptr<CGV::Surface> surface_ptr;
         std::shared_ptr<CascadeGraphicsDebugging::Vulkan::Validation_Layer> validation_layer_ptr;

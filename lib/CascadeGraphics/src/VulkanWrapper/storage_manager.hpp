@@ -109,6 +109,8 @@ namespace CascadeGraphics
 
             Resource_Data Get_Resource_Data(Resource_ID resource_id);
             bool Does_Resource_Exist(Resource_ID resource_id);
+
+            void Upload_To_Buffer(Resource_ID resource_id, void* data, size_t data_size);
         };
     } // namespace Vulkan
 } // namespace CascadeGraphics

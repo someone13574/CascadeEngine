@@ -388,5 +388,26 @@ namespace CascadeGraphics
 
             return false;
         }
+
+        void Storage_Manager::Upload_To_Buffer(Resource_ID resource_id, void* data, size_t data_size)
+        {
+            if (resource_id.type == BUFFER)
+            {
+                for (unsigned int i = 0; i < m_buffers.size(); i++)
+                {
+                    if (m_buffers[i].resource_id == resource_id)
+                    {
+                        void* mapped_memory;
+                        VALIDATE_VKRESULT(vkMapMemory(*(m_logical_device_ptr->Get_Device()), m_buffers[i].buffer_memory, 0, data_size, 0, &mapped_memory), "Vulkan: failed to map memory for buffer upload");
+                        memcpy(mapped_memory, data, data_size);
+                        vkUnmapMemory(*(m_logical_device_ptr->Get_Device()), m_buffers[i].buffer_memory);
+                        return;
+                    }
+                }
+            }
+
+            LOG_ERROR << "Vulkan: buffer " << resource_id.label << "-" << resource_id.index << " does not exist";
+            exit(EXIT_FAILURE);
+        }
     } // namespace Vulkan
 } // namespace CascadeGraphics

@@ -15,3 +15,5 @@
 #include "../src/VulkanWrapper/swapchain_wrapper.hpp"
 #include "../src/VulkanWrapper/synchronization_manager.hpp"
 #include "../src/VulkanWrapper/validation_layer_wrapper.hpp"
+
+#include "../src/camera.hpp"

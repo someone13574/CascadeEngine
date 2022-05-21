@@ -24,6 +24,12 @@ add_library(CascadeGraphics STATIC
     src/VulkanWrapper/command_buffer_manager.cpp
     src/VulkanWrapper/resource_grouping_manager.cpp
     src/VulkanWrapper/synchronization_manager.cpp
+    src/Data_Types/vector_2.hpp
+    src/Data_Types/vector_3.hpp
+    src/Data_Types/vector_4.hpp
+    src/Data_Types/matrix_2x2.hpp
+    src/Data_Types/matrix_3x3.hpp
+    src/camera.cpp
     src/debug_tools.cpp)
 
 if(UNIX)

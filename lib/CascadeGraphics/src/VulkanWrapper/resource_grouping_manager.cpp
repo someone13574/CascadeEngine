@@ -152,11 +152,11 @@ namespace CascadeGraphics
 
                         if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::BUFFER)
                         {
-                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = &descriptor_infos[i].first.value();
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = &descriptor_infos[j].first.value();
                         }
                         else if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::IMAGE)
                         {
-                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = &descriptor_infos[i].second.value();
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = &descriptor_infos[j].second.value();
                         }
                     }
 
