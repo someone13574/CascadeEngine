@@ -261,7 +261,7 @@ namespace CascadeCore
     {
         switch (message)
         {
-            case WM_DESTROY:
+            case WM_CLOSE:
                 PostQuitMessage(0);
                 break;
             default:
@@ -284,12 +284,18 @@ namespace CascadeCore
     {
         MSG message;
 
-        if (!GetMessage(&message, nullptr, 0, 0))
+        BOOL get_message_return = 0;
+
+        if ((get_message_return = GetMessage(&message, nullptr, 0, 0)) == 0)
         {
             Event_Manager::Window_Close_Event event_struct = {};
             event_struct.window_to_close = this;
 
             m_event_manager_ptr->Execute_Window_Close_Event(event_struct);
+        }
+        else if (get_message_return == -1)
+        {
+            LOG_FATAL << "WIN32: GetMessage failed";
         }
 
         TranslateMessage(&message);
