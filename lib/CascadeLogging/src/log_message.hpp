@@ -3,7 +3,7 @@
 #include <chrono>
 #include <string>
 
-namespace cascade_logging
+namespace Cascade_Logging
 {
     enum Severity_Level
     {
@@ -23,4 +23,4 @@ namespace cascade_logging
         Severity_Level severity;
         std::chrono::time_point<std::chrono::system_clock> time;
     };
-} // namespace cascade_logging
+} // namespace Cascade_Logging

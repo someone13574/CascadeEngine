@@ -9,7 +9,7 @@
 #include <string>
 #include <thread>
 
-namespace cascade_logging
+namespace Cascade_Logging
 {
     class Redirect
     {
@@ -48,41 +48,40 @@ namespace cascade_logging
 
         void Queue_Message(Log_Message message);
     };
-} // namespace cascade_logging
+} // namespace Cascade_Logging
 
-#if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN || defined LOG_LEVEL_ERROR \
-    || defined LOG_LEVEL_FATAL
-#define LOG_FATAL cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_FATAL)
+#if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN || defined LOG_LEVEL_ERROR || defined LOG_LEVEL_FATAL
+#define LOG_FATAL Cascade_Logging::Logger::Log(__FILE__, __LINE__, Cascade_Logging::Severity_Level::LEVEL_FATAL)
 #else
-#define LOG_FATAL cascade_logging::Redirect()
+#define LOG_FATAL Cascade_Logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN || defined LOG_LEVEL_ERROR
-#define LOG_ERROR cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_ERROR)
+#define LOG_ERROR Cascade_Logging::Logger::Log(__FILE__, __LINE__, Cascade_Logging::Severity_Level::LEVEL_ERROR)
 #else
-#define LOG_ERROR cascade_logging::Redirect()
+#define LOG_ERROR Cascade_Logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO || defined LOG_LEVEL_WARN
-#define LOG_WARN cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_WARN)
+#define LOG_WARN Cascade_Logging::Logger::Log(__FILE__, __LINE__, Cascade_Logging::Severity_Level::LEVEL_WARN)
 #else
-#define LOG_WARN cascade_logging::Redirect()
+#define LOG_WARN Cascade_Logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG || defined LOG_LEVEL_INFO
-#define LOG_INFO cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_INFO)
+#define LOG_INFO Cascade_Logging::Logger::Log(__FILE__, __LINE__, Cascade_Logging::Severity_Level::LEVEL_INFO)
 #else
-#define LOG_INFO cascade_logging::Redirect()
+#define LOG_INFO Cascade_Logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE || defined LOG_LEVEL_DEBUG
-#define LOG_DEBUG cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_DEBUG)
+#define LOG_DEBUG Cascade_Logging::Logger::Log(__FILE__, __LINE__, Cascade_Logging::Severity_Level::LEVEL_DEBUG)
 #else
-#define LOG_DEBUG cascade_logging::Redirect()
+#define LOG_DEBUG Cascade_Logging::Redirect()
 #endif
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE
-#define LOG_TRACE cascade_logging::Logger::Log(__FILE__, __LINE__, cascade_logging::Severity_Level::LEVEL_TRACE)
+#define LOG_TRACE Cascade_Logging::Logger::Log(__FILE__, __LINE__, Cascade_Logging::Severity_Level::LEVEL_TRACE)
 #else
-#define LOG_TRACE cascade_logging::Redirect()
+#define LOG_TRACE Cascade_Logging::Redirect()
 #endif

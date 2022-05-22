@@ -12,7 +12,7 @@
 
 #define FILL_LENGTH 42
 
-namespace cascade_logging
+namespace Cascade_Logging
 {
     Logger::Logger()
     {
@@ -129,4 +129,4 @@ namespace cascade_logging
         m_message_queue.push(std::move(final_message));
         m_condition_varable.notify_all();
     }
-} // namespace cascade_logging
+} // namespace Cascade_Logging

@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_subdirectory(../CascadeGraphics ../../build/build/CascadeGraphics)
 
 add_library(CascadeCore STATIC
-    src/event_manager.cpp
     src/renderer.cpp
     src/window.cpp
     src/application.cpp)

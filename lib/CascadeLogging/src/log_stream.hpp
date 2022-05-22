@@ -5,7 +5,7 @@
 #include <chrono>
 #include <sstream>
 
-namespace cascade_logging
+namespace Cascade_Logging
 {
     class Logger;
 
@@ -22,4 +22,4 @@ namespace cascade_logging
         Log_Stream(Logger& logger, std::string file, unsigned int line, Severity_Level severity);
         ~Log_Stream();
     };
-} // namespace cascade_logging
+} // namespace Cascade_Logging
