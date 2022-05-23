@@ -8,7 +8,8 @@ add_subdirectory(../CascadeGraphics ../../build/build/CascadeGraphics)
 add_library(CascadeCore STATIC
     src/renderer.cpp
     src/window.cpp
-    src/application.cpp)
+    src/application.cpp
+    src/event_manager.cpp)
 
 target_include_directories(CascadeCore PUBLIC include)
 

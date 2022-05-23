@@ -51,6 +51,9 @@ namespace Cascade_Core
         m_xcb_close_window_reply_ptr = xcb_intern_atom_reply(m_xcb_connection_ptr, m_xcb_close_window_cookie, 0);
         xcb_change_property(m_xcb_connection_ptr, XCB_PROP_MODE_REPLACE, m_xcb_window_ptr, (*close_window_tmp_reply).atom, 4, 32, 1, &(*m_xcb_close_window_reply_ptr).atom);
 
+        unsigned int enabled_events[] = {XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE};
+        xcb_change_window_attributes(m_xcb_connection_ptr, m_xcb_window_ptr, XCB_CW_EVENT_MASK, enabled_events);
+
         xcb_map_window(m_xcb_connection_ptr, m_xcb_window_ptr);
         xcb_flush(m_xcb_connection_ptr);
 
@@ -105,6 +108,8 @@ namespace Cascade_Core
         }
 
 #endif
+
+        m_event_manager_ptr = std::make_shared<Event_Manager>(1024);
 
         m_initialization_stage = Initialization_Stage::WINDOW_CREATED;
     }
@@ -183,6 +188,85 @@ namespace Cascade_Core
                     }
                     break;
                 }
+                case XCB_BUTTON_PRESS:
+                {
+                    xcb_button_press_event_t* button_press_event = (xcb_button_press_event_t*)window_ptr->m_xcb_event_ptr;
+
+                    Event_Manager::Button_Press_Event event_data = {};
+                    event_data.event_type = Event_Manager::Event_Type::BUTTON_PRESS;
+                    event_data.x_position = button_press_event->event_x;
+                    event_data.y_position = button_press_event->event_y;
+
+                    switch ((unsigned int)button_press_event->detail)
+                    {
+                        case 1:
+                        {
+                            event_data.button = Event_Manager::Button_Press_Event::Button::LEFT_BUTTON;
+                            window_ptr->m_event_manager_ptr->Add_Event(&event_data);
+                            break;
+                        }
+                        case 2:
+                        {
+                            event_data.button = Event_Manager::Button_Press_Event::Button::MIDDLE_BUTTON;
+                            window_ptr->m_event_manager_ptr->Add_Event(&event_data);
+                            break;
+                        }
+                        case 3:
+                        {
+                            event_data.button = Event_Manager::Button_Press_Event::Button::RIGHT_BUTTON;
+                            window_ptr->m_event_manager_ptr->Add_Event(&event_data);
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+                case XCB_BUTTON_RELEASE:
+                {
+                    xcb_button_release_event_t* button_release_event = (xcb_button_release_event_t*)window_ptr->m_xcb_event_ptr;
+
+                    Event_Manager::Button_Release_Event event_data = {};
+                    event_data.event_type = Event_Manager::Event_Type::BUTTON_RELEASE;
+                    event_data.x_position = button_release_event->event_x;
+                    event_data.y_position = button_release_event->event_y;
+
+                    switch ((unsigned int)button_release_event->detail)
+                    {
+                        case 1:
+                        {
+                            event_data.button = Event_Manager::Button_Release_Event::Button::LEFT_BUTTON;
+                            window_ptr->m_event_manager_ptr->Add_Event(&event_data);
+                            break;
+                        }
+                        case 2:
+                        {
+                            event_data.button = Event_Manager::Button_Release_Event::Button::MIDDLE_BUTTON;
+                            window_ptr->m_event_manager_ptr->Add_Event(&event_data);
+                            break;
+                        }
+                        case 3:
+                        {
+                            event_data.button = Event_Manager::Button_Release_Event::Button::RIGHT_BUTTON;
+                            window_ptr->m_event_manager_ptr->Add_Event(&event_data);
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+                case XCB_MOTION_NOTIFY:
+                {
+                    xcb_motion_notify_event_t* motion_notify_event = (xcb_motion_notify_event_t*)window_ptr->m_xcb_event_ptr;
+
+                    Event_Manager::Pointer_Motion_Event event_data = {};
+                    event_data.event_type = Event_Manager::Event_Type::POINTER_MOTION;
+                    event_data.x_position = motion_notify_event->event_x;
+                    event_data.y_position = motion_notify_event->event_y;
+
+                    window_ptr->m_event_manager_ptr->Add_Event(&event_data);
+
+                    break;
+                }
             }
 
 #elif defined _WIN32 || defined WIN32
@@ -221,11 +305,11 @@ namespace Cascade_Core
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
-        window_ptr->Initialize_Renderer();
+        // window_ptr->Initialize_Renderer();
 
         while (window_ptr->m_threads_active)
         {
-            window_ptr->m_renderer_ptr->Render_Frame();
+            // window_ptr->m_renderer_ptr->Render_Frame();
         }
 
         window_ptr->m_render_thread_stopped = true;

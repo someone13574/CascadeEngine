@@ -1,5 +1,6 @@
 #pragma once
 
+#include "event_manager.hpp"
 #include "renderer.hpp"
 
 #include <memory>
@@ -35,6 +36,7 @@ namespace Cascade_Core
         unsigned int m_width;
         unsigned int m_height;
 
+        std::shared_ptr<Event_Manager> m_event_manager_ptr;
         std::shared_ptr<Renderer> m_renderer_ptr;
 
         Initialization_Stage m_initialization_stage = Initialization_Stage::NOT_STARTED;
