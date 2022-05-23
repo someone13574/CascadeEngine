@@ -3,6 +3,12 @@
 #include <string>
 #include <thread>
 
+#ifdef __linux__
+#include <xcb/xcb.h>
+#elif defined _WIN32 || defined WIN32
+
+#endif
+
 namespace Cascade_Core
 {
     class Window
@@ -12,7 +18,8 @@ namespace Cascade_Core
         {
             NOT_STARTED,
             WINDOW_CREATED,
-            RENDERER_CREATED
+            RENDERER_CREATED,
+            CLEANED_UP,
         };
 
     private:
@@ -22,13 +29,27 @@ namespace Cascade_Core
 
         Initialization_Stage m_initialization_stage = Initialization_Stage::NOT_STARTED;
 
+        bool m_requesting_close = false;
         bool m_threads_active = false;
         bool m_event_thread_stopped = false;
         bool m_render_thread_stopped = false;
         std::thread m_event_thread;
         std::thread m_render_thread;
 
+#ifdef __linux__
+        xcb_connection_t* m_xcb_connection_ptr;
+        xcb_screen_t* m_xcb_screen_ptr;
+        xcb_window_t m_xcb_window_ptr;
+        xcb_generic_event_t* m_xcb_event_ptr;
+        xcb_intern_atom_cookie_t m_xcb_close_window_cookie;
+        xcb_intern_atom_reply_t* m_xcb_close_window_reply_ptr;
+#elif defined _WIN32 || defined WIN32
+
+#endif
+
     private:
+        void Initialize_Window();
+
         static void Event_Loop(Window* window_ptr);
         static void Render_Loop(Window* window_ptr);
 
@@ -39,5 +60,6 @@ namespace Cascade_Core
         void Close_Window();
 
         bool Is_Window_Closed();
+        bool Is_Requesting_Close();
     };
 } // namespace Cascade_Core

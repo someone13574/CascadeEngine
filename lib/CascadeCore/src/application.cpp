@@ -37,6 +37,14 @@ namespace Cascade_Core
     {
         while (true)
         {
+            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            {
+                if (m_window_ptrs[i]->Is_Requesting_Close())
+                {
+                    m_window_ptrs[i]->Close_Window();
+                }
+            }
+
             bool all_windows_exited = true;
             for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
             {
