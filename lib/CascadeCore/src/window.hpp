@@ -15,6 +15,7 @@
 
 #include <tchar.h>
 #include <windows.h>
+#include <windowsx.h>
 
 #endif
 
@@ -79,5 +80,7 @@ namespace Cascade_Core
 
         bool Is_Window_Closed();
         bool Is_Requesting_Close();
+
+        std::shared_ptr<Event_Manager> Get_Event_Manager();
     };
 } // namespace Cascade_Core

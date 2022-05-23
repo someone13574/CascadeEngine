@@ -100,7 +100,7 @@ namespace Cascade_Core
         RECT window_rect = {0, 0, (LONG)m_width, (LONG)m_height};
         AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, FALSE);
 
-        m_hwindow = CreateWindow(szWindowClass, m_window_title.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, nullptr, nullptr, nullptr, nullptr);
+        m_hwindow = CreateWindow(szWindowClass, m_window_title.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, nullptr, nullptr, m_hinstance, this);
         if (!m_hwindow)
         {
             LOG_FATAL << "Core: failed to create window";
@@ -118,14 +118,111 @@ namespace Cascade_Core
 
     LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
     {
+        Window* window_ptr;
+        window_ptr = (Window*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+
         switch (message)
         {
+            case WM_CREATE:
+            {
+                CREATESTRUCT* create_struct = (CREATESTRUCT*)lparam;
+                Window* window = (Window*)create_struct->lpCreateParams;
+                SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)window);
+                break;
+            }
             case WM_CLOSE:
+            {
                 PostQuitMessage(0);
                 break;
+            }
+            case WM_LBUTTONDOWN:
+            {
+                Event_Manager::Button_Press_Event event_data = {};
+                event_data.event_type = Event_Manager::Event_Type::BUTTON_PRESS;
+                event_data.x_position = GET_X_LPARAM(lparam);
+                event_data.y_position = GET_Y_LPARAM(lparam);
+                event_data.button = Event_Manager::Button_Press_Event::LEFT_BUTTON;
+
+                window_ptr->Get_Event_Manager()->Add_Event(&event_data);
+
+                break;
+            }
+            case WM_MBUTTONDOWN:
+            {
+                Event_Manager::Button_Press_Event event_data = {};
+                event_data.event_type = Event_Manager::Event_Type::BUTTON_PRESS;
+                event_data.x_position = GET_X_LPARAM(lparam);
+                event_data.y_position = GET_Y_LPARAM(lparam);
+                event_data.button = Event_Manager::Button_Press_Event::MIDDLE_BUTTON;
+
+                window_ptr->Get_Event_Manager()->Add_Event(&event_data);
+
+                break;
+            }
+            case WM_RBUTTONDOWN:
+            {
+                Event_Manager::Button_Press_Event event_data = {};
+                event_data.event_type = Event_Manager::Event_Type::BUTTON_PRESS;
+                event_data.x_position = GET_X_LPARAM(lparam);
+                event_data.y_position = GET_Y_LPARAM(lparam);
+                event_data.button = Event_Manager::Button_Press_Event::RIGHT_BUTTON;
+
+                window_ptr->Get_Event_Manager()->Add_Event(&event_data);
+
+                break;
+            }
+            case WM_LBUTTONUP:
+            {
+                Event_Manager::Button_Release_Event event_data = {};
+                event_data.event_type = Event_Manager::Event_Type::BUTTON_RELEASE;
+                event_data.x_position = GET_X_LPARAM(lparam);
+                event_data.y_position = GET_Y_LPARAM(lparam);
+                event_data.button = Event_Manager::Button_Release_Event::LEFT_BUTTON;
+
+                window_ptr->Get_Event_Manager()->Add_Event(&event_data);
+
+                break;
+            }
+            case WM_MBUTTONUP:
+            {
+                Event_Manager::Button_Release_Event event_data = {};
+                event_data.event_type = Event_Manager::Event_Type::BUTTON_RELEASE;
+                event_data.x_position = GET_X_LPARAM(lparam);
+                event_data.y_position = GET_Y_LPARAM(lparam);
+                event_data.button = Event_Manager::Button_Release_Event::MIDDLE_BUTTON;
+
+                window_ptr->Get_Event_Manager()->Add_Event(&event_data);
+
+                break;
+            }
+            case WM_RBUTTONUP:
+            {
+                Event_Manager::Button_Release_Event event_data = {};
+                event_data.event_type = Event_Manager::Event_Type::BUTTON_RELEASE;
+                event_data.x_position = GET_X_LPARAM(lparam);
+                event_data.y_position = GET_Y_LPARAM(lparam);
+                event_data.button = Event_Manager::Button_Release_Event::RIGHT_BUTTON;
+
+                window_ptr->Get_Event_Manager()->Add_Event(&event_data);
+
+                break;
+            }
+            case WM_MOUSEMOVE:
+            {
+                Event_Manager::Pointer_Motion_Event event_data = {};
+                event_data.event_type = Event_Manager::Event_Type::POINTER_MOTION;
+                event_data.x_position = GET_X_LPARAM(lparam);
+                event_data.y_position = GET_Y_LPARAM(lparam);
+
+                window_ptr->Get_Event_Manager()->Add_Event(&event_data);
+
+                break;
+            }
             default:
+            {
                 return DefWindowProc(hwnd, message, wparam, lparam);
                 break;
+            }
         }
 
         return 0;
@@ -364,5 +461,10 @@ namespace Cascade_Core
     bool Window::Is_Requesting_Close()
     {
         return m_requesting_close;
+    }
+
+    std::shared_ptr<Event_Manager> Window::Get_Event_Manager()
+    {
+        return m_event_manager_ptr;
     }
 } // namespace Cascade_Core

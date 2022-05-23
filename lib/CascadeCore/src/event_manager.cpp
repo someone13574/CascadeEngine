@@ -38,8 +38,6 @@ namespace Cascade_Core
             {
                 m_button_press_events.push_back(std::pair<Button_Press_Event, std::chrono::time_point<std::chrono::system_clock>>(*(Button_Press_Event*)event_data, std::chrono::system_clock::now()));
 
-                // LOG_TRACE << "Core: Button press event (Button: " << m_button_press_events.back().first.button << "   X: " << m_button_press_events.back().first.x_position << "   Y: " << m_button_press_events.back().first.y_position << ")";
-
                 while (m_button_press_events.size() > m_max_events)
                 {
                     m_button_press_events.erase(m_button_press_events.begin());
@@ -67,17 +65,11 @@ namespace Cascade_Core
                     }
                 }
 
-                // LOG_DEBUG << "Core: Mouse Status (X: " << m_mouse_status.x_position << ", Y: " << m_mouse_status.y_position << ", Left down: " << m_mouse_status.left_down << ", Middle down: " << m_mouse_status.middle_down
-                //           << ", Right down: " << m_mouse_status.right_down << ")";
-
                 break;
             }
             case Event_Type::BUTTON_RELEASE:
             {
                 m_button_release_events.push_back(std::pair<Button_Release_Event, std::chrono::time_point<std::chrono::system_clock>>(*(Button_Release_Event*)event_data, std::chrono::system_clock::now()));
-
-                // LOG_TRACE << "Core: Button release event (Button: " << m_button_release_events.back().first.button << "   X: " << m_button_release_events.back().first.x_position << "   Y: " << m_button_release_events.back().first.y_position <<
-                // ")";
 
                 while (m_button_release_events.size() > m_max_events)
                 {
@@ -106,16 +98,11 @@ namespace Cascade_Core
                     }
                 }
 
-                // LOG_DEBUG << "Core: Mouse Status (X: " << m_mouse_status.x_position << ", Y: " << m_mouse_status.y_position << ", Left down: " << m_mouse_status.left_down << ", Middle down: " << m_mouse_status.middle_down
-                //           << ", Right down: " << m_mouse_status.right_down << ")";
-
                 break;
             }
             case Event_Type::POINTER_MOTION:
             {
                 m_pointer_motion_events.push_back(std::pair<Pointer_Motion_Event, std::chrono::time_point<std::chrono::system_clock>>(*(Pointer_Motion_Event*)event_data, std::chrono::system_clock::now()));
-
-                // LOG_TRACE << "Core: Pointer motion event (X: " << m_pointer_motion_events.back().first.x_position << "   Y: " << m_pointer_motion_events.back().first.y_position << ")";
 
                 while (m_pointer_motion_events.size() > m_max_events)
                 {
@@ -124,9 +111,6 @@ namespace Cascade_Core
 
                 m_mouse_status.x_position = m_pointer_motion_events.back().first.x_position;
                 m_mouse_status.y_position = m_pointer_motion_events.back().first.y_position;
-
-                // LOG_DEBUG << "Core: Mouse Status (X: " << m_mouse_status.x_position << ", Y: " << m_mouse_status.y_position << ", Left down: " << m_mouse_status.left_down << ", Middle down: " << m_mouse_status.middle_down
-                //<< ", Right down: " << m_mouse_status.right_down << ")";
 
                 break;
             }
