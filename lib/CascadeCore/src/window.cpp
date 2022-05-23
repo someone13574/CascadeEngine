@@ -267,9 +267,6 @@ namespace Cascade_Core
             }
         }
 
-#elif defined _WIN32 || defined WIN32
-
-
 #endif
 
         LOG_INFO << "Core: Finished closing window";
