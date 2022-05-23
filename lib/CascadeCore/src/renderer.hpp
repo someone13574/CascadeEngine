@@ -14,7 +14,7 @@
 
 namespace CGV = CascadeGraphics::Vulkan;
 
-namespace CascadeCore
+namespace Cascade_Core
 {
     class Renderer
     {
@@ -49,4 +49,4 @@ namespace CascadeCore
 
         void Render_Frame();
     };
-} // namespace CascadeCore
+} // namespace Cascade_Core

@@ -7,7 +7,7 @@
 
 namespace CGV = CascadeGraphics::Vulkan;
 
-namespace CascadeCore
+namespace Cascade_Core
 {
     Renderer::Renderer(CascadeGraphics::Vulkan::Surface::Window_Data window_data, unsigned int width, unsigned int height) : m_width(width), m_height(height), m_camera(CascadeGraphics::Camera({-3.0, 0.0, 0.0}, {1.0, 0.0, 0.0}))
     {
@@ -182,4 +182,4 @@ namespace CascadeCore
             m_current_frame = (m_current_frame + 1) % 3;
         }
     }
-} // namespace CascadeCore
+} // namespace Cascade_Core

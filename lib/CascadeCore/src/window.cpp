@@ -53,6 +53,31 @@ namespace Cascade_Core
         m_initialization_stage = Initialization_Stage::WINDOW_CREATED;
     }
 
+    void Window::Initialize_Renderer()
+    {
+        LOG_INFO << "Core: Initializing renderer";
+
+        if (m_initialization_stage != Initialization_Stage::WINDOW_CREATED)
+        {
+            LOG_ERROR << "Core: window '" << m_window_title << "' is at the incorrect initialization stage";
+            exit(EXIT_FAILURE);
+        }
+
+#ifdef __linux__
+
+        CascadeGraphics::Vulkan::Surface::Window_Data window_data = {};
+        window_data.connection_ptr = m_xcb_connection_ptr;
+        window_data.window_ptr = &m_xcb_window_ptr;
+
+        m_renderer_ptr = std::make_shared<Renderer>(window_data, m_width, m_height);
+
+#elif defined _WIN32 || defined WIN32
+
+#endif
+
+        m_initialization_stage = Initialization_Stage::RENDERER_CREATED;
+    }
+
     void Window::Event_Loop(Window* window_ptr)
     {
         LOG_DEBUG << "Core: Started event loop for window '" << window_ptr->m_window_title << "'";
@@ -98,8 +123,11 @@ namespace Cascade_Core
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
+        window_ptr->Initialize_Renderer();
+
         while (window_ptr->m_threads_active)
         {
+            window_ptr->m_renderer_ptr->Render_Frame();
         }
 
         window_ptr->m_render_thread_stopped = true;
@@ -123,6 +151,16 @@ namespace Cascade_Core
         {
             case Initialization_Stage::WINDOW_CREATED:
             {
+                free(m_xcb_event_ptr);
+                xcb_destroy_window(m_xcb_connection_ptr, m_xcb_window_ptr);
+                xcb_disconnect(m_xcb_connection_ptr);
+                m_initialization_stage = Initialization_Stage::CLEANED_UP;
+                break;
+            }
+            case Initialization_Stage::RENDERER_CREATED:
+            {
+                m_renderer_ptr.reset();
+
                 free(m_xcb_event_ptr);
                 xcb_destroy_window(m_xcb_connection_ptr, m_xcb_window_ptr);
                 xcb_disconnect(m_xcb_connection_ptr);

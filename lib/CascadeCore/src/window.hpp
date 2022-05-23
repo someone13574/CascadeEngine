@@ -1,5 +1,8 @@
 #pragma once
 
+#include "renderer.hpp"
+
+#include <memory>
 #include <string>
 #include <thread>
 
@@ -27,6 +30,8 @@ namespace Cascade_Core
         unsigned int m_width;
         unsigned int m_height;
 
+        std::shared_ptr<Renderer> m_renderer_ptr;
+
         Initialization_Stage m_initialization_stage = Initialization_Stage::NOT_STARTED;
 
         bool m_requesting_close = false;
@@ -49,6 +54,7 @@ namespace Cascade_Core
 
     private:
         void Initialize_Window();
+        void Initialize_Renderer();
 
         static void Event_Loop(Window* window_ptr);
         static void Render_Loop(Window* window_ptr);
