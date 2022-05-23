@@ -6,6 +6,14 @@
 
 namespace Cascade_Core
 {
+#if defined _WIN32 | defined WIN32
+
+    static TCHAR szWindowClass[] = _T("window_class");
+
+    LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+#endif
+
     Window::Window(std::string window_title, unsigned int width, unsigned int height) : m_window_title(window_title), m_width(width), m_height(height)
     {
         LOG_DEBUG << "Core: Created window '" << m_window_title << "' with dimensions " << m_width << "x" << m_height;
@@ -48,10 +56,77 @@ namespace Cascade_Core
 
 #elif defined _WIN32 || defined WIN32
 
+        LOG_INFO << "Core: Initializing WIN32 window";
+
+        if (m_initialization_stage != Initialization_Stage::NOT_STARTED)
+        {
+            LOG_ERROR << "Core: window '" << m_window_title << "' is at the incorrect initialization stage";
+            exit(EXIT_FAILURE);
+        }
+
+        m_hinstance = GetModuleHandle(0);
+
+        static bool window_class_registered = false;
+        if (!window_class_registered)
+        {
+            LOG_TRACE << "Core: registering window class";
+
+            WNDCLASSEX window_class;
+            window_class.cbSize = sizeof(WNDCLASSEX);
+            window_class.style = CS_DBLCLKS | CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+            window_class.lpfnWndProc = WndProc;
+            window_class.cbClsExtra = 0;
+            window_class.cbWndExtra = 0;
+            window_class.hInstance = m_hinstance;
+            window_class.hIcon = nullptr;
+            window_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
+            window_class.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+            window_class.lpszMenuName = nullptr;
+            window_class.lpszClassName = szWindowClass;
+            window_class.hIconSm = nullptr;
+
+            if (!RegisterClassEx(&window_class))
+            {
+                LOG_FATAL << "Core: failed to register the window class";
+                exit(EXIT_FAILURE);
+            }
+
+            window_class_registered = true;
+        }
+
+        RECT window_rect = {0, 0, (LONG)m_width, (LONG)m_height};
+        AdjustWindowRect(&window_rect, WS_OVERLAPPEDWINDOW | WS_VISIBLE, FALSE);
+
+        m_hwindow = CreateWindow(szWindowClass, m_window_title.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, nullptr, nullptr, nullptr, nullptr);
+        if (!m_hwindow)
+        {
+            LOG_FATAL << "Core: failed to create window";
+            exit(EXIT_FAILURE);
+        }
+
 #endif
 
         m_initialization_stage = Initialization_Stage::WINDOW_CREATED;
     }
+
+#if defined _WIN32 || defined WIN32
+
+    LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+    {
+        switch (message)
+        {
+            case WM_CLOSE:
+                PostQuitMessage(0);
+                break;
+            default:
+                return DefWindowProc(hwnd, message, wparam, lparam);
+                break;
+        }
+
+        return 0;
+    }
+
+#endif
 
     void Window::Initialize_Renderer()
     {
@@ -106,6 +181,23 @@ namespace Cascade_Core
 
 #elif defined _WIN32 || defined WIN32
 
+            MSG message;
+            BOOL get_message_return_value;
+
+            if ((get_message_return_value = GetMessage(&message, nullptr, 0, 0)) == 0)
+            {
+                window_ptr->m_requesting_close = true;
+                window_ptr->m_threads_active = false;
+            }
+            else if (get_message_return_value == -1)
+            {
+                LOG_FATAL << "Core: GetMessage() failed";
+                exit(EXIT_FAILURE);
+            }
+
+            TranslateMessage(&message);
+            DispatchMessage(&message);
+
 #endif
         }
 
@@ -123,11 +215,11 @@ namespace Cascade_Core
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
-        window_ptr->Initialize_Renderer();
+        // window_ptr->Initialize_Renderer();
 
         while (window_ptr->m_threads_active)
         {
-            window_ptr->m_renderer_ptr->Render_Frame();
+            // window_ptr->m_renderer_ptr->Render_Frame();
         }
 
         window_ptr->m_render_thread_stopped = true;
@@ -170,6 +262,7 @@ namespace Cascade_Core
         }
 
 #elif defined _WIN32 || defined WIN32
+
 
 #endif
 

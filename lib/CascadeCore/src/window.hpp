@@ -7,8 +7,13 @@
 #include <thread>
 
 #ifdef __linux__
+
 #include <xcb/xcb.h>
+
 #elif defined _WIN32 || defined WIN32
+
+#include <tchar.h>
+#include <windows.h>
 
 #endif
 
@@ -42,13 +47,18 @@ namespace Cascade_Core
         std::thread m_render_thread;
 
 #ifdef __linux__
+
         xcb_connection_t* m_xcb_connection_ptr;
         xcb_screen_t* m_xcb_screen_ptr;
         xcb_window_t m_xcb_window_ptr;
         xcb_generic_event_t* m_xcb_event_ptr;
         xcb_intern_atom_cookie_t m_xcb_close_window_cookie;
         xcb_intern_atom_reply_t* m_xcb_close_window_reply_ptr;
+
 #elif defined _WIN32 || defined WIN32
+
+        HWND m_hwindow;
+        HINSTANCE m_hinstance;
 
 #endif
 
