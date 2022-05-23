@@ -148,6 +148,12 @@ namespace Cascade_Core
 
 #elif defined _WIN32 || defined WIN32
 
+        CascadeGraphics::Vulkan::Surface::Window_Data window_data = {};
+        window_data.hinstance_ptr = &m_hinstance;
+        window_data.hwindow_ptr = &m_hwindow;
+
+        m_renderer_ptr = std::make_shared<Renderer>(window_data, m_width, m_height);
+
 #endif
 
         m_initialization_stage = Initialization_Stage::RENDERER_CREATED;
@@ -215,11 +221,11 @@ namespace Cascade_Core
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
-        // window_ptr->Initialize_Renderer();
+        window_ptr->Initialize_Renderer();
 
         while (window_ptr->m_threads_active)
         {
-            // window_ptr->m_renderer_ptr->Render_Frame();
+            window_ptr->m_renderer_ptr->Render_Frame();
         }
 
         window_ptr->m_render_thread_stopped = true;
