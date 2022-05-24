@@ -84,6 +84,8 @@ namespace Cascade_Core
         bool Is_Window_Closed();
         bool Is_Requesting_Close();
 
+        void Update_Size(unsigned int width, unsigned int height);
+
         std::pair<unsigned int, unsigned int> Get_Window_Dimensions();
         Initialization_Stage Get_Initialization_Stage();
         std::shared_ptr<Event_Manager> Get_Event_Manager();

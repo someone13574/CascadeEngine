@@ -218,6 +218,20 @@ namespace Cascade_Core
 
                 break;
             }
+            case WM_SIZE:
+            {
+                RECT client_rectangle;
+                BOOL get_client_rectangle_result = GetClientRect(hwnd, &client_rectangle);
+
+                if (get_client_rectangle_result == 0)
+                {
+                    LOG_ERROR << "Core: Failed to get window dimensions with code " << GetLastError();
+                }
+
+                window_ptr->Update_Size(client_rectangle.right - client_rectangle.left, client_rectangle.bottom - client_rectangle.top);
+
+                break;
+            }
             default:
             {
                 return DefWindowProc(hwnd, message, wparam, lparam);
@@ -447,6 +461,13 @@ namespace Cascade_Core
                 break;
             }
         }
+#elif defined _WIN32 || defined WIN32
+
+        if (m_initialization_stage == Initialization_Stage::RENDERER_CREATED)
+        {
+            m_renderer_ptr.reset();
+            m_initialization_stage = Initialization_Stage::CLEANED_UP;
+        }
 
 #endif
 
@@ -482,8 +503,21 @@ namespace Cascade_Core
         return std::pair<unsigned int, unsigned int>(get_geometry_reply_ptr->width, get_geometry_reply_ptr->height);
 
 #elif defined _WIN32 || defined WIN32
-        return std::pair<unsigned int, unsigned int>(0, 0);
+        if (m_initialization_stage != Initialization_Stage::NOT_STARTED)
+        {
+            return std::pair<unsigned int, unsigned int>(m_width, m_height);
+        }
+        else
+        {
+            return std::pair<unsigned int, unsigned int>(0, 0);
+        }
 #endif
+    }
+
+    void Window::Update_Size(unsigned int width, unsigned int height)
+    {
+        m_width = width;
+        m_height = height;
     }
 
     Window::Initialization_Stage Window::Get_Initialization_Stage()
