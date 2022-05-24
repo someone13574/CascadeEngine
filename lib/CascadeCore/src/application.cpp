@@ -3,6 +3,7 @@
 #include "cascade_logging.hpp"
 
 #include <chrono>
+#include <cmath>
 
 namespace Cascade_Core
 {
@@ -61,6 +62,45 @@ namespace Cascade_Core
             }
 
             std::this_thread::sleep_for(std::chrono::microseconds(16667));
+        }
+    }
+
+    void Application::Run_Program_Loop(std::function<void()> function_to_run, unsigned int repetitions_per_second)
+    {
+        std::chrono::high_resolution_clock::time_point iteration_start;
+        std::chrono::microseconds microseconds_per_repetition = std::chrono::microseconds((uint64_t)(1000000.0 / (double)repetitions_per_second));
+
+        while (true)
+        {
+            iteration_start = std::chrono::high_resolution_clock::now();
+
+            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            {
+                if (m_window_ptrs[i]->Is_Requesting_Close())
+                {
+                    m_window_ptrs[i]->Close_Window();
+                }
+            }
+
+            bool all_windows_exited = true;
+            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            {
+                if (!m_window_ptrs[i]->Is_Window_Closed())
+                {
+                    all_windows_exited = false;
+                    break;
+                }
+            }
+
+            if (all_windows_exited)
+            {
+                break;
+            }
+
+            function_to_run();
+
+            std::chrono::microseconds execution_time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - iteration_start);
+            std::this_thread::sleep_for(std::chrono::microseconds(std::abs((microseconds_per_repetition - execution_time).count())));
         }
     }
 } // namespace Cascade_Core

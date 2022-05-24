@@ -20,7 +20,7 @@ namespace Cascade_Core
             KEY_RELEASE
         };
 
-        struct Mouse_Status
+        struct Mouse_State
         {
             int x_position;
             int y_position;
@@ -69,7 +69,7 @@ namespace Cascade_Core
         };
 
     private:
-        Mouse_Status m_mouse_status;
+        Mouse_State m_mouse_state;
 
         unsigned int m_max_events;
         std::vector<std::pair<void*, std::chrono::time_point<std::chrono::system_clock>>> m_all_events;
@@ -85,5 +85,7 @@ namespace Cascade_Core
 
     public:
         void Add_Event(void* event_data);
+
+        Mouse_State Get_Mouse_State();
     };
 } // namespace Cascade_Core

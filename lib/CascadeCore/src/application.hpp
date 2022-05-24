@@ -2,6 +2,7 @@
 
 #include "window.hpp"
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -30,6 +31,7 @@ namespace Cascade_Core
         std::shared_ptr<Window> Create_Window(std::string window_title, unsigned int width, unsigned int height);
 
         void Wait_For_Windows_To_Exit();
+        void Run_Program_Loop(std::function<void()> function_to_run, unsigned int repetitions_per_second);
     };
 
 } // namespace Cascade_Core

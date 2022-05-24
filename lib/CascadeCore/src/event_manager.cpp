@@ -8,7 +8,7 @@ namespace Cascade_Core
     {
         LOG_INFO << "Core: Created event manager";
 
-        m_mouse_status = {0, 0, false, false, false};
+        m_mouse_state = {0, 0, false, false, false};
     }
 
     Event_Manager::Event_Type Event_Manager::Get_Event_Type(void* event_data)
@@ -43,24 +43,24 @@ namespace Cascade_Core
                     m_button_press_events.erase(m_button_press_events.begin());
                 }
 
-                m_mouse_status.x_position = m_button_press_events.back().first.x_position;
-                m_mouse_status.y_position = m_button_press_events.back().first.y_position;
+                m_mouse_state.x_position = m_button_press_events.back().first.x_position;
+                m_mouse_state.y_position = m_button_press_events.back().first.y_position;
 
                 switch (m_button_press_events.back().first.button)
                 {
                     case Button_Press_Event::Button::LEFT_BUTTON:
                     {
-                        m_mouse_status.left_down = true;
+                        m_mouse_state.left_down = true;
                         break;
                     }
                     case Button_Press_Event::Button::MIDDLE_BUTTON:
                     {
-                        m_mouse_status.middle_down = true;
+                        m_mouse_state.middle_down = true;
                         break;
                     }
                     case Button_Press_Event::Button::RIGHT_BUTTON:
                     {
-                        m_mouse_status.right_down = true;
+                        m_mouse_state.right_down = true;
                         break;
                     }
                 }
@@ -76,24 +76,24 @@ namespace Cascade_Core
                     m_button_release_events.erase(m_button_release_events.begin());
                 }
 
-                m_mouse_status.x_position = m_button_release_events.back().first.x_position;
-                m_mouse_status.y_position = m_button_release_events.back().first.y_position;
+                m_mouse_state.x_position = m_button_release_events.back().first.x_position;
+                m_mouse_state.y_position = m_button_release_events.back().first.y_position;
 
                 switch (m_button_release_events.back().first.button)
                 {
                     case Button_Release_Event::Button::LEFT_BUTTON:
                     {
-                        m_mouse_status.left_down = false;
+                        m_mouse_state.left_down = false;
                         break;
                     }
                     case Button_Release_Event::Button::MIDDLE_BUTTON:
                     {
-                        m_mouse_status.middle_down = false;
+                        m_mouse_state.middle_down = false;
                         break;
                     }
                     case Button_Release_Event::Button::RIGHT_BUTTON:
                     {
-                        m_mouse_status.right_down = false;
+                        m_mouse_state.right_down = false;
                         break;
                     }
                 }
@@ -109,8 +109,8 @@ namespace Cascade_Core
                     m_pointer_motion_events.erase(m_pointer_motion_events.begin());
                 }
 
-                m_mouse_status.x_position = m_pointer_motion_events.back().first.x_position;
-                m_mouse_status.y_position = m_pointer_motion_events.back().first.y_position;
+                m_mouse_state.x_position = m_pointer_motion_events.back().first.x_position;
+                m_mouse_state.y_position = m_pointer_motion_events.back().first.y_position;
 
                 break;
             }
@@ -120,5 +120,10 @@ namespace Cascade_Core
                 exit(EXIT_FAILURE);
             }
         }
+    }
+
+    Event_Manager::Mouse_State Event_Manager::Get_Mouse_State()
+    {
+        return m_mouse_state;
     }
 } // namespace Cascade_Core
