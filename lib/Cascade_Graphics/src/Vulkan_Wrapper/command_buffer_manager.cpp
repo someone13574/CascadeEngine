@@ -278,7 +278,7 @@ namespace Cascade_Graphics
             vkCmdDispatch(m_command_buffers[Get_Command_Buffer_Index(identifier)].command_buffer, group_count_x, group_count_y, group_count_z);
         }
 
-        void Command_Buffer_Manager::Copy_Image(Identifier identifier, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id)
+        void Command_Buffer_Manager::Copy_Image(Identifier identifier, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id, unsigned int width, unsigned int height)
         {
             LOG_INFO << "Vulkan: copying image " << source_resource_id.label << "-" << source_resource_id.index << " to " << destination_resource_id.label << "-" << destination_resource_id.index << " in command buffer '" << identifier.label << "-"
                      << identifier.index << "'";
@@ -311,8 +311,8 @@ namespace Cascade_Graphics
             region_offset.z = 0;
 
             VkExtent3D region_extent = {};
-            region_extent.width = 1280;
-            region_extent.height = 720;
+            region_extent.width = width;
+            region_extent.height = height;
             region_extent.depth = 1;
 
             VkImageCopy copy_region = {};

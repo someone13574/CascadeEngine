@@ -87,7 +87,7 @@ namespace Cascade_Graphics
             void End_Recording(Identifier identifier);
             void Image_Memory_Barrier(Identifier identifier, Storage_Manager::Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
             void Dispatch_Compute_Shader(Identifier identifier, unsigned int group_count_x, unsigned int group_count_y, unsigned int group_count_z);
-            void Copy_Image(Identifier identifier, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id);
+            void Copy_Image(Identifier identifier, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id, unsigned int width, unsigned int height);
 
             VkCommandBuffer* Get_Command_Buffer(Identifier identifier);
         };

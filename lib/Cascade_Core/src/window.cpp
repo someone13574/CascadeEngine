@@ -246,7 +246,7 @@ namespace Cascade_Core
         window_data.connection_ptr = m_xcb_connection_ptr;
         window_data.window_ptr = &m_xcb_window_ptr;
 
-        m_renderer_ptr = std::make_shared<Renderer>(window_data, m_width, m_height);
+        m_renderer_ptr = std::make_shared<Renderer>(this, window_data, m_width, m_height);
 
 #elif defined _WIN32 || defined WIN32
 
@@ -254,7 +254,7 @@ namespace Cascade_Core
         window_data.hinstance_ptr = &m_hinstance;
         window_data.hwindow_ptr = &m_hwindow;
 
-        m_renderer_ptr = std::make_shared<Renderer>(window_data, m_width, m_height);
+        m_renderer_ptr = std::make_shared<Renderer>(this, window_data, m_width, m_height);
 
 #endif
 
@@ -461,6 +461,29 @@ namespace Cascade_Core
     bool Window::Is_Requesting_Close()
     {
         return m_requesting_close;
+    }
+
+    std::pair<unsigned int, unsigned int> Window::Get_Window_Dimensions()
+    {
+#ifdef __linux__
+
+        xcb_get_geometry_cookie_t get_geometry_cookie;
+        xcb_get_geometry_reply_t* get_geometry_reply_ptr;
+
+        get_geometry_cookie = xcb_get_geometry(m_xcb_connection_ptr, m_xcb_window_ptr);
+        get_geometry_reply_ptr = xcb_get_geometry_reply(m_xcb_connection_ptr, get_geometry_cookie, NULL);
+
+        if (!get_geometry_reply_ptr)
+        {
+            LOG_ERROR << "Core: Failed to get window dimensions";
+            exit(EXIT_FAILURE);
+        }
+
+        return std::pair<unsigned int, unsigned int>(get_geometry_reply_ptr->width, get_geometry_reply_ptr->height);
+
+#elif defined _WIN32 || defined WIN32
+        return std::pair<unsigned int, unsigned int>(0, 0);
+#endif
     }
 
     Window::Initialization_Stage Window::Get_Initialization_Stage()

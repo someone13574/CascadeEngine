@@ -1,5 +1,7 @@
 #pragma once
 
+#include "window.hpp"
+
 #if defined __linux__
 
 #include <xcb/xcb.h>
@@ -16,11 +18,15 @@ namespace CGV = Cascade_Graphics::Vulkan;
 
 namespace Cascade_Core
 {
+    class Window;
+
     class Renderer
     {
     private:
         unsigned int m_width;
         unsigned int m_height;
+
+        Window* m_window_ptr;
 
         unsigned int m_current_frame = 0;
 
@@ -43,8 +49,11 @@ namespace Cascade_Core
         std::shared_ptr<CGV::Command_Buffer_Manager> command_buffer_manager_ptr;
         std::shared_ptr<CGV::Synchronization_Manager> synchronization_manager_ptr;
 
+    private:
+        void Recreate_Swapchain();
+
     public:
-        Renderer(Cascade_Graphics::Vulkan::Surface::Window_Data window_data, unsigned int width, unsigned int height);
+        Renderer(Window* window_ptr, Cascade_Graphics::Vulkan::Surface::Window_Data window_data, unsigned int width, unsigned int height);
         ~Renderer();
 
     public:
