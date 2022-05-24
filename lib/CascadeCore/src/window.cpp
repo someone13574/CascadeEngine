@@ -402,11 +402,11 @@ namespace Cascade_Core
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
-        // window_ptr->Initialize_Renderer();
+        window_ptr->Initialize_Renderer();
 
         while (window_ptr->m_threads_active)
         {
-            // window_ptr->m_renderer_ptr->Render_Frame();
+            window_ptr->m_renderer_ptr->Render_Frame();
         }
 
         window_ptr->m_render_thread_stopped = true;
