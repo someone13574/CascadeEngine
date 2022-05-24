@@ -22,6 +22,17 @@ layout(binding = 1) uniform Camera_Data
     float origin_z;
 } camera_data;
 
+bool Ray_Box_Intersection(vec3 origin, vec3 direction, vec3 box_min, vec3 box_max, float min_dst)
+{
+    vec3 t1 = (box_min - origin) / direction;
+    vec3 t2 = (box_max - origin) / direction;
+
+    float min_t = max(max(min(t1.x, t2.x), min(t1.y, t2.y)), min(t1.z, t2.z));
+    float max_t = min(min(max(t1.x, t2.x), max(t1.y, t2.y)), max(t1.z, t2.z));
+
+    return max_t >= min_t && min_t < min_dst;
+} 
+
 // code
 void main()
 {
@@ -31,5 +42,7 @@ void main()
     vec3 ray_origin = vec3(camera_data.origin_x, camera_data.origin_y, camera_data.origin_z);
     vec3 ray_direction = normalize(vec3(uv.x, -uv.y, -1.0) * mat3x3(camera_data.matrix_x0, camera_data.matrix_x1, camera_data.matrix_x2, camera_data.matrix_y0, camera_data.matrix_y1, camera_data.matrix_y2, camera_data.matrix_z0, camera_data.matrix_z1, camera_data.matrix_z2));
 
-    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(ray_direction.x, ray_direction.y, ray_direction.z, 1.0));
+    bool intersect = Ray_Box_Intersection(ray_origin, ray_direction, vec3(-0.5, -0.5, -0.5), vec3(0.5, 0.5, 0.5), 1.0 / 0.0);
+
+    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(intersect, 0.0, 0.0, 1.0));
 }

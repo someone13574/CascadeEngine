@@ -36,7 +36,9 @@ namespace Cascade_Graphics
     public:
         Camera(Vector_3<double> position, Vector_3<double> direction);
 
-        void Update_Direction(Vector_3<double> direction);
+        void Set_Position(Vector_3<double> position);
+        void Set_Direction(Vector_3<double> direction);
+        void Look_At(Vector_3<double> position);
 
         Vector_3<double> Get_Camera_Position();
         Matrix_3x3<double> Get_Camera_To_World_Matrix();
