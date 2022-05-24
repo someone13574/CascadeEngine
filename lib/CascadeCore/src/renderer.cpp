@@ -9,7 +9,7 @@ namespace CGV = CascadeGraphics::Vulkan;
 
 namespace Cascade_Core
 {
-    Renderer::Renderer(CascadeGraphics::Vulkan::Surface::Window_Data window_data, unsigned int width, unsigned int height) : m_width(width), m_height(height), m_camera(CascadeGraphics::Camera({-3.0, 0.0, 0.0}, {1.0, 0.0, 0.0}))
+    Renderer::Renderer(CascadeGraphics::Vulkan::Surface::Window_Data window_data, unsigned int width, unsigned int height) : m_width(width), m_height(height)
     {
         m_initialized = false;
 
@@ -101,6 +101,8 @@ namespace Cascade_Core
         synchronization_manager_ptr->Add_Fence("image_in_flight", VK_NULL_HANDLE);
         synchronization_manager_ptr->Add_Fence("image_in_flight", VK_NULL_HANDLE);
 
+        m_camera_ptr = std::make_shared<CascadeGraphics::Camera>(CascadeGraphics::Vector_3(-3.0, 0.0, 0.0), CascadeGraphics::Vector_3(1.0, 0.0, 0.0));
+
         LOG_INFO << "Renderer initialized";
 
         m_initialized = true;
@@ -135,18 +137,18 @@ namespace Cascade_Core
             //
 
             CascadeGraphics::Camera::GPU_Camera_Data camera_data = {};
-            camera_data.matrix_x0 = m_camera.Get_Camera_To_World_Matrix().m_x0;
-            camera_data.matrix_x1 = m_camera.Get_Camera_To_World_Matrix().m_x1;
-            camera_data.matrix_x2 = m_camera.Get_Camera_To_World_Matrix().m_x2;
-            camera_data.matrix_y0 = m_camera.Get_Camera_To_World_Matrix().m_y0;
-            camera_data.matrix_y1 = m_camera.Get_Camera_To_World_Matrix().m_y1;
-            camera_data.matrix_y2 = m_camera.Get_Camera_To_World_Matrix().m_y2;
-            camera_data.matrix_z0 = m_camera.Get_Camera_To_World_Matrix().m_z0;
-            camera_data.matrix_z1 = m_camera.Get_Camera_To_World_Matrix().m_z1;
-            camera_data.matrix_z2 = m_camera.Get_Camera_To_World_Matrix().m_z2;
-            camera_data.origin_x = m_camera.Get_Camera_Position().m_x;
-            camera_data.origin_y = m_camera.Get_Camera_Position().m_y;
-            camera_data.origin_z = m_camera.Get_Camera_Position().m_z;
+            camera_data.matrix_x0 = m_camera_ptr->Get_Camera_To_World_Matrix().m_x0;
+            camera_data.matrix_x1 = m_camera_ptr->Get_Camera_To_World_Matrix().m_x1;
+            camera_data.matrix_x2 = m_camera_ptr->Get_Camera_To_World_Matrix().m_x2;
+            camera_data.matrix_y0 = m_camera_ptr->Get_Camera_To_World_Matrix().m_y0;
+            camera_data.matrix_y1 = m_camera_ptr->Get_Camera_To_World_Matrix().m_y1;
+            camera_data.matrix_y2 = m_camera_ptr->Get_Camera_To_World_Matrix().m_y2;
+            camera_data.matrix_z0 = m_camera_ptr->Get_Camera_To_World_Matrix().m_z0;
+            camera_data.matrix_z1 = m_camera_ptr->Get_Camera_To_World_Matrix().m_z1;
+            camera_data.matrix_z2 = m_camera_ptr->Get_Camera_To_World_Matrix().m_z2;
+            camera_data.origin_x = m_camera_ptr->Get_Camera_Position().m_x;
+            camera_data.origin_y = m_camera_ptr->Get_Camera_Position().m_y;
+            camera_data.origin_z = m_camera_ptr->Get_Camera_Position().m_z;
 
             storage_manager_ptr->Upload_To_Buffer({0, "camera_data", CGV::Storage_Manager::Resource_Type::BUFFER}, &camera_data, sizeof(CascadeGraphics::Camera::GPU_Camera_Data));
 
@@ -181,5 +183,10 @@ namespace Cascade_Core
 
             m_current_frame = (m_current_frame + 1) % 3;
         }
+    }
+
+    std::shared_ptr<CascadeGraphics::Camera> Renderer::Get_Camera()
+    {
+        return m_camera_ptr;
     }
 } // namespace Cascade_Core

@@ -27,7 +27,7 @@ namespace Cascade_Core
         bool m_initialized = false;
 
     private:
-        CascadeGraphics::Camera m_camera;
+        std::shared_ptr<CascadeGraphics::Camera> m_camera_ptr;
 
         std::shared_ptr<CGV::Instance> instance_ptr;
         std::shared_ptr<CGV::Surface> surface_ptr;
@@ -47,6 +47,9 @@ namespace Cascade_Core
         Renderer(CascadeGraphics::Vulkan::Surface::Window_Data window_data, unsigned int width, unsigned int height);
         ~Renderer();
 
+    public:
         void Render_Frame();
+
+        std::shared_ptr<CascadeGraphics::Camera> Get_Camera();
     };
 } // namespace Cascade_Core

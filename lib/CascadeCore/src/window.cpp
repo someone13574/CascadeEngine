@@ -463,8 +463,18 @@ namespace Cascade_Core
         return m_requesting_close;
     }
 
+    Window::Initialization_Stage Window::Get_Initialization_Stage()
+    {
+        return m_initialization_stage;
+    }
+
     std::shared_ptr<Event_Manager> Window::Get_Event_Manager()
     {
         return m_event_manager_ptr;
+    }
+
+    std::shared_ptr<Renderer> Window::Get_Renderer()
+    {
+        return m_renderer_ptr;
     }
 } // namespace Cascade_Core

@@ -16,4 +16,7 @@
 #include "../src/VulkanWrapper/synchronization_manager.hpp"
 #include "../src/VulkanWrapper/validation_layer_wrapper.hpp"
 
+#include "../src/Data_Types/vector_2.hpp"
+#include "../src/Data_Types/vector_3.hpp"
+#include "../src/Data_Types/vector_4.hpp"
 #include "../src/camera.hpp"

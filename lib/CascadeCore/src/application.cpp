@@ -27,6 +27,28 @@ namespace Cascade_Core
         LOG_INFO << "Core: Finished cleaning up application";
     }
 
+    void Application::Wait_For_Window_Initialization()
+    {
+        while (true)
+        {
+            bool all_windows_initialized = true;
+            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            {
+                if (m_window_ptrs[i]->Get_Initialization_Stage() != Window::Initialization_Stage::RENDERER_CREATED)
+                {
+                    all_windows_initialized = false;
+                }
+            }
+
+            if (all_windows_initialized)
+            {
+                break;
+            }
+
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
+        }
+    }
+
     std::shared_ptr<Window> Application::Create_Window(std::string window_title, unsigned int width, unsigned int height)
     {
         m_window_ptrs.push_back(std::make_shared<Window>(window_title, width, height));
@@ -36,6 +58,8 @@ namespace Cascade_Core
 
     void Application::Wait_For_Windows_To_Exit()
     {
+        Wait_For_Window_Initialization();
+
         while (true)
         {
             for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
@@ -67,6 +91,8 @@ namespace Cascade_Core
 
     void Application::Run_Program_Loop(std::function<void()> function_to_run, unsigned int repetitions_per_second)
     {
+        Wait_For_Window_Initialization();
+
         std::chrono::high_resolution_clock::time_point iteration_start;
         std::chrono::microseconds microseconds_per_repetition = std::chrono::microseconds((uint64_t)(1000000.0 / (double)repetitions_per_second));
 

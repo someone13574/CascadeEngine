@@ -23,6 +23,9 @@ namespace Cascade_Core
         Application_Info m_application_info;
         std::vector<std::shared_ptr<Window>> m_window_ptrs;
 
+    private:
+        void Wait_For_Window_Initialization();
+
     public:
         Application(Application_Info application_info);
         ~Application();

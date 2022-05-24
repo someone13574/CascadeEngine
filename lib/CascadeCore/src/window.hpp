@@ -23,7 +23,7 @@ namespace Cascade_Core
 {
     class Window
     {
-    private:
+    public:
         enum Initialization_Stage
         {
             NOT_STARTED,
@@ -81,6 +81,8 @@ namespace Cascade_Core
         bool Is_Window_Closed();
         bool Is_Requesting_Close();
 
+        Initialization_Stage Get_Initialization_Stage();
         std::shared_ptr<Event_Manager> Get_Event_Manager();
+        std::shared_ptr<Renderer> Get_Renderer();
     };
 } // namespace Cascade_Core

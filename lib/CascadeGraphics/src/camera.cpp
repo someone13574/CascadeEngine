@@ -15,6 +15,13 @@ namespace CascadeGraphics
         m_camera_to_world_matrix = Matrix_3x3<double>(cu, cv, -m_direction);
     }
 
+    void Camera::Update_Direction(Vector_3<double> direction)
+    {
+        m_direction = direction.Normalized();
+
+        Update_Camera_To_World_Matrix();
+    }
+
     Vector_3<double> Camera::Get_Camera_Position()
     {
         return m_position;
