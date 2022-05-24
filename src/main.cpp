@@ -7,13 +7,13 @@ std::shared_ptr<Cascade_Core::Window> main_window_ptr;
 
 void Update()
 {
-    std::shared_ptr<CascadeGraphics::Camera> camera_ptr = main_window_ptr->Get_Renderer()->Get_Camera();
+    std::shared_ptr<Cascade_Graphics::Camera> camera_ptr = main_window_ptr->Get_Renderer()->Get_Camera();
     Cascade_Core::Event_Manager::Mouse_State mouse_state = main_window_ptr->Get_Event_Manager()->Get_Mouse_State();
 
-    CascadeGraphics::Vector_2<double> screen_position = {mouse_state.x_position / 1280.0 * 2.0 - 1.0, mouse_state.y_position / 720.0 * 2.0 - 1.0};
+    Cascade_Graphics::Vector_2<double> screen_position = {mouse_state.x_position / 1280.0 * 2.0 - 1.0, mouse_state.y_position / 720.0 * 2.0 - 1.0};
     screen_position *= 3.0;
 
-    camera_ptr->Update_Direction(CascadeGraphics::Vector_3<double>(std::cos(screen_position.m_x) * std::cos(-screen_position.m_y), std::sin(-screen_position.m_y), std::sin(screen_position.m_x) * std::cos(-screen_position.m_y)));
+    camera_ptr->Update_Direction(Cascade_Graphics::Vector_3<double>(std::cos(screen_position.m_x) * std::cos(-screen_position.m_y), std::sin(-screen_position.m_y), std::sin(screen_position.m_x) * std::cos(-screen_position.m_y)));
 }
 
 int main()

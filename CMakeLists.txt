@@ -11,7 +11,7 @@ endif(UNIX)
 
 add_compile_definitions(LOG_LEVEL_ALL CSD_ENABLE_DEBUG_LAYERS CSD_ENABLE_PRESENTATION)
 
-add_subdirectory(lib/CascadeCore)
+add_subdirectory(lib/Cascade_Core)
 
-add_executable(CascadeApplication src/main.cpp)
-target_link_libraries(CascadeApplication PUBLIC CascadeCore)
+add_executable(Cascade_Application src/main.cpp)
+target_link_libraries(Cascade_Application PUBLIC Cascade_Core)
