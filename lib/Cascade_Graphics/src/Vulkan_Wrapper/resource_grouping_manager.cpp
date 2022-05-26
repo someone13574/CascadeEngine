@@ -2,6 +2,8 @@
 
 #include "../debug_tools.hpp"
 
+#include <list>
+
 namespace Cascade_Graphics
 {
     namespace Vulkan
@@ -36,27 +38,10 @@ namespace Cascade_Graphics
                 {
                     for (unsigned int j = 0; j < m_resource_groupings[i].resources.size(); j++)
                     {
-                        VkDescriptorType current_resource_descriptor_type = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
+                        descriptor_pool_sizes.resize(descriptor_pool_sizes.size() + 1);
 
-                        bool found_resource_grouping = false;
-                        for (unsigned int k = 0; k < descriptor_pool_sizes.size(); k++)
-                        {
-                            if (current_resource_descriptor_type == descriptor_pool_sizes[k].type)
-                            {
-                                descriptor_pool_sizes[k].descriptorCount++;
-
-                                found_resource_grouping = true;
-                                break;
-                            }
-                        }
-
-                        if (!found_resource_grouping)
-                        {
-                            descriptor_pool_sizes.resize(descriptor_pool_sizes.size() + 1);
-
-                            descriptor_pool_sizes.back().descriptorCount = 1;
-                            descriptor_pool_sizes.back().type = current_resource_descriptor_type;
-                        }
+                        descriptor_pool_sizes.back().descriptorCount = 1;
+                        descriptor_pool_sizes.back().type = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
                     }
                 }
             }
@@ -102,14 +87,19 @@ namespace Cascade_Graphics
                 {
                     LOG_TRACE << "Vulkan: creating write descriptor sets for resource grouping '" << m_resource_groupings[i].label << "'";
 
+                    std::list<VkDescriptorBufferInfo> buffer_descriptor_infos;
+                    std::list<VkDescriptorImageInfo> image_descriptor_infos;
+
                     for (unsigned int j = 0; j < m_resource_groupings[i].resources.size(); j++)
                     {
                         if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::BUFFER)
                         {
-                            VkDescriptorBufferInfo buffer_descriptor_info = {};
-                            buffer_descriptor_info.buffer = *m_storage_manager_ptr->Get_Buffer(m_resource_groupings[i].resources[j]);
-                            buffer_descriptor_info.offset = 0;
-                            buffer_descriptor_info.range = VK_WHOLE_SIZE;
+                            buffer_descriptor_infos.resize(buffer_descriptor_infos.size() + 1);
+
+                            buffer_descriptor_infos.back() = {};
+                            buffer_descriptor_infos.back().buffer = *m_storage_manager_ptr->Get_Buffer(m_resource_groupings[i].resources[j]);
+                            buffer_descriptor_infos.back().offset = 0;
+                            buffer_descriptor_infos.back().range = VK_WHOLE_SIZE;
 
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.resize(m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size() + 1);
 
@@ -121,7 +111,7 @@ namespace Cascade_Graphics
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstArrayElement = 0;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorCount = 1;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
-                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = &buffer_descriptor_info;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = &buffer_descriptor_infos.back();
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = nullptr;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pTexelBufferView = nullptr;
                         }
@@ -150,10 +140,12 @@ namespace Cascade_Graphics
                             VkSampler sampler;
                             VALIDATE_VKRESULT(vkCreateSampler(*(m_logical_device_ptr->Get_Device()), &sampler_create_info, nullptr, &sampler), "Vulkan: failed to create image sampler");
 
-                            VkDescriptorImageInfo image_descriptor_info = {};
-                            image_descriptor_info.sampler = sampler;
-                            image_descriptor_info.imageView = *m_storage_manager_ptr->Get_Image_View(m_resource_groupings[i].resources[j]);
-                            image_descriptor_info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+                            image_descriptor_infos.resize(image_descriptor_infos.size() + 1);
+
+                            image_descriptor_infos.back() = {};
+                            image_descriptor_infos.back().sampler = sampler;
+                            image_descriptor_infos.back().imageView = *m_storage_manager_ptr->Get_Image_View(m_resource_groupings[i].resources[j]);
+                            image_descriptor_infos.back().imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.resize(m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size() + 1);
 
@@ -166,7 +158,7 @@ namespace Cascade_Graphics
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorCount = 1;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = nullptr;
-                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = &image_descriptor_info;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = &image_descriptor_infos.back();
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pTexelBufferView = nullptr;
                         }
                     }

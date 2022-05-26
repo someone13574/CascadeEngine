@@ -62,6 +62,8 @@ namespace Cascade_Graphics
                 VkBuffer buffer;
                 VkDeviceMemory buffer_memory;
                 VkDescriptorType descriptor_type;
+                VkBufferUsageFlagBits buffer_usage;
+                Resouce_Queue_Families resource_queue_families;
             };
 
             struct Image_Info
@@ -89,6 +91,8 @@ namespace Cascade_Graphics
             std::vector<Image_Resource> m_images;
 
         private:
+            void Create_Buffer_From_ID(Resource_ID resource_id, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families);
+
             unsigned int Get_Next_Buffer_Id(std::string label);
             unsigned int Get_Next_Image_Id(std::string label);
             std::vector<unsigned int> Get_Queue_Families(Resouce_Queue_Families resouce_queue_families);
@@ -110,6 +114,7 @@ namespace Cascade_Graphics
             Resource_Data Get_Resource_Data(Resource_ID resource_id);
             bool Does_Resource_Exist(Resource_ID resource_id);
 
+            void Resize_Buffer(Resource_ID resource_id, VkDeviceSize buffer_size);
             void Upload_To_Buffer(Resource_ID resource_id, void* data, size_t data_size);
         };
     } // namespace Vulkan

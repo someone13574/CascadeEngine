@@ -158,7 +158,7 @@ namespace Cascade_Graphics
         }
 
     public:
-        Vector_T m_x;
-        Vector_T m_y;
+        Vector_T m_x = 0;
+        Vector_T m_y = 0;
     };
 } // namespace Cascade_Graphics

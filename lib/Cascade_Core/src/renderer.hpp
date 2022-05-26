@@ -34,6 +34,7 @@ namespace Cascade_Core
 
     private:
         std::shared_ptr<Cascade_Graphics::Camera> m_camera_ptr;
+        std::shared_ptr<Cascade_Graphics::Object_Manager> m_object_manager_ptr;
 
         std::shared_ptr<CGV::Instance> instance_ptr;
         std::shared_ptr<CGV::Surface> surface_ptr;
@@ -60,5 +61,6 @@ namespace Cascade_Core
         void Render_Frame();
 
         std::shared_ptr<Cascade_Graphics::Camera> Get_Camera();
+        std::shared_ptr<Cascade_Graphics::Object_Manager> Get_Object_Manager();
     };
 } // namespace Cascade_Core

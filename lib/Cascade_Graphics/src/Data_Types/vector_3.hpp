@@ -11,9 +11,9 @@ namespace Cascade_Graphics
         static_assert(std::is_arithmetic<Vector_T>::value, "Vector: Vector type must be numeric");
 
     public:
-        Vector_T m_x;
-        Vector_T m_y;
-        Vector_T m_z;
+        Vector_T m_x = 0;
+        Vector_T m_y = 0;
+        Vector_T m_z = 0;
 
     public:
         Vector_3(Vector_T x, Vector_T y, Vector_T z) : m_x(x), m_y(y), m_z(z){};

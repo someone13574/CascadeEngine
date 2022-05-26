@@ -34,6 +34,7 @@ namespace Cascade_Core
         storage_manager_ptr = std::make_shared<CGV::Storage_Manager>(logical_device_ptr, physical_device_ptr, queue_manager_ptr, swapchain_ptr);
         storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, {width, height}, {false, true, true, false, false, false});
         storage_manager_ptr->Create_Buffer("camera_data", sizeof(Cascade_Graphics::Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, {false, true, true, false, false, false});
+        storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object::GPU_Voxel) * 2, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, {false, true, true, false, false, false});
         storage_manager_ptr->Add_Swapchain("swapchain");
 
         shader_manager_ptr = std::make_shared<CGV::Shader_Manager>(logical_device_ptr);
@@ -45,7 +46,7 @@ namespace Cascade_Core
 #endif
 
         resource_grouping_manager = std::make_shared<CGV::Resource_Grouping_Manager>(logical_device_ptr, storage_manager_ptr);
-        resource_grouping_manager->Add_Resource_Grouping("per_frame_descriptor_set", {{0, "render_target", CGV::Storage_Manager::IMAGE}, {0, "camera_data", CGV::Storage_Manager::BUFFER}}, true);
+        resource_grouping_manager->Add_Resource_Grouping("per_frame_descriptor_set", {{0, "render_target", CGV::Storage_Manager::IMAGE}, {0, "camera_data", CGV::Storage_Manager::BUFFER}, {0, "voxel_buffer", CGV::Storage_Manager::BUFFER}}, true);
         resource_grouping_manager->Add_Resource_Grouping("swapchain", {{0, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, {1, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, {2, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}}, false);
         resource_grouping_manager->Create_Descriptor_Sets();
 
@@ -58,7 +59,7 @@ namespace Cascade_Core
         command_buffer_manager_ptr->Begin_Recording({"render_frame", 0}, (VkCommandBufferUsageFlagBits)0);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 0}, {0, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 0}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 0}, std::ceil(m_width / 32.0), std::ceil(m_width / 32.0), 1);
+        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 0}, std::ceil(m_width / 32.0), std::ceil(m_height / 32.0), 1);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 0}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Copy_Image({"render_frame", 0}, {0, "render_target", CGV::Storage_Manager::IMAGE}, {0, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, m_width, m_height);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 0}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -69,7 +70,7 @@ namespace Cascade_Core
         command_buffer_manager_ptr->Begin_Recording({"render_frame", 1}, (VkCommandBufferUsageFlagBits)0);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 1}, {1, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 1}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 1}, std::ceil(m_width / 32.0), std::ceil(m_width / 32.0), 1);
+        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 1}, std::ceil(m_width / 32.0), std::ceil(m_height / 32.0), 1);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 1}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Copy_Image({"render_frame", 1}, {0, "render_target", CGV::Storage_Manager::IMAGE}, {1, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, m_width, m_height);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 1}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -80,7 +81,7 @@ namespace Cascade_Core
         command_buffer_manager_ptr->Begin_Recording({"render_frame", 2}, (VkCommandBufferUsageFlagBits)0);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {2, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 2}, std::ceil(m_width / 32.0), std::ceil(m_width / 32.0), 1);
+        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 2}, std::ceil(m_width / 32.0), std::ceil(m_height / 32.0), 1);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Copy_Image({"render_frame", 2}, {0, "render_target", CGV::Storage_Manager::IMAGE}, {2, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, m_width, m_height);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -102,8 +103,24 @@ namespace Cascade_Core
         synchronization_manager_ptr->Add_Fence("image_in_flight", VK_NULL_HANDLE);
 
         m_camera_ptr = std::make_shared<Cascade_Graphics::Camera>(Cascade_Graphics::Vector_3(-3.0, 0.0, 0.0), Cascade_Graphics::Vector_3(1.0, 0.0, 0.0));
+        m_object_manager_ptr = std::make_shared<Cascade_Graphics::Object_Manager>();
 
         LOG_INFO << "Renderer initialized";
+
+        Cascade_Graphics::Object::GPU_Voxel gpu_voxel_a = {};
+        gpu_voxel_a.x_position = -0.5;
+        gpu_voxel_a.y_position = 0.0;
+        gpu_voxel_a.z_position = 0.0;
+        gpu_voxel_a.size = 0.25;
+
+        Cascade_Graphics::Object::GPU_Voxel gpu_voxel_b = {};
+        gpu_voxel_b.x_position = 0.5;
+        gpu_voxel_b.y_position = 0.0;
+        gpu_voxel_b.z_position = 0.0;
+        gpu_voxel_b.size = 0.25;
+
+        Cascade_Graphics::Object::GPU_Voxel gpu_voxels[2] = {gpu_voxel_a, gpu_voxel_b};
+        storage_manager_ptr->Upload_To_Buffer({0, "voxel_buffer", CGV::Storage_Manager::Resource_Type::BUFFER}, &gpu_voxels, sizeof(Cascade_Graphics::Object::GPU_Voxel) * 2);
 
         m_initialized = true;
     }
@@ -129,15 +146,18 @@ namespace Cascade_Core
         m_width = new_window_dimensions.first;
         m_height = new_window_dimensions.second;
 
+        LOG_DEBUG << "Vulkan: New window size " << m_width << "x" << m_height;
+
         swapchain_ptr = std::make_shared<CGV::Swapchain>(logical_device_ptr, physical_device_ptr, surface_ptr, queue_manager_ptr, m_width, m_height);
 
         storage_manager_ptr = std::make_shared<CGV::Storage_Manager>(logical_device_ptr, physical_device_ptr, queue_manager_ptr, swapchain_ptr);
         storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, {m_width, m_height}, {false, true, true, false, false, false});
         storage_manager_ptr->Create_Buffer("camera_data", sizeof(Cascade_Graphics::Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, {false, true, true, false, false, false});
+        storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object::GPU_Voxel) * 2, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, {false, true, true, false, false, false});
         storage_manager_ptr->Add_Swapchain("swapchain");
 
         resource_grouping_manager = std::make_shared<CGV::Resource_Grouping_Manager>(logical_device_ptr, storage_manager_ptr);
-        resource_grouping_manager->Add_Resource_Grouping("per_frame_descriptor_set", {{0, "render_target", CGV::Storage_Manager::IMAGE}, {0, "camera_data", CGV::Storage_Manager::BUFFER}}, true);
+        resource_grouping_manager->Add_Resource_Grouping("per_frame_descriptor_set", {{0, "render_target", CGV::Storage_Manager::IMAGE}, {0, "camera_data", CGV::Storage_Manager::BUFFER}, {0, "voxel_buffer", CGV::Storage_Manager::BUFFER}}, true);
         resource_grouping_manager->Add_Resource_Grouping("swapchain", {{0, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, {1, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, {2, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}}, false);
         resource_grouping_manager->Create_Descriptor_Sets();
 
@@ -150,7 +170,7 @@ namespace Cascade_Core
         command_buffer_manager_ptr->Begin_Recording({"render_frame", 0}, (VkCommandBufferUsageFlagBits)0);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 0}, {0, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 0}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 0}, std::ceil(m_width / 32.0), std::ceil(m_width / 32.0), 1);
+        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 0}, std::ceil(m_width / 32.0), std::ceil(m_height / 32.0), 1);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 0}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Copy_Image({"render_frame", 0}, {0, "render_target", CGV::Storage_Manager::IMAGE}, {0, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, m_width, m_height);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 0}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -161,7 +181,7 @@ namespace Cascade_Core
         command_buffer_manager_ptr->Begin_Recording({"render_frame", 1}, (VkCommandBufferUsageFlagBits)0);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 1}, {1, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 1}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 1}, std::ceil(m_width / 32.0), std::ceil(m_width / 32.0), 1);
+        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 1}, std::ceil(m_width / 32.0), std::ceil(m_height / 32.0), 1);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 1}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Copy_Image({"render_frame", 1}, {0, "render_target", CGV::Storage_Manager::IMAGE}, {1, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, m_width, m_height);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 1}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -172,12 +192,27 @@ namespace Cascade_Core
         command_buffer_manager_ptr->Begin_Recording({"render_frame", 2}, (VkCommandBufferUsageFlagBits)0);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {2, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 2}, std::ceil(m_width / 32.0), std::ceil(m_width / 32.0), 1);
+        command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", 2}, std::ceil(m_width / 32.0), std::ceil(m_height / 32.0), 1);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Copy_Image({"render_frame", 2}, {0, "render_target", CGV::Storage_Manager::IMAGE}, {2, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, m_width, m_height);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {0, "render_target", CGV::Storage_Manager::IMAGE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", 2}, {2, "swapchain", CGV::Storage_Manager::SWAPCHAIN_IMAGE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT);
         command_buffer_manager_ptr->End_Recording({"render_frame", 2});
+
+        Cascade_Graphics::Object::GPU_Voxel gpu_voxel_a = {};
+        gpu_voxel_a.x_position = -0.5;
+        gpu_voxel_a.y_position = 0.0;
+        gpu_voxel_a.z_position = 0.0;
+        gpu_voxel_a.size = 0.25;
+
+        Cascade_Graphics::Object::GPU_Voxel gpu_voxel_b = {};
+        gpu_voxel_b.x_position = 0.5;
+        gpu_voxel_b.y_position = 0.0;
+        gpu_voxel_b.z_position = 0.0;
+        gpu_voxel_b.size = 0.25;
+
+        Cascade_Graphics::Object::GPU_Voxel gpu_voxels[2] = {gpu_voxel_a, gpu_voxel_b};
+        storage_manager_ptr->Upload_To_Buffer({0, "voxel_buffer", CGV::Storage_Manager::Resource_Type::BUFFER}, &gpu_voxels, sizeof(Cascade_Graphics::Object::GPU_Voxel) * 2);
     }
 
     void Renderer::Render_Frame()
@@ -277,5 +312,10 @@ namespace Cascade_Core
     std::shared_ptr<Cascade_Graphics::Camera> Renderer::Get_Camera()
     {
         return m_camera_ptr;
+    }
+
+    std::shared_ptr<Cascade_Graphics::Object_Manager> Renderer::Get_Object_Manager()
+    {
+        return m_object_manager_ptr;
     }
 } // namespace Cascade_Core

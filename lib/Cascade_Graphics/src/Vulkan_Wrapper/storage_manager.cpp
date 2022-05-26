@@ -107,20 +107,18 @@ namespace Cascade_Graphics
             return queue_families_vector;
         }
 
-        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families)
+        void Storage_Manager::Create_Buffer_From_ID(Resource_ID resource_id, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families)
         {
             std::vector<unsigned int> queue_families = Get_Queue_Families(resouce_queue_families);
 
-            unsigned int buffer_id = Get_Next_Buffer_Id(label);
-
             m_buffers.resize(m_buffers.size() + 1);
             m_buffers.back() = {};
-            m_buffers.back().resource_id.index = buffer_id;
-            m_buffers.back().resource_id.label = label;
-            m_buffers.back().resource_id.type = Resource_Type::BUFFER;
+            m_buffers.back().resource_id = resource_id;
             m_buffers.back().descriptor_type = buffer_type;
+            m_buffers.back().buffer_usage = buffer_usage;
+            m_buffers.back().resource_queue_families = resouce_queue_families;
 
-            LOG_INFO << "Vulkan: creating buffer " << label << "-" << buffer_id;
+            LOG_INFO << "Vulkan: creating buffer " << resource_id.label << "-" << resource_id.index;
 
             VkBufferCreateInfo buffer_create_info = {};
             buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -159,7 +157,17 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkAllocateMemory(*(m_logical_device_ptr->Get_Device()), &memory_allocate_info, nullptr, &m_buffers.back().buffer_memory), "Vulkan: failed to allocate buffer memory");
             VALIDATE_VKRESULT(vkBindBufferMemory(*(m_logical_device_ptr->Get_Device()), m_buffers.back().buffer, m_buffers.back().buffer_memory, 0), "Vulkan: fail to bind buffer memory");
 
-            LOG_TRACE << "Vulkan: finished creating buffer " << label << "-" << buffer_id;
+            LOG_TRACE << "Vulkan: finished creating buffer " << resource_id.label << "-" << resource_id.index;
+        }
+
+        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families)
+        {
+            Resource_ID resource_id = {};
+            resource_id.label = label;
+            resource_id.index = Get_Next_Buffer_Id(label);
+            resource_id.type = Resource_Type::BUFFER;
+
+            Create_Buffer_From_ID(resource_id, buffer_size, buffer_usage, buffer_type, resouce_queue_families);
         }
 
         void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, Resouce_Queue_Families resouce_queue_families)

@@ -55,6 +55,8 @@ namespace Cascade_Core
     {
         m_window_ptrs.push_back(std::make_shared<Window>(window_title, width, height));
 
+        Wait_For_Window_Initialization();
+
         return m_window_ptrs.back();
     }
 
