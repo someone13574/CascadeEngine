@@ -13,7 +13,7 @@ namespace Cascade_Graphics
     {
         Physical_Device::Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr) : m_queue_manager_ptr(queue_manager_ptr), m_surface_ptr(surface_ptr)
         {
-            LOG_INFO << "Vulkan: choosing physical device";
+            LOG_INFO << "Vulkan: Choosing physical device";
 
             unsigned int device_count = 0;
             vkEnumeratePhysicalDevices(*(instance_ptr->Get_Instance()), &device_count, nullptr);
@@ -21,7 +21,7 @@ namespace Cascade_Graphics
 
             if (device_count == 0)
             {
-                LOG_FATAL << "Vulkan: could not find a gpu with Vulkan support";
+                LOG_FATAL << "Vulkan: Could not find a gpu with Vulkan support";
                 exit(EXIT_FAILURE);
             }
 
@@ -54,17 +54,17 @@ namespace Cascade_Graphics
 
             if (best_rated_device == VK_NULL_HANDLE)
             {
-                LOG_FATAL << "Vulkan: could not find a suitable gpu";
+                LOG_FATAL << "Vulkan: Could not find a suitable gpu";
                 exit(EXIT_FAILURE);
             }
 
-            LOG_DEBUG << "Vulkan: selected device " << best_rated_device_properties.deviceName;
+            LOG_DEBUG << "Vulkan: Selected device " << best_rated_device_properties.deviceName;
             m_physical_device = best_rated_device;
         }
 
         bool Physical_Device::Is_Device_Suitable(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features)
         {
-            LOG_INFO << "Vulkan: checking physical device " << physical_device_properties.deviceName << " suitablity";
+            LOG_INFO << "Vulkan: Checking physical device " << physical_device_properties.deviceName << " suitablity";
 
             if (!m_queue_manager_ptr->Physical_Device_Has_Required_Queues(physical_device))
             {
@@ -85,7 +85,7 @@ namespace Cascade_Graphics
 
         bool Physical_Device::Check_Device_Extension_Support(VkPhysicalDevice physical_device)
         {
-            LOG_TRACE << "Vulkan: checking physical device extension support";
+            LOG_TRACE << "Vulkan: Checking physical device extension support";
 
             std::vector<const char*> required_extensions = Get_Required_Extensions();
 
@@ -96,7 +96,7 @@ namespace Cascade_Graphics
 
             unsigned int extension_count;
             vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr);
-            LOG_DEBUG << "Vulkan: found " << extension_count << " physical device extensions";
+            LOG_DEBUG << "Vulkan: Found " << extension_count << " physical device extensions";
 
             if (extension_count == 0)
             {
@@ -108,7 +108,7 @@ namespace Cascade_Graphics
 
             for (unsigned int i = 0; i < available_extensions.size(); i++)
             {
-                LOG_TRACE << "Vulkan: found physical device extension " << available_extensions[i].extensionName;
+                LOG_TRACE << "Vulkan: Found physical device extension " << available_extensions[i].extensionName;
             }
 
             bool device_supports_extensions = true;
@@ -122,18 +122,18 @@ namespace Cascade_Graphics
 
                 if (!extension_found)
                 {
-                    LOG_INFO << "Vulkan: physical device is missing extension " << required_extensions[i];
+                    LOG_INFO << "Vulkan: Physical device is missing extension " << required_extensions[i];
                     device_supports_extensions = false;
                 }
             }
 
             if (!device_supports_extensions)
             {
-                LOG_TRACE << "Vulkan: this physical device is missing one or more required extensions";
+                LOG_TRACE << "Vulkan: This physical device is missing one or more required extensions";
             }
             else
             {
-                LOG_TRACE << "Vulkan: this physical device has all required extensions";
+                LOG_TRACE << "Vulkan: This physical device has all required extensions";
             }
 
             return device_supports_extensions;

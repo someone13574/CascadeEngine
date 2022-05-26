@@ -63,7 +63,7 @@ namespace Cascade_Core
 
         if (m_initialization_stage != Initialization_Stage::NOT_STARTED)
         {
-            LOG_ERROR << "Core: window '" << m_window_title << "' is at the incorrect initialization stage";
+            LOG_ERROR << "Core: Window '" << m_window_title << "' is at the incorrect initialization stage";
             exit(EXIT_FAILURE);
         }
 
@@ -72,7 +72,7 @@ namespace Cascade_Core
         static bool window_class_registered = false;
         if (!window_class_registered)
         {
-            LOG_TRACE << "Core: registering window class";
+            LOG_TRACE << "Core: Registering window class";
 
             WNDCLASSEX window_class;
             window_class.cbSize = sizeof(WNDCLASSEX);
@@ -90,7 +90,7 @@ namespace Cascade_Core
 
             if (!RegisterClassEx(&window_class))
             {
-                LOG_FATAL << "Core: failed to register the window class";
+                LOG_FATAL << "Core: Failed to register the window class";
                 exit(EXIT_FAILURE);
             }
 
@@ -103,7 +103,7 @@ namespace Cascade_Core
         m_hwindow = CreateWindow(szWindowClass, m_window_title.c_str(), WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, window_rect.right - window_rect.left, window_rect.bottom - window_rect.top, nullptr, nullptr, m_hinstance, this);
         if (!m_hwindow)
         {
-            LOG_FATAL << "Core: failed to create window";
+            LOG_FATAL << "Core: Failed to create window";
             exit(EXIT_FAILURE);
         }
 
@@ -250,7 +250,7 @@ namespace Cascade_Core
 
         if (m_initialization_stage != Initialization_Stage::WINDOW_CREATED)
         {
-            LOG_ERROR << "Core: window '" << m_window_title << "' is at the incorrect initialization stage";
+            LOG_ERROR << "Core: Window '" << m_window_title << "' is at the incorrect initialization stage";
             exit(EXIT_FAILURE);
         }
 

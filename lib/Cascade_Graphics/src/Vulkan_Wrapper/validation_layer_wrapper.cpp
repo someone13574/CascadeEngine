@@ -11,7 +11,7 @@ namespace Cascade_Graphics_Debugging
         Validation_Layer::Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan::Instance> instance_ptr) : m_instance_ptr(instance_ptr)
         {
 #if defined CSD_ENABLE_DEBUG_LAYERS
-            LOG_INFO << "Vulkan: creating validation layer debug messenger";
+            LOG_INFO << "Vulkan: Creating validation layer debug messenger";
 
             VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Generate_Messenger_Create_Info();
 
@@ -28,17 +28,17 @@ namespace Cascade_Graphics_Debugging
 
             if (messenger_creation_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Vulkan: debug messenger creation failed with VkResult " << messenger_creation_result;
+                LOG_FATAL << "Vulkan: Debug messenger creation failed with VkResult " << messenger_creation_result;
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Vulkan: finished creating validation layer debug messenger";
+            LOG_TRACE << "Vulkan: Finished creating validation layer debug messenger";
 #endif
         }
 
         Validation_Layer::~Validation_Layer()
         {
-            LOG_INFO << "Vulkan: destroying validation layer debug messenger";
+            LOG_INFO << "Vulkan: Destroying validation layer debug messenger";
 
             auto destroy_messenger_function = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(*(m_instance_ptr->Get_Instance()), "vkDestroyDebugUtilsMessengerEXT");
             if (destroy_messenger_function != nullptr)
@@ -47,11 +47,11 @@ namespace Cascade_Graphics_Debugging
             }
             else
             {
-                LOG_FATAL << "Vulkan: couldn't get vkDestroyDebugUtilsMessengerEXT proc addr";
+                LOG_FATAL << "Vulkan: Couldn't get vkDestroyDebugUtilsMessengerEXT proc addr";
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Vulkan: finished destroying validation layer debug messenger";
+            LOG_TRACE << "Vulkan: Finished destroying validation layer debug messenger";
         }
 
         static VKAPI_ATTR VkBool32 VKAPI_CALL Validation_Layer_Callback(VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -161,7 +161,7 @@ namespace Cascade_Graphics_Debugging
 
         bool Validation_Layer::Check_Validation_Layer_Support(std::vector<const char*> layers_to_check)
         {
-            LOG_INFO << "Vulkan: checking validation layer support";
+            LOG_INFO << "Vulkan: Checking validation layer support";
 
             unsigned int layer_count;
             vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
@@ -171,7 +171,7 @@ namespace Cascade_Graphics_Debugging
 
             for (unsigned int i = 0; i < supported_layers.size(); i++)
             {
-                LOG_TRACE << "Vulkan: validation layer supported " << supported_layers[i].layerName;
+                LOG_TRACE << "Vulkan: Validation layer supported " << supported_layers[i].layerName;
             }
 
             bool requested_layers_satisfied = true;
@@ -185,19 +185,19 @@ namespace Cascade_Graphics_Debugging
 
                 if (!layer_found)
                 {
-                    LOG_ERROR << "Vulkan: missing support for requested validation layer " << layers_to_check[i];
+                    LOG_ERROR << "Vulkan: Missing support for requested validation layer " << layers_to_check[i];
                     requested_layers_satisfied = false;
                 }
             }
 
             if (requested_layers_satisfied)
             {
-                LOG_DEBUG << "Vulkan: all requested validation layers satisfied";
+                LOG_DEBUG << "Vulkan: All requested validation layers satisfied";
                 return true;
             }
             else
             {
-                LOG_FATAL << "Vulkan: a requested validation layer is not present";
+                LOG_FATAL << "Vulkan: A requested validation layer is not present";
                 exit(EXIT_FAILURE);
             }
         }

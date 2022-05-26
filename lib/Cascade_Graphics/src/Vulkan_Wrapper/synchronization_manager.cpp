@@ -12,7 +12,7 @@ namespace Cascade_Graphics
 
         Synchronization_Manager::~Synchronization_Manager()
         {
-            LOG_INFO << "Vulkan: destroying synchonization objects";
+            LOG_INFO << "Vulkan: Destroying synchonization objects";
 
             for (unsigned int i = 0; i < m_semaphores.size(); i++)
             {
@@ -27,7 +27,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_TRACE << "Vulkan: finished destroying synchronization objects";
+            LOG_TRACE << "Vulkan: Finished destroying synchronization objects";
         }
 
         unsigned int Synchronization_Manager::Get_Next_Semaphore_Index(std::string label)
@@ -64,7 +64,7 @@ namespace Cascade_Graphics
             identifier.label = label;
             identifier.index = Get_Next_Semaphore_Index(label);
 
-            LOG_INFO << "Vulkan: creating semaphore with identifier '" << identifier.label << "-" << identifier.index << "'";
+            LOG_INFO << "Vulkan: Creating semaphore with identifier '" << identifier.label << "-" << identifier.index << "'";
 
             VkSemaphoreCreateInfo semaphore_create_info = {};
             semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -75,9 +75,9 @@ namespace Cascade_Graphics
             m_semaphores.back() = {};
             m_semaphores.back().identifier = identifier;
 
-            VALIDATE_VKRESULT(vkCreateSemaphore(*(m_logical_device_ptr->Get_Device()), &semaphore_create_info, nullptr, &m_semaphores.back().semaphore), "Vulkan: failed to create semaphore");
+            VALIDATE_VKRESULT(vkCreateSemaphore(*(m_logical_device_ptr->Get_Device()), &semaphore_create_info, nullptr, &m_semaphores.back().semaphore), "Vulkan: Failed to create semaphore");
 
-            LOG_TRACE << "Vulkan: finished creating semaphore";
+            LOG_TRACE << "Vulkan: Finished creating semaphore";
         }
 
         void Synchronization_Manager::Create_Fence(std::string label)
@@ -86,7 +86,7 @@ namespace Cascade_Graphics
             identifier.label = label;
             identifier.index = Get_Next_Fence_Index(label);
 
-            LOG_INFO << "Vulkan: creating fence with identifier '" << identifier.label << "-" << identifier.index << "'";
+            LOG_INFO << "Vulkan: Creating fence with identifier '" << identifier.label << "-" << identifier.index << "'";
 
             VkFenceCreateInfo fence_create_info = {};
             fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -98,9 +98,9 @@ namespace Cascade_Graphics
             m_fences.back().identifier = identifier;
             m_fences.back().added = false;
 
-            VALIDATE_VKRESULT(vkCreateFence(*(m_logical_device_ptr->Get_Device()), &fence_create_info, nullptr, &m_fences.back().fence), "Vulkan: failed to create fence");
+            VALIDATE_VKRESULT(vkCreateFence(*(m_logical_device_ptr->Get_Device()), &fence_create_info, nullptr, &m_fences.back().fence), "Vulkan: Failed to create fence");
 
-            LOG_TRACE << "Vulkan: finished creating fence";
+            LOG_TRACE << "Vulkan: Finished creating fence";
         }
 
         void Synchronization_Manager::Add_Fence(std::string label, VkFence fence)
@@ -109,7 +109,7 @@ namespace Cascade_Graphics
             identifier.label = label;
             identifier.index = Get_Next_Fence_Index(label);
 
-            LOG_INFO << "Vulkan: adding fence with identifier '" << identifier.label << "-" << identifier.index << "'";
+            LOG_INFO << "Vulkan: Adding fence with identifier '" << identifier.label << "-" << identifier.index << "'";
 
             m_fences.resize(m_fences.size() + 1);
             m_fences.back() = {};
@@ -117,7 +117,7 @@ namespace Cascade_Graphics
             m_fences.back().fence = fence;
             m_fences.back().added = true;
 
-            LOG_TRACE << "Vulkan: finished adding fence";
+            LOG_TRACE << "Vulkan: Finished adding fence";
         }
 
         VkSemaphore* Synchronization_Manager::Get_Semaphore(Identifier identifier)
@@ -130,7 +130,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan: cannot find semaphore with identifier '" << identifier.label << "-" << identifier.index << "'";
+            LOG_ERROR << "Vulkan: Cannot find semaphore with identifier '" << identifier.label << "-" << identifier.index << "'";
             exit(EXIT_FAILURE);
         }
 
@@ -144,7 +144,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan: cannot find fence with identifier '" << identifier.label << "-" << identifier.index << "'";
+            LOG_ERROR << "Vulkan: Cannot find fence with identifier '" << identifier.label << "-" << identifier.index << "'";
             exit(EXIT_FAILURE);
         }
     } // namespace Vulkan

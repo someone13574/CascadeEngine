@@ -9,7 +9,7 @@ namespace Cascade_Graphics
         Surface::Surface(Window_Data window_data, std::shared_ptr<Instance> instance_ptr) : m_instance_ptr(instance_ptr)
         {
 #if defined __linux__
-            LOG_INFO << "Vulkan: creating xcb window surface";
+            LOG_INFO << "Vulkan: Creating xcb window surface";
 
             VkXcbSurfaceCreateInfoKHR xcb_surface_create_info = {};
             xcb_surface_create_info.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
@@ -22,13 +22,13 @@ namespace Cascade_Graphics
 
             if (create_surface_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Vulkan: failed to create xcb window surface";
+                LOG_FATAL << "Vulkan: Failed to create xcb window surface";
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Vulkan: finished creating surface";
+            LOG_TRACE << "Vulkan: Finished creating surface";
 #elif defined _WIN32 || defined WIN32
-            LOG_INFO << "Vulkan: creating WIN32 window surface";
+            LOG_INFO << "Vulkan: Creating WIN32 window surface";
 
             VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
             win32_surface_create_info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -41,21 +41,21 @@ namespace Cascade_Graphics
 
             if (create_surface_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Vulkan: failed to create WIN32 window surface";
+                LOG_FATAL << "Vulkan: Failed to create WIN32 window surface";
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Vulkan: finished creating surface";
+            LOG_TRACE << "Vulkan: Finished creating surface";
 #endif
         }
 
         Surface::~Surface()
         {
-            LOG_INFO << "Vulkan: destroying surface";
+            LOG_INFO << "Vulkan: Destroying surface";
 
             vkDestroySurfaceKHR(*(m_instance_ptr->Get_Instance()), m_surface, nullptr);
 
-            LOG_TRACE << "Vulkan: finished destroying surface";
+            LOG_TRACE << "Vulkan: Finished destroying surface";
         }
 
         VkSurfaceKHR* Surface::Get_Surface()

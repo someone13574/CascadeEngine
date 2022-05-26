@@ -14,7 +14,7 @@ namespace Cascade_Graphics
 
         Resource_Grouping_Manager::~Resource_Grouping_Manager()
         {
-            LOG_INFO << "Vulkan: cleaning up resource grouping manager";
+            LOG_INFO << "Vulkan: Cleaning up resource grouping manager";
 
             for (unsigned int i = 0; i < m_descriptor_set_layouts.size(); i++)
             {
@@ -23,12 +23,12 @@ namespace Cascade_Graphics
 
             vkDestroyDescriptorPool(*(m_logical_device_ptr->Get_Device()), m_descriptor_pool, nullptr);
 
-            LOG_TRACE << "Vulkan: finished cleaning up resource grouping manager";
+            LOG_TRACE << "Vulkan: Finished cleaning up resource grouping manager";
         }
 
         void Resource_Grouping_Manager::Create_Descriptor_Pool()
         {
-            LOG_INFO << "Vulkan: creating descriptor pool";
+            LOG_INFO << "Vulkan: Creating descriptor pool";
 
             std::vector<VkDescriptorPoolSize> descriptor_pool_sizes;
 
@@ -54,14 +54,14 @@ namespace Cascade_Graphics
             descriptor_pool_create_info.poolSizeCount = descriptor_pool_sizes.size();
             descriptor_pool_create_info.pPoolSizes = descriptor_pool_sizes.data();
 
-            VALIDATE_VKRESULT(vkCreateDescriptorPool(*(m_logical_device_ptr->Get_Device()), &descriptor_pool_create_info, nullptr, &m_descriptor_pool), "Vulkan: failed to create descriptor pool");
+            VALIDATE_VKRESULT(vkCreateDescriptorPool(*(m_logical_device_ptr->Get_Device()), &descriptor_pool_create_info, nullptr, &m_descriptor_pool), "Vulkan: Failed to create descriptor pool");
 
-            LOG_TRACE << "Vulkan: finished creating descriptor pool";
+            LOG_TRACE << "Vulkan: Finished creating descriptor pool";
         }
 
         void Resource_Grouping_Manager::Allocate_Descriptor_Sets()
         {
-            LOG_INFO << "Vulkan: allocating descriptor sets";
+            LOG_INFO << "Vulkan: Allocating descriptor sets";
 
             Create_Descriptor_Pool();
 
@@ -72,20 +72,20 @@ namespace Cascade_Graphics
             descriptor_set_allocate_info.descriptorSetCount = m_descriptor_sets.size();
             descriptor_set_allocate_info.pSetLayouts = m_descriptor_set_layouts.data();
 
-            VALIDATE_VKRESULT(vkAllocateDescriptorSets(*(m_logical_device_ptr->Get_Device()), &descriptor_set_allocate_info, m_descriptor_sets.data()), "Vulkan: failed to allocate descriptor sets");
+            VALIDATE_VKRESULT(vkAllocateDescriptorSets(*(m_logical_device_ptr->Get_Device()), &descriptor_set_allocate_info, m_descriptor_sets.data()), "Vulkan: Failed to allocate descriptor sets");
 
-            LOG_TRACE << "Vulkan: allocated descriptor set";
+            LOG_TRACE << "Vulkan: Allocated descriptor set";
         }
 
         void Resource_Grouping_Manager::Create_Write_Descriptor_Sets()
         {
-            LOG_INFO << "Vulkan: creating write descriptor sets";
+            LOG_INFO << "Vulkan: Creating write descriptor sets";
 
             for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
             {
                 if (m_resource_groupings[i].descriptor_set_info.has_value())
                 {
-                    LOG_TRACE << "Vulkan: creating write descriptor sets for resource grouping '" << m_resource_groupings[i].label << "'";
+                    LOG_TRACE << "Vulkan: Creating write descriptor sets for resource grouping '" << m_resource_groupings[i].label << "'";
 
                     std::list<VkDescriptorBufferInfo> buffer_descriptor_infos;
                     std::list<VkDescriptorImageInfo> image_descriptor_infos;
@@ -138,7 +138,7 @@ namespace Cascade_Graphics
                             sampler_create_info.unnormalizedCoordinates = VK_FALSE;
 
                             VkSampler sampler;
-                            VALIDATE_VKRESULT(vkCreateSampler(*(m_logical_device_ptr->Get_Device()), &sampler_create_info, nullptr, &sampler), "Vulkan: failed to create image sampler");
+                            VALIDATE_VKRESULT(vkCreateSampler(*(m_logical_device_ptr->Get_Device()), &sampler_create_info, nullptr, &sampler), "Vulkan: Failed to create image sampler");
 
                             image_descriptor_infos.resize(image_descriptor_infos.size() + 1);
 
@@ -167,18 +167,18 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_TRACE << "Vulkan: finished creating write descriptor sets";
+            LOG_TRACE << "Vulkan: Finished creating write descriptor sets";
         }
 
         void Resource_Grouping_Manager::Add_Resource_Grouping(std::string label, std::vector<Storage_Manager::Resource_ID> resources, bool add_descriptor_set)
         {
-            LOG_INFO << "Vulkan: adding resource grouping with label " << label;
+            LOG_INFO << "Vulkan: Adding resource grouping with label " << label;
 
             for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
             {
                 if (m_resource_groupings[i].label == label)
                 {
-                    LOG_ERROR << "Vulkan: label already in use";
+                    LOG_ERROR << "Vulkan: Label already in use";
                     exit(EXIT_FAILURE);
                 }
             }
@@ -188,7 +188,7 @@ namespace Cascade_Graphics
             {
                 if (!m_storage_manager_ptr->Does_Resource_Exist(resources[i]))
                 {
-                    LOG_ERROR << "Vulkan: resource " << resources[i].label << "-" << resources[i].index << " does not exist";
+                    LOG_ERROR << "Vulkan: Resource " << resources[i].label << "-" << resources[i].index << " does not exist";
                     exit(EXIT_FAILURE);
                 }
                 if (resources[i].type == Storage_Manager::SWAPCHAIN_IMAGE)
@@ -196,11 +196,11 @@ namespace Cascade_Graphics
                     contains_swapchain_image = true;
                 }
 
-                LOG_TRACE << "Vulkan: including resource " << resources[i].label << "-" << resources[i].index;
+                LOG_TRACE << "Vulkan: Including resource " << resources[i].label << "-" << resources[i].index;
             }
             if (add_descriptor_set && contains_swapchain_image)
             {
-                LOG_ERROR << "Vulkan: cannot create descriptor set with swapchain image";
+                LOG_ERROR << "Vulkan: Cannot create descriptor set with swapchain image";
                 exit(EXIT_FAILURE);
             }
 
@@ -221,7 +221,7 @@ namespace Cascade_Graphics
 
                 m_resource_groupings.back().descriptor_set_info = descriptor_set_info;
 
-                LOG_TRACE << "Vulkan: creating descriptor set layout";
+                LOG_TRACE << "Vulkan: Creating descriptor set layout";
 
                 std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_bindings(resources.size());
                 for (unsigned int i = 0; i < resources.size(); i++)
@@ -241,12 +241,12 @@ namespace Cascade_Graphics
                 descriptor_set_layout_create_info.bindingCount = descriptor_set_layout_bindings.size();
                 descriptor_set_layout_create_info.pBindings = descriptor_set_layout_bindings.data();
 
-                VALIDATE_VKRESULT(vkCreateDescriptorSetLayout(*(m_logical_device_ptr->Get_Device()), &descriptor_set_layout_create_info, nullptr, &m_descriptor_set_layouts.back()), "Vulkan: failed to create descriptor set layout");
+                VALIDATE_VKRESULT(vkCreateDescriptorSetLayout(*(m_logical_device_ptr->Get_Device()), &descriptor_set_layout_create_info, nullptr, &m_descriptor_set_layouts.back()), "Vulkan: Failed to create descriptor set layout");
 
-                LOG_TRACE << "Vulkan: created descriptor set layout. Descriptor set will be allocated after calling Allocate_Descriptor_Sets";
+                LOG_TRACE << "Vulkan: Created descriptor set layout. Descriptor set will be allocated after calling Allocate_Descriptor_Sets";
             }
 
-            LOG_TRACE << "Vulkan: added resource grouping";
+            LOG_TRACE << "Vulkan: Added resource grouping";
         }
 
         void Resource_Grouping_Manager::Create_Descriptor_Sets()
@@ -265,7 +265,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan: no resource group with label '" << resource_group_label << "'";
+            LOG_ERROR << "Vulkan: No resource group with label '" << resource_group_label << "'";
             exit(EXIT_FAILURE);
         }
 
@@ -282,7 +282,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan: no descriptor set with label '" << resource_grouping_label << "'";
+            LOG_ERROR << "Vulkan: No descriptor set with label '" << resource_grouping_label << "'";
             exit(EXIT_FAILURE);
         }
 
@@ -299,7 +299,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan: no descriptor set layout with label '" << resource_grouping_label << "'";
+            LOG_ERROR << "Vulkan: No descriptor set layout with label '" << resource_grouping_label << "'";
             exit(EXIT_FAILURE);
         }
 
@@ -313,7 +313,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan: cannot find resource grouping with label '" << resource_grouping_label << "'";
+            LOG_ERROR << "Vulkan: Cannot find resource grouping with label '" << resource_grouping_label << "'";
             exit(EXIT_FAILURE);
         }
     } // namespace Vulkan

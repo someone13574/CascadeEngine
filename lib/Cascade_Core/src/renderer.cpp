@@ -13,7 +13,7 @@ namespace Cascade_Core
     {
         m_initialized = false;
 
-        LOG_INFO << "Initializing renderer";
+        LOG_INFO << "Core: Initializing renderer";
 
         instance_ptr = std::make_shared<CGV::Instance>("Application name", 0);
 
@@ -105,7 +105,7 @@ namespace Cascade_Core
         m_camera_ptr = std::make_shared<Cascade_Graphics::Camera>(Cascade_Graphics::Vector_3(-3.0, 0.0, 0.0), Cascade_Graphics::Vector_3(1.0, 0.0, 0.0));
         m_object_manager_ptr = std::make_shared<Cascade_Graphics::Object_Manager>();
 
-        LOG_INFO << "Renderer initialized";
+        LOG_INFO << "Core: Renderer initialized";
 
         Cascade_Graphics::Object::GPU_Voxel gpu_voxel_a = {};
         gpu_voxel_a.x_position = -0.5;
@@ -127,9 +127,9 @@ namespace Cascade_Core
 
     Renderer::~Renderer()
     {
-        LOG_TRACE << "Renderer cleanup started";
+        LOG_TRACE << "Core: Renderer cleanup started";
 
-        LOG_TRACE << "Renderer cleanup finished";
+        LOG_TRACE << "Core: Renderer cleanup finished";
     }
 
     void Renderer::Recreate_Swapchain()
@@ -227,7 +227,7 @@ namespace Cascade_Core
 
             if (acquire_next_image_result == VK_ERROR_OUT_OF_DATE_KHR)
             {
-                LOG_ERROR << "Out of date, should have been caught earlier";
+                LOG_ERROR << "Core: Out of date, should have been caught earlier";
 
                 Recreate_Swapchain();
 
@@ -235,7 +235,7 @@ namespace Cascade_Core
             }
             else
             {
-                VALIDATE_VKRESULT(acquire_next_image_result, "Vulkan: failed to acquire next swapchain image");
+                VALIDATE_VKRESULT(acquire_next_image_result, "Vulkan: Failed to acquire next swapchain image");
             }
 
             if (*synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}) != VK_NULL_HANDLE)
@@ -279,7 +279,7 @@ namespace Cascade_Core
 
             vkResetFences(*(logical_device_ptr->Get_Device()), 1, synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}));
 
-            VALIDATE_VKRESULT(vkQueueSubmit(*(queue_manager_ptr->Get_Queue(1)), 1, &submit_info, *synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame})), "Vulkan: failed to submit queue");
+            VALIDATE_VKRESULT(vkQueueSubmit(*(queue_manager_ptr->Get_Queue(1)), 1, &submit_info, *synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame})), "Vulkan: Failed to submit queue");
 
             VkPresentInfoKHR present_info = {};
             present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

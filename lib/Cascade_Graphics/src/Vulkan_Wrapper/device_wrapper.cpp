@@ -11,7 +11,7 @@ namespace Cascade_Graphics
     {
         Device::Device(std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Cascade_Graphics_Debugging::Vulkan::Validation_Layer> validation_layer_ptr, std::shared_ptr<Physical_Device> physical_device_ptr)
         {
-            LOG_INFO << "Vulkan: creating logical device";
+            LOG_INFO << "Vulkan: Creating logical device";
 
             std::vector<VkDeviceQueueCreateInfo> queue_create_infos = queue_manager_ptr->Generate_Queue_Create_Infos();
 
@@ -39,22 +39,22 @@ namespace Cascade_Graphics
             VkResult device_creation_result = vkCreateDevice(*(physical_device_ptr->Get_Physical_Device()), &device_create_info, nullptr, &m_device);
             if (device_creation_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Vulkan: failed to create logical device with VkResult " << device_creation_result;
+                LOG_FATAL << "Vulkan: Failed to create logical device with VkResult " << device_creation_result;
                 exit(EXIT_FAILURE);
             }
 
             queue_manager_ptr->Get_Device_Queue_Handles(&m_device);
 
-            LOG_TRACE << "Vulkan: finished creating logical device";
+            LOG_TRACE << "Vulkan: Finished creating logical device";
         }
 
         Device::~Device()
         {
-            LOG_INFO << "Vulkan: destroying logical device";
+            LOG_INFO << "Vulkan: Destroying logical device";
 
             vkDestroyDevice(m_device, nullptr);
 
-            LOG_TRACE << "Vulkan: finished destroying logical device";
+            LOG_TRACE << "Vulkan: Finished destroying logical device";
         }
 
         VkDevice* Device::Get_Device()
