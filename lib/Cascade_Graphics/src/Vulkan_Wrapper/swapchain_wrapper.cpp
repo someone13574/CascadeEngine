@@ -1,6 +1,6 @@
 #include "swapchain_wrapper.hpp"
 
-#include "../debug_tools.hpp"
+#include "debug_tools.hpp"
 
 #include <algorithm>
 
@@ -246,7 +246,7 @@ namespace Cascade_Graphics
 
         bool Swapchain::Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface> surface_ptr)
         {
-            LOG_TRACE << "Vulkan: Checking surface support";
+            LOG_INFO << "Vulkan: Checking surface support";
 
             std::vector<VkSurfaceFormatKHR> surface_formats;
             std::vector<VkPresentModeKHR> present_modes;

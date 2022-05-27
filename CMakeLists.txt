@@ -9,7 +9,7 @@ if(UNIX)
     set(CMAKE_CXX_FLAGS "-lxcb -lvulkan -pthread -g")
 endif(UNIX)
 
-add_compile_definitions(LOG_LEVEL_ALL CSD_ENABLE_DEBUG_LAYERS CSD_ENABLE_PRESENTATION)
+add_compile_definitions(LOG_LEVEL_ALL CSD_USE_VULKAN CSD_VULKAN_ENABLE_DEBUG_LAYERS)
 
 add_subdirectory(lib/Cascade_Core)
 

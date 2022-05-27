@@ -1,25 +1,8 @@
-#include "../src/vulkan_header.hpp"
-
-#include "../src/debug_tools.hpp"
-
-#include "../src/Vulkan_Wrapper/command_buffer_manager.hpp"
-#include "../src/Vulkan_Wrapper/device_wrapper.hpp"
-#include "../src/Vulkan_Wrapper/instance_wrapper.hpp"
-#include "../src/Vulkan_Wrapper/physical_device_wrapper.hpp"
-#include "../src/Vulkan_Wrapper/pipeline_manager.hpp"
-#include "../src/Vulkan_Wrapper/queue_wrapper.hpp"
-#include "../src/Vulkan_Wrapper/resource_grouping_manager.hpp"
-#include "../src/Vulkan_Wrapper/shader_manager.hpp"
-#include "../src/Vulkan_Wrapper/storage_manager.hpp"
-#include "../src/Vulkan_Wrapper/surface_wrapper.hpp"
-#include "../src/Vulkan_Wrapper/swapchain_wrapper.hpp"
-#include "../src/Vulkan_Wrapper/synchronization_manager.hpp"
-#include "../src/Vulkan_Wrapper/validation_layer_wrapper.hpp"
-
 #include "../src/Data_Types/vector_2.hpp"
 #include "../src/Data_Types/vector_3.hpp"
 #include "../src/Data_Types/vector_4.hpp"
 #include "../src/camera.hpp"
-
 #include "../src/object.hpp"
 #include "../src/object_manager.hpp"
+#include "../src/renderer.hpp"
+#include "../src/window_information.hpp"

@@ -164,9 +164,7 @@ namespace Cascade_Graphics
         {
             std::vector<const char*> required_extensions;
 
-#if defined CSD_ENABLE_PRESENTATION
             required_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-#endif
 
             return required_extensions;
         }

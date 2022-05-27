@@ -1,6 +1,6 @@
 #include "command_buffer_manager.hpp"
 
-#include "../debug_tools.hpp"
+#include "debug_tools.hpp"
 
 namespace Cascade_Graphics
 {
@@ -280,8 +280,8 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::Copy_Image(Identifier identifier, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id, unsigned int width, unsigned int height)
         {
-            LOG_INFO << "Vulkan: Copying image " << source_resource_id.label << "-" << source_resource_id.index << " to " << destination_resource_id.label << "-" << destination_resource_id.index << " in command buffer '" << identifier.label << "-"
-                     << identifier.index << "'";
+            LOG_TRACE << "Vulkan: Copying image " << source_resource_id.label << "-" << source_resource_id.index << " to " << destination_resource_id.label << "-" << destination_resource_id.index << " in command buffer '" << identifier.label << "-"
+                      << identifier.index << "'";
 
             unsigned int command_buffer_index = Get_Command_Buffer_Index(identifier);
 
@@ -324,8 +324,6 @@ namespace Cascade_Graphics
 
             vkCmdCopyImage(m_command_buffers[command_buffer_index].command_buffer, *m_storage_manager_ptr->Get_Image(source_resource_id), m_command_buffers[command_buffer_index].image_resource_states[source_index].current_image_layout,
                            *m_storage_manager_ptr->Get_Image(destination_resource_id), m_command_buffers[command_buffer_index].image_resource_states[destination_index].current_image_layout, 1, &copy_region);
-
-            LOG_TRACE << "Vulkan: Recorded copy command";
         }
 
         VkCommandBuffer* Command_Buffer_Manager::Get_Command_Buffer(Identifier identifier)

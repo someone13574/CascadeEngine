@@ -1,7 +1,7 @@
 #pragma once
 
+#include "cascade_graphics.hpp"
 #include "event_manager.hpp"
-#include "renderer.hpp"
 
 #include <memory>
 #include <string>
@@ -22,8 +22,6 @@
 
 namespace Cascade_Core
 {
-    class Renderer;
-
     class Window
     {
     public:
@@ -41,7 +39,7 @@ namespace Cascade_Core
         unsigned int m_height;
 
         std::shared_ptr<Event_Manager> m_event_manager_ptr;
-        std::shared_ptr<Renderer> m_renderer_ptr;
+        std::shared_ptr<Cascade_Graphics::Renderer> m_renderer_ptr;
 
         Initialization_Stage m_initialization_stage = Initialization_Stage::NOT_STARTED;
 
@@ -56,7 +54,7 @@ namespace Cascade_Core
 
         xcb_connection_t* m_xcb_connection_ptr;
         xcb_screen_t* m_xcb_screen_ptr;
-        xcb_window_t m_xcb_window_ptr;
+        xcb_window_t m_xcb_window;
         xcb_generic_event_t* m_xcb_event_ptr;
         xcb_intern_atom_cookie_t m_xcb_close_window_cookie;
         xcb_intern_atom_reply_t* m_xcb_close_window_reply_ptr;
@@ -89,6 +87,6 @@ namespace Cascade_Core
         std::pair<unsigned int, unsigned int> Get_Window_Dimensions();
         Initialization_Stage Get_Initialization_Stage();
         std::shared_ptr<Event_Manager> Get_Event_Manager();
-        std::shared_ptr<Renderer> Get_Renderer();
+        std::shared_ptr<Cascade_Graphics::Renderer> Get_Renderer();
     };
 } // namespace Cascade_Core

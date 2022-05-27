@@ -130,7 +130,7 @@ namespace Cascade_Graphics
             std::vector<const char*> required_instance_extensions;
             required_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 
-#if defined CSD_ENABLE_DEBUG_LAYERS
+#if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
             required_instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 

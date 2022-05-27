@@ -37,24 +37,25 @@ namespace Cascade_Core
 
         m_xcb_connection_ptr = xcb_connect(nullptr, nullptr);
         m_xcb_screen_ptr = xcb_setup_roots_iterator(xcb_get_setup(m_xcb_connection_ptr)).data;
-        m_xcb_window_ptr = xcb_generate_id(m_xcb_connection_ptr);
+        m_xcb_window = xcb_generate_id(m_xcb_connection_ptr);
 
         unsigned int mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
         unsigned int values[2] = {m_xcb_screen_ptr->white_pixel, 0};
 
-        xcb_create_window(m_xcb_connection_ptr, XCB_COPY_FROM_PARENT, m_xcb_window_ptr, m_xcb_screen_ptr->root, 0, 0, m_width, m_height, 10, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_xcb_screen_ptr->root_visual, mask, values);
-        xcb_change_property(m_xcb_connection_ptr, XCB_PROP_MODE_REPLACE, m_xcb_window_ptr, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, m_window_title.length(), const_cast<char*>(m_window_title.c_str()));
+        xcb_create_window(m_xcb_connection_ptr, XCB_COPY_FROM_PARENT, m_xcb_window, m_xcb_screen_ptr->root, 0, 0, m_width, m_height, 10, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_xcb_screen_ptr->root_visual, mask, values);
+        xcb_change_property(m_xcb_connection_ptr, XCB_PROP_MODE_REPLACE, m_xcb_window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, m_window_title.length(), const_cast<char*>(m_window_title.c_str()));
 
         xcb_intern_atom_cookie_t close_window_tmp_cookie = xcb_intern_atom(m_xcb_connection_ptr, 1, 12, "WM_PROTOCOLS");
         xcb_intern_atom_reply_t* close_window_tmp_reply = xcb_intern_atom_reply(m_xcb_connection_ptr, close_window_tmp_cookie, 0);
         m_xcb_close_window_cookie = xcb_intern_atom(m_xcb_connection_ptr, 0, 16, "WM_DELETE_WINDOW");
         m_xcb_close_window_reply_ptr = xcb_intern_atom_reply(m_xcb_connection_ptr, m_xcb_close_window_cookie, 0);
-        xcb_change_property(m_xcb_connection_ptr, XCB_PROP_MODE_REPLACE, m_xcb_window_ptr, (*close_window_tmp_reply).atom, 4, 32, 1, &(*m_xcb_close_window_reply_ptr).atom);
+        xcb_change_property(m_xcb_connection_ptr, XCB_PROP_MODE_REPLACE, m_xcb_window, (*close_window_tmp_reply).atom, 4, 32, 1, &(*m_xcb_close_window_reply_ptr).atom);
 
-        unsigned int enabled_events[] = {XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE};
-        xcb_change_window_attributes(m_xcb_connection_ptr, m_xcb_window_ptr, XCB_CW_EVENT_MASK, enabled_events);
+        unsigned int enabled_events[] = {XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE
+                                         | XCB_EVENT_MASK_STRUCTURE_NOTIFY};
+        xcb_change_window_attributes(m_xcb_connection_ptr, m_xcb_window, XCB_CW_EVENT_MASK, enabled_events);
 
-        xcb_map_window(m_xcb_connection_ptr, m_xcb_window_ptr);
+        xcb_map_window(m_xcb_connection_ptr, m_xcb_window);
         xcb_flush(m_xcb_connection_ptr);
 
 #elif defined _WIN32 || defined WIN32
@@ -256,19 +257,23 @@ namespace Cascade_Core
 
 #ifdef __linux__
 
-        Cascade_Graphics::Vulkan::Surface::Window_Data window_data = {};
-        window_data.connection_ptr = m_xcb_connection_ptr;
-        window_data.window_ptr = &m_xcb_window_ptr;
+        Cascade_Graphics::Window_Information window_information = {};
+        window_information.width = &m_width;
+        window_information.height = &m_height;
+        window_information.xcb_window_ptr = &m_xcb_window;
+        window_information.xcb_connection_ptr = m_xcb_connection_ptr;
 
-        m_renderer_ptr = std::make_shared<Renderer>(this, window_data, m_width, m_height);
+        m_renderer_ptr = std::make_shared<Cascade_Graphics::Renderer>(window_information);
 
 #elif defined _WIN32 || defined WIN32
 
-        Cascade_Graphics::Vulkan::Surface::Window_Data window_data = {};
-        window_data.hinstance_ptr = &m_hinstance;
-        window_data.hwindow_ptr = &m_hwindow;
+        Cascade_Graphics::Window_Information window_information = {};
+        window_information.window_width_ptr = &m_width;
+        window_information.window_height_ptr = &m_height;
+        window_information.hwindow_ptr = &m_hwindow;
+        window_information.hinstance_ptr = &m_hinstance;
 
-        m_renderer_ptr = std::make_shared<Renderer>(this, window_data, m_width, m_height);
+        m_renderer_ptr = std::make_shared<Cascade_Graphics::Renderer>(window_information);
 
 #endif
 
@@ -378,6 +383,15 @@ namespace Cascade_Core
 
                     break;
                 }
+                case XCB_CONFIGURE_NOTIFY:
+                {
+                    xcb_configure_notify_event_t* configure_notify_event = (xcb_configure_notify_event_t*)window_ptr->m_xcb_event_ptr;
+
+                    window_ptr->m_width = configure_notify_event->width;
+                    window_ptr->m_height = configure_notify_event->height;
+
+                    break;
+                }
             }
 
 #elif defined _WIN32 || defined WIN32
@@ -445,7 +459,7 @@ namespace Cascade_Core
             case Initialization_Stage::WINDOW_CREATED:
             {
                 free(m_xcb_event_ptr);
-                xcb_destroy_window(m_xcb_connection_ptr, m_xcb_window_ptr);
+                xcb_destroy_window(m_xcb_connection_ptr, m_xcb_window);
                 xcb_disconnect(m_xcb_connection_ptr);
                 m_initialization_stage = Initialization_Stage::CLEANED_UP;
                 break;
@@ -455,7 +469,7 @@ namespace Cascade_Core
                 m_renderer_ptr.reset();
 
                 free(m_xcb_event_ptr);
-                xcb_destroy_window(m_xcb_connection_ptr, m_xcb_window_ptr);
+                xcb_destroy_window(m_xcb_connection_ptr, m_xcb_window);
                 xcb_disconnect(m_xcb_connection_ptr);
                 m_initialization_stage = Initialization_Stage::CLEANED_UP;
                 break;
@@ -491,7 +505,7 @@ namespace Cascade_Core
         xcb_get_geometry_cookie_t get_geometry_cookie;
         xcb_get_geometry_reply_t* get_geometry_reply_ptr;
 
-        get_geometry_cookie = xcb_get_geometry(m_xcb_connection_ptr, m_xcb_window_ptr);
+        get_geometry_cookie = xcb_get_geometry(m_xcb_connection_ptr, m_xcb_window);
         get_geometry_reply_ptr = xcb_get_geometry_reply(m_xcb_connection_ptr, get_geometry_cookie, NULL);
 
         if (!get_geometry_reply_ptr)
@@ -530,7 +544,7 @@ namespace Cascade_Core
         return m_event_manager_ptr;
     }
 
-    std::shared_ptr<Renderer> Window::Get_Renderer()
+    std::shared_ptr<Cascade_Graphics::Renderer> Window::Get_Renderer()
     {
         return m_renderer_ptr;
     }

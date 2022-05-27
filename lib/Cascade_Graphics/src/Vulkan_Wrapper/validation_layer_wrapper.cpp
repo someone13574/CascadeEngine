@@ -10,7 +10,7 @@ namespace Cascade_Graphics_Debugging
     {
         Validation_Layer::Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan::Instance> instance_ptr) : m_instance_ptr(instance_ptr)
         {
-#if defined CSD_ENABLE_DEBUG_LAYERS
+#if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
             LOG_INFO << "Vulkan: Creating validation layer debug messenger";
 
             VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Generate_Messenger_Create_Info();

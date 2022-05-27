@@ -25,7 +25,7 @@ namespace Cascade_Graphics
             device_create_info.flags = 0;
             device_create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
             device_create_info.pQueueCreateInfos = queue_create_infos.data();
-#if defined CSD_ENABLE_DEBUG_LAYERS
+#if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
             std::vector<const char*> enabled_validation_layers = Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers();
             device_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
             device_create_info.ppEnabledLayerNames = enabled_validation_layers.data();

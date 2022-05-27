@@ -1,6 +1,6 @@
 #include "pipeline_manager.hpp"
 
-#include "../debug_tools.hpp"
+#include "debug_tools.hpp"
 
 namespace Cascade_Graphics
 {

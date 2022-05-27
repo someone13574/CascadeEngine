@@ -1,6 +1,6 @@
 #include "shader_manager.hpp"
 
-#include "../debug_tools.hpp"
+#include "debug_tools.hpp"
 
 #include <fstream>
 

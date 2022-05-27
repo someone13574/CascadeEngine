@@ -25,7 +25,7 @@ int main()
     Cascade_Core::Application application({"Test Cascade Application", 0, 4});
     main_window_ptr = application.Create_Window("Main Window", 1280, 720);
 
-    main_window_ptr->Get_Renderer()->Get_Object_Manager()->Create_Object_From_Sample_Function("test", 3, {-1.0, -1.0, -1.0}, {1.0, 1.0, 1.0}, Volume_Sample_Function);
+    // main_window_ptr->Get_Renderer()->Get_Object_Manager()->Create_Object_From_Sample_Function("test", 3, {-1.0, -1.0, -1.0}, {1.0, 1.0, 1.0}, Volume_Sample_Function);
 
     application.Run_Program_Loop(Update, 60);
 }

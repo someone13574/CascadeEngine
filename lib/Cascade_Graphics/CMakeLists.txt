@@ -24,15 +24,17 @@ add_library(Cascade_Graphics STATIC
     src/Vulkan_Wrapper/command_buffer_manager.cpp
     src/Vulkan_Wrapper/resource_grouping_manager.cpp
     src/Vulkan_Wrapper/synchronization_manager.cpp
+    src/Vulkan_Wrapper/debug_tools.cpp
     src/Data_Types/vector_2.hpp
     src/Data_Types/vector_3.hpp
     src/Data_Types/vector_4.hpp
     src/Data_Types/matrix_2x2.hpp
     src/Data_Types/matrix_3x3.hpp
+    src/window_information.hpp
     src/object.cpp
     src/object_manager.cpp
     src/camera.cpp
-    src/debug_tools.cpp)
+    src/renderer.cpp)
 
 if(UNIX)
     target_include_directories(Cascade_Graphics

@@ -1,6 +1,6 @@
 #include "storage_manager.hpp"
 
-#include "../debug_tools.hpp"
+#include "debug_tools.hpp"
 
 #include <cstring>
 #include <set>

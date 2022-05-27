@@ -6,7 +6,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Surface::Surface(Window_Data window_data, std::shared_ptr<Instance> instance_ptr) : m_instance_ptr(instance_ptr)
+        Surface::Surface(Window_Information window_data, std::shared_ptr<Instance> instance_ptr) : m_instance_ptr(instance_ptr)
         {
 #if defined __linux__
             LOG_INFO << "Vulkan: Creating xcb window surface";
@@ -15,8 +15,8 @@ namespace Cascade_Graphics
             xcb_surface_create_info.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
             xcb_surface_create_info.pNext = nullptr;
             xcb_surface_create_info.flags = 0;
-            xcb_surface_create_info.connection = window_data.connection_ptr;
-            xcb_surface_create_info.window = *window_data.window_ptr;
+            xcb_surface_create_info.connection = window_data.xcb_connection_ptr;
+            xcb_surface_create_info.window = *window_data.xcb_window_ptr;
 
             VkResult create_surface_result = vkCreateXcbSurfaceKHR(*(m_instance_ptr->Get_Instance()), &xcb_surface_create_info, nullptr, &m_surface);
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../vulkan_header.hpp"
 #include "instance_wrapper.hpp"
+#include "vulkan_header.hpp"
 
 #include <memory>
 #include <vector>
