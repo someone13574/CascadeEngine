@@ -274,7 +274,7 @@ namespace Cascade_Graphics
                 staisfied_queues |= is_present_family ? Queue_Types::PRESENT_QUEUE : 0;
             }
 
-            if (staisfied_queues & m_required_queues == m_required_queues)
+            if ((staisfied_queues & m_required_queues) == m_required_queues)
             {
                 LOG_TRACE << "Vulkan: Has all required queues";
                 return true;
