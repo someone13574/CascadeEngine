@@ -258,8 +258,8 @@ namespace Cascade_Core
 #ifdef __linux__
 
         Cascade_Graphics::Window_Information window_information = {};
-        window_information.width = &m_width;
-        window_information.height = &m_height;
+        window_information.width_ptr = &m_width;
+        window_information.height_ptr = &m_height;
         window_information.xcb_window_ptr = &m_xcb_window;
         window_information.xcb_connection_ptr = m_xcb_connection_ptr;
 
@@ -268,8 +268,8 @@ namespace Cascade_Core
 #elif defined _WIN32 || defined WIN32
 
         Cascade_Graphics::Window_Information window_information = {};
-        window_information.window_width_ptr = &m_width;
-        window_information.window_height_ptr = &m_height;
+        window_information.width_ptr = &m_width;
+        window_information.height_ptr = &m_height;
         window_information.hwindow_ptr = &m_hwindow;
         window_information.hinstance_ptr = &m_hinstance;
 

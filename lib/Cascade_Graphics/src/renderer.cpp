@@ -25,8 +25,8 @@ namespace Cascade_Graphics
 
     void Renderer::Initialize_Vulkan()
     {
-        unsigned int width = *m_window_information.width;
-        unsigned int height = *m_window_information.height;
+        unsigned int width = *m_window_information.width_ptr;
+        unsigned int height = *m_window_information.height_ptr;
 
         m_instance_ptr = std::make_shared<Vulkan::Instance>("Application name", 0);
         m_surface_ptr = std::make_shared<Vulkan::Surface>(m_window_information, m_instance_ptr);
@@ -131,8 +131,8 @@ namespace Cascade_Graphics
         m_storage_manager_ptr.reset();
         m_swapchain_ptr.reset();
 
-        unsigned int width = *m_window_information.width;
-        unsigned int height = *m_window_information.height;
+        unsigned int width = *m_window_information.width_ptr;
+        unsigned int height = *m_window_information.height_ptr;
 
         LOG_DEBUG << "Vulkan: New window size " << width << "x" << height;
 

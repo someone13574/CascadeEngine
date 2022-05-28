@@ -9,8 +9,8 @@ namespace Cascade_Graphics
 {
     struct Window_Information
     {
-        unsigned int* width;
-        unsigned int* height;
+        unsigned int* width_ptr;
+        unsigned int* height_ptr;
 
         xcb_window_t* xcb_window_ptr;
         xcb_connection_t* xcb_connection_ptr;
@@ -25,8 +25,8 @@ namespace Cascade_Graphics
 {
     struct Window_Information
     {
-        unsigned int* window_width_ptr;
-        unsigned int* window_height_ptr;
+        unsigned int* width_ptr;
+        unsigned int* height_ptr;
 
         HWND* hwindow_ptr;
         HINSTANCE* hinstance_ptr;
