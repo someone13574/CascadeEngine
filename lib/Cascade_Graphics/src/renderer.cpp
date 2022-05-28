@@ -190,6 +190,7 @@ namespace Cascade_Graphics
             if (acquire_next_image_result == VK_ERROR_OUT_OF_DATE_KHR)
             {
                 LOG_DEBUG << "Vulkan: Swapchain is out of date";
+                Recreate_Swapchain();
 
                 return;
             }
@@ -208,20 +209,7 @@ namespace Cascade_Graphics
 
             //
 
-            Cascade_Graphics::Camera::GPU_Camera_Data camera_data = {};
-            camera_data.matrix_x0 = m_camera_ptr->Get_Camera_To_World_Matrix().m_x0;
-            camera_data.matrix_x1 = m_camera_ptr->Get_Camera_To_World_Matrix().m_x1;
-            camera_data.matrix_x2 = m_camera_ptr->Get_Camera_To_World_Matrix().m_x2;
-            camera_data.matrix_y0 = m_camera_ptr->Get_Camera_To_World_Matrix().m_y0;
-            camera_data.matrix_y1 = m_camera_ptr->Get_Camera_To_World_Matrix().m_y1;
-            camera_data.matrix_y2 = m_camera_ptr->Get_Camera_To_World_Matrix().m_y2;
-            camera_data.matrix_z0 = m_camera_ptr->Get_Camera_To_World_Matrix().m_z0;
-            camera_data.matrix_z1 = m_camera_ptr->Get_Camera_To_World_Matrix().m_z1;
-            camera_data.matrix_z2 = m_camera_ptr->Get_Camera_To_World_Matrix().m_z2;
-            camera_data.origin_x = m_camera_ptr->Get_Camera_Position().m_x;
-            camera_data.origin_y = m_camera_ptr->Get_Camera_Position().m_y;
-            camera_data.origin_z = m_camera_ptr->Get_Camera_Position().m_z;
-
+            Cascade_Graphics::Camera::GPU_Camera_Data camera_data = m_camera_ptr->Get_GPU_Camera_Data();
             m_storage_manager_ptr->Upload_To_Buffer({0, "camera_data", Vulkan::Storage_Manager::Resource_Type::BUFFER}, &camera_data, sizeof(Cascade_Graphics::Camera::GPU_Camera_Data));
 
             //
@@ -255,7 +243,6 @@ namespace Cascade_Graphics
             if (present_result == VK_ERROR_OUT_OF_DATE_KHR || present_result == VK_SUBOPTIMAL_KHR)
             {
                 LOG_DEBUG << "Vulkan: Swapchain is out of date or suboptimal";
-                // exit(EXIT_FAILURE);
                 Recreate_Swapchain();
 
                 return;

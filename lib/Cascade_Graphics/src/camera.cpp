@@ -43,4 +43,23 @@ namespace Cascade_Graphics
     {
         return m_camera_to_world_matrix;
     }
+
+    Camera::GPU_Camera_Data Camera::Get_GPU_Camera_Data()
+    {
+        GPU_Camera_Data camera_data = {};
+        camera_data.matrix_x0 = m_camera_to_world_matrix.m_x0;
+        camera_data.matrix_x1 = m_camera_to_world_matrix.m_x1;
+        camera_data.matrix_x2 = m_camera_to_world_matrix.m_x2;
+        camera_data.matrix_y0 = m_camera_to_world_matrix.m_y0;
+        camera_data.matrix_y1 = m_camera_to_world_matrix.m_y1;
+        camera_data.matrix_y2 = m_camera_to_world_matrix.m_y2;
+        camera_data.matrix_z0 = m_camera_to_world_matrix.m_z0;
+        camera_data.matrix_z1 = m_camera_to_world_matrix.m_z1;
+        camera_data.matrix_z2 = m_camera_to_world_matrix.m_z2;
+        camera_data.origin_x = m_position.m_x;
+        camera_data.origin_y = m_position.m_y;
+        camera_data.origin_z = m_position.m_z;
+
+        return camera_data;
+    }
 } // namespace Cascade_Graphics

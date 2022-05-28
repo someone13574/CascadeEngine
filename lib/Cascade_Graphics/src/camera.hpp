@@ -42,5 +42,6 @@ namespace Cascade_Graphics
 
         Vector_3<double> Get_Camera_Position();
         Matrix_3x3<double> Get_Camera_To_World_Matrix();
+        GPU_Camera_Data Get_GPU_Camera_Data();
     };
 } // namespace Cascade_Graphics
