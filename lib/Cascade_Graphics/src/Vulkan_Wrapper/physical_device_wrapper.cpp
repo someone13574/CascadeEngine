@@ -60,13 +60,14 @@ namespace Cascade_Graphics
 
             LOG_DEBUG << "Vulkan: Selected device " << best_rated_device_properties.deviceName;
             m_physical_device = best_rated_device;
+            m_queue_manager_ptr->Get_Queue_Families(&m_physical_device);
         }
 
         bool Physical_Device::Is_Device_Suitable(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features)
         {
             LOG_INFO << "Vulkan: Checking physical device " << physical_device_properties.deviceName << " suitablity";
 
-            if (!m_queue_manager_ptr->Physical_Device_Has_Required_Queues(physical_device))
+            if (!m_queue_manager_ptr->Has_Required_Queues(&physical_device))
             {
                 return false;
             }

@@ -9,22 +9,21 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Device::Device(std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Cascade_Graphics_Debugging::Vulkan::Validation_Layer> validation_layer_ptr, std::shared_ptr<Physical_Device> physical_device_ptr)
+        Device::Device(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Cascade_Graphics_Debugging::Vulkan::Validation_Layer> validation_layer_ptr)
         {
             LOG_INFO << "Vulkan: Creating logical device";
-
-            std::vector<VkDeviceQueueCreateInfo> queue_create_infos = queue_manager_ptr->Generate_Queue_Create_Infos();
 
             VkPhysicalDeviceFeatures physical_device_features = {};
 
             std::vector<const char*> required_extensions = physical_device_ptr->Get_Required_Extensions();
+            std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos = queue_manager_ptr->Generate_Device_Queue_Create_Infos();
 
             VkDeviceCreateInfo device_create_info = {};
             device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
             device_create_info.pNext = nullptr;
             device_create_info.flags = 0;
-            device_create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
-            device_create_info.pQueueCreateInfos = queue_create_infos.data();
+            device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_infos.size());
+            device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
 #if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
             std::vector<const char*> enabled_validation_layers = Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers();
             device_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());

@@ -14,7 +14,7 @@ add_library(Cascade_Graphics STATIC
     src/Vulkan_Wrapper/instance_wrapper.cpp
     src/Vulkan_Wrapper/validation_layer_wrapper.cpp
     src/Vulkan_Wrapper/physical_device_wrapper.cpp
-    src/Vulkan_Wrapper/queue_wrapper.cpp
+    src/Vulkan_Wrapper/queue_manager.cpp
     src/Vulkan_Wrapper/device_wrapper.cpp
     src/Vulkan_Wrapper/surface_wrapper.cpp
     src/Vulkan_Wrapper/swapchain_wrapper.cpp

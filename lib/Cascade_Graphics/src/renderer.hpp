@@ -14,7 +14,7 @@
 #include "Vulkan_Wrapper/instance_wrapper.hpp"
 #include "Vulkan_Wrapper/physical_device_wrapper.hpp"
 #include "Vulkan_Wrapper/pipeline_manager.hpp"
-#include "Vulkan_Wrapper/queue_wrapper.hpp"
+#include "Vulkan_Wrapper/queue_manager.hpp"
 #include "Vulkan_Wrapper/resource_grouping_manager.hpp"
 #include "Vulkan_Wrapper/shader_manager.hpp"
 #include "Vulkan_Wrapper/storage_manager.hpp"

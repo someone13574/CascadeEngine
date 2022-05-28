@@ -1,7 +1,7 @@
 #pragma once
 
 #include "instance_wrapper.hpp"
-#include "queue_wrapper.hpp"
+#include "queue_manager.hpp"
 #include "surface_wrapper.hpp"
 #include "vulkan_header.hpp"
 

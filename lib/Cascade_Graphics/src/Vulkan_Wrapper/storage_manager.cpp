@@ -74,49 +74,49 @@ namespace Cascade_Graphics
             return count;
         }
 
-        std::vector<unsigned int> Storage_Manager::Get_Queue_Families(Resouce_Queue_Families resouce_queue_families)
+        std::vector<unsigned int> Storage_Manager::Get_Queue_Families(unsigned int required_queues)
         {
             std::set<unsigned int> queue_families = {};
 
-            if (resouce_queue_families.use_graphics && m_queue_manager_ptr->Get_Queue_Family_Indices().m_graphics_index.has_value())
+            if (required_queues & Queue_Manager::Queue_Types::GRAPHICS_QUEUE)
             {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Indices().m_graphics_index.value());
+                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::GRAPHICS_QUEUE));
             }
-            if (resouce_queue_families.use_compute && m_queue_manager_ptr->Get_Queue_Family_Indices().m_compute_index.has_value())
+            if (required_queues & Queue_Manager::Queue_Types::COMPUTE_QUEUE)
             {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Indices().m_compute_index.value());
+                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::COMPUTE_QUEUE));
             }
-            if (resouce_queue_families.use_transfer && m_queue_manager_ptr->Get_Queue_Family_Indices().m_transfer_index.has_value())
+            if (required_queues & Queue_Manager::Queue_Types::TRANSFER_QUEUE)
             {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Indices().m_transfer_index.value());
+                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE));
             }
-            if (resouce_queue_families.use_sparse_binding && m_queue_manager_ptr->Get_Queue_Family_Indices().m_sparse_binding_index.has_value())
+            if (required_queues & Queue_Manager::Queue_Types::SPARSE_BINDING_QUEUE)
             {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Indices().m_sparse_binding_index.value());
+                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::SPARSE_BINDING_QUEUE));
             }
-            if (resouce_queue_families.use_protected && m_queue_manager_ptr->Get_Queue_Family_Indices().m_protected_index.has_value())
+            if (required_queues & Queue_Manager::Queue_Types::PROTECTED_QUEUE)
             {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Indices().m_protected_index.value());
+                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::PROTECTED_QUEUE));
             }
-            if (resouce_queue_families.use_present && m_queue_manager_ptr->Get_Queue_Family_Indices().m_present_index.has_value())
+            if (required_queues & Queue_Manager::Queue_Types::PRESENT_QUEUE)
             {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Indices().m_present_index.value());
+                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::PRESENT_QUEUE));
             }
 
             std::vector<unsigned int> queue_families_vector(queue_families.begin(), queue_families.end());
             return queue_families_vector;
         }
 
-        void Storage_Manager::Create_Buffer_From_ID(Resource_ID resource_id, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families)
+        void Storage_Manager::Create_Buffer_From_ID(Resource_ID resource_id, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_required_queues)
         {
-            std::vector<unsigned int> queue_families = Get_Queue_Families(resouce_queue_families);
+            std::vector<unsigned int> queue_families = Get_Queue_Families(resource_required_queues);
 
             m_buffers.resize(m_buffers.size() + 1);
             m_buffers.back() = {};
             m_buffers.back().resource_id = resource_id;
             m_buffers.back().descriptor_type = buffer_type;
             m_buffers.back().buffer_usage = buffer_usage;
-            m_buffers.back().resource_queue_families = resouce_queue_families;
+            m_buffers.back().resource_required_queues = resource_required_queues;
 
             LOG_INFO << "Vulkan: Creating buffer " << resource_id.label << "-" << resource_id.index;
 
@@ -160,19 +160,19 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan: Finished creating buffer " << resource_id.label << "-" << resource_id.index;
         }
 
-        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families)
+        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_required_queues)
         {
             Resource_ID resource_id = {};
             resource_id.label = label;
             resource_id.index = Get_Next_Buffer_Id(label);
             resource_id.type = Resource_Type::BUFFER;
 
-            Create_Buffer_From_ID(resource_id, buffer_size, buffer_usage, buffer_type, resouce_queue_families);
+            Create_Buffer_From_ID(resource_id, buffer_size, buffer_usage, buffer_type, resource_required_queues);
         }
 
-        void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, Resouce_Queue_Families resouce_queue_families)
+        void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, unsigned int resource_required_queues)
         {
-            std::vector<unsigned int> queue_families = Get_Queue_Families(resouce_queue_families);
+            std::vector<unsigned int> queue_families = Get_Queue_Families(resource_required_queues);
 
             unsigned int image_id = Get_Next_Image_Id(label);
 

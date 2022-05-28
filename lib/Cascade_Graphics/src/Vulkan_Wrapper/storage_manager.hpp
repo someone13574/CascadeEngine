@@ -4,7 +4,7 @@
 
 #include "device_wrapper.hpp"
 #include "physical_device_wrapper.hpp"
-#include "queue_wrapper.hpp"
+#include "queue_manager.hpp"
 #include "swapchain_wrapper.hpp"
 
 #include <memory>
@@ -16,16 +16,6 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        struct Resouce_Queue_Families
-        {
-            bool use_graphics;
-            bool use_compute;
-            bool use_transfer;
-            bool use_sparse_binding;
-            bool use_protected;
-            bool use_present;
-        };
-
         class Storage_Manager
         {
         public:
@@ -63,7 +53,7 @@ namespace Cascade_Graphics
                 VkDeviceMemory buffer_memory;
                 VkDescriptorType descriptor_type;
                 VkBufferUsageFlagBits buffer_usage;
-                Resouce_Queue_Families resource_queue_families;
+                unsigned int resource_required_queues;
             };
 
             struct Image_Info
@@ -91,19 +81,19 @@ namespace Cascade_Graphics
             std::vector<Image_Resource> m_images;
 
         private:
-            void Create_Buffer_From_ID(Resource_ID resource_id, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families);
+            void Create_Buffer_From_ID(Resource_ID resource_id, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_required_queues);
 
             unsigned int Get_Next_Buffer_Id(std::string label);
             unsigned int Get_Next_Image_Id(std::string label);
-            std::vector<unsigned int> Get_Queue_Families(Resouce_Queue_Families resouce_queue_families);
+            std::vector<unsigned int> Get_Queue_Families(unsigned int required_queues);
 
         public:
             Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Swapchain> swapchain_ptr);
             ~Storage_Manager();
 
         public:
-            void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, Resouce_Queue_Families resouce_queue_families);
-            void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, Resouce_Queue_Families resouce_queue_families);
+            void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_required_queues);
+            void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, unsigned int resource_required_queues);
 
             void Add_Swapchain(std::string label);
 

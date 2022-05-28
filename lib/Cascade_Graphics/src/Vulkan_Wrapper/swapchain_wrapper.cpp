@@ -184,11 +184,11 @@ namespace Cascade_Graphics
             swapchain_create_info.clipped = VK_TRUE;
             swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
 
-            if (m_queue_manager_ptr->Get_Queue_Family_Indices().m_present_index.value() == m_queue_manager_ptr->Get_Queue_Family_Indices().m_transfer_index.value())
+            if (m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::PRESENT_QUEUE) == m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE))
             {
                 LOG_TRACE << "Vulkan: Swapchain being created with VK_SHARING_MODE_CONCURRENT";
 
-                unsigned int queue_family_indices[] = {m_queue_manager_ptr->Get_Queue_Family_Indices().m_present_index.value(), m_queue_manager_ptr->Get_Queue_Family_Indices().m_transfer_index.value()};
+                unsigned int queue_family_indices[] = {m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::PRESENT_QUEUE), m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE)};
 
                 swapchain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
                 swapchain_create_info.queueFamilyIndexCount = 2;
