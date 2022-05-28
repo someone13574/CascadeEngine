@@ -16,7 +16,7 @@ namespace Cascade_Graphics
             LOG_INFO << "Vulkan: Choosing physical device";
 
             unsigned int device_count = 0;
-            vkEnumeratePhysicalDevices(*(instance_ptr->Get_Instance()), &device_count, nullptr);
+            vkEnumeratePhysicalDevices(*instance_ptr->Get_Instance(), &device_count, nullptr);
             LOG_DEBUG << "Vulkan: " << device_count << " physical device(s) found";
 
             if (device_count == 0)
@@ -26,7 +26,7 @@ namespace Cascade_Graphics
             }
 
             std::vector<VkPhysicalDevice> physical_devices(device_count);
-            vkEnumeratePhysicalDevices(*(instance_ptr->Get_Instance()), &device_count, physical_devices.data());
+            vkEnumeratePhysicalDevices(*instance_ptr->Get_Instance(), &device_count, physical_devices.data());
 
             unsigned int best_device_rating = 0;
             VkPhysicalDevice best_rated_device = VK_NULL_HANDLE;

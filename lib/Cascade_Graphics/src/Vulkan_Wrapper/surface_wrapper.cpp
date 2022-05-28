@@ -18,7 +18,7 @@ namespace Cascade_Graphics
             xcb_surface_create_info.connection = window_data.xcb_connection_ptr;
             xcb_surface_create_info.window = *window_data.xcb_window_ptr;
 
-            VkResult create_surface_result = vkCreateXcbSurfaceKHR(*(m_instance_ptr->Get_Instance()), &xcb_surface_create_info, nullptr, &m_surface);
+            VkResult create_surface_result = vkCreateXcbSurfaceKHR(*m_instance_ptr->Get_Instance(), &xcb_surface_create_info, nullptr, &m_surface);
 
             if (create_surface_result != VK_SUCCESS)
             {
@@ -37,7 +37,7 @@ namespace Cascade_Graphics
             win32_surface_create_info.hinstance = *window_data.hinstance_ptr;
             win32_surface_create_info.hwnd = *window_data.hwindow_ptr;
 
-            VkResult create_surface_result = vkCreateWin32SurfaceKHR(*(m_instance_ptr->Get_Instance()), &win32_surface_create_info, nullptr, &m_surface);
+            VkResult create_surface_result = vkCreateWin32SurfaceKHR(*m_instance_ptr->Get_Instance(), &win32_surface_create_info, nullptr, &m_surface);
 
             if (create_surface_result != VK_SUCCESS)
             {
@@ -53,7 +53,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Destroying surface";
 
-            vkDestroySurfaceKHR(*(m_instance_ptr->Get_Instance()), m_surface, nullptr);
+            vkDestroySurfaceKHR(*m_instance_ptr->Get_Instance(), m_surface, nullptr);
 
             LOG_TRACE << "Vulkan: Finished destroying surface";
         }

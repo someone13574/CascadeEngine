@@ -16,14 +16,14 @@ namespace Cascade_Graphics
 
             for (unsigned int i = 0; i < m_semaphores.size(); i++)
             {
-                vkDestroySemaphore(*(m_logical_device_ptr->Get_Device()), m_semaphores[i].semaphore, nullptr);
+                vkDestroySemaphore(*m_logical_device_ptr->Get_Device(), m_semaphores[i].semaphore, nullptr);
             }
 
             for (unsigned int i = 0; i < m_fences.size(); i++)
             {
                 if (!m_fences[i].added)
                 {
-                    vkDestroyFence(*(m_logical_device_ptr->Get_Device()), m_fences[i].fence, nullptr);
+                    vkDestroyFence(*m_logical_device_ptr->Get_Device(), m_fences[i].fence, nullptr);
                 }
             }
 
@@ -75,7 +75,7 @@ namespace Cascade_Graphics
             m_semaphores.back() = {};
             m_semaphores.back().identifier = identifier;
 
-            VALIDATE_VKRESULT(vkCreateSemaphore(*(m_logical_device_ptr->Get_Device()), &semaphore_create_info, nullptr, &m_semaphores.back().semaphore), "Vulkan: Failed to create semaphore");
+            VALIDATE_VKRESULT(vkCreateSemaphore(*m_logical_device_ptr->Get_Device(), &semaphore_create_info, nullptr, &m_semaphores.back().semaphore), "Vulkan: Failed to create semaphore");
 
             LOG_TRACE << "Vulkan: Finished creating semaphore";
         }
@@ -98,7 +98,7 @@ namespace Cascade_Graphics
             m_fences.back().identifier = identifier;
             m_fences.back().added = false;
 
-            VALIDATE_VKRESULT(vkCreateFence(*(m_logical_device_ptr->Get_Device()), &fence_create_info, nullptr, &m_fences.back().fence), "Vulkan: Failed to create fence");
+            VALIDATE_VKRESULT(vkCreateFence(*m_logical_device_ptr->Get_Device(), &fence_create_info, nullptr, &m_fences.back().fence), "Vulkan: Failed to create fence");
 
             LOG_TRACE << "Vulkan: Finished creating fence";
         }

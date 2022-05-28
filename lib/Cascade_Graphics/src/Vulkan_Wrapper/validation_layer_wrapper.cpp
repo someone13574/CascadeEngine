@@ -16,10 +16,10 @@ namespace Cascade_Graphics_Debugging
             VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Generate_Messenger_Create_Info();
 
             VkResult messenger_creation_result;
-            auto create_messenger_function = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(*(m_instance_ptr->Get_Instance()), "vkCreateDebugUtilsMessengerEXT");
+            auto create_messenger_function = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(*m_instance_ptr->Get_Instance(), "vkCreateDebugUtilsMessengerEXT");
             if (create_messenger_function != nullptr)
             {
-                messenger_creation_result = create_messenger_function(*(m_instance_ptr->Get_Instance()), &messenger_create_info, nullptr, &m_debug_messenger);
+                messenger_creation_result = create_messenger_function(*m_instance_ptr->Get_Instance(), &messenger_create_info, nullptr, &m_debug_messenger);
             }
             else
             {
@@ -40,10 +40,10 @@ namespace Cascade_Graphics_Debugging
         {
             LOG_INFO << "Vulkan: Destroying validation layer debug messenger";
 
-            auto destroy_messenger_function = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(*(m_instance_ptr->Get_Instance()), "vkDestroyDebugUtilsMessengerEXT");
+            auto destroy_messenger_function = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(*m_instance_ptr->Get_Instance(), "vkDestroyDebugUtilsMessengerEXT");
             if (destroy_messenger_function != nullptr)
             {
-                destroy_messenger_function(*(m_instance_ptr->Get_Instance()), m_debug_messenger, nullptr);
+                destroy_messenger_function(*m_instance_ptr->Get_Instance(), m_debug_messenger, nullptr);
             }
             else
             {

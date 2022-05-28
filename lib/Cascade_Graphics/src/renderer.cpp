@@ -123,7 +123,7 @@ namespace Cascade_Graphics
 
     void Renderer::Recreate_Swapchain()
     {
-        vkDeviceWaitIdle(*(m_logical_device_ptr->Get_Device()));
+        vkDeviceWaitIdle(*m_logical_device_ptr->Get_Device());
 
         m_command_buffer_manager_ptr.reset();
         m_pipeline_manager_ptr.reset();
@@ -181,11 +181,11 @@ namespace Cascade_Graphics
 #ifdef CSD_USE_VULKAN
         if (m_renderer_initialized)
         {
-            vkWaitForFences(*(m_logical_device_ptr->Get_Device()), 1, m_synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}), VK_TRUE, UINT64_MAX);
+            vkWaitForFences(*m_logical_device_ptr->Get_Device(), 1, m_synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}), VK_TRUE, UINT64_MAX);
 
             unsigned int image_index;
-            VkResult acquire_next_image_result = vkAcquireNextImageKHR(*(m_logical_device_ptr->Get_Device()), *(m_swapchain_ptr->Get_Swapchain()), UINT64_MAX,
-                                                                       *m_synchronization_manager_ptr->Get_Semaphore({"swapchain_image_available", m_current_frame}), VK_NULL_HANDLE, &image_index);
+            VkResult acquire_next_image_result
+                = vkAcquireNextImageKHR(*m_logical_device_ptr->Get_Device(), *m_swapchain_ptr->Get_Swapchain(), UINT64_MAX, *m_synchronization_manager_ptr->Get_Semaphore({"swapchain_image_available", m_current_frame}), VK_NULL_HANDLE, &image_index);
 
             if (acquire_next_image_result == VK_ERROR_OUT_OF_DATE_KHR)
             {
@@ -200,9 +200,9 @@ namespace Cascade_Graphics
 
             if (*m_synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}) != VK_NULL_HANDLE)
             {
-                vkWaitForFences(*(m_logical_device_ptr->Get_Device()), 1, m_synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}), VK_TRUE, UINT64_MAX);
+                vkWaitForFences(*m_logical_device_ptr->Get_Device(), 1, m_synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}), VK_TRUE, UINT64_MAX);
             }
-            *(m_synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame})) = *(m_synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}));
+            *m_synchronization_manager_ptr->Get_Fence({"image_in_flight", m_current_frame}) = *m_synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame});
 
             VkPipelineStageFlags pipeline_wait_stage_mask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 
@@ -237,9 +237,9 @@ namespace Cascade_Graphics
             submit_info.signalSemaphoreCount = 1;
             submit_info.pSignalSemaphores = m_synchronization_manager_ptr->Get_Semaphore({"render_finished", m_current_frame});
 
-            vkResetFences(*(m_logical_device_ptr->Get_Device()), 1, m_synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}));
+            vkResetFences(*m_logical_device_ptr->Get_Device(), 1, m_synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame}));
 
-            VALIDATE_VKRESULT(vkQueueSubmit(*(m_queue_manager_ptr->Get_Queue(1)), 1, &submit_info, *m_synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame})), "Vulkan: Failed to submit queue");
+            VALIDATE_VKRESULT(vkQueueSubmit(*m_queue_manager_ptr->Get_Queue(1), 1, &submit_info, *m_synchronization_manager_ptr->Get_Fence({"in_flight", m_current_frame})), "Vulkan: Failed to submit queue");
 
             VkPresentInfoKHR present_info = {};
             present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -251,7 +251,7 @@ namespace Cascade_Graphics
             present_info.pImageIndices = &image_index;
             present_info.pResults = nullptr;
 
-            VkResult present_result = vkQueuePresentKHR(*(m_queue_manager_ptr->Get_Queue(5)), &present_info);
+            VkResult present_result = vkQueuePresentKHR(*m_queue_manager_ptr->Get_Queue(5), &present_info);
             if (present_result == VK_ERROR_OUT_OF_DATE_KHR || present_result == VK_SUBOPTIMAL_KHR)
             {
                 LOG_DEBUG << "Vulkan: Swapchain is out of date or suboptimal";

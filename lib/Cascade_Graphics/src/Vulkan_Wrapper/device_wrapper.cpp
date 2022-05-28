@@ -36,7 +36,7 @@ namespace Cascade_Graphics
             device_create_info.enabledExtensionCount = required_extensions.size();
             device_create_info.ppEnabledExtensionNames = required_extensions.data();
 
-            VkResult device_creation_result = vkCreateDevice(*(physical_device_ptr->Get_Physical_Device()), &device_create_info, nullptr, &m_device);
+            VkResult device_creation_result = vkCreateDevice(*physical_device_ptr->Get_Physical_Device(), &device_create_info, nullptr, &m_device);
             if (device_creation_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Vulkan: Failed to create logical device with VkResult " << device_creation_result;

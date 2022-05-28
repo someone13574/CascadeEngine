@@ -20,7 +20,7 @@ namespace Cascade_Graphics
             {
                 LOG_TRACE << "Vulkan: Destroying shader module " << m_shaders[i].shader_info.label;
 
-                vkDestroyShaderModule(*(m_logical_device_ptr->Get_Device()), m_shaders[i].shader_module, nullptr);
+                vkDestroyShaderModule(*m_logical_device_ptr->Get_Device(), m_shaders[i].shader_module, nullptr);
             }
 
             LOG_TRACE << "Vulkan: Finished cleaning up shaders";
@@ -108,7 +108,7 @@ namespace Cascade_Graphics
             m_shaders.back().shader_info.label = label;
             m_shaders.back().shader_info.shader_type = shader_type;
             m_shaders.back().path = path;
-            VALIDATE_VKRESULT(vkCreateShaderModule(*(m_logical_device_ptr->Get_Device()), &shader_module_create_info, nullptr, &m_shaders.back().shader_module), "Vulkan: Failed to create shader module");
+            VALIDATE_VKRESULT(vkCreateShaderModule(*m_logical_device_ptr->Get_Device(), &shader_module_create_info, nullptr, &m_shaders.back().shader_module), "Vulkan: Failed to create shader module");
 
             LOG_TRACE << "Vulkan: Finished adding shader";
         }

@@ -20,7 +20,7 @@ namespace Cascade_Graphics
 
             for (unsigned int i = 0; i < m_command_pools.size(); i++)
             {
-                vkDestroyCommandPool(*(m_logical_device_ptr->Get_Device()), m_command_pools[i].command_pool, nullptr);
+                vkDestroyCommandPool(*m_logical_device_ptr->Get_Device(), m_command_pools[i].command_pool, nullptr);
             }
 
             LOG_TRACE << "Vulkan: Finished destroying command pools";
@@ -40,7 +40,7 @@ namespace Cascade_Graphics
             command_pool_create_info.flags = 0;
             command_pool_create_info.queueFamilyIndex = queue_family;
 
-            VALIDATE_VKRESULT(vkCreateCommandPool(*(m_logical_device_ptr->Get_Device()), &command_pool_create_info, nullptr, &m_command_pools.back().command_pool), "Vulkan: Failed to create command pool");
+            VALIDATE_VKRESULT(vkCreateCommandPool(*m_logical_device_ptr->Get_Device(), &command_pool_create_info, nullptr, &m_command_pools.back().command_pool), "Vulkan: Failed to create command pool");
 
             LOG_TRACE << "Vulkan: Finished creating command pool";
         }
@@ -56,7 +56,7 @@ namespace Cascade_Graphics
             command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
             command_buffer_allocate_info.commandBufferCount = 1; // Not efficient
 
-            VALIDATE_VKRESULT(vkAllocateCommandBuffers(*(m_logical_device_ptr->Get_Device()), &command_buffer_allocate_info, &m_command_buffers[command_buffer_index].command_buffer), "Vulkan: Failed to allocate command buffer");
+            VALIDATE_VKRESULT(vkAllocateCommandBuffers(*m_logical_device_ptr->Get_Device(), &command_buffer_allocate_info, &m_command_buffers[command_buffer_index].command_buffer), "Vulkan: Failed to allocate command buffer");
 
             LOG_TRACE << "Vulkan: Finished allocating command buffer";
         }

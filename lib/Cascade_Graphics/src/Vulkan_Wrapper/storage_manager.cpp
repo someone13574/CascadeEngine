@@ -23,8 +23,8 @@ namespace Cascade_Graphics
             {
                 LOG_TRACE << "Vulkan: Destroying buffer " << m_buffers[i].resource_id.label << "-" << m_buffers[i].resource_id.index;
 
-                vkDestroyBuffer(*(m_logical_device_ptr->Get_Device()), m_buffers[i].buffer, nullptr);
-                vkFreeMemory(*(m_logical_device_ptr->Get_Device()), m_buffers[i].buffer_memory, nullptr);
+                vkDestroyBuffer(*m_logical_device_ptr->Get_Device(), m_buffers[i].buffer, nullptr);
+                vkFreeMemory(*m_logical_device_ptr->Get_Device(), m_buffers[i].buffer_memory, nullptr);
             }
             m_buffers.clear();
 
@@ -34,9 +34,9 @@ namespace Cascade_Graphics
                 {
                     LOG_TRACE << "Vulkan: Destorying image " << m_images[i].resource_id.label << "-" << m_images[i].resource_id.index;
 
-                    vkDestroyImage(*(m_logical_device_ptr->Get_Device()), m_images[i].image_info->image, nullptr);
-                    vkDestroyImageView(*(m_logical_device_ptr->Get_Device()), m_images[i].image_info->image_view, nullptr);
-                    vkFreeMemory(*(m_logical_device_ptr->Get_Device()), m_images[i].image_info->image_memory, nullptr);
+                    vkDestroyImage(*m_logical_device_ptr->Get_Device(), m_images[i].image_info->image, nullptr);
+                    vkDestroyImageView(*m_logical_device_ptr->Get_Device(), m_images[i].image_info->image_view, nullptr);
+                    vkFreeMemory(*m_logical_device_ptr->Get_Device(), m_images[i].image_info->image_memory, nullptr);
                 }
             }
             m_images.clear();
@@ -130,13 +130,13 @@ namespace Cascade_Graphics
             buffer_create_info.queueFamilyIndexCount = queue_families.size();
             buffer_create_info.pQueueFamilyIndices = queue_families.data();
 
-            VALIDATE_VKRESULT(vkCreateBuffer(*(m_logical_device_ptr->Get_Device()), &buffer_create_info, nullptr, &m_buffers.back().buffer), "Vulkan: Failed to create buffer");
+            VALIDATE_VKRESULT(vkCreateBuffer(*m_logical_device_ptr->Get_Device(), &buffer_create_info, nullptr, &m_buffers.back().buffer), "Vulkan: Failed to create buffer");
 
             VkMemoryRequirements memory_requirements;
-            vkGetBufferMemoryRequirements(*(m_logical_device_ptr->Get_Device()), m_buffers.back().buffer, &memory_requirements);
+            vkGetBufferMemoryRequirements(*m_logical_device_ptr->Get_Device(), m_buffers.back().buffer, &memory_requirements);
 
             VkPhysicalDeviceMemoryProperties memory_properties;
-            vkGetPhysicalDeviceMemoryProperties(*(m_physical_device_ptr->Get_Physical_Device()), &memory_properties);
+            vkGetPhysicalDeviceMemoryProperties(*m_physical_device_ptr->Get_Physical_Device(), &memory_properties);
 
             unsigned int memory_type_index = 0;
             VkMemoryPropertyFlags memory_property_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
@@ -154,8 +154,8 @@ namespace Cascade_Graphics
             memory_allocate_info.allocationSize = memory_requirements.size;
             memory_allocate_info.memoryTypeIndex = memory_type_index;
 
-            VALIDATE_VKRESULT(vkAllocateMemory(*(m_logical_device_ptr->Get_Device()), &memory_allocate_info, nullptr, &m_buffers.back().buffer_memory), "Vulkan: Failed to allocate buffer memory");
-            VALIDATE_VKRESULT(vkBindBufferMemory(*(m_logical_device_ptr->Get_Device()), m_buffers.back().buffer, m_buffers.back().buffer_memory, 0), "Vulkan: Fail to bind buffer memory");
+            VALIDATE_VKRESULT(vkAllocateMemory(*m_logical_device_ptr->Get_Device(), &memory_allocate_info, nullptr, &m_buffers.back().buffer_memory), "Vulkan: Failed to allocate buffer memory");
+            VALIDATE_VKRESULT(vkBindBufferMemory(*m_logical_device_ptr->Get_Device(), m_buffers.back().buffer, m_buffers.back().buffer_memory, 0), "Vulkan: Fail to bind buffer memory");
 
             LOG_TRACE << "Vulkan: Finished creating buffer " << resource_id.label << "-" << resource_id.index;
         }
@@ -202,13 +202,13 @@ namespace Cascade_Graphics
             image_create_info.sharingMode = (queue_families.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
             image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-            VALIDATE_VKRESULT(vkCreateImage(*(m_logical_device_ptr->Get_Device()), &image_create_info, nullptr, &image_info.image), "Vulkan: Failed to create image");
+            VALIDATE_VKRESULT(vkCreateImage(*m_logical_device_ptr->Get_Device(), &image_create_info, nullptr, &image_info.image), "Vulkan: Failed to create image");
 
             VkMemoryRequirements memory_requirements;
-            vkGetImageMemoryRequirements(*(m_logical_device_ptr->Get_Device()), image_info.image, &memory_requirements);
+            vkGetImageMemoryRequirements(*m_logical_device_ptr->Get_Device(), image_info.image, &memory_requirements);
 
             VkPhysicalDeviceMemoryProperties memory_properties;
-            vkGetPhysicalDeviceMemoryProperties(*(m_physical_device_ptr->Get_Physical_Device()), &memory_properties);
+            vkGetPhysicalDeviceMemoryProperties(*m_physical_device_ptr->Get_Physical_Device(), &memory_properties);
 
             unsigned int memory_type_index = 0;
             VkMemoryPropertyFlags memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
@@ -226,8 +226,8 @@ namespace Cascade_Graphics
             memory_allocate_info.allocationSize = memory_requirements.size;
             memory_allocate_info.memoryTypeIndex = memory_type_index;
 
-            VALIDATE_VKRESULT(vkAllocateMemory(*(m_logical_device_ptr->Get_Device()), &memory_allocate_info, nullptr, &image_info.image_memory), "Vulkan: Failed to allocate image memory");
-            VALIDATE_VKRESULT(vkBindImageMemory(*(m_logical_device_ptr->Get_Device()), image_info.image, image_info.image_memory, 0), "Vulkan: Fail to bind image memory");
+            VALIDATE_VKRESULT(vkAllocateMemory(*m_logical_device_ptr->Get_Device(), &memory_allocate_info, nullptr, &image_info.image_memory), "Vulkan: Failed to allocate image memory");
+            VALIDATE_VKRESULT(vkBindImageMemory(*m_logical_device_ptr->Get_Device(), image_info.image, image_info.image_memory, 0), "Vulkan: Fail to bind image memory");
 
             VkImageViewCreateInfo image_view_create_info = {};
             image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -246,7 +246,7 @@ namespace Cascade_Graphics
             image_view_create_info.subresourceRange.baseArrayLayer = 0;
             image_view_create_info.subresourceRange.layerCount = 1;
 
-            VALIDATE_VKRESULT(vkCreateImageView(*(m_logical_device_ptr->Get_Device()), &image_view_create_info, nullptr, &image_info.image_view), "Vulkan: Failed to create image view");
+            VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_ptr->Get_Device(), &image_view_create_info, nullptr, &image_info.image_view), "Vulkan: Failed to create image view");
 
             m_images.back().image_info = image_info;
 
@@ -406,9 +406,9 @@ namespace Cascade_Graphics
                     if (m_buffers[i].resource_id == resource_id)
                     {
                         void* mapped_memory;
-                        VALIDATE_VKRESULT(vkMapMemory(*(m_logical_device_ptr->Get_Device()), m_buffers[i].buffer_memory, 0, data_size, 0, &mapped_memory), "Vulkan: Failed to map memory for buffer upload");
+                        VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_ptr->Get_Device(), m_buffers[i].buffer_memory, 0, data_size, 0, &mapped_memory), "Vulkan: Failed to map memory for buffer upload");
                         memcpy(mapped_memory, data, data_size);
-                        vkUnmapMemory(*(m_logical_device_ptr->Get_Device()), m_buffers[i].buffer_memory);
+                        vkUnmapMemory(*m_logical_device_ptr->Get_Device(), m_buffers[i].buffer_memory);
                         return;
                     }
                 }

@@ -37,11 +37,11 @@ namespace Cascade_Graphics
             LOG_INFO << "Vulkan: Setting queue family indices";
 
             unsigned int queue_families_count = 0;
-            vkGetPhysicalDeviceQueueFamilyProperties(*(physical_device_ptr->Get_Physical_Device()), &queue_families_count, nullptr);
+            vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_ptr->Get_Physical_Device(), &queue_families_count, nullptr);
             LOG_TRACE << "Vulkan: Found " << queue_families_count << " queue families";
 
             std::vector<VkQueueFamilyProperties> queue_families(queue_families_count);
-            vkGetPhysicalDeviceQueueFamilyProperties(*(physical_device_ptr->Get_Physical_Device()), &queue_families_count, queue_families.data());
+            vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_ptr->Get_Physical_Device(), &queue_families_count, queue_families.data());
 
             for (unsigned int i = 0; i < queue_families_count; i++)
             {
@@ -52,7 +52,7 @@ namespace Cascade_Graphics
                 bool family_has_protected = queue_families[i].queueFlags & VK_QUEUE_PROTECTED_BIT;
 
                 VkBool32 family_has_present = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(*(physical_device_ptr->Get_Physical_Device()), i, *(m_surface_ptr->Get_Surface()), &family_has_present);
+                vkGetPhysicalDeviceSurfaceSupportKHR(*physical_device_ptr->Get_Physical_Device(), i, *m_surface_ptr->Get_Surface(), &family_has_present);
 
                 LOG_TRACE << "Vulkan: Found queue family (Count: " << queue_families[i].queueCount << ")" << ((family_has_graphics) ? " (Graphics)" : "") << ((family_has_compute) ? " (Compute)" : "") << ((family_has_transfer) ? " (Transfer)" : "")
                           << ((family_has_sparse_binding) ? " (Sparse binding)" : "") << ((family_has_protected) ? " (Protected)" : "") << ((family_has_present) ? " (Present)" : "");
@@ -225,7 +225,7 @@ namespace Cascade_Graphics
                 bool family_has_protected = queue_families[i].queueFlags & VK_QUEUE_PROTECTED_BIT;
 
                 VkBool32 family_has_present = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, *(m_surface_ptr->Get_Surface()), &family_has_present);
+                vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, *m_surface_ptr->Get_Surface(), &family_has_present);
 
                 LOG_TRACE << "Vulkan: Found queue family (Count: " << queue_families[i].queueCount << ")" << ((family_has_graphics) ? " (Graphics)" : "") << ((family_has_compute) ? " (Compute)" : "") << ((family_has_transfer) ? " (Transfer)" : "")
                           << ((family_has_sparse_binding) ? " (Sparse binding)" : "") << ((family_has_protected) ? " (Protected)" : "") << ((family_has_present) ? " (Present)" : "");

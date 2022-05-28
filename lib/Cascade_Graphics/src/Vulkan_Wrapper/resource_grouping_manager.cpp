@@ -18,10 +18,10 @@ namespace Cascade_Graphics
 
             for (unsigned int i = 0; i < m_descriptor_set_layouts.size(); i++)
             {
-                vkDestroyDescriptorSetLayout(*(m_logical_device_ptr->Get_Device()), m_descriptor_set_layouts[i], nullptr);
+                vkDestroyDescriptorSetLayout(*m_logical_device_ptr->Get_Device(), m_descriptor_set_layouts[i], nullptr);
             }
 
-            vkDestroyDescriptorPool(*(m_logical_device_ptr->Get_Device()), m_descriptor_pool, nullptr);
+            vkDestroyDescriptorPool(*m_logical_device_ptr->Get_Device(), m_descriptor_pool, nullptr);
 
             LOG_TRACE << "Vulkan: Finished cleaning up resource grouping manager";
         }
@@ -54,7 +54,7 @@ namespace Cascade_Graphics
             descriptor_pool_create_info.poolSizeCount = descriptor_pool_sizes.size();
             descriptor_pool_create_info.pPoolSizes = descriptor_pool_sizes.data();
 
-            VALIDATE_VKRESULT(vkCreateDescriptorPool(*(m_logical_device_ptr->Get_Device()), &descriptor_pool_create_info, nullptr, &m_descriptor_pool), "Vulkan: Failed to create descriptor pool");
+            VALIDATE_VKRESULT(vkCreateDescriptorPool(*m_logical_device_ptr->Get_Device(), &descriptor_pool_create_info, nullptr, &m_descriptor_pool), "Vulkan: Failed to create descriptor pool");
 
             LOG_TRACE << "Vulkan: Finished creating descriptor pool";
         }
@@ -72,7 +72,7 @@ namespace Cascade_Graphics
             descriptor_set_allocate_info.descriptorSetCount = m_descriptor_sets.size();
             descriptor_set_allocate_info.pSetLayouts = m_descriptor_set_layouts.data();
 
-            VALIDATE_VKRESULT(vkAllocateDescriptorSets(*(m_logical_device_ptr->Get_Device()), &descriptor_set_allocate_info, m_descriptor_sets.data()), "Vulkan: Failed to allocate descriptor sets");
+            VALIDATE_VKRESULT(vkAllocateDescriptorSets(*m_logical_device_ptr->Get_Device(), &descriptor_set_allocate_info, m_descriptor_sets.data()), "Vulkan: Failed to allocate descriptor sets");
 
             LOG_TRACE << "Vulkan: Allocated descriptor set";
         }
@@ -138,7 +138,7 @@ namespace Cascade_Graphics
                             sampler_create_info.unnormalizedCoordinates = VK_FALSE;
 
                             VkSampler sampler;
-                            VALIDATE_VKRESULT(vkCreateSampler(*(m_logical_device_ptr->Get_Device()), &sampler_create_info, nullptr, &sampler), "Vulkan: Failed to create image sampler");
+                            VALIDATE_VKRESULT(vkCreateSampler(*m_logical_device_ptr->Get_Device(), &sampler_create_info, nullptr, &sampler), "Vulkan: Failed to create image sampler");
 
                             image_descriptor_infos.resize(image_descriptor_infos.size() + 1);
 
@@ -163,7 +163,7 @@ namespace Cascade_Graphics
                         }
                     }
 
-                    vkUpdateDescriptorSets(*(m_logical_device_ptr->Get_Device()), m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size(), m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.data(), 0, nullptr);
+                    vkUpdateDescriptorSets(*m_logical_device_ptr->Get_Device(), m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size(), m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.data(), 0, nullptr);
                 }
             }
 
@@ -241,7 +241,7 @@ namespace Cascade_Graphics
                 descriptor_set_layout_create_info.bindingCount = descriptor_set_layout_bindings.size();
                 descriptor_set_layout_create_info.pBindings = descriptor_set_layout_bindings.data();
 
-                VALIDATE_VKRESULT(vkCreateDescriptorSetLayout(*(m_logical_device_ptr->Get_Device()), &descriptor_set_layout_create_info, nullptr, &m_descriptor_set_layouts.back()), "Vulkan: Failed to create descriptor set layout");
+                VALIDATE_VKRESULT(vkCreateDescriptorSetLayout(*m_logical_device_ptr->Get_Device(), &descriptor_set_layout_create_info, nullptr, &m_descriptor_set_layouts.back()), "Vulkan: Failed to create descriptor set layout");
 
                 LOG_TRACE << "Vulkan: Created descriptor set layout. Descriptor set will be allocated after calling Allocate_Descriptor_Sets";
             }

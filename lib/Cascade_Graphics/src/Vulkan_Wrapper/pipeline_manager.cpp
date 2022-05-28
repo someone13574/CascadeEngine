@@ -20,8 +20,8 @@ namespace Cascade_Graphics
 
             for (unsigned int i = 0; i < m_pipelines.size(); i++)
             {
-                vkDestroyPipeline(*(m_logical_device_ptr->Get_Device()), m_pipelines[i].pipeline, nullptr);
-                vkDestroyPipelineLayout(*(m_logical_device_ptr->Get_Device()), m_pipelines[i].pipeline_layout, nullptr);
+                vkDestroyPipeline(*m_logical_device_ptr->Get_Device(), m_pipelines[i].pipeline, nullptr);
+                vkDestroyPipelineLayout(*m_logical_device_ptr->Get_Device(), m_pipelines[i].pipeline_layout, nullptr);
             }
 
             LOG_TRACE << "Vulkan: Finished destroying pipelines";
@@ -69,7 +69,7 @@ namespace Cascade_Graphics
             pipeline_layout_create_info.pushConstantRangeCount = 0;
             pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
-            VALIDATE_VKRESULT(vkCreatePipelineLayout(*(m_logical_device_ptr->Get_Device()), &pipeline_layout_create_info, nullptr, &m_pipelines.back().pipeline_layout), "Vulkan: Failed to create pipeline layout");
+            VALIDATE_VKRESULT(vkCreatePipelineLayout(*m_logical_device_ptr->Get_Device(), &pipeline_layout_create_info, nullptr, &m_pipelines.back().pipeline_layout), "Vulkan: Failed to create pipeline layout");
 
             VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info = {};
             pipeline_shader_stage_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -89,7 +89,7 @@ namespace Cascade_Graphics
             compute_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
             compute_pipeline_create_info.basePipelineIndex = 0;
 
-            VALIDATE_VKRESULT(vkCreateComputePipelines(*(m_logical_device_ptr->Get_Device()), VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &m_pipelines.back().pipeline), "Vulkan: Failed to create compute pipeline");
+            VALIDATE_VKRESULT(vkCreateComputePipelines(*m_logical_device_ptr->Get_Device(), VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &m_pipelines.back().pipeline), "Vulkan: Failed to create compute pipeline");
 
             LOG_TRACE << "Vulkan: Finished creating compute pipeline";
         }
