@@ -41,7 +41,9 @@ namespace Cascade_Graphics
                         descriptor_pool_sizes.resize(descriptor_pool_sizes.size() + 1);
 
                         descriptor_pool_sizes.back().descriptorCount = 1;
-                        descriptor_pool_sizes.back().type = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
+                        descriptor_pool_sizes.back().type = (m_resource_groupings[i].resources[j].resource_type == Storage_Manager::Resource_ID::BUFFER_RESOURCE) ?
+                                                                m_storage_manager_ptr->Get_Buffer_Resource(m_resource_groupings[i].resources[j])->buffer_type :
+                                                                m_storage_manager_ptr->Get_Image_Resource(m_resource_groupings[i].resources[j])->image_type;
                     }
                 }
             }
@@ -92,12 +94,12 @@ namespace Cascade_Graphics
 
                     for (unsigned int j = 0; j < m_resource_groupings[i].resources.size(); j++)
                     {
-                        if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::BUFFER)
+                        if (m_resource_groupings[i].resources[j].resource_type == Storage_Manager::Resource_ID::BUFFER_RESOURCE)
                         {
                             buffer_descriptor_infos.resize(buffer_descriptor_infos.size() + 1);
 
                             buffer_descriptor_infos.back() = {};
-                            buffer_descriptor_infos.back().buffer = *m_storage_manager_ptr->Get_Buffer(m_resource_groupings[i].resources[j]);
+                            buffer_descriptor_infos.back().buffer = m_storage_manager_ptr->Get_Buffer_Resource(m_resource_groupings[i].resources[j])->buffer;
                             buffer_descriptor_infos.back().offset = 0;
                             buffer_descriptor_infos.back().range = VK_WHOLE_SIZE;
 
@@ -110,12 +112,12 @@ namespace Cascade_Graphics
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstBinding = j;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstArrayElement = 0;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorCount = 1;
-                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Buffer_Resource(m_resource_groupings[i].resources[j])->buffer_type;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = &buffer_descriptor_infos.back();
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = nullptr;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pTexelBufferView = nullptr;
                         }
-                        else if (m_resource_groupings[i].resources[j].type == Storage_Manager::Resource_Type::IMAGE)
+                        else if (m_resource_groupings[i].resources[j].resource_type == Storage_Manager::Resource_ID::IMAGE_RESOURCE)
                         {
                             VkSamplerCreateInfo sampler_create_info = {};
                             sampler_create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -144,7 +146,7 @@ namespace Cascade_Graphics
 
                             image_descriptor_infos.back() = {};
                             image_descriptor_infos.back().sampler = sampler;
-                            image_descriptor_infos.back().imageView = *m_storage_manager_ptr->Get_Image_View(m_resource_groupings[i].resources[j]);
+                            image_descriptor_infos.back().imageView = m_storage_manager_ptr->Get_Image_Resource(m_resource_groupings[i].resources[j])->image_view;
                             image_descriptor_infos.back().imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.resize(m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.size() + 1);
@@ -156,7 +158,7 @@ namespace Cascade_Graphics
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstBinding = j;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().dstArrayElement = 0;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorCount = 1;
-                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Resource_Data(m_resource_groupings[i].resources[j]).descriptor_type;
+                            m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().descriptorType = m_storage_manager_ptr->Get_Image_Resource(m_resource_groupings[i].resources[j])->image_type;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pBufferInfo = nullptr;
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pImageInfo = &image_descriptor_infos.back();
                             m_resource_groupings[i].descriptor_set_info->write_descriptor_sets.back().pTexelBufferView = nullptr;
@@ -183,27 +185,6 @@ namespace Cascade_Graphics
                 }
             }
 
-            bool contains_swapchain_image = false;
-            for (unsigned int i = 0; i < resources.size(); i++)
-            {
-                if (!m_storage_manager_ptr->Does_Resource_Exist(resources[i]))
-                {
-                    LOG_ERROR << "Vulkan: Resource " << resources[i].label << "-" << resources[i].index << " does not exist";
-                    exit(EXIT_FAILURE);
-                }
-                if (resources[i].type == Storage_Manager::SWAPCHAIN_IMAGE)
-                {
-                    contains_swapchain_image = true;
-                }
-
-                LOG_TRACE << "Vulkan: Including resource " << resources[i].label << "-" << resources[i].index;
-            }
-            if (add_descriptor_set && contains_swapchain_image)
-            {
-                LOG_ERROR << "Vulkan: Cannot create descriptor set with swapchain image";
-                exit(EXIT_FAILURE);
-            }
-
             m_resource_groupings.resize(m_resource_groupings.size() + 1);
             m_resource_groupings.back() = {};
             m_resource_groupings.back().label = label;
@@ -228,7 +209,8 @@ namespace Cascade_Graphics
                 {
                     descriptor_set_layout_bindings[i] = {};
                     descriptor_set_layout_bindings[i].binding = i;
-                    descriptor_set_layout_bindings[i].descriptorType = m_storage_manager_ptr->Get_Resource_Data(resources[i]).descriptor_type;
+                    descriptor_set_layout_bindings[i].descriptorType
+                        = (resources[i].resource_type == Storage_Manager::Resource_ID::BUFFER_RESOURCE) ? m_storage_manager_ptr->Get_Buffer_Resource(resources[i])->buffer_type : m_storage_manager_ptr->Get_Image_Resource(resources[i])->image_type;
                     descriptor_set_layout_bindings[i].descriptorCount = 1;
                     descriptor_set_layout_bindings[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
                     descriptor_set_layout_bindings[i].pImmutableSamplers = nullptr;

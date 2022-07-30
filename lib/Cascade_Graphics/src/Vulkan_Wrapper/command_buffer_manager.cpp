@@ -133,7 +133,7 @@ namespace Cascade_Graphics
 
             for (unsigned int i = 0; i < resource_identifiers.size(); i++)
             {
-                if (resource_identifiers[i].type == Storage_Manager::Resource_Type::IMAGE || resource_identifiers[i].type == Storage_Manager::Resource_Type::SWAPCHAIN_IMAGE)
+                if (resource_identifiers[i].resource_type == Storage_Manager::Resource_ID::Resource_Type::IMAGE_RESOURCE)
                 {
                     m_command_buffers.back().image_resource_states.resize(m_command_buffers.back().image_resource_states.size() + 1);
 
@@ -220,9 +220,9 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Vulkan: Image memory barrier in command buffer '" << identifier.label << "-" << identifier.index << "'";
 
-            if (!(resource_id.type == Storage_Manager::Resource_Type::IMAGE || resource_id.type == Storage_Manager::Resource_Type::SWAPCHAIN_IMAGE))
+            if (resource_id.resource_type != Storage_Manager::Resource_ID::IMAGE_RESOURCE)
             {
-                LOG_ERROR << "Vulkan: Resource type must be an image or swapchain image";
+                LOG_ERROR << "Vulkan: Resource type must be an image";
                 exit(EXIT_FAILURE);
             }
 
@@ -260,7 +260,7 @@ namespace Cascade_Graphics
             image_memory_barrier.newLayout = m_command_buffers[command_buffer_index].image_resource_states[resource_index].current_image_layout;
             image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            image_memory_barrier.image = *m_storage_manager_ptr->Get_Image(resource_id);
+            image_memory_barrier.image = m_storage_manager_ptr->Get_Image_Resource(resource_id)->image;
             image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             image_memory_barrier.subresourceRange.baseMipLevel = 0;
             image_memory_barrier.subresourceRange.levelCount = 1;
@@ -322,8 +322,8 @@ namespace Cascade_Graphics
             copy_region.dstOffset = region_offset;
             copy_region.extent = region_extent;
 
-            vkCmdCopyImage(m_command_buffers[command_buffer_index].command_buffer, *m_storage_manager_ptr->Get_Image(source_resource_id), m_command_buffers[command_buffer_index].image_resource_states[source_index].current_image_layout,
-                           *m_storage_manager_ptr->Get_Image(destination_resource_id), m_command_buffers[command_buffer_index].image_resource_states[destination_index].current_image_layout, 1, &copy_region);
+            vkCmdCopyImage(m_command_buffers[command_buffer_index].command_buffer, m_storage_manager_ptr->Get_Image_Resource(source_resource_id)->image, m_command_buffers[command_buffer_index].image_resource_states[source_index].current_image_layout,
+                           m_storage_manager_ptr->Get_Image_Resource(destination_resource_id)->image, m_command_buffers[command_buffer_index].image_resource_states[destination_index].current_image_layout, 1, &copy_region);
         }
 
         VkCommandBuffer* Command_Buffer_Manager::Get_Command_Buffer(Identifier identifier)

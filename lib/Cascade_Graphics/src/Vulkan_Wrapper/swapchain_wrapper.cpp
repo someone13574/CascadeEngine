@@ -1,8 +1,9 @@
 #include "swapchain_wrapper.hpp"
 
 #include "debug_tools.hpp"
-
+#include "queue_manager.hpp"
 #include <algorithm>
+
 
 namespace Cascade_Graphics
 {
@@ -177,7 +178,7 @@ namespace Cascade_Graphics
             swapchain_create_info.imageColorSpace = m_surface_format.colorSpace;
             swapchain_create_info.imageExtent = m_swapchain_extent;
             swapchain_create_info.imageArrayLayers = 1;
-            swapchain_create_info.imageUsage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+            swapchain_create_info.imageUsage = SWAPCHAIN_USAGE;
             swapchain_create_info.preTransform = m_surface_capabilities.currentTransform;
             swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
             swapchain_create_info.presentMode = m_present_mode;
@@ -287,6 +288,30 @@ namespace Cascade_Graphics
             }
 
             return true;
+        }
+
+        std::vector<Storage_Manager::Image_Resource> Swapchain::Get_Swapchain_Image_Resources()
+        {
+            LOG_TRACE << "Vulkan: Making image resources for the swapchain";
+
+            std::vector<Storage_Manager::Image_Resource> swapchain_image_resources(m_swapchain_image_count);
+
+            for (unsigned int i = 0; i < m_swapchain_image_count; i++)
+            {
+                swapchain_image_resources[i] = {};
+                swapchain_image_resources[i].resource_id = {"swapchain", i, Storage_Manager::Resource_ID::IMAGE_RESOURCE};
+                swapchain_image_resources[i].image_format = m_surface_format.format;
+                swapchain_image_resources[i].image_usage = SWAPCHAIN_USAGE;
+                swapchain_image_resources[i].image_type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+                swapchain_image_resources[i].image_size = m_swapchain_extent;
+                swapchain_image_resources[i].resource_queue_mask = Queue_Manager::Queue_Types::COMPUTE_QUEUE | Queue_Manager::Queue_Types::PRESENT_QUEUE | Queue_Manager::Queue_Types::TRANSFER_QUEUE;
+                swapchain_image_resources[i].image = m_swapchain_images[i];
+                swapchain_image_resources[i].image_view = m_swapchain_image_views[i];
+                swapchain_image_resources[i].device_memory = VK_NULL_HANDLE;
+                swapchain_image_resources[i].memory_type_index = 0;
+            }
+
+            return swapchain_image_resources;
         }
 
         VkSwapchainKHR* Swapchain::Get_Swapchain()

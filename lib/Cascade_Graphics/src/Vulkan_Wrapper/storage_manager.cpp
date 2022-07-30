@@ -1,241 +1,201 @@
 #include "storage_manager.hpp"
 
-#include "debug_tools.hpp"
 
+#include "debug_tools.hpp"
 #include <cstring>
-#include <set>
-#include <sstream>
 
 namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Storage_Manager::Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Swapchain> swapchain_ptr)
-            : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_queue_manager_ptr(queue_manager_ptr), m_swapchain_ptr(swapchain_ptr)
+        Storage_Manager::Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr)
+            : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_queue_manager_ptr(queue_manager_ptr)
         {
         }
 
-        Storage_Manager::~Storage_Manager()
+        std::string Storage_Manager::Get_Resource_String(Resource_ID resource_id)
         {
-            LOG_INFO << "Vulkan: Cleaning up storage";
-
-            for (unsigned int i = 0; i < m_buffers.size(); i++)
-            {
-                LOG_TRACE << "Vulkan: Destroying buffer " << m_buffers[i].resource_id.label << "-" << m_buffers[i].resource_id.index;
-
-                vkDestroyBuffer(*m_logical_device_ptr->Get_Device(), m_buffers[i].buffer, nullptr);
-                vkFreeMemory(*m_logical_device_ptr->Get_Device(), m_buffers[i].buffer_memory, nullptr);
-            }
-            m_buffers.clear();
-
-            for (unsigned int i = 0; i < m_images.size(); i++)
-            {
-                if (m_images[i].resource_id.type == Resource_Type::IMAGE)
-                {
-                    LOG_TRACE << "Vulkan: Destorying image " << m_images[i].resource_id.label << "-" << m_images[i].resource_id.index;
-
-                    vkDestroyImage(*m_logical_device_ptr->Get_Device(), m_images[i].image_info->image, nullptr);
-                    vkDestroyImageView(*m_logical_device_ptr->Get_Device(), m_images[i].image_info->image_view, nullptr);
-                    vkFreeMemory(*m_logical_device_ptr->Get_Device(), m_images[i].image_info->image_memory, nullptr);
-                }
-            }
-            m_images.clear();
-
-            LOG_TRACE << "Vulkan: Finished cleaning up storage";
+            return resource_id.label.append("-").append(std::to_string(resource_id.index));
         }
 
-        unsigned int Storage_Manager::Get_Next_Buffer_Id(std::string label)
+        unsigned int Storage_Manager::Get_Buffer_Index(Resource_ID resource_id)
         {
-            unsigned int count = 0;
-
-            for (unsigned int i = 0; i < m_buffers.size(); i++)
+            if (resource_id.resource_type == Resource_ID::BUFFER_RESOURCE)
             {
-                if (label == m_buffers[i].resource_id.label)
+                for (unsigned int i = 0; i < m_buffer_resources.size(); i++)
                 {
-                    count++;
+                    Resource_ID current_resource_id = m_buffer_resources[i].resource_id;
+
+                    if (current_resource_id == resource_id)
+                    {
+                        return i;
+                    }
                 }
             }
 
-            return count;
+            LOG_ERROR << "Vulkan: No buffers named '" << Get_Resource_String(resource_id) << "' exist";
+            exit(EXIT_FAILURE);
         }
 
-        unsigned int Storage_Manager::Get_Next_Image_Id(std::string label)
+        unsigned int Storage_Manager::Get_Image_Index(Resource_ID resource_id)
         {
-            unsigned int count = 0;
-
-            for (unsigned int i = 0; i < m_images.size(); i++)
+            if (resource_id.resource_type == Resource_ID::IMAGE_RESOURCE)
             {
-                if (label == m_images[i].resource_id.label)
+                for (unsigned int i = 0; i < m_image_resources.size(); i++)
                 {
-                    count++;
+                    Resource_ID current_resource_id = m_image_resources[i].resource_id;
+
+                    if (current_resource_id == resource_id)
+                    {
+                        return i;
+                    }
                 }
             }
 
-            return count;
+            LOG_ERROR << "Vulkan: No images named '" << Get_Resource_String(resource_id) << "' exist";
+            exit(EXIT_FAILURE);
         }
 
-        std::vector<unsigned int> Storage_Manager::Get_Queue_Families(unsigned int required_queues)
+        void Storage_Manager::Create_VkBuffer(Resource_ID resource_id)
         {
-            std::set<unsigned int> queue_families = {};
+            LOG_TRACE << "Vulkan: Creating VkBuffer for " << Get_Resource_String(resource_id);
 
-            if (required_queues & Queue_Manager::Queue_Types::GRAPHICS_QUEUE)
-            {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::GRAPHICS_QUEUE));
-            }
-            if (required_queues & Queue_Manager::Queue_Types::COMPUTE_QUEUE)
-            {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::COMPUTE_QUEUE));
-            }
-            if (required_queues & Queue_Manager::Queue_Types::TRANSFER_QUEUE)
-            {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE));
-            }
-            if (required_queues & Queue_Manager::Queue_Types::SPARSE_BINDING_QUEUE)
-            {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::SPARSE_BINDING_QUEUE));
-            }
-            if (required_queues & Queue_Manager::Queue_Types::PROTECTED_QUEUE)
-            {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::PROTECTED_QUEUE));
-            }
-            if (required_queues & Queue_Manager::Queue_Types::PRESENT_QUEUE)
-            {
-                queue_families.insert(m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::PRESENT_QUEUE));
-            }
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
 
-            std::vector<unsigned int> queue_families_vector(queue_families.begin(), queue_families.end());
-            return queue_families_vector;
-        }
-
-        void Storage_Manager::Create_Buffer_From_ID(Resource_ID resource_id, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_required_queues)
-        {
-            std::vector<unsigned int> queue_families = Get_Queue_Families(resource_required_queues);
-
-            m_buffers.resize(m_buffers.size() + 1);
-            m_buffers.back() = {};
-            m_buffers.back().resource_id = resource_id;
-            m_buffers.back().descriptor_type = buffer_type;
-            m_buffers.back().buffer_usage = buffer_usage;
-            m_buffers.back().resource_required_queues = resource_required_queues;
-
-            LOG_INFO << "Vulkan: Creating buffer " << resource_id.label << "-" << resource_id.index;
+            std::vector<unsigned int> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(buffer_resource_ptr->resource_queue_mask);
 
             VkBufferCreateInfo buffer_create_info = {};
             buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
             buffer_create_info.pNext = nullptr;
             buffer_create_info.flags = 0;
-            buffer_create_info.size = buffer_size;
-            buffer_create_info.usage = buffer_usage;
-            buffer_create_info.sharingMode = (queue_families.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
-            buffer_create_info.queueFamilyIndexCount = queue_families.size();
-            buffer_create_info.pQueueFamilyIndices = queue_families.data();
+            buffer_create_info.size = buffer_resource_ptr->buffer_size;
+            buffer_create_info.usage = buffer_resource_ptr->buffer_usage;
+            buffer_create_info.sharingMode = (unique_queues.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
+            buffer_create_info.queueFamilyIndexCount = unique_queues.size();
+            buffer_create_info.pQueueFamilyIndices = unique_queues.data();
 
-            VALIDATE_VKRESULT(vkCreateBuffer(*m_logical_device_ptr->Get_Device(), &buffer_create_info, nullptr, &m_buffers.back().buffer), "Vulkan: Failed to create buffer");
+            VALIDATE_VKRESULT(vkCreateBuffer(*m_logical_device_ptr->Get_Device(), &buffer_create_info, nullptr, &buffer_resource_ptr->buffer), "Vulkan: Failed to create VkBuffer");
+        }
 
-            VkMemoryRequirements memory_requirements;
-            vkGetBufferMemoryRequirements(*m_logical_device_ptr->Get_Device(), m_buffers.back().buffer, &memory_requirements);
+        void Storage_Manager::Get_Buffer_Memory_Info(Resource_ID resource_id)
+        {
+            LOG_TRACE << "Vulkan: Getting memory infomation for " << Get_Resource_String(resource_id);
 
-            VkPhysicalDeviceMemoryProperties memory_properties;
-            vkGetPhysicalDeviceMemoryProperties(*m_physical_device_ptr->Get_Physical_Device(), &memory_properties);
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
 
-            unsigned int memory_type_index = 0;
-            VkMemoryPropertyFlags memory_property_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            for (unsigned int i = 0; i < memory_properties.memoryTypeCount; i++)
+            vkGetBufferMemoryRequirements(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->buffer, &buffer_resource_ptr->memory_requirements);
+
+            VkPhysicalDeviceMemoryProperties device_memory_properties;
+            vkGetPhysicalDeviceMemoryProperties(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties);
+
+            VkMemoryPropertyFlags required_memory_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            for (unsigned int i = 0; i < device_memory_properties.memoryTypeCount; i++)
             {
-                if ((memory_requirements.memoryTypeBits & (1 << i)) && (memory_properties.memoryTypes[i].propertyFlags & memory_property_flags) == memory_property_flags)
+                if (buffer_resource_ptr->memory_requirements.memoryTypeBits & (1 << i))
                 {
-                    memory_type_index = i;
+                    if ((device_memory_properties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
+                    {
+                        buffer_resource_ptr->memory_type_index = i;
+                    }
                 }
             }
+        }
+
+        void Storage_Manager::Allocate_Buffer_Memory(Resource_ID resource_id)
+        {
+            LOG_TRACE << "Vulkan: Allocating memory for buffer " << Get_Resource_String(resource_id);
+
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
 
             VkMemoryAllocateInfo memory_allocate_info = {};
             memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
             memory_allocate_info.pNext = nullptr;
-            memory_allocate_info.allocationSize = memory_requirements.size;
-            memory_allocate_info.memoryTypeIndex = memory_type_index;
+            memory_allocate_info.allocationSize = buffer_resource_ptr->memory_requirements.size;
+            memory_allocate_info.memoryTypeIndex = buffer_resource_ptr->memory_type_index;
 
-            VALIDATE_VKRESULT(vkAllocateMemory(*m_logical_device_ptr->Get_Device(), &memory_allocate_info, nullptr, &m_buffers.back().buffer_memory), "Vulkan: Failed to allocate buffer memory");
-            VALIDATE_VKRESULT(vkBindBufferMemory(*m_logical_device_ptr->Get_Device(), m_buffers.back().buffer, m_buffers.back().buffer_memory, 0), "Vulkan: Fail to bind buffer memory");
-
-            LOG_TRACE << "Vulkan: Finished creating buffer " << resource_id.label << "-" << resource_id.index;
+            VALIDATE_VKRESULT(vkAllocateMemory(*m_logical_device_ptr->Get_Device(), &memory_allocate_info, nullptr, &buffer_resource_ptr->device_memory), "Vulkan: Failed to allocate buffer memory");
+            VALIDATE_VKRESULT(vkBindBufferMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->buffer, buffer_resource_ptr->device_memory, 0), "Vulkan: Failed to bind buffer memory");
         }
 
-        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_required_queues)
+        void Storage_Manager::Create_VkImage(Resource_ID resource_id)
         {
-            Resource_ID resource_id = {};
-            resource_id.label = label;
-            resource_id.index = Get_Next_Buffer_Id(label);
-            resource_id.type = Resource_Type::BUFFER;
+            LOG_TRACE << "Vulkan: Creating VkImage for image " << Get_Resource_String(resource_id);
 
-            Create_Buffer_From_ID(resource_id, buffer_size, buffer_usage, buffer_type, resource_required_queues);
-        }
+            Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
 
-        void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType image_type, VkExtent2D image_size, unsigned int resource_required_queues)
-        {
-            std::vector<unsigned int> queue_families = Get_Queue_Families(resource_required_queues);
-
-            unsigned int image_id = Get_Next_Image_Id(label);
-
-            Image_Info image_info = {};
-            image_info.descriptor_type = image_type;
-
-            m_images.resize(m_images.size() + 1);
-            m_images.back() = {};
-            m_images.back().resource_id.index = image_id;
-            m_images.back().resource_id.label = label;
-            m_images.back().resource_id.type = Resource_Type::IMAGE;
-
-            LOG_INFO << "Vulkan: Creating image " << label << "-" << image_id;
+            std::vector<unsigned int> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(image_resource_ptr->resource_queue_mask);
 
             VkImageCreateInfo image_create_info = {};
             image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
             image_create_info.pNext = nullptr;
             image_create_info.flags = 0;
             image_create_info.imageType = VK_IMAGE_TYPE_2D;
-            image_create_info.format = image_format;
-            image_create_info.extent = {image_size.width, image_size.height, 1};
+            image_create_info.format = image_resource_ptr->image_format;
+            image_create_info.extent = {image_resource_ptr->image_size.width, image_resource_ptr->image_size.height};
             image_create_info.mipLevels = 1;
             image_create_info.arrayLayers = 1;
             image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
             image_create_info.tiling = VK_IMAGE_TILING_OPTIMAL;
-            image_create_info.usage = image_usage;
-            image_create_info.sharingMode = (queue_families.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
+            image_create_info.usage = image_resource_ptr->image_usage;
+            image_create_info.sharingMode = (unique_queues.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
             image_create_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-            VALIDATE_VKRESULT(vkCreateImage(*m_logical_device_ptr->Get_Device(), &image_create_info, nullptr, &image_info.image), "Vulkan: Failed to create image");
+            VALIDATE_VKRESULT(vkCreateImage(*m_logical_device_ptr->Get_Device(), &image_create_info, nullptr, &image_resource_ptr->image), "Vulkan: Failed to create VkImage");
+        }
 
-            VkMemoryRequirements memory_requirements;
-            vkGetImageMemoryRequirements(*m_logical_device_ptr->Get_Device(), image_info.image, &memory_requirements);
+        void Storage_Manager::Get_Image_Memory_Info(Resource_ID resource_id)
+        {
+            LOG_TRACE << "Vulkan: Getting memory infomation for " << Get_Resource_String(resource_id);
 
-            VkPhysicalDeviceMemoryProperties memory_properties;
-            vkGetPhysicalDeviceMemoryProperties(*m_physical_device_ptr->Get_Physical_Device(), &memory_properties);
+            Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
 
-            unsigned int memory_type_index = 0;
-            VkMemoryPropertyFlags memory_property_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-            for (unsigned int i = 0; i < memory_properties.memoryTypeCount; i++)
+            vkGetImageMemoryRequirements(*m_logical_device_ptr->Get_Device(), image_resource_ptr->image, &image_resource_ptr->memory_requirements);
+
+            VkPhysicalDeviceMemoryProperties device_memory_properties;
+            vkGetPhysicalDeviceMemoryProperties(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties);
+
+            VkMemoryPropertyFlags required_memory_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            for (unsigned int i = 0; i < device_memory_properties.memoryTypeCount; i++)
             {
-                if ((memory_requirements.memoryTypeBits & (1 << i)) && (memory_properties.memoryTypes[i].propertyFlags & memory_property_flags) == memory_property_flags)
+                if (image_resource_ptr->memory_requirements.memoryTypeBits & (1 << i))
                 {
-                    memory_type_index = i;
+                    if ((device_memory_properties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
+                    {
+                        image_resource_ptr->memory_type_index = i;
+                    }
                 }
             }
+        }
+
+        void Storage_Manager::Allocate_Image_Memory(Resource_ID resource_id)
+        {
+            LOG_TRACE << "Vulkan: Allocating memory for image " << Get_Resource_String(resource_id);
+
+            Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
 
             VkMemoryAllocateInfo memory_allocate_info = {};
-            memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
             memory_allocate_info.pNext = nullptr;
-            memory_allocate_info.allocationSize = memory_requirements.size;
-            memory_allocate_info.memoryTypeIndex = memory_type_index;
+            memory_allocate_info.allocationSize = image_resource_ptr->memory_requirements.size;
+            memory_allocate_info.memoryTypeIndex = image_resource_ptr->memory_type_index;
 
-            VALIDATE_VKRESULT(vkAllocateMemory(*m_logical_device_ptr->Get_Device(), &memory_allocate_info, nullptr, &image_info.image_memory), "Vulkan: Failed to allocate image memory");
-            VALIDATE_VKRESULT(vkBindImageMemory(*m_logical_device_ptr->Get_Device(), image_info.image, image_info.image_memory, 0), "Vulkan: Fail to bind image memory");
+            VALIDATE_VKRESULT(vkAllocateMemory(*m_logical_device_ptr->Get_Device(), &memory_allocate_info, nullptr, &image_resource_ptr->device_memory), "Vulkan: Failed to allocate image memory");
+            VALIDATE_VKRESULT(vkBindImageMemory(*m_logical_device_ptr->Get_Device(), image_resource_ptr->image, image_resource_ptr->device_memory, 0), "Vulkan: Failed to bind image memory");
+        }
+
+        void Storage_Manager::Create_Image_View(Resource_ID resource_id)
+        {
+            LOG_TRACE << "Vulkan: Creating image view for image " << Get_Resource_String(resource_id);
+
+            Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
 
             VkImageViewCreateInfo image_view_create_info = {};
             image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
             image_view_create_info.pNext = nullptr;
             image_view_create_info.flags = 0;
-            image_view_create_info.image = image_info.image;
+            image_view_create_info.image = image_resource_ptr->image;
             image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            image_view_create_info.format = image_format;
+            image_view_create_info.format = image_resource_ptr->image_format;
             image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
             image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
             image_view_create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -246,175 +206,169 @@ namespace Cascade_Graphics
             image_view_create_info.subresourceRange.baseArrayLayer = 0;
             image_view_create_info.subresourceRange.layerCount = 1;
 
-            VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_ptr->Get_Device(), &image_view_create_info, nullptr, &image_info.image_view), "Vulkan: Failed to create image view");
-
-            m_images.back().image_info = image_info;
-
-            LOG_TRACE << "Vulkan: Finished creating image " << label << "-" << image_id;
+            VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_ptr->Get_Device(), &image_view_create_info, nullptr, &image_resource_ptr->image_view), "Vulkan: Failed to create image view");
         }
 
-        void Storage_Manager::Add_Swapchain(std::string label)
+        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_queue_mask)
         {
-            LOG_INFO << "Vulkan: Adding swapchain's images to storage manager under label " << label;
+            Resource_ID resource_id = {};
+            resource_id.label = label;
+            resource_id.index = 0;
+            resource_id.resource_type = Resource_ID::Resource_Type::BUFFER_RESOURCE;
 
-            for (unsigned int i = 0; i < m_images.size(); i++)
+            while (true)
             {
-                if (m_images[i].resource_id.label == label)
+                bool index_in_use = false;
+
+                for (unsigned int i = 0; i < m_buffer_resources.size(); i++)
                 {
-                    LOG_ERROR << "Vulkan: Cannot have pre-existing resources share label '" << label << "' with swapchain";
-                    exit(EXIT_FAILURE);
+                    index_in_use |= m_buffer_resources[i].resource_id == resource_id;
+                }
+
+                if (!index_in_use)
+                {
+                    break;
+                }
+                else
+                {
+                    resource_id.index++;
                 }
             }
 
-            for (unsigned int i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
-            {
-                m_images.resize(m_images.size() + 1);
-                m_images.back() = {};
-                m_images.back().resource_id.index = i;
-                m_images.back().resource_id.label = label;
-                m_images.back().resource_id.type = Resource_Type::SWAPCHAIN_IMAGE;
+            LOG_INFO << "Vulkan: Creating buffer " << Get_Resource_String(resource_id);
 
-                LOG_TRACE << "Vulkan: Adding swapchain image " << i;
-            }
+            m_buffer_resources.resize(m_buffer_resources.size() + 1);
+            m_buffer_resources.back() = {};
+            m_buffer_resources.back().resource_id = resource_id;
+            m_buffer_resources.back().buffer_size = buffer_size;
+            m_buffer_resources.back().buffer_type = buffer_type;
+            m_buffer_resources.back().buffer_usage = buffer_usage;
+            m_buffer_resources.back().resource_queue_mask = resource_queue_mask;
+            m_buffer_resources.back().buffer = VK_NULL_HANDLE;
+            m_buffer_resources.back().device_memory = VK_NULL_HANDLE;
+            m_buffer_resources.back().memory_type_index = 0;
 
-            LOG_TRACE << "Vulkan: Finished adding swapchain's images";
+            Create_VkBuffer(resource_id);
+            Get_Buffer_Memory_Info(resource_id);
+            Allocate_Buffer_Memory(resource_id);
         }
 
-        VkImage* Storage_Manager::Get_Image(Resource_ID resource_id)
+        void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, unsigned int resource_queue_mask)
         {
-            for (unsigned int i = 0; i < m_images.size(); i++)
+            Resource_ID resource_id = {};
+            resource_id.label = label;
+            resource_id.index = 0;
+            resource_id.resource_type = Resource_ID::Resource_Type::IMAGE_RESOURCE;
+
+            while (true)
             {
-                if (m_images[i].resource_id == resource_id)
+                bool index_in_use = false;
+
+                for (unsigned int i = 0; i < m_image_resources.size(); i++)
                 {
-                    if (m_images[i].resource_id.type == Resource_Type::IMAGE)
-                    {
-                        return &m_images[i].image_info->image;
-                    }
-                    else if (m_images[i].resource_id.type == Resource_Type::SWAPCHAIN_IMAGE)
-                    {
-                        return m_swapchain_ptr->Get_Swapchain_Image(resource_id.index);
-                    }
+                    index_in_use |= m_buffer_resources[i].resource_id == resource_id;
+                }
+
+                if (!index_in_use)
+                {
+                    break;
+                }
+                else
+                {
+                    resource_id.index++;
                 }
             }
 
+            LOG_INFO << "Vulkan: Creating image " << Get_Resource_String(resource_id);
 
-            LOG_ERROR << "Vulkan: Image with resource id '" << resource_id.label << "-" << resource_id.index << "' does not exist";
-            exit(EXIT_FAILURE);
+            m_image_resources.resize(m_image_resources.size() + 1);
+            m_image_resources.back() = {};
+            m_image_resources.back().resource_id = resource_id;
+            m_image_resources.back().image_format = image_format;
+            m_image_resources.back().image_usage = image_usage;
+            m_image_resources.back().image_type = descriptor_type;
+            m_image_resources.back().image_size = image_size;
+            m_image_resources.back().resource_queue_mask = resource_queue_mask;
+            m_image_resources.back().image = VK_NULL_HANDLE;
+            m_image_resources.back().image_view = VK_NULL_HANDLE;
+            m_image_resources.back().device_memory = VK_NULL_HANDLE;
+            m_image_resources.back().memory_type_index = 0;
+
+            Create_VkImage(resource_id);
+            Get_Image_Memory_Info(resource_id);
+            Allocate_Image_Memory(resource_id);
+            Create_Image_View(resource_id);
         }
 
-        VkImageView* Storage_Manager::Get_Image_View(Resource_ID resource_id)
+        void Storage_Manager::Add_Image(std::string label, Image_Resource image_resource)
         {
-            for (unsigned int i = 0; i < m_images.size(); i++)
+            Resource_ID resource_id = {};
+            resource_id.label = label;
+            resource_id.index = 0;
+            resource_id.resource_type = Resource_ID::Resource_Type::IMAGE_RESOURCE;
+
+            while (true)
             {
-                if (m_images[i].resource_id == resource_id)
+                bool index_in_use = false;
+
+                for (unsigned int i = 0; i < m_image_resources.size(); i++)
                 {
-                    if (m_images[i].resource_id.type == Resource_Type::IMAGE)
-                    {
-                        return &m_images[i].image_info->image_view;
-                    }
+                    index_in_use |= m_image_resources[i].resource_id == resource_id;
+                }
+
+                if (!index_in_use)
+                {
+                    break;
+                }
+                else
+                {
+                    resource_id.index++;
                 }
             }
 
-            LOG_ERROR << "Vulkan: Image with resource id '" << resource_id.label << "-" << resource_id.index << "' does not exist";
-            exit(EXIT_FAILURE);
-        }
+            LOG_INFO << "Vulkan: Adding image resource to storage manager (provided resource_id was overwritten) with resource id " << Get_Resource_String(resource_id);
 
-        VkBuffer* Storage_Manager::Get_Buffer(Resource_ID resource_id)
-        {
-            for (unsigned int i = 0; i < m_buffers.size(); i++)
-            {
-                if (m_buffers[i].resource_id == resource_id)
-                {
-                    if (m_buffers[i].resource_id.type == Resource_Type::BUFFER)
-                    {
-                        return &m_buffers[i].buffer;
-                    }
-                }
-            }
-
-            LOG_ERROR << "Vulkan: Buffer with resource id '" << resource_id.label << "-" << resource_id.index << "' does not exist";
-            exit(EXIT_FAILURE);
-        }
-
-        Storage_Manager::Resource_Data Storage_Manager::Get_Resource_Data(Resource_ID resource_id)
-        {
-            if (resource_id.type == BUFFER)
-            {
-                for (unsigned int i = 0; i < m_buffers.size(); i++)
-                {
-                    if (m_buffers[i].resource_id == resource_id)
-                    {
-                        return {resource_id, m_buffers[i].descriptor_type};
-                    }
-                }
-            }
-            else
-            {
-                for (unsigned int i = 0; i < m_images.size(); i++)
-                {
-                    if (m_images[i].resource_id == resource_id)
-                    {
-                        if (m_images[i].resource_id.type == Resource_Type::IMAGE)
-                        {
-                            return {resource_id, m_images[i].image_info->descriptor_type};
-                        }
-                        else
-                        {
-                            LOG_ERROR << "Vulkan: Cannot get descriptor type of swapchain image";
-                            exit(EXIT_FAILURE);
-                        }
-                    }
-                }
-            }
-
-            LOG_ERROR << "Vulkan: Resource " << resource_id.label << "-" << resource_id.index << " does not exist";
-            exit(EXIT_FAILURE);
-        }
-
-        bool Storage_Manager::Does_Resource_Exist(Resource_ID resource_id)
-        {
-            if (resource_id.type == BUFFER)
-            {
-                for (unsigned int i = 0; i < m_buffers.size(); i++)
-                {
-                    if (m_buffers[i].resource_id == resource_id)
-                    {
-                        return true;
-                    }
-                }
-            }
-            else if (resource_id.type == IMAGE || resource_id.type == SWAPCHAIN_IMAGE)
-            {
-                for (unsigned int i = 0; i < m_images.size(); i++)
-                {
-                    if (m_images[i].resource_id == resource_id)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            image_resource.resource_id = resource_id;
+            m_image_resources.push_back(image_resource);
         }
 
         void Storage_Manager::Upload_To_Buffer(Resource_ID resource_id, void* data, size_t data_size)
         {
-            if (resource_id.type == BUFFER)
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
+
+            void* mapped_memory;
+            VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory, 0, data_size, 0, &mapped_memory), "Vulkan: Failed to map memory");
+
+            memcpy(mapped_memory, data, data_size);
+
+            vkUnmapMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory);
+        }
+
+        Storage_Manager::Buffer_Resource* Storage_Manager::Get_Buffer_Resource(Resource_ID resource_id)
+        {
+            for (unsigned int i = 0; i < m_buffer_resources.size(); i++)
             {
-                for (unsigned int i = 0; i < m_buffers.size(); i++)
+                if (m_buffer_resources[i].resource_id == resource_id)
                 {
-                    if (m_buffers[i].resource_id == resource_id)
-                    {
-                        void* mapped_memory;
-                        VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_ptr->Get_Device(), m_buffers[i].buffer_memory, 0, data_size, 0, &mapped_memory), "Vulkan: Failed to map memory for buffer upload");
-                        memcpy(mapped_memory, data, data_size);
-                        vkUnmapMemory(*m_logical_device_ptr->Get_Device(), m_buffers[i].buffer_memory);
-                        return;
-                    }
+                    return &m_buffer_resources[i];
                 }
             }
 
-            LOG_ERROR << "Vulkan: Buffer " << resource_id.label << "-" << resource_id.index << " does not exist";
+            LOG_ERROR << "Vulkan: Buffer '" << Get_Resource_String(resource_id) << "' doesn't exist";
+            exit(EXIT_FAILURE);
+        }
+
+        Storage_Manager::Image_Resource* Storage_Manager::Get_Image_Resource(Resource_ID resource_id)
+        {
+            for (unsigned int i = 0; i < m_image_resources.size(); i++)
+            {
+                if (m_image_resources[i].resource_id == resource_id)
+                {
+                    return &m_image_resources[i];
+                }
+            }
+
+            LOG_ERROR << "Vulkan: Image " << Get_Resource_String(resource_id) << " doesn't exist";
             exit(EXIT_FAILURE);
         }
     } // namespace Vulkan

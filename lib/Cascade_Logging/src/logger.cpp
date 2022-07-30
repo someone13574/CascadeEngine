@@ -128,5 +128,5 @@ namespace Cascade_Logging
         std::lock_guard<std::mutex> lock(m_queue_mutex);
         m_message_queue.push(std::move(final_message));
         m_condition_varable.notify_all();
-    }
+        }
 } // namespace Cascade_Logging

@@ -54,6 +54,7 @@ namespace Cascade_Graphics
             unsigned int Get_Queue_Family_Index(Queue_Types queue_type);
             void Get_Queue_Families(VkPhysicalDevice* physical_device_ptr);
             bool Has_Required_Queues(VkPhysicalDevice* physical_device_ptr);
+            std::vector<unsigned int> Get_Unique_Queue_Families(unsigned int required_queues);
             std::vector<VkDeviceQueueCreateInfo> Generate_Device_Queue_Create_Infos();
         };
     } // namespace Vulkan

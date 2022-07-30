@@ -5,6 +5,7 @@
 #include "device_wrapper.hpp"
 #include "physical_device_wrapper.hpp"
 #include "queue_manager.hpp"
+#include "storage_manager.hpp"
 #include "surface_wrapper.hpp"
 
 #include <memory>
@@ -35,6 +36,8 @@ namespace Cascade_Graphics
             std::vector<VkImage> m_swapchain_images;
             std::vector<VkImageView> m_swapchain_image_views;
 
+            static const VkImageUsageFlags SWAPCHAIN_USAGE = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
         private:
             void Get_Swapchain_Support();
             void Select_Swapchain_Format();
@@ -52,6 +55,7 @@ namespace Cascade_Graphics
         public:
             static bool Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface> surface_ptr);
 
+            std::vector<Storage_Manager::Image_Resource> Get_Swapchain_Image_Resources();
             VkSwapchainKHR* Get_Swapchain();
             unsigned int Get_Swapchain_Image_Count();
             VkImage* Get_Swapchain_Image(unsigned int index);

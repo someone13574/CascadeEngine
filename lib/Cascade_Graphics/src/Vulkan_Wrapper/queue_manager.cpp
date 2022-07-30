@@ -286,51 +286,59 @@ namespace Cascade_Graphics
             }
         }
 
-        std::vector<VkDeviceQueueCreateInfo> Queue_Manager::Generate_Device_Queue_Create_Infos()
+        std::vector<unsigned int> Queue_Manager::Get_Unique_Queue_Families(unsigned int required_queues)
         {
-            LOG_INFO << "Vulkan: Generating device queue create infos";
-
-            int protected_queue_family_index = -1;
             std::set<unsigned int> unique_family_indices;
 
-            if (m_required_queues & Queue_Types::GRAPHICS_QUEUE)
+            if ((required_queues & Queue_Types::GRAPHICS_QUEUE) && (m_required_queues & Queue_Types::GRAPHICS_QUEUE))
             {
                 unique_family_indices.insert(m_queue_family_indices.graphics_family_index.value());
             }
-            if (m_required_queues & Queue_Types::COMPUTE_QUEUE)
+            if ((required_queues & Queue_Types::COMPUTE_QUEUE) && (m_required_queues & Queue_Types::COMPUTE_QUEUE))
             {
                 unique_family_indices.insert(m_queue_family_indices.compute_family_index.value());
             }
-            if (m_required_queues & Queue_Types::TRANSFER_QUEUE)
+            if ((required_queues & Queue_Types::TRANSFER_QUEUE) && (m_required_queues & Queue_Types::TRANSFER_QUEUE))
             {
                 unique_family_indices.insert(m_queue_family_indices.transfer_family_index.value());
             }
-            if (m_required_queues & Queue_Types::SPARSE_BINDING_QUEUE)
+            if ((required_queues & Queue_Types::SPARSE_BINDING_QUEUE) && (m_required_queues & Queue_Types::SPARSE_BINDING_QUEUE))
             {
                 unique_family_indices.insert(m_queue_family_indices.sparse_binding_family_index.value());
             }
-            if (m_required_queues & Queue_Types::PROTECTED_QUEUE)
+            if ((required_queues & Queue_Types::PROTECTED_QUEUE) && (m_required_queues & Queue_Types::PROTECTED_QUEUE))
             {
                 unique_family_indices.insert(m_queue_family_indices.protected_family_index.value());
-                protected_queue_family_index = m_queue_family_indices.protected_family_index.value();
             }
-            if (m_required_queues & Queue_Types::PRESENT_QUEUE)
+            if ((required_queues & Queue_Types::PRESENT_QUEUE) && (m_required_queues & Queue_Types::PRESENT_QUEUE))
             {
                 unique_family_indices.insert(m_queue_family_indices.present_family_index.value());
             }
 
+            std::vector<unsigned int> unique_queue_indices_vector(unique_family_indices.begin(), unique_family_indices.end());
+
+            return unique_queue_indices_vector;
+        }
+
+        std::vector<VkDeviceQueueCreateInfo> Queue_Manager::Generate_Device_Queue_Create_Infos()
+        {
+            LOG_INFO << "Vulkan: Generating device queue create infos";
+
+            int protected_queue_family_index = (m_required_queues & Queue_Types::PROTECTED_QUEUE) ? m_queue_family_indices.protected_family_index.value() : -1;
+            std::vector<unsigned int> unique_queue_families = Get_Unique_Queue_Families(m_required_queues);
+
             float queue_priority = 1.0;
             std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos;
 
-            for (unsigned int queue_family_index : unique_family_indices)
+            for (unsigned int i = 0; i < unique_queue_families.size(); i++)
             {
                 device_queue_create_infos.resize(device_queue_create_infos.size() + 1);
 
                 device_queue_create_infos.back() = {};
                 device_queue_create_infos.back().sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
                 device_queue_create_infos.back().pNext = nullptr;
-                device_queue_create_infos.back().flags = (queue_family_index == protected_queue_family_index) ? VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT : 0;
-                device_queue_create_infos.back().queueFamilyIndex = queue_family_index;
+                device_queue_create_infos.back().flags = (unique_queue_families[i] == protected_queue_family_index) ? VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT : 0;
+                device_queue_create_infos.back().queueFamilyIndex = unique_queue_families[i];
                 device_queue_create_infos.back().queueCount = 1;
                 device_queue_create_infos.back().pQueuePriorities = &queue_priority;
             }
