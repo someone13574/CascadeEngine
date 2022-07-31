@@ -6,11 +6,11 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Pipeline_Manager::Pipeline_Manager(std::shared_ptr<Resource_Grouping_Manager> resource_grouping_manager_ptr,
+        Pipeline_Manager::Pipeline_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr,
                                            std::shared_ptr<Device> logical_device_ptr,
                                            std::shared_ptr<Storage_Manager> storage_manager_ptr,
                                            std::shared_ptr<Shader_Manager> shader_manager_ptr)
-            : m_resource_grouping_manager_ptr(resource_grouping_manager_ptr), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_shader_manager_ptr(shader_manager_ptr)
+            : m_descriptor_set_manager_ptr(descriptor_set_manager_ptr), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_shader_manager_ptr(shader_manager_ptr)
         {
         }
 
@@ -65,7 +65,7 @@ namespace Cascade_Graphics
             pipeline_layout_create_info.pNext = nullptr;
             pipeline_layout_create_info.flags = 0;
             pipeline_layout_create_info.setLayoutCount = 1;
-            pipeline_layout_create_info.pSetLayouts = m_resource_grouping_manager_ptr->Get_Descriptor_Set_Layout(resource_grouping_label);
+            pipeline_layout_create_info.pSetLayouts = &m_descriptor_set_manager_ptr->Get_Descriptor_Set_Data(resource_grouping_label)->descriptor_set_layout;
             pipeline_layout_create_info.pushConstantRangeCount = 0;
             pipeline_layout_create_info.pPushConstantRanges = nullptr;
 

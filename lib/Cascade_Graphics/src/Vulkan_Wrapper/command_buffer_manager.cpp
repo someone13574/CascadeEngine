@@ -6,11 +6,11 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Command_Buffer_Manager::Command_Buffer_Manager(std::shared_ptr<Resource_Grouping_Manager> resource_grouping_manager_ptr,
+        Command_Buffer_Manager::Command_Buffer_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager,
                                                        std::shared_ptr<Device> logical_device_ptr,
                                                        std::shared_ptr<Pipeline_Manager> pipeline_manager_ptr,
                                                        std::shared_ptr<Storage_Manager> storage_manager_ptr)
-            : m_resource_grouping_manager_ptr(resource_grouping_manager_ptr), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr)
+            : m_descriptor_set_manager(descriptor_set_manager), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr)
         {
         }
 
@@ -127,7 +127,7 @@ namespace Cascade_Graphics
             std::vector<Storage_Manager::Resource_ID> resource_identifiers;
             for (unsigned int i = 0; i < resource_group_labels.size(); i++)
             {
-                std::vector<Storage_Manager::Resource_ID> resource_group_resources = m_resource_grouping_manager_ptr->Get_Resources(resource_group_labels[i]);
+                std::vector<Storage_Manager::Resource_ID> resource_group_resources = m_storage_manager_ptr->Get_Resource_Grouping(resource_group_labels[i])->resource_ids;
                 resource_identifiers.insert(resource_identifiers.end(), resource_group_resources.begin(), resource_group_resources.end());
             }
 
@@ -191,10 +191,10 @@ namespace Cascade_Graphics
                 {
                     for (unsigned int i = 0; i < m_command_buffers[command_buffer_index].resource_group_labels.size(); i++)
                     {
-                        if (m_resource_grouping_manager_ptr->Resource_Group_Has_Descriptor_Set(m_command_buffers[command_buffer_index].resource_group_labels[i]))
+                        if (m_storage_manager_ptr->Get_Resource_Grouping(m_command_buffers[command_buffer_index].resource_group_labels[i])->has_descriptor_set)
                         {
                             vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline_Layout(m_command_buffers[command_buffer_index].pipeline_label), 0, 1,
-                                                    m_resource_grouping_manager_ptr->Get_Descriptor_Set(m_command_buffers[command_buffer_index].resource_group_labels[i]), 0, nullptr);
+                                                    &m_descriptor_set_manager->Get_Descriptor_Set_Data(m_command_buffers[command_buffer_index].resource_group_labels[i])->descriptor_set, 0, nullptr);
                         }
                     }
                     break;

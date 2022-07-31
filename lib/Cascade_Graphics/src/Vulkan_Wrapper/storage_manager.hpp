@@ -39,7 +39,7 @@ namespace Cascade_Graphics
                 Resource_ID resource_id;
 
                 VkDeviceSize buffer_size;
-                VkDescriptorType buffer_type;
+                VkDescriptorType descriptor_type;
                 VkBufferUsageFlagBits buffer_usage;
                 unsigned int resource_queue_mask;
 
@@ -55,7 +55,7 @@ namespace Cascade_Graphics
 
                 VkFormat image_format;
                 VkImageUsageFlags image_usage;
-                VkDescriptorType image_type;
+                VkDescriptorType descriptor_type;
                 VkExtent2D image_size;
                 unsigned int resource_queue_mask;
 
@@ -66,9 +66,20 @@ namespace Cascade_Graphics
                 unsigned int memory_type_index;
             };
 
+            struct Resource_Grouping
+            {
+                std::string label;
+
+                bool has_descriptor_set;
+                unsigned int buffer_resource_count;
+                unsigned int image_resource_count;
+                std::vector<Resource_ID> resource_ids;
+            };
+
         private:
             std::vector<Buffer_Resource> m_buffer_resources;
             std::vector<Image_Resource> m_image_resources;
+            std::vector<Resource_Grouping> m_resource_groupings;
 
             std::shared_ptr<Device> m_logical_device_ptr;
             std::shared_ptr<Physical_Device> m_physical_device_ptr;
@@ -92,15 +103,17 @@ namespace Cascade_Graphics
             Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
 
         public:
-            void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_queue_mask);
+            void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType descriptor_type, unsigned int resource_queue_mask);
             void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, unsigned int resource_queue_mask);
+            void Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids);
 
-            void Add_Image(std::string label, Image_Resource image_resource); // resource_id is overwritten
+            void Add_Image(std::string label, Image_Resource image_resource);
 
             void Upload_To_Buffer(Resource_ID resource_id, void* data, size_t data_size);
 
             Buffer_Resource* Get_Buffer_Resource(Resource_ID resource_id);
             Image_Resource* Get_Image_Resource(Resource_ID resource_id);
+            Resource_Grouping* Get_Resource_Grouping(std::string label);
         };
     } // namespace Vulkan
 } // namespace Cascade_Graphics

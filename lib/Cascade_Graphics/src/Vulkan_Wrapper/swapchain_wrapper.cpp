@@ -302,7 +302,7 @@ namespace Cascade_Graphics
                 swapchain_image_resources[i].resource_id = {"swapchain", i, Storage_Manager::Resource_ID::IMAGE_RESOURCE};
                 swapchain_image_resources[i].image_format = m_surface_format.format;
                 swapchain_image_resources[i].image_usage = SWAPCHAIN_USAGE;
-                swapchain_image_resources[i].image_type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+                swapchain_image_resources[i].descriptor_type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
                 swapchain_image_resources[i].image_size = m_swapchain_extent;
                 swapchain_image_resources[i].resource_queue_mask = Queue_Manager::Queue_Types::COMPUTE_QUEUE | Queue_Manager::Queue_Types::PRESENT_QUEUE | Queue_Manager::Queue_Types::TRANSFER_QUEUE;
                 swapchain_image_resources[i].image = m_swapchain_images[i];

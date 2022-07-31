@@ -209,7 +209,7 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_ptr->Get_Device(), &image_view_create_info, nullptr, &image_resource_ptr->image_view), "Vulkan: Failed to create image view");
         }
 
-        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType buffer_type, unsigned int resource_queue_mask)
+        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType descriptor_type, unsigned int resource_queue_mask)
         {
             Resource_ID resource_id = {};
             resource_id.label = label;
@@ -241,7 +241,7 @@ namespace Cascade_Graphics
             m_buffer_resources.back() = {};
             m_buffer_resources.back().resource_id = resource_id;
             m_buffer_resources.back().buffer_size = buffer_size;
-            m_buffer_resources.back().buffer_type = buffer_type;
+            m_buffer_resources.back().descriptor_type = descriptor_type;
             m_buffer_resources.back().buffer_usage = buffer_usage;
             m_buffer_resources.back().resource_queue_mask = resource_queue_mask;
             m_buffer_resources.back().buffer = VK_NULL_HANDLE;
@@ -286,7 +286,7 @@ namespace Cascade_Graphics
             m_image_resources.back().resource_id = resource_id;
             m_image_resources.back().image_format = image_format;
             m_image_resources.back().image_usage = image_usage;
-            m_image_resources.back().image_type = descriptor_type;
+            m_image_resources.back().descriptor_type = descriptor_type;
             m_image_resources.back().image_size = image_size;
             m_image_resources.back().resource_queue_mask = resource_queue_mask;
             m_image_resources.back().image = VK_NULL_HANDLE;
@@ -298,6 +298,69 @@ namespace Cascade_Graphics
             Get_Image_Memory_Info(resource_id);
             Allocate_Image_Memory(resource_id);
             Create_Image_View(resource_id);
+        }
+
+        void Storage_Manager::Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids)
+        {
+            LOG_INFO << "Vulkan: Creating resource grouping with label '" << label << "'";
+
+            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            {
+                if (m_resource_groupings[i].label == label)
+                {
+                    LOG_ERROR << "Vulkan: A resource grouping with that label already exists";
+                    exit(EXIT_FAILURE);
+                }
+            }
+
+            unsigned int buffer_resource_count = 0;
+            unsigned int image_resource_count = 0;
+            for (unsigned int i = 0; i < resource_ids.size(); i++)
+            {
+                bool resource_exists = false;
+                if (resource_ids[i].resource_type == Resource_ID::BUFFER_RESOURCE)
+                {
+                    for (unsigned int j = 0; j < m_buffer_resources.size(); j++)
+                    {
+                        if (m_buffer_resources[j].resource_id == resource_ids[i])
+                        {
+                            resource_exists = true;
+                        }
+                    }
+
+                    if (!resource_exists)
+                    {
+                        LOG_ERROR << "Vulkan: The buffer '" << Get_Resource_String(resource_ids[i]) << "' does not exist";
+                        exit(EXIT_FAILURE);
+                    }
+                    buffer_resource_count++;
+                }
+                else if (resource_ids[i].resource_type == Resource_ID::IMAGE_RESOURCE)
+                {
+                    for (unsigned int j = 0; j < m_image_resources.size(); j++)
+                    {
+                        if (m_image_resources[j].resource_id == resource_ids[i])
+                        {
+                            resource_exists = true;
+                        }
+                    }
+
+                    if (!resource_exists)
+                    {
+                        LOG_ERROR << "Vulkan: The image '" << Get_Resource_String(resource_ids[i]) << "' does not exist";
+                        exit(EXIT_FAILURE);
+                    }
+                    image_resource_count++;
+                }
+            }
+
+            m_resource_groupings.resize(m_resource_groupings.size() + 1);
+            m_resource_groupings.back() = {};
+            m_resource_groupings.back().label = label;
+            m_resource_groupings.back().has_descriptor_set = false;
+            m_resource_groupings.back().buffer_resource_count = buffer_resource_count;
+            m_resource_groupings.back().image_resource_count = image_resource_count;
+            m_resource_groupings.back().resource_ids = resource_ids;
         }
 
         void Storage_Manager::Add_Image(std::string label, Image_Resource image_resource)
@@ -369,6 +432,20 @@ namespace Cascade_Graphics
             }
 
             LOG_ERROR << "Vulkan: Image " << Get_Resource_String(resource_id) << " doesn't exist";
+            exit(EXIT_FAILURE);
+        }
+
+        Storage_Manager::Resource_Grouping* Storage_Manager::Get_Resource_Grouping(std::string label)
+        {
+            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            {
+                if (m_resource_groupings[i].label == label)
+                {
+                    return &m_resource_groupings[i];
+                }
+            }
+
+            LOG_ERROR << "Vulkan: The resource grouping '" << label << "' does not exist";
             exit(EXIT_FAILURE);
         }
     } // namespace Vulkan

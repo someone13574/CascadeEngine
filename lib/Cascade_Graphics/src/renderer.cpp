@@ -57,18 +57,20 @@ namespace Cascade_Graphics
         m_shader_manager_ptr->Add_Shader("render_shader", "C:/Users/Owen Law/Documents/Code/C++/CascadeEngine/build/build/build/Cascade_Graphics/src/Shaders/render.comp.spv");
 #endif
 
-        m_resource_grouping_manager_ptr = std::make_shared<Vulkan::Resource_Grouping_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
-        m_resource_grouping_manager_ptr->Add_Resource_Grouping(
-            "per_frame_descriptor_set",
-            {{"render_target", 0, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"camera_data", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, {"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}}, true);
-        m_resource_grouping_manager_ptr->Add_Resource_Grouping(
-            "swapchain", {{"swapchain", 0, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 1, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 2, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}}, false);
-        m_resource_grouping_manager_ptr->Create_Descriptor_Sets();
+        m_storage_manager_ptr->Create_Resource_Grouping(
+            "per_frame_descriptors",
+            {{"render_target", 0, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"camera_data", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, {"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}});
 
-        m_pipeline_manager_ptr = std::make_shared<Vulkan::Pipeline_Manager>(m_resource_grouping_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
-        m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptor_set", "render_shader");
+        m_storage_manager_ptr->Create_Resource_Grouping(
+            "swapchain_images", {{"swapchain", 0, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 1, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 2, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}});
 
-        m_command_buffer_manager_ptr = std::make_shared<Vulkan::Command_Buffer_Manager>(m_resource_grouping_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
+        m_descriptor_set_manager_ptr = std::make_shared<Vulkan::Descriptor_Set_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
+        m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
+
+        m_pipeline_manager_ptr = std::make_shared<Vulkan::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
+        m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
+
+        m_command_buffer_manager_ptr = std::make_shared<Vulkan::Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
         Record_Vulkan_Command_Buffers(width, height);
 
         m_synchronization_manager_ptr = std::make_shared<Vulkan::Synchronization_Manager>(m_logical_device_ptr);
@@ -108,7 +110,7 @@ namespace Cascade_Graphics
         {
             for (unsigned int i = 0; i < 3; i++)
             {
-                m_command_buffer_manager_ptr->Add_Command_Buffer("render_frame", m_queue_manager_ptr->Get_Queue_Family_Index(Vulkan::Queue_Manager::Queue_Types::COMPUTE_QUEUE), {"per_frame_descriptor_set", "swapchain"}, "rendering_pipeline");
+                m_command_buffer_manager_ptr->Add_Command_Buffer("render_frame", m_queue_manager_ptr->Get_Queue_Family_Index(Vulkan::Queue_Manager::Queue_Types::COMPUTE_QUEUE), {"per_frame_descriptors", "swapchain_images"}, "rendering_pipeline");
                 m_command_buffer_manager_ptr->Begin_Recording({"render_frame", i}, (VkCommandBufferUsageFlagBits)0);
                 m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"swapchain", i, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                                                                    VK_PIPELINE_STAGE_TRANSFER_BIT);
@@ -137,7 +139,7 @@ namespace Cascade_Graphics
 
         m_command_buffer_manager_ptr.reset();
         m_pipeline_manager_ptr.reset();
-        m_resource_grouping_manager_ptr.reset();
+        m_descriptor_set_manager_ptr.reset();
         m_storage_manager_ptr.reset();
         m_swapchain_ptr.reset();
 
@@ -162,18 +164,20 @@ namespace Cascade_Graphics
             m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]);
         }
 
-        m_resource_grouping_manager_ptr = std::make_shared<Vulkan::Resource_Grouping_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
-        m_resource_grouping_manager_ptr->Add_Resource_Grouping(
-            "per_frame_descriptor_set",
-            {{"render_target", 0, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"camera_data", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, {"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}}, true);
-        m_resource_grouping_manager_ptr->Add_Resource_Grouping(
-            "swapchain", {{"swapchain", 0, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 1, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 2, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}}, false);
-        m_resource_grouping_manager_ptr->Create_Descriptor_Sets();
+        m_storage_manager_ptr->Create_Resource_Grouping(
+            "per_frame_descriptors",
+            {{"render_target", 0, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"camera_data", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, {"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}});
 
-        m_pipeline_manager_ptr = std::make_shared<Vulkan::Pipeline_Manager>(m_resource_grouping_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
-        m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptor_set", "render_shader");
+        m_storage_manager_ptr->Create_Resource_Grouping(
+            "swapchain_images", {{"swapchain", 0, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 1, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 2, Vulkan::Storage_Manager::Resource_ID::IMAGE_RESOURCE}});
 
-        m_command_buffer_manager_ptr = std::make_shared<Vulkan::Command_Buffer_Manager>(m_resource_grouping_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
+        m_descriptor_set_manager_ptr = std::make_shared<Vulkan::Descriptor_Set_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
+        m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
+
+        m_pipeline_manager_ptr = std::make_shared<Vulkan::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
+        m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
+
+        m_command_buffer_manager_ptr = std::make_shared<Vulkan::Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
         Record_Vulkan_Command_Buffers(width, height);
 
         Object::GPU_Voxel gpu_voxel_a = {};

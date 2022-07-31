@@ -22,7 +22,7 @@ add_library(Cascade_Graphics STATIC
     src/Vulkan_Wrapper/storage_manager.cpp
     src/Vulkan_Wrapper/shader_manager.cpp
     src/Vulkan_Wrapper/command_buffer_manager.cpp
-    src/Vulkan_Wrapper/resource_grouping_manager.cpp
+    src/Vulkan_Wrapper/descriptor_set_manager.cpp
     src/Vulkan_Wrapper/synchronization_manager.cpp
     src/Vulkan_Wrapper/debug_tools.cpp
     src/Data_Types/vector_2.hpp
