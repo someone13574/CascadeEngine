@@ -6,6 +6,7 @@
 #include "object_manager.hpp"
 #include "window_information.hpp"
 
+#include <chrono>
 #include <memory>
 
 #ifdef CSD_USE_VULKAN
@@ -34,6 +35,10 @@ namespace Cascade_Graphics
         std::shared_ptr<Camera> m_camera_ptr;
         std::shared_ptr<Object_Manager> m_object_manager_ptr;
         Window_Information m_window_information;
+
+#ifdef CSD_LOG_FPS
+        std::chrono::time_point<std::chrono::high_resolution_clock> m_previous_present;
+#endif
 
     private:
 #ifdef CSD_USE_VULKAN

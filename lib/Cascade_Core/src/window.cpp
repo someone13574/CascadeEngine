@@ -432,9 +432,17 @@ namespace Cascade_Core
 
         window_ptr->Initialize_Renderer();
 
+        std::chrono::high_resolution_clock::time_point iteration_start;
+        std::chrono::microseconds microseconds_per_repetition = std::chrono::microseconds((uint64_t)(1000000.0 / 120.0));
+
         while (window_ptr->m_threads_active)
         {
+            iteration_start = std::chrono::high_resolution_clock::now();
+
             window_ptr->m_renderer_ptr->Render_Frame();
+
+            std::chrono::microseconds execution_time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - iteration_start);
+            std::this_thread::sleep_for(std::chrono::microseconds(std::abs((microseconds_per_repetition - execution_time).count())));
         }
 
         window_ptr->m_render_thread_stopped = true;

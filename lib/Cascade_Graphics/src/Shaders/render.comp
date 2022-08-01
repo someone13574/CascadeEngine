@@ -69,5 +69,5 @@ void main()
         min_dst = min(min_dst, Ray_Box_Intersection(ray_origin, fractional_ray_direction, vec3(voxels[i].x, voxels[i].y, voxels[i].z) - vec3(voxels[i].size), vec3(voxels[i].x, voxels[i].y, voxels[i].z) + vec3(voxels[i].size), 1.0 / 0.0));
     }
 
-    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(min_dst / 5.0, 0.0, 0.0, 1.0));
+    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(min_dst / 8.0, 0.0, 0.0, 1.0));
 }

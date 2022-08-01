@@ -120,22 +120,19 @@ namespace Cascade_Graphics
                         new_voxel.depth = m_voxels[current_index].depth + 1;
 
                         uint8_t intersection_data = Voxel_Intersects_Volume_Function(volume_sample_function, new_voxel);
-                        if (new_voxel.depth == max_depth)
+                        if ((intersection_data & 4) >> 2)
                         {
-                            new_voxel.child_index = (intersection_data & 1) << 7;
+                            new_voxel.child_index = 1 << 6;
                         }
                         else
                         {
-                            if ((intersection_data & 2) >> 1)
+                            if (new_voxel.depth == max_depth)
                             {
-                                if ((intersection_data & 4) >> 2)
-                                {
-                                    new_voxel.child_index = 1 << 6;
-                                }
-                                else
-                                {
-                                    new_voxel.child_index = 1 << 7;
-                                }
+                                new_voxel.child_index = (intersection_data & 1) << 7;
+                            }
+                            else
+                            {
+                                new_voxel.child_index = ((intersection_data & 2) >> 1) << 7;
                             }
                         }
 
@@ -187,7 +184,7 @@ namespace Cascade_Graphics
         std::vector<GPU_Voxel> gpu_voxels;
         for (unsigned int i = 0; i < m_voxels.size(); i++)
         {
-            if (m_voxels[i].depth == m_max_depth || m_voxels[i].child_index & 0x40)
+            if ((m_voxels[i].depth == m_max_depth && m_voxels[i].child_index & 0x80) || m_voxels[i].child_index & 0x40) // || m_voxels[i].child_index & 0x40
             {
                 GPU_Voxel gpu_voxel = {};
                 gpu_voxel.x_position = m_voxels[i].x_position;

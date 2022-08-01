@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 
 #include "cascade_logging.hpp"
+#include <chrono>
 
 namespace Cascade_Graphics
 {
@@ -9,6 +10,9 @@ namespace Cascade_Graphics
 #ifdef CSD_USE_VULKAN
         LOG_DEBUG << "Graphics: Creating renderer with Vulkan backend";
 
+#ifdef CSD_LOG_FPS
+        m_previous_present = std::chrono::high_resolution_clock::now();
+#endif
         Initialize_Vulkan();
 #else
         LOG_ERROR << "Graphics: Currently only the Vulkan backend is supported. Recompile with CSD_USE_VULKAN";
@@ -321,6 +325,12 @@ namespace Cascade_Graphics
             }
 
             m_current_frame = (m_current_frame + 1) % 3;
+
+#ifdef CSD_LOG_FPS
+            std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
+            LOG_TRACE << "Graphics: FPS    " << 1000000000.0 / (now - m_previous_present).count();
+            m_previous_present = now;
+#endif
         }
 #endif
     }

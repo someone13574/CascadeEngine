@@ -7,7 +7,7 @@ std::shared_ptr<Cascade_Core::Window> main_window_ptr;
 
 void Update(Cascade_Core::Application* instance_ptr)
 {
-    double elapsed_seconds = instance_ptr->Get_Elapsed_Time().count() / 1000.0;
+    double elapsed_seconds = instance_ptr->Get_Elapsed_Time().count() / 1000.0 / 5.0;
 
     std::shared_ptr<Cascade_Graphics::Camera> camera_ptr = main_window_ptr->Get_Renderer()->Get_Camera();
 
