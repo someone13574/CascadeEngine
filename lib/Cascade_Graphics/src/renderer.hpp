@@ -3,6 +3,7 @@
 
 #include "camera.hpp"
 #include "object.hpp"
+#include "object_manager.hpp"
 #include "window_information.hpp"
 
 #include <memory>
@@ -31,6 +32,7 @@ namespace Cascade_Graphics
     private:
         bool m_renderer_initialized = false;
         std::shared_ptr<Camera> m_camera_ptr;
+        std::shared_ptr<Object_Manager> m_object_manager_ptr;
         Window_Information m_window_information;
 
     private:
@@ -59,10 +61,13 @@ namespace Cascade_Graphics
 #endif
     public:
         Renderer(Window_Information window_information);
+        ~Renderer();
 
     public:
         void Render_Frame();
+        void Update_Voxels();
 
         std::shared_ptr<Camera> Get_Camera();
+        std::shared_ptr<Object_Manager> Get_Object_Manager();
     };
 } // namespace Cascade_Graphics

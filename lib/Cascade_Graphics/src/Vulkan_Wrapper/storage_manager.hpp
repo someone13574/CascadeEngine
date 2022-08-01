@@ -53,6 +53,7 @@ namespace Cascade_Graphics
             {
                 Resource_ID resource_id;
 
+                bool is_swapchain_image;
                 VkFormat image_format;
                 VkImageUsageFlags image_usage;
                 VkDescriptorType descriptor_type;
@@ -101,6 +102,7 @@ namespace Cascade_Graphics
 
         public:
             Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
+            ~Storage_Manager();
 
         public:
             void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType descriptor_type, unsigned int resource_queue_mask);
@@ -109,6 +111,7 @@ namespace Cascade_Graphics
 
             void Add_Image(std::string label, Image_Resource image_resource);
 
+            void Resize_Buffer(Resource_ID resource_id, VkDeviceSize buffer_size);
             void Upload_To_Buffer(Resource_ID resource_id, void* data, size_t data_size);
 
             Buffer_Resource* Get_Buffer_Resource(Resource_ID resource_id);

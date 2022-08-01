@@ -156,6 +156,11 @@ namespace Cascade_Graphics
             *this /= sqrt((double)(m_x * m_x + m_y * m_y + m_z * m_z));
         }
 
+        Vector_T Length()
+        {
+            return sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
+        }
+
         template <typename T>
         static double Dot(Vector_3<T> vector_a, Vector_3<T> vector_b)
         {

@@ -22,5 +22,6 @@ namespace Cascade_Graphics
 
     public:
         void Create_Object_From_Sample_Function(std::string label, uint8_t max_depth, Vector_3<double> boundary_min, Vector_3<double> boundary_max, std::function<bool(Vector_3<double>)> volume_sample_function);
+        std::vector<Object::GPU_Voxel> Get_GPU_Voxels();
     };
 } // namespace Cascade_Graphics

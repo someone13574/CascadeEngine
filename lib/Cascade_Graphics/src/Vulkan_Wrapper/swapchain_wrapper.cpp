@@ -41,6 +41,8 @@ namespace Cascade_Graphics
                 vkDestroyImageView(*m_logical_device_ptr->Get_Device(), m_swapchain_image_views[i], nullptr);
             }
 
+            LOG_TRACE << "destroyed image views";
+
             vkDestroySwapchainKHR(*m_logical_device_ptr->Get_Device(), m_swapchain, nullptr);
 
             LOG_TRACE << "Vulkan: Finished destroying swapchain";
@@ -300,6 +302,7 @@ namespace Cascade_Graphics
             {
                 swapchain_image_resources[i] = {};
                 swapchain_image_resources[i].resource_id = {"swapchain", i, Storage_Manager::Resource_ID::IMAGE_RESOURCE};
+                swapchain_image_resources[i].is_swapchain_image = true;
                 swapchain_image_resources[i].image_format = m_surface_format.format;
                 swapchain_image_resources[i].image_usage = SWAPCHAIN_USAGE;
                 swapchain_image_resources[i].descriptor_type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;

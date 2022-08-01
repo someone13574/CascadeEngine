@@ -16,9 +16,22 @@ namespace Cascade_Graphics
 #endif
 
         m_camera_ptr = std::make_shared<Camera>(Vector_3<double>(-3.0, 0.0, 0.0), Vector_3<double>(1.0, 0.0, 0.0));
+        m_object_manager_ptr = std::make_shared<Object_Manager>();
 
         m_renderer_initialized = true;
         LOG_DEBUG << "Graphics: Renderer initialized";
+    }
+
+    Renderer::~Renderer()
+    {
+#ifdef CSD_USE_VULKAN
+
+        LOG_DEBUG << "Graphics: Destroying Vulkan backend";
+
+        m_renderer_initialized = false;
+        vkDeviceWaitIdle(*m_logical_device_ptr->Get_Device());
+
+#endif
     }
 
 #ifdef CSD_USE_VULKAN
@@ -41,7 +54,7 @@ namespace Cascade_Graphics
                                             Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
         m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Cascade_Graphics::Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                              Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
-        m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object::GPU_Voxel) * 2, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object::GPU_Voxel) * 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                              Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
 
         std::vector<Vulkan::Storage_Manager::Image_Resource> swapchain_image_resources = m_swapchain_ptr->Get_Swapchain_Image_Resources();
@@ -87,21 +100,7 @@ namespace Cascade_Graphics
         m_synchronization_manager_ptr->Add_Fence("image_in_flight", VK_NULL_HANDLE);
         m_synchronization_manager_ptr->Add_Fence("image_in_flight", VK_NULL_HANDLE);
 
-
-        Cascade_Graphics::Object::GPU_Voxel gpu_voxel_a = {};
-        gpu_voxel_a.x_position = -0.5;
-        gpu_voxel_a.y_position = 0.0;
-        gpu_voxel_a.z_position = 0.0;
-        gpu_voxel_a.size = 0.25;
-
-        Cascade_Graphics::Object::GPU_Voxel gpu_voxel_b = {};
-        gpu_voxel_b.x_position = 0.5;
-        gpu_voxel_b.y_position = 0.0;
-        gpu_voxel_b.z_position = 0.0;
-        gpu_voxel_b.size = 0.25;
-
-        Cascade_Graphics::Object::GPU_Voxel gpu_voxels[2] = {gpu_voxel_a, gpu_voxel_b};
-        m_storage_manager_ptr->Upload_To_Buffer({"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, &gpu_voxels, sizeof(Object::GPU_Voxel) * 2);
+        Update_Voxels();
     }
 
     void Renderer::Record_Vulkan_Command_Buffers(unsigned int width, unsigned int height)
@@ -135,6 +134,8 @@ namespace Cascade_Graphics
 
     void Renderer::Recreate_Swapchain()
     {
+        m_renderer_initialized = false;
+
         vkDeviceWaitIdle(*m_logical_device_ptr->Get_Device());
 
         m_command_buffer_manager_ptr.reset();
@@ -155,7 +156,7 @@ namespace Cascade_Graphics
                                             Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
         m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Cascade_Graphics::Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                              Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
-        m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object::GPU_Voxel) * 2, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+        m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object::GPU_Voxel) * 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                              Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
 
         std::vector<Vulkan::Storage_Manager::Image_Resource> swapchain_image_resources = m_swapchain_ptr->Get_Swapchain_Image_Resources();
@@ -180,24 +181,67 @@ namespace Cascade_Graphics
         m_command_buffer_manager_ptr = std::make_shared<Vulkan::Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
         Record_Vulkan_Command_Buffers(width, height);
 
-        Object::GPU_Voxel gpu_voxel_a = {};
-        gpu_voxel_a.x_position = -0.5;
-        gpu_voxel_a.y_position = 0.0;
-        gpu_voxel_a.z_position = 0.0;
-        gpu_voxel_a.size = 0.25;
+        std::vector<Object::GPU_Voxel> gpu_voxels = m_object_manager_ptr->Get_GPU_Voxels();
 
-        Object::GPU_Voxel gpu_voxel_b = {};
-        gpu_voxel_b.x_position = 0.5;
-        gpu_voxel_b.y_position = 0.0;
-        gpu_voxel_b.z_position = 0.0;
-        gpu_voxel_b.size = 0.25;
+        if (m_storage_manager_ptr->Get_Buffer_Resource({"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE})->buffer_size < sizeof(Object::GPU_Voxel) * gpu_voxels.size())
+        {
+            m_storage_manager_ptr->Resize_Buffer({"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, sizeof(Cascade_Graphics::Object::GPU_Voxel) * gpu_voxels.size());
 
-        Object::GPU_Voxel gpu_voxels[2] = {gpu_voxel_a, gpu_voxel_b};
-        m_storage_manager_ptr->Upload_To_Buffer({"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, &gpu_voxels, sizeof(Object::GPU_Voxel) * 2);
+            m_command_buffer_manager_ptr.reset();
+            m_pipeline_manager_ptr.reset();
+            m_descriptor_set_manager_ptr.reset();
+
+            m_descriptor_set_manager_ptr = std::make_shared<Vulkan::Descriptor_Set_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
+            m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
+            m_pipeline_manager_ptr = std::make_shared<Vulkan::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
+            m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
+            m_command_buffer_manager_ptr = std::make_shared<Vulkan::Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
+            Record_Vulkan_Command_Buffers(*m_window_information.width_ptr, *m_window_information.height_ptr);
+        }
+
+        m_storage_manager_ptr->Upload_To_Buffer({"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, gpu_voxels.data(), sizeof(Cascade_Graphics::Object::GPU_Voxel) * gpu_voxels.size());
+
+        m_renderer_initialized = true;
     }
 
 
 #endif
+
+    void Renderer::Update_Voxels()
+    {
+#ifdef CSD_USE_VULKAN
+
+        if (m_renderer_initialized)
+        {
+            m_renderer_initialized = false;
+
+            vkDeviceWaitIdle(*m_logical_device_ptr->Get_Device());
+
+            std::vector<Object::GPU_Voxel> gpu_voxels = m_object_manager_ptr->Get_GPU_Voxels();
+
+            if (m_storage_manager_ptr->Get_Buffer_Resource({"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE})->buffer_size < sizeof(Object::GPU_Voxel) * gpu_voxels.size())
+            {
+                m_storage_manager_ptr->Resize_Buffer({"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, sizeof(Cascade_Graphics::Object::GPU_Voxel) * gpu_voxels.size());
+
+                m_command_buffer_manager_ptr.reset();
+                m_pipeline_manager_ptr.reset();
+                m_descriptor_set_manager_ptr.reset();
+
+                m_descriptor_set_manager_ptr = std::make_shared<Vulkan::Descriptor_Set_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
+                m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
+                m_pipeline_manager_ptr = std::make_shared<Vulkan::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
+                m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
+                m_command_buffer_manager_ptr = std::make_shared<Vulkan::Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
+                Record_Vulkan_Command_Buffers(*m_window_information.width_ptr, *m_window_information.height_ptr);
+            }
+
+            m_storage_manager_ptr->Upload_To_Buffer({"voxel_buffer", 0, Vulkan::Storage_Manager::Resource_ID::BUFFER_RESOURCE}, gpu_voxels.data(), sizeof(Cascade_Graphics::Object::GPU_Voxel) * gpu_voxels.size());
+
+            m_renderer_initialized = true;
+        }
+
+#endif
+    }
 
     void Renderer::Render_Frame()
     {
@@ -284,5 +328,10 @@ namespace Cascade_Graphics
     std::shared_ptr<Camera> Renderer::Get_Camera()
     {
         return m_camera_ptr;
+    }
+
+    std::shared_ptr<Object_Manager> Renderer::Get_Object_Manager()
+    {
+        return m_object_manager_ptr;
     }
 } // namespace Cascade_Graphics

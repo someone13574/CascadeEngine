@@ -60,4 +60,31 @@ namespace Cascade_Graphics
 
         m_objects.back().Create_Object_Sample_Function(max_depth, boundary_min, boundary_max, volume_sample_function);
     }
+
+    std::vector<Object::GPU_Voxel> Object_Manager::Get_GPU_Voxels()
+    {
+        std::vector<Object::GPU_Voxel> gpu_voxels;
+        for (unsigned int i = 0; i < m_objects.size(); i++)
+        {
+            std::vector<Object::GPU_Voxel> object_gpu_voxels = m_objects[i].Get_GPU_Voxels();
+
+            gpu_voxels.insert(gpu_voxels.end(), object_gpu_voxels.begin(), object_gpu_voxels.end());
+        }
+
+        return gpu_voxels;
+
+        // Cascade_Graphics::Object::GPU_Voxel gpu_voxel_a = {};
+        // gpu_voxel_a.x_position = -0.5;
+        // gpu_voxel_a.y_position = 0.0;
+        // gpu_voxel_a.z_position = 0.0;
+        // gpu_voxel_a.size = 0.25;
+
+        // Cascade_Graphics::Object::GPU_Voxel gpu_voxel_b = {};
+        // gpu_voxel_b.x_position = 0.5;
+        // gpu_voxel_b.y_position = 0.0;
+        // gpu_voxel_b.z_position = 0.0;
+        // gpu_voxel_b.size = 0.25;
+
+        // return {gpu_voxel_a, gpu_voxel_b};
+    }
 } // namespace Cascade_Graphics

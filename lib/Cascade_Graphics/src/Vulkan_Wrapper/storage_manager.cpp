@@ -13,6 +13,40 @@ namespace Cascade_Graphics
         {
         }
 
+        Storage_Manager::~Storage_Manager()
+        {
+            LOG_INFO << "Vulkan: Cleaning up storage";
+
+            for (unsigned int i = 0; i < m_buffer_resources.size(); i++)
+            {
+                Buffer_Resource* buffer_resource_ptr = &m_buffer_resources[i];
+
+                LOG_TRACE << "Vulkan: Destroying buffer " << Get_Resource_String(buffer_resource_ptr->resource_id) << "'";
+
+                vkDestroyBuffer(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
+                vkFreeMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
+            }
+            m_buffer_resources.clear();
+
+            for (unsigned int i = 0; i < m_image_resources.size(); i++)
+            {
+                Image_Resource* image_resource_ptr = &m_image_resources[i];
+
+                if (!image_resource_ptr->is_swapchain_image)
+                {
+                    LOG_TRACE << "Vulkan: Destorying image '" << Get_Resource_String(image_resource_ptr->resource_id) << "'";
+
+                    vkDestroyImage(*m_logical_device_ptr->Get_Device(), image_resource_ptr->image, nullptr);
+                    vkDestroyImageView(*m_logical_device_ptr->Get_Device(), image_resource_ptr->image_view, nullptr);
+                    vkFreeMemory(*m_logical_device_ptr->Get_Device(), image_resource_ptr->device_memory, nullptr);
+                }
+            }
+            m_image_resources.clear();
+            m_resource_groupings.clear();
+
+            LOG_TRACE << "Vulkan: Finished cleaning up storage";
+        }
+
         std::string Storage_Manager::Get_Resource_String(Resource_ID resource_id)
         {
             return resource_id.label.append("-").append(std::to_string(resource_id.index));
@@ -284,6 +318,7 @@ namespace Cascade_Graphics
             m_image_resources.resize(m_image_resources.size() + 1);
             m_image_resources.back() = {};
             m_image_resources.back().resource_id = resource_id;
+            m_image_resources.back().is_swapchain_image = false;
             m_image_resources.back().image_format = image_format;
             m_image_resources.back().image_usage = image_usage;
             m_image_resources.back().descriptor_type = descriptor_type;
@@ -393,6 +428,25 @@ namespace Cascade_Graphics
 
             image_resource.resource_id = resource_id;
             m_image_resources.push_back(image_resource);
+        }
+
+        void Storage_Manager::Resize_Buffer(Resource_ID resource_id, VkDeviceSize buffer_size)
+        {
+            LOG_TRACE << "Vulkan: Resizing buffer '" << Get_Resource_String(resource_id) << "'";
+
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
+
+            vkDestroyBuffer(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
+            vkFreeMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
+
+            buffer_resource_ptr->buffer_size = buffer_size;
+            buffer_resource_ptr->buffer = VK_NULL_HANDLE;
+            buffer_resource_ptr->device_memory = VK_NULL_HANDLE;
+            buffer_resource_ptr->memory_type_index = 0;
+
+            Create_VkBuffer(resource_id);
+            Get_Buffer_Memory_Info(resource_id);
+            Allocate_Buffer_Memory(resource_id);
         }
 
         void Storage_Manager::Upload_To_Buffer(Resource_ID resource_id, void* data, size_t data_size)

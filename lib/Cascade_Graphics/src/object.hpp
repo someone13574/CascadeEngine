@@ -42,8 +42,11 @@ namespace Cascade_Graphics
         Vector_3<double> m_root_min;
         Vector_3<double> m_root_max;
 
+        unsigned int m_max_depth;
+
     private:
         uint32_t Get_Voxel_Index(Vector_3<double> position);
+        uint8_t Voxel_Intersects_Volume_Function(std::function<bool(Vector_3<double>)> volume_sample_function, Voxel voxel);
 
     public:
         Object(std::string label);
@@ -52,5 +55,6 @@ namespace Cascade_Graphics
         void Create_Object_Sample_Function(uint8_t max_depth, Vector_3<double> boundary_min, Vector_3<double> boundary_max, std::function<bool(Vector_3<double>)> volume_sample_function);
 
         std::string Get_Label();
+        std::vector<GPU_Voxel> Get_GPU_Voxels();
     };
 } // namespace Cascade_Graphics
