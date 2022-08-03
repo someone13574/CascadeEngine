@@ -83,11 +83,10 @@ void main()
     {
         iteration++;
 
-
         Voxel current_voxel = voxels[current_index];
 
         vec3 current_normal;
-        float dst = Ray_Box_Intersection(ray_origin + vec3(current_voxel.x, current_voxel.y, current_voxel.z), fractional_ray_direction, current_voxel.size, current_normal);
+        float dst = Ray_Box_Intersection(ray_origin - vec3(current_voxel.x, current_voxel.y, current_voxel.z), fractional_ray_direction, current_voxel.size, current_normal);
 
         if (dst == 1.0 / 0.0)
         {
@@ -106,11 +105,11 @@ void main()
                     normal = current_normal;
                     min_dst = dst;
 
-                    vec3 offset = abs((ray_direction * min_dst + ray_origin) + vec3(current_voxel.x, current_voxel.y, current_voxel.z));
+                    vec3 offset = abs((ray_direction * min_dst + ray_origin) - vec3(current_voxel.x, current_voxel.y, current_voxel.z));
 
-                    bool x_face = (offset.x > current_voxel.size - 0.004);
-                    bool y_face = (offset.y > current_voxel.size - 0.004);
-                    bool z_face = (offset.z > current_voxel.size - 0.004);
+                    bool x_face = (offset.x > current_voxel.size - 0.001);
+                    bool y_face = (offset.y > current_voxel.size - 0.001);
+                    bool z_face = (offset.z > current_voxel.size - 0.001);
 
                     voxel_edge = (x_face && y_face) || (x_face && z_face) || (y_face && z_face);
                 }
@@ -118,5 +117,12 @@ void main()
         }
     }
 
-    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(abs(normal) * 0.5, 1.0));
+    if (false) // voxel_edge
+    {
+        imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(vec3(0.0), 1.0));
+    }
+    else
+    {
+        imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(abs(normal) * 0.5, 1.0));
+    }
 }

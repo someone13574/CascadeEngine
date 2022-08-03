@@ -17,7 +17,7 @@ void Update(Cascade_Core::Application* instance_ptr)
 
 bool Volume_Sample_Function(Cascade_Graphics::Vector_3<double> position)
 {
-    return position.Length() > 1.5 && position.m_y > 0.0;
+    return position.Length() > 1.5 && position.m_y < 0.0;
 }
 
 int main()
