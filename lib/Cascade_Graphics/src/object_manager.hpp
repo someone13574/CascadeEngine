@@ -38,7 +38,7 @@ namespace Cascade_Graphics
             unsigned int miss_link;
 
             unsigned int depth;
-            bool add_to_stack;
+            bool is_leaf;
         };
 
         struct Object
@@ -49,6 +49,9 @@ namespace Cascade_Graphics
 
     private:
         std::vector<Object> m_objects;
+
+    private:
+        void Voxel_Sample_Volume_Function(Voxel voxel, std::function<bool(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting, bool& is_center_intersecting);
 
     public:
         Object_Manager();

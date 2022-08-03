@@ -442,7 +442,7 @@ namespace Cascade_Core
             window_ptr->m_renderer_ptr->Render_Frame();
 
             std::chrono::microseconds execution_time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - iteration_start);
-            std::this_thread::sleep_for(std::chrono::microseconds(std::abs((microseconds_per_repetition - execution_time).count())));
+            // std::this_thread::sleep_for(std::chrono::microseconds(std::abs((microseconds_per_repetition - execution_time).count())));
         }
 
         window_ptr->m_render_thread_stopped = true;

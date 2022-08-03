@@ -78,10 +78,8 @@ void main()
 
     uint current_index = 0;
 
-    vec3 final_normal = vec3(0);
-
     uint iteration = 0;
-    while (iteration < 100000000 && current_index != -1 && current_index < voxels.length())
+    while (iteration < 1000000000 && current_index != -1 && current_index < voxels.length())
     {
         iteration++;
 
@@ -110,9 +108,9 @@ void main()
 
                     vec3 offset = abs((ray_direction * min_dst + ray_origin) + vec3(current_voxel.x, current_voxel.y, current_voxel.z));
 
-                    bool x_face = (offset.x > current_voxel.size - 0.002);
-                    bool y_face = (offset.y > current_voxel.size - 0.002);
-                    bool z_face = (offset.z > current_voxel.size - 0.002);
+                    bool x_face = (offset.x > current_voxel.size - 0.004);
+                    bool y_face = (offset.y > current_voxel.size - 0.004);
+                    bool z_face = (offset.z > current_voxel.size - 0.004);
 
                     voxel_edge = (x_face && y_face) || (x_face && z_face) || (y_face && z_face);
                 }
@@ -120,12 +118,5 @@ void main()
         }
     }
 
-    if (voxel_edge)
-    {
-        imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(0.0, 0.0, 0.0, 1.0));
-    }
-    else
-    {
-        imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(abs(normal) * 0.5, 1.0));
-    }
+    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(abs(normal) * 0.5, 1.0));
 }

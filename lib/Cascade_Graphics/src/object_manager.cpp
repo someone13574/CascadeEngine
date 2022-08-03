@@ -9,6 +9,39 @@ namespace Cascade_Graphics
     {
     }
 
+    void Object_Manager::Voxel_Sample_Volume_Function(Voxel voxel, std::function<bool(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting, bool& is_center_intersecting)
+    {
+        const unsigned int SAMPLES = 8;
+
+        is_center_intersecting = volume_sample_function(voxel.position);
+        is_fully_contained = is_center_intersecting;
+        is_intersecting = is_center_intersecting;
+
+        double step_size = (1.0 / (SAMPLES - 1)) * voxel.size * 2.0;
+        Vector_3<double> sample_position(0.0, 0.0, 0.0);
+
+        for (unsigned int i = 0; i < SAMPLES; i++)
+        {
+            for (unsigned int j = 0; j < SAMPLES; j++)
+            {
+                for (unsigned int k = 0; k < SAMPLES; k++)
+                {
+                    sample_position = voxel.position - Vector_3<double>(voxel.size, voxel.size, voxel.size) + Vector_3<double>(i * step_size, j * step_size, k * step_size);
+
+                    bool sample = volume_sample_function(sample_position);
+
+                    is_fully_contained = is_fully_contained && sample;
+                    is_intersecting = is_intersecting || sample;
+
+                    if (!is_fully_contained && is_intersecting)
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     void Object_Manager::Create_Object_Volume_Function(std::string label, unsigned int max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::function<bool(Vector_3<double>)> volume_sample_function)
     {
         LOG_INFO << "Graphics: Creating object with label '" << label << "'";
@@ -42,7 +75,7 @@ namespace Cascade_Graphics
         root_voxel.hit_link = -1;
         root_voxel.miss_link = -1;
         root_voxel.depth = 0;
-        root_voxel.add_to_stack = true;
+        root_voxel.is_leaf = false;
 
         m_objects.back().voxels.push_back(root_voxel);
 
@@ -56,7 +89,6 @@ namespace Cascade_Graphics
 
             if (current_voxel.depth != max_depth)
             {
-                unsigned int first_child = -1;
                 unsigned int previous_child = -1;
 
                 for (unsigned int i = 0; i < 8; i++)
@@ -78,23 +110,14 @@ namespace Cascade_Graphics
                     child_voxel.miss_link = current_voxel.miss_link;
                     child_voxel.depth = current_voxel.depth + 1;
 
-                    bool center_intersection = volume_sample_function(child_voxel.position);
-                    bool corner_000_intersection = volume_sample_function(child_voxel.position + Vector_3<double>(-child_voxel.size, -child_voxel.size, -child_voxel.size));
-                    bool corner_001_intersection = volume_sample_function(child_voxel.position + Vector_3<double>(-child_voxel.size, -child_voxel.size, child_voxel.size));
-                    bool corner_010_intersection = volume_sample_function(child_voxel.position + Vector_3<double>(-child_voxel.size, child_voxel.size, -child_voxel.size));
-                    bool corner_011_intersection = volume_sample_function(child_voxel.position + Vector_3<double>(-child_voxel.size, child_voxel.size, child_voxel.size));
-                    bool corner_100_intersection = volume_sample_function(child_voxel.position + Vector_3<double>(child_voxel.size, -child_voxel.size, -child_voxel.size));
-                    bool corner_101_intersection = volume_sample_function(child_voxel.position + Vector_3<double>(child_voxel.size, -child_voxel.size, child_voxel.size));
-                    bool corner_110_intersection = volume_sample_function(child_voxel.position + Vector_3<double>(child_voxel.size, child_voxel.size, -child_voxel.size));
-                    bool corner_111_intersection = volume_sample_function(child_voxel.position + Vector_3<double>(child_voxel.size, child_voxel.size, child_voxel.size));
+                    bool is_fully_contained;
+                    bool is_intersecting;
+                    bool is_center_intersecting;
+                    Voxel_Sample_Volume_Function(child_voxel, volume_sample_function, is_fully_contained, is_intersecting, is_center_intersecting);
 
-                    if ((center_intersection && child_voxel.depth == max_depth)
-                        || (corner_000_intersection || corner_001_intersection || corner_010_intersection || corner_011_intersection || corner_100_intersection || corner_101_intersection || corner_110_intersection || corner_111_intersection
-                            || center_intersection))
+                    if (is_intersecting)
                     {
-                        child_voxel.add_to_stack = !((corner_000_intersection && corner_001_intersection && corner_010_intersection && corner_011_intersection && corner_100_intersection && corner_101_intersection && corner_110_intersection
-                                                      && corner_111_intersection && center_intersection)
-                                                     || (child_voxel.depth == max_depth));
+                        child_voxel.is_leaf = child_voxel.depth == max_depth || is_fully_contained;
 
                         current_voxel.child_indices[i] = m_objects.back().voxels.size();
 
@@ -131,7 +154,7 @@ namespace Cascade_Graphics
                 {
                     if (current_voxel.child_indices[i] != -1)
                     {
-                        if (m_objects.back().voxels[current_voxel.child_indices[i]].add_to_stack)
+                        if (!m_objects.back().voxels[current_voxel.child_indices[i]].is_leaf)
                         {
                             voxel_stack.push(current_voxel.child_indices[i]);
                         }
