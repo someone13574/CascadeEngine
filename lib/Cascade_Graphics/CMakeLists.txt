@@ -30,9 +30,8 @@ add_library(Cascade_Graphics STATIC
     src/Data_Types/vector_4.hpp
     src/Data_Types/matrix_2x2.hpp
     src/Data_Types/matrix_3x3.hpp
-    src/window_information.hpp
-    src/object.cpp
     src/object_manager.cpp
+    src/window_information.hpp
     src/camera.cpp
     src/renderer.cpp)
 

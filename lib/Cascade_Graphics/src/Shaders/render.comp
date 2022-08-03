@@ -1,4 +1,4 @@
-#version 450
+#version 460
 
 layout(local_size_x = 32, local_size_y = 32) in;
 
@@ -28,6 +28,12 @@ struct Voxel
     float y;
     float z;
     float size;
+
+    uint hit_index;
+    uint miss_index;
+    
+    uint padding_a;
+    uint padding_b;
 };
 
 layout(std140, binding = 2) buffer voxel_buffer
@@ -35,23 +41,26 @@ layout(std140, binding = 2) buffer voxel_buffer
     Voxel voxels[];
 };
 
-float Ray_Box_Intersection(vec3 origin, vec3 fractional_ray_direction, vec3 box_min, vec3 box_max, float max_dst)
+float Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, float box_size, out vec3 normal)
 {
-    vec3 t1 = (box_min - origin) * fractional_ray_direction;
-    vec3 t2 = (box_max - origin) * fractional_ray_direction;
+    vec3 n = ray_origin * fractional_ray_direction;
+    vec3 k = box_size * abs(fractional_ray_direction);
 
-    float min_t = max(max(min(t1.x, t2.x), min(t1.y, t2.y)), min(t1.z, t2.z));
-    float max_t = min(min(max(t1.x, t2.x), max(t1.y, t2.y)), max(t1.z, t2.z));
+    vec3 t1 = -n - k;
+    vec3 t2 = -n + k;
 
-    if (max_t >= min_t)
+    float tN = max(max(t1.x, t1.y), t1.z);
+    float tF = min(min(t2.x, t2.y), t2.z);
+
+    if (tN >= tF || tF < 0.0)
     {
-        return abs(min_t);
+        normal = vec3(0);
+        return 1.0/0.0;
     }
-    else
-    {
-        return 1.0 / 0.0;
-    }
-} 
+
+    normal = -sign(fractional_ray_direction) * step(t1.yzx, t1.xyz) * step(t1.zxy, t1.xyz);
+    return tN;
+}
 
 // code
 void main()
@@ -60,14 +69,63 @@ void main()
     vec2 uv = (-texture_size + 2.0 * (gl_GlobalInvocationID.xy + vec2(0.5, 0.5))) / texture_size.y;
 
     vec3 ray_origin = vec3(camera_data.origin_x, camera_data.origin_y, camera_data.origin_z);
-    vec3 ray_direction = normalize(vec3(uv.x, -uv.y, -1.0) * mat3x3(camera_data.matrix_x0, camera_data.matrix_x1, camera_data.matrix_x2, camera_data.matrix_y0, camera_data.matrix_y1, camera_data.matrix_y2, camera_data.matrix_z0, camera_data.matrix_z1, camera_data.matrix_z2));
+    vec3 ray_direction = normalize(vec3(uv.x, -uv.y, 1.0) * mat3x3(camera_data.matrix_x0, camera_data.matrix_x1, camera_data.matrix_x2, camera_data.matrix_y0, camera_data.matrix_y1, camera_data.matrix_y2, camera_data.matrix_z0, camera_data.matrix_z1, camera_data.matrix_z2));
     vec3 fractional_ray_direction = 1.0 / ray_direction;
 
     float min_dst = 1.0 / 0.0;
-    for (uint i = 0; i < voxels.length(); i++)
+    vec3 normal = vec3(0);
+    bool voxel_edge = false;
+
+    uint current_index = 0;
+
+    vec3 final_normal = vec3(0);
+
+    uint iteration = 0;
+    while (iteration < 100000000 && current_index != -1 && current_index < voxels.length())
     {
-        min_dst = min(min_dst, Ray_Box_Intersection(ray_origin, fractional_ray_direction, vec3(voxels[i].x, voxels[i].y, voxels[i].z) - vec3(voxels[i].size), vec3(voxels[i].x, voxels[i].y, voxels[i].z) + vec3(voxels[i].size), 1.0 / 0.0));
+        iteration++;
+
+
+        Voxel current_voxel = voxels[current_index];
+
+        vec3 current_normal;
+        float dst = Ray_Box_Intersection(ray_origin + vec3(current_voxel.x, current_voxel.y, current_voxel.z), fractional_ray_direction, current_voxel.size, current_normal);
+
+        if (dst == 1.0 / 0.0)
+        {
+            current_index = current_voxel.miss_index;
+        }
+        else
+        {
+            current_index = current_voxel.hit_index;
+
+            if (current_index == -1)
+            {
+                current_index = current_voxel.miss_index;
+
+                if (dst < min_dst)
+                {
+                    normal = current_normal;
+                    min_dst = dst;
+
+                    vec3 offset = abs((ray_direction * min_dst + ray_origin) + vec3(current_voxel.x, current_voxel.y, current_voxel.z));
+
+                    bool x_face = (offset.x > current_voxel.size - 0.002);
+                    bool y_face = (offset.y > current_voxel.size - 0.002);
+                    bool z_face = (offset.z > current_voxel.size - 0.002);
+
+                    voxel_edge = (x_face && y_face) || (x_face && z_face) || (y_face && z_face);
+                }
+            }
+        }
     }
 
-    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(min_dst / 8.0, 0.0, 0.0, 1.0));
+    if (voxel_edge)
+    {
+        imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(0.0, 0.0, 0.0, 1.0));
+    }
+    else
+    {
+        imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(abs(normal) * 0.5, 1.0));
+    }
 }

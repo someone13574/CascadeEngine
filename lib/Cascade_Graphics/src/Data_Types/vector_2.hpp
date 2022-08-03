@@ -11,6 +11,7 @@ namespace Cascade_Graphics
         static_assert(std::is_arithmetic<Vector_T>::value, "Vector: Vector type must be numeric");
 
     public:
+        Vector_2(){};
         Vector_2(Vector_T x, Vector_T y) : m_x(x), m_y(y){};
 
         template <typename Convert_T>

@@ -16,6 +16,7 @@ namespace Cascade_Graphics
         Vector_T m_z = 0;
 
     public:
+        Vector_3(){};
         Vector_3(Vector_T x, Vector_T y, Vector_T z) : m_x(x), m_y(y), m_z(z){};
 
         template <typename Convert_T>
