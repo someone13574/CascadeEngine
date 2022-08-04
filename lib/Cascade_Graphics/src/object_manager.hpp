@@ -18,11 +18,8 @@ namespace Cascade_Graphics
             float position_z;
             float size;
 
-            unsigned int hit_index;
-            unsigned int miss_index;
-
-            unsigned int padding_a;
-            unsigned int padding_b;
+            unsigned int hit_links[8];
+            unsigned int miss_links[8];
         };
 
     private:
@@ -34,8 +31,8 @@ namespace Cascade_Graphics
             unsigned int parent_index;
             unsigned int child_indices[8] = {0, 0, 0, 0, 0, 0, 0, 0};
             unsigned int child_index;
-            unsigned int hit_link;
-            unsigned int miss_link;
+            unsigned int hit_links[8];
+            unsigned int miss_links[8];
 
             unsigned int depth;
             bool is_leaf;

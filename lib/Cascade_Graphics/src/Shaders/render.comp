@@ -29,11 +29,7 @@ struct Voxel
     float z;
     float size;
 
-    uint hit_index;
-    uint miss_index;
-    
-    uint padding_a;
-    uint padding_b;
+    mat4x4 links;
 };
 
 layout(std140, binding = 2) buffer voxel_buffer
@@ -72,7 +68,10 @@ void main()
     vec3 ray_direction = normalize(vec3(uv.x, -uv.y, 1.0) * mat3x3(camera_data.matrix_x0, camera_data.matrix_x1, camera_data.matrix_x2, camera_data.matrix_y0, camera_data.matrix_y1, camera_data.matrix_y2, camera_data.matrix_z0, camera_data.matrix_z1, camera_data.matrix_z2));
     vec3 fractional_ray_direction = 1.0 / ray_direction;
 
-    float min_dst = 1.0 / 0.0;
+    uint direction_index_low = uint(ray_direction.x < 0.0) | (uint(ray_direction.y < 0.0) << 1);
+    uint direction_index_high = uint(ray_direction.z < 0.0);
+
+    float hit_distance = 0;
     vec3 normal = vec3(0);
     bool voxel_edge = false;
 
@@ -90,29 +89,26 @@ void main()
 
         if (dst == 1.0 / 0.0)
         {
-            current_index = current_voxel.miss_index;
+            current_index = floatBitsToUint(current_voxel.links[2 + direction_index_high][direction_index_low]);
         }
         else
         {
-            current_index = current_voxel.hit_index;
+            current_index = floatBitsToUint(current_voxel.links[direction_index_high][direction_index_low]);
 
             if (current_index == -1)
             {
-                current_index = current_voxel.miss_index;
+                normal = current_normal;
+                hit_distance = dst;
 
-                if (dst < min_dst)
-                {
-                    normal = current_normal;
-                    min_dst = dst;
+                vec3 offset = abs((ray_direction * hit_distance + ray_origin) - vec3(current_voxel.x, current_voxel.y, current_voxel.z));
 
-                    vec3 offset = abs((ray_direction * min_dst + ray_origin) - vec3(current_voxel.x, current_voxel.y, current_voxel.z));
+                bool x_face = (offset.x > current_voxel.size - 0.004);
+                bool y_face = (offset.y > current_voxel.size - 0.004);
+                bool z_face = (offset.z > current_voxel.size - 0.004);
 
-                    bool x_face = (offset.x > current_voxel.size - 0.001);
-                    bool y_face = (offset.y > current_voxel.size - 0.001);
-                    bool z_face = (offset.z > current_voxel.size - 0.001);
+                voxel_edge = (x_face && y_face) || (x_face && z_face) || (y_face && z_face);
 
-                    voxel_edge = (x_face && y_face) || (x_face && z_face) || (y_face && z_face);
-                }
+                break;
             }
         }
     }
@@ -124,5 +120,6 @@ void main()
     else
     {
         imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(abs(normal) * 0.5, 1.0));
+        //imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(vec3(hit_distance) / 5.0, 1.0));
     }
 }
