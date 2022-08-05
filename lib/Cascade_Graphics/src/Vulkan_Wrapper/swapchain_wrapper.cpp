@@ -308,14 +308,19 @@ namespace Cascade_Graphics
             return &m_swapchain;
         }
 
+        VkImage* Swapchain::Get_Swapchain_Image(unsigned int index)
+        {
+            return &m_swapchain_images[index];
+        }
+
         unsigned int Swapchain::Get_Swapchain_Image_Count()
         {
             return m_swapchain_image_count;
         }
 
-        VkImage* Swapchain::Get_Swapchain_Image(unsigned int index)
+        VkExtent2D Swapchain::Get_Swapchain_Extent()
         {
-            return &m_swapchain_images[index];
+            return m_swapchain_extent;
         }
     } // namespace Vulkan
 } // namespace Cascade_Graphics

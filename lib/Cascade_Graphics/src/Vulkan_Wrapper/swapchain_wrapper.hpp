@@ -57,8 +57,9 @@ namespace Cascade_Graphics
 
             std::vector<Storage_Manager::Image_Resource> Get_Swapchain_Image_Resources();
             VkSwapchainKHR* Get_Swapchain();
-            unsigned int Get_Swapchain_Image_Count();
             VkImage* Get_Swapchain_Image(unsigned int index);
+            unsigned int Get_Swapchain_Image_Count();
+            VkExtent2D Get_Swapchain_Extent();
         };
     } // namespace Vulkan
 } // namespace Cascade_Graphics

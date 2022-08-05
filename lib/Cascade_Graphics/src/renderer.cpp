@@ -213,6 +213,8 @@ namespace Cascade_Graphics
             LOG_DEBUG << "Vulkan: New window size " << width << "x" << height;
 
             m_swapchain_ptr = std::make_shared<Vulkan::Swapchain>(m_logical_device_ptr, m_physical_device_ptr, m_surface_ptr, m_queue_manager_ptr, width, height);
+            width = m_swapchain_ptr->Get_Swapchain_Extent().width;
+            height = m_swapchain_ptr->Get_Swapchain_Extent().height;
 
             std::vector<Object_Manager::GPU_Voxel> gpu_voxels = m_object_manager_ptr->Get_GPU_Voxels();
             m_storage_manager_ptr = std::make_shared<Vulkan::Storage_Manager>(m_logical_device_ptr, m_physical_device_ptr, m_queue_manager_ptr);
@@ -255,8 +257,6 @@ namespace Cascade_Graphics
                 m_synchronization_manager_ptr->Create_Semaphore("render_finished_semaphore");
                 m_synchronization_manager_ptr->Create_Fence("in_flight_fence");
             }
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 
@@ -377,7 +377,7 @@ namespace Cascade_Graphics
 
 #ifdef CSD_LOG_FPS
             std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
-            // LOG_TRACE << "Graphics: FPS    " << 1000000000.0 / (now - m_previous_present).count();
+            LOG_TRACE << "Graphics: FPS    " << 1000000000.0 / (now - m_previous_present).count();
             m_previous_present = now;
 #endif
         }
