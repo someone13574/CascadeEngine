@@ -31,6 +31,7 @@ namespace Cascade_Graphics
 
         private:
             std::vector<Descriptor_Set_Data> m_descriptor_sets;
+            std::vector<VkSampler> m_samplers;
 
             std::shared_ptr<Device> m_logical_device_ptr;
             std::shared_ptr<Storage_Manager> m_storage_manager_ptr;

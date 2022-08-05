@@ -165,7 +165,7 @@ namespace Cascade_Graphics
             image_create_info.flags = 0;
             image_create_info.imageType = VK_IMAGE_TYPE_2D;
             image_create_info.format = image_resource_ptr->image_format;
-            image_create_info.extent = {image_resource_ptr->image_size.width, image_resource_ptr->image_size.height};
+            image_create_info.extent = {image_resource_ptr->image_size.width, image_resource_ptr->image_size.height, 1};
             image_create_info.mipLevels = 1;
             image_create_info.arrayLayers = 1;
             image_create_info.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -208,7 +208,7 @@ namespace Cascade_Graphics
             Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
 
             VkMemoryAllocateInfo memory_allocate_info = {};
-            memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+            memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
             memory_allocate_info.pNext = nullptr;
             memory_allocate_info.allocationSize = image_resource_ptr->memory_requirements.size;
             memory_allocate_info.memoryTypeIndex = image_resource_ptr->memory_type_index;

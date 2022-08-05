@@ -147,7 +147,7 @@ namespace Cascade_Graphics_Debugging
                             break;
                         }
                     }
-                    // exit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                     break;
                 }
                 default:

@@ -22,6 +22,11 @@ namespace Cascade_Graphics
                 vkDestroyDescriptorPool(*m_logical_device_ptr->Get_Device(), m_descriptor_sets[i].descriptor_pool, nullptr);
             }
 
+            for (unsigned int i = 0; i < m_samplers.size(); i++)
+            {
+                vkDestroySampler(*m_logical_device_ptr->Get_Device(), m_samplers[i], nullptr);
+            }
+
             LOG_TRACE << "Vulkan: Finished cleaning up descriptor set manager";
         }
 
@@ -155,11 +160,11 @@ namespace Cascade_Graphics
                     sampler_create_info.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
                     sampler_create_info.unnormalizedCoordinates = VK_FALSE;
 
-                    VkSampler sampler;
-                    VALIDATE_VKRESULT(vkCreateSampler(*m_logical_device_ptr->Get_Device(), &sampler_create_info, nullptr, &sampler), "Vulkan: Failed to create image sampler");
+                    m_samplers.resize(m_samplers.size() + 1);
+                    VALIDATE_VKRESULT(vkCreateSampler(*m_logical_device_ptr->Get_Device(), &sampler_create_info, nullptr, &m_samplers.back()), "Vulkan: Failed to create image sampler");
 
                     descriptor_set_data_ptr->image_descriptor_infos[set_image_descriptor_infos] = {};
-                    descriptor_set_data_ptr->image_descriptor_infos[set_image_descriptor_infos].sampler = sampler;
+                    descriptor_set_data_ptr->image_descriptor_infos[set_image_descriptor_infos].sampler = m_samplers.back();
                     descriptor_set_data_ptr->image_descriptor_infos[set_image_descriptor_infos].imageView = m_storage_manager_ptr->Get_Image_Resource(resource_grouping_ptr->resource_ids[i])->image_view;
                     descriptor_set_data_ptr->image_descriptor_infos[set_image_descriptor_infos].imageLayout = VK_IMAGE_LAYOUT_GENERAL;
 

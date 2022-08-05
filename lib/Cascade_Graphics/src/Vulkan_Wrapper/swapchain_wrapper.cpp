@@ -41,8 +41,6 @@ namespace Cascade_Graphics
                 vkDestroyImageView(*m_logical_device_ptr->Get_Device(), m_swapchain_image_views[i], nullptr);
             }
 
-            LOG_TRACE << "destroyed image views";
-
             vkDestroySwapchainKHR(*m_logical_device_ptr->Get_Device(), m_swapchain, nullptr);
 
             LOG_TRACE << "Vulkan: Finished destroying swapchain";
@@ -170,6 +168,10 @@ namespace Cascade_Graphics
 
         void Swapchain::Create_Swapchain()
         {
+            LOG_INFO << "Vulkan: Creating swapchain";
+
+            std::vector<unsigned int> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(Queue_Manager::Queue_Types::TRANSFER_QUEUE | Queue_Manager::Queue_Types::PRESENT_QUEUE);
+
             VkSwapchainCreateInfoKHR swapchain_create_info = {};
             swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
             swapchain_create_info.pNext = nullptr;
@@ -181,30 +183,14 @@ namespace Cascade_Graphics
             swapchain_create_info.imageExtent = m_swapchain_extent;
             swapchain_create_info.imageArrayLayers = 1;
             swapchain_create_info.imageUsage = SWAPCHAIN_USAGE;
+            swapchain_create_info.imageSharingMode = (unique_queues.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
+            swapchain_create_info.queueFamilyIndexCount = unique_queues.size();
+            swapchain_create_info.pQueueFamilyIndices = unique_queues.data();
             swapchain_create_info.preTransform = m_surface_capabilities.currentTransform;
             swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
             swapchain_create_info.presentMode = m_present_mode;
             swapchain_create_info.clipped = VK_TRUE;
             swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
-
-            if (m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::PRESENT_QUEUE) == m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE))
-            {
-                LOG_TRACE << "Vulkan: Swapchain being created with VK_SHARING_MODE_CONCURRENT";
-
-                unsigned int queue_family_indices[] = {m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::PRESENT_QUEUE), m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE)};
-
-                swapchain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-                swapchain_create_info.queueFamilyIndexCount = 2;
-                swapchain_create_info.pQueueFamilyIndices = queue_family_indices;
-            }
-            else
-            {
-                LOG_TRACE << "Vulkan: Swapchain being created with VK_SHARING_MODE_EXCLUSIVE";
-
-                swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                swapchain_create_info.queueFamilyIndexCount = 0;
-                swapchain_create_info.pQueueFamilyIndices = nullptr;
-            }
 
             VALIDATE_VKRESULT(vkCreateSwapchainKHR(*m_logical_device_ptr->Get_Device(), &swapchain_create_info, nullptr, &m_swapchain), "Vulkan: Failed to create swapchain");
         }
