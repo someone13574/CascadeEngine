@@ -4,8 +4,6 @@ const char* VkResult_To_Message(VkResult vkresult)
 {
     switch (vkresult)
     {
-        case VK_SUCCESS:
-            return "VK_SUCCESS";
         case VK_NOT_READY:
             return "VK_NOT_READY";
         case VK_TIMEOUT:
@@ -82,6 +80,8 @@ const char* VkResult_To_Message(VkResult vkresult)
             return "VK_OPERATION_NOT_DEFERRED_KHR";
         case VK_RESULT_MAX_ENUM:
             return "VK_RESULT_MAX_ENUM";
+        default:
+            return "Unknown VkResult";
     }
 
     return "Unknown VkResult";

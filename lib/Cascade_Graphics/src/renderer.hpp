@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <memory>
+#include <mutex>
 
 #ifdef CSD_USE_VULKAN
 #include "Vulkan_Wrapper/command_buffer_manager.hpp"
@@ -32,6 +33,7 @@ namespace Cascade_Graphics
     private:
         bool m_renderer_initialized = false;
         bool m_rendering_active = false;
+        std::mutex m_renderer_mutex;
 
         std::shared_ptr<Camera> m_camera_ptr;
         std::shared_ptr<Object_Manager> m_object_manager_ptr;

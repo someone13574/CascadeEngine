@@ -88,14 +88,14 @@ namespace Cascade_Graphics
             instance_create_info.enabledExtensionCount = static_cast<uint32_t>(m_required_instance_extensions.size());
             instance_create_info.ppEnabledExtensionNames = m_required_instance_extensions.data();
 
-#if defined CASCADE_ENABLE_DEBUG_LAYERS
-            Cascade_GraphicsDebugging::Vulkan::Validation_Layer::Check_Validation_Layer_Support(Cascade_GraphicsDebugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers());
+#if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
+            Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Check_Validation_Layer_Support(Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers());
 
-            std::vector<const char*> enabled_validation_layers = Cascade_GraphicsDebugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers();
+            std::vector<const char*> enabled_validation_layers = Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers();
             instance_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
             instance_create_info.ppEnabledLayerNames = enabled_validation_layers.data();
 
-            VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Cascade_GraphicsDebugging::Vulkan::Validation_Layer::Generate_Messenger_Create_Info();
+            VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Generate_Messenger_Create_Info();
             instance_create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&messenger_create_info;
 #else
             instance_create_info.enabledLayerCount = 0;
