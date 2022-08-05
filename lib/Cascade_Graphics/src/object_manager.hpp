@@ -48,7 +48,7 @@ namespace Cascade_Graphics
         std::vector<Object> m_objects;
 
     private:
-        void Voxel_Sample_Volume_Function(Voxel voxel, std::function<bool(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting, bool& is_center_intersecting);
+        void Voxel_Sample_Volume_Function(Voxel voxel, unsigned int max_depth, std::function<bool(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting, bool& is_center_intersecting);
 
     public:
         Object_Manager();

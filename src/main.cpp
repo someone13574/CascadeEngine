@@ -12,6 +12,7 @@ void Update(Cascade_Core::Application* instance_ptr)
     std::shared_ptr<Cascade_Graphics::Camera> camera_ptr = main_window_ptr->Get_Renderer()->Get_Camera();
 
     camera_ptr->Set_Position({std::sin(elapsed_seconds) * 2.2, std::cos(elapsed_seconds) * 12.0, std::cos(elapsed_seconds) * 12.0});
+    // camera_ptr->Set_Position({std::sin(elapsed_seconds) * 2.5, std::cos(elapsed_seconds) * 2.5, std::cos(elapsed_seconds) * 2.5});
     camera_ptr->Look_At({0.0, 0.0, 0.0});
 }
 

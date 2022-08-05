@@ -1,6 +1,7 @@
 #include "object_manager.hpp"
 
 #include "cascade_logging.hpp"
+#include <cmath>
 #include <stack>
 
 namespace Cascade_Graphics
@@ -9,25 +10,26 @@ namespace Cascade_Graphics
     {
     }
 
-    void Object_Manager::Voxel_Sample_Volume_Function(Voxel voxel, std::function<bool(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting, bool& is_center_intersecting)
+    void Object_Manager::Voxel_Sample_Volume_Function(Voxel voxel, unsigned int max_depth, std::function<bool(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting, bool& is_center_intersecting)
     {
-        const unsigned int SAMPLES = 8;
+        unsigned int samples = std::pow(2, (max_depth - voxel.depth)) + 1;
 
         is_center_intersecting = volume_sample_function(voxel.position);
         is_fully_contained = is_center_intersecting;
         is_intersecting = is_center_intersecting;
 
-        double step_size = (1.0 / (SAMPLES - 1)) * voxel.size * 2.0;
-        Vector_3<double> sample_position(0.0, 0.0, 0.0);
+        double step_size = (1.0 / (samples - 1)) * voxel.size * 2.0;
+        Vector_3<double> start_position = voxel.position - Vector_3<double>(voxel.size, voxel.size, voxel.size);
+        Vector_3<double> sample_position = start_position;
 
-        for (unsigned int i = 0; i < SAMPLES; i++)
+        for (unsigned int i = 0; i < samples; i++)
         {
-            for (unsigned int j = 0; j < SAMPLES; j++)
+            sample_position.m_y = start_position.m_y;
+            for (unsigned int j = 0; j < samples; j++)
             {
-                for (unsigned int k = 0; k < SAMPLES; k++)
+                sample_position.m_z = start_position.m_z;
+                for (unsigned int k = 0; k < samples; k++)
                 {
-                    sample_position = voxel.position - Vector_3<double>(voxel.size, voxel.size, voxel.size) + Vector_3<double>(i * step_size, j * step_size, k * step_size);
-
                     bool sample = volume_sample_function(sample_position);
 
                     is_fully_contained = is_fully_contained && sample;
@@ -37,8 +39,12 @@ namespace Cascade_Graphics
                     {
                         return;
                     }
+
+                    sample_position.m_z += step_size;
                 }
+                sample_position.m_y += step_size;
             }
+            sample_position.m_x += step_size;
         }
     }
 
@@ -145,11 +151,11 @@ namespace Cascade_Graphics
                     bool is_fully_contained;
                     bool is_intersecting;
                     bool is_center_intersecting;
-                    Voxel_Sample_Volume_Function(child_voxel, volume_sample_function, is_fully_contained, is_intersecting, is_center_intersecting);
+                    Voxel_Sample_Volume_Function(child_voxel, max_depth, volume_sample_function, is_fully_contained, is_intersecting, is_center_intersecting);
 
                     if (is_intersecting)
                     {
-                        child_voxel.is_leaf = child_voxel.depth == max_depth || is_fully_contained;
+                        child_voxel.is_leaf = is_fully_contained || child_voxel.depth == max_depth;
 
                         current_voxel.child_indices[i] = m_objects.back().voxels.size();
 
