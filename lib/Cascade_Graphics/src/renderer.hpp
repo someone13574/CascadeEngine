@@ -46,6 +46,7 @@ namespace Cascade_Graphics
     private:
 #ifdef CSD_USE_VULKAN
         unsigned int m_current_frame = 0;
+        unsigned int which_hit_buffer = 0;
 
         std::shared_ptr<Vulkan::Instance> m_instance_ptr;
         std::shared_ptr<Vulkan::Surface> m_surface_ptr;

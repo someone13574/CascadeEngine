@@ -44,7 +44,7 @@ namespace Cascade_Graphics
         return m_camera_to_world_matrix;
     }
 
-    Camera::GPU_Camera_Data Camera::Get_GPU_Camera_Data()
+    Camera::GPU_Camera_Data Camera::Get_GPU_Camera_Data(unsigned int which_hit_buffer)
     {
         GPU_Camera_Data camera_data = {};
         camera_data.matrix_x0 = m_camera_to_world_matrix.m_x0;
@@ -59,6 +59,7 @@ namespace Cascade_Graphics
         camera_data.origin_x = m_position.m_x;
         camera_data.origin_y = m_position.m_y;
         camera_data.origin_z = m_position.m_z;
+        camera_data.which_hit_buffer = which_hit_buffer;
 
         return camera_data;
     }

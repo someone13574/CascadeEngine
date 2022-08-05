@@ -20,6 +20,12 @@ layout(binding = 1) uniform Camera_Data
     float origin_x;
     float origin_y;
     float origin_z;
+
+    uint which_hit_buffer;
+
+    uint pa;
+    uint pb;
+    uint pc;
 } camera_data;
 
 struct Voxel
@@ -35,6 +41,11 @@ struct Voxel
 layout(std140, binding = 2) buffer voxel_buffer
 {
     Voxel voxels[];
+};
+
+layout(std140, binding = 3) buffer hit_buffer
+{
+    ivec4 hit_counts[];
 };
 
 float Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, float box_size, out vec3 normal)
@@ -93,22 +104,72 @@ void main()
         }
         else
         {
-            current_index = floatBitsToUint(current_voxel.links[direction_index_high][direction_index_low]);
+            //
+            if (camera_data.which_hit_buffer == 0)
+            {
+                atomicAdd(hit_counts[current_index].x, 1);
+                atomicAdd(hit_counts[current_index].y, 1);
+                hit_counts[current_index].z = 0;
+            }
+            else if (camera_data.which_hit_buffer == 1)
+            {
+                atomicAdd(hit_counts[current_index].y, 1);
+                atomicAdd(hit_counts[current_index].z, 1);
+                hit_counts[current_index].w = 0;
+            }
+            else if (camera_data.which_hit_buffer == 2)
+            {
+                atomicAdd(hit_counts[current_index].z, 1);
+                atomicAdd(hit_counts[current_index].w, 1);
+                hit_counts[current_index].x = 0;
+            }
+            else if (camera_data.which_hit_buffer == 3)
+            {
+                atomicAdd(hit_counts[current_index].w, 1);
+                atomicAdd(hit_counts[current_index].x, 1);
+                hit_counts[current_index].y = 0;
+            }
+            //
 
-            if (current_index == -1)
+            uint temp = floatBitsToUint(current_voxel.links[direction_index_high][direction_index_low]);
+
+            uint hits = 0;
+
+            if (camera_data.which_hit_buffer == 0)
+            {
+                hits = hit_counts[current_index].w;
+            }
+            else if (camera_data.which_hit_buffer == 1)
+            {
+                hits = hit_counts[current_index].x;
+            }
+            else if (camera_data.which_hit_buffer == 2)
+            {
+                hits = hit_counts[current_index].y;
+            }
+            else if (camera_data.which_hit_buffer == 3)
+            {
+                hits = hit_counts[current_index].z;
+            }
+
+            if (temp == -1 || hits < 10)
             {
                 normal = current_normal;
                 hit_distance = dst;
 
                 vec3 offset = abs((ray_direction * hit_distance + ray_origin) - vec3(current_voxel.x, current_voxel.y, current_voxel.z));
 
-                bool x_face = (offset.x > current_voxel.size - 0.004);
-                bool y_face = (offset.y > current_voxel.size - 0.004);
-                bool z_face = (offset.z > current_voxel.size - 0.004);
+                bool x_face = (offset.x > current_voxel.size - (current_voxel.size * 0.25));
+                bool y_face = (offset.y > current_voxel.size - (current_voxel.size * 0.25));
+                bool z_face = (offset.z > current_voxel.size - (current_voxel.size * 0.25));
 
                 voxel_edge = (x_face && y_face) || (x_face && z_face) || (y_face && z_face);
 
                 break;
+            }
+            else
+            {
+                current_index = temp;
             }
         }
     }
@@ -119,7 +180,6 @@ void main()
     }
     else
     {
-        imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(abs(normal) * 0.5, 1.0));
-        //imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(vec3(hit_distance) / 5.0, 1.0));
+        imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(abs(normal), 1.0));
     }
 }
