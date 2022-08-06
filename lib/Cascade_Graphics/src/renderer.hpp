@@ -20,6 +20,7 @@
 #include "Vulkan_Wrapper/queue_manager.hpp"
 #include "Vulkan_Wrapper/shader_manager.hpp"
 #include "Vulkan_Wrapper/storage_manager.hpp"
+#include "Vulkan_Wrapper/storage_manager_resource_id.hpp"
 #include "Vulkan_Wrapper/surface_wrapper.hpp"
 #include "Vulkan_Wrapper/swapchain_wrapper.hpp"
 #include "Vulkan_Wrapper/synchronization_manager.hpp"

@@ -20,6 +20,7 @@ add_library(Cascade_Graphics STATIC
     src/Vulkan_Wrapper/swapchain_wrapper.cpp
     src/Vulkan_Wrapper/pipeline_manager.cpp
     src/Vulkan_Wrapper/storage_manager.cpp
+    src/Vulkan_Wrapper/storage_manager_resource_id.hpp
     src/Vulkan_Wrapper/shader_manager.cpp
     src/Vulkan_Wrapper/command_buffer_manager.cpp
     src/Vulkan_Wrapper/descriptor_set_manager.cpp

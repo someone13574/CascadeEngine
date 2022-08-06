@@ -15,6 +15,9 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
+        class Storage_Manager;
+        class Descriptor_Set_Manager;
+
         class Pipeline_Manager
         {
         public:

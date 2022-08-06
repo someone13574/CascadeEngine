@@ -13,6 +13,8 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
+        class Storage_Manager;
+
         class Descriptor_Set_Manager
         {
         public:
@@ -48,6 +50,7 @@ namespace Cascade_Graphics
 
         public:
             void Create_Descriptor_Set(std::string resource_grouping_label);
+            void Remove_Descriptor_Set(std::string resource_grouping_label);
 
             Descriptor_Set_Data* Get_Descriptor_Set_Data(std::string label);
         };

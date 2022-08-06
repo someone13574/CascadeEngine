@@ -11,9 +11,12 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Physical_Device::Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr) : m_queue_manager_ptr(queue_manager_ptr), m_surface_ptr(surface_ptr)
+        Physical_Device::Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr, std::set<const char*> required_extensions)
+            : m_queue_manager_ptr(queue_manager_ptr), m_surface_ptr(surface_ptr), m_required_extensions(required_extensions)
         {
             LOG_INFO << "Vulkan: Choosing physical device";
+
+            m_required_extensions.insert(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
             unsigned int device_count = 0;
             vkEnumeratePhysicalDevices(*instance_ptr->Get_Instance(), &device_count, nullptr);
@@ -88,9 +91,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Vulkan: Checking physical device extension support";
 
-            std::vector<const char*> required_extensions = Get_Required_Extensions();
-
-            if (required_extensions.empty())
+            if (m_required_extensions.empty())
             {
                 return true;
             }
@@ -113,17 +114,17 @@ namespace Cascade_Graphics
             }
 
             bool device_supports_extensions = true;
-            for (unsigned int i = 0; i < required_extensions.size(); i++)
+            for (const char* extension : m_required_extensions)
             {
                 bool extension_found = false;
                 for (unsigned int j = 0; j < available_extensions.size(); j++)
                 {
-                    extension_found |= strcmp(required_extensions[i], available_extensions[j].extensionName) == 0;
+                    extension_found |= strcmp(extension, available_extensions[j].extensionName) == 0;
                 }
 
                 if (!extension_found)
                 {
-                    LOG_INFO << "Vulkan: Physical device is missing extension " << required_extensions[i];
+                    LOG_INFO << "Vulkan: Physical device is missing extension " << extension;
                     device_supports_extensions = false;
                 }
             }
@@ -161,13 +162,9 @@ namespace Cascade_Graphics
             return &m_physical_device;
         }
 
-        std::vector<const char*> Physical_Device::Get_Required_Extensions()
+        std::set<const char*> Physical_Device::Get_Required_Extensions()
         {
-            std::vector<const char*> required_extensions;
-
-            required_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-
-            return required_extensions;
+            return m_required_extensions;
         }
     } // namespace Vulkan
 } // namespace Cascade_Graphics

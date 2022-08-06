@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <vector>
 
 namespace Cascade_Graphics
 {

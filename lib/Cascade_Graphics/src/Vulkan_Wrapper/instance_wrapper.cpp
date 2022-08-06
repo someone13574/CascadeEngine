@@ -10,63 +10,21 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        unsigned int Get_Supported_Extension_Count()
-        {
-            unsigned int extension_count = 0;
-            vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
-
-            LOG_DEBUG << "Vulkan: This device supports " << extension_count << " extensions";
-
-            return extension_count;
-        }
-
-        bool Is_Vulkan_Supported()
-        {
-            LOG_INFO << "Vulkan: Checking Vulkan support";
-
-            std::vector<const char*> required_extensions = Cascade_Graphics::Vulkan::Instance::Get_Required_Instance_Extensions();
-            std::vector<bool> extensions_satisfied(required_extensions.size());
-
-            unsigned int extension_count = Get_Supported_Extension_Count();
-            std::vector<VkExtensionProperties> supported_extensions(extension_count);
-            vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, supported_extensions.data());
-
-            for (unsigned int i = 0; i < supported_extensions.size(); i++)
-            {
-                LOG_TRACE << "Vulkan: Extension supported " << supported_extensions[i].extensionName;
-            }
-
-            bool vulkan_supported = true;
-            for (unsigned int i = 0; i < required_extensions.size(); i++)
-            {
-                bool found_extension = false;
-                for (unsigned int j = 0; j < supported_extensions.size(); j++)
-                {
-                    found_extension |= strcmp(required_extensions[i], supported_extensions[j].extensionName) == 0;
-                }
-
-                if (!found_extension)
-                {
-                    LOG_ERROR << "Vulkan: Missing support for extension " << required_extensions[i];
-                    vulkan_supported = false;
-                }
-            }
-
-            if (vulkan_supported)
-            {
-                LOG_DEBUG << "Vulkan: This device has all the required extensions";
-                return true;
-            }
-            else
-            {
-                LOG_FATAL << "Vulkan: This device is missing a required extension";
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        Instance::Instance(const char* application_name, unsigned int application_version)
+        Instance::Instance(const char* application_name, unsigned int application_version, std::set<const char*> required_instance_extensions) : m_required_instance_extensions(required_instance_extensions)
         {
             LOG_INFO << "Vulkan: Creating instance";
+
+            m_required_instance_extensions.insert(VK_KHR_SURFACE_EXTENSION_NAME);
+
+#if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
+            m_required_instance_extensions.insert(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
+#if defined __linux__
+            m_required_instance_extensions.insert(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
+#elif defined _WIN32 || defined WIN32
+            m_required_instance_extensions.insert(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#endif
 
             Is_Vulkan_Supported();
 
@@ -79,14 +37,14 @@ namespace Cascade_Graphics
             m_application_info.engineVersion = VK_MAKE_VERSION(0, 1, 0);
             m_application_info.apiVersion = VK_API_VERSION_1_3;
 
-            m_required_instance_extensions = Get_Required_Instance_Extensions();
+            std::vector<const char*> required_extensions(m_required_instance_extensions.begin(), m_required_instance_extensions.end());
 
             VkInstanceCreateInfo instance_create_info = {};
             instance_create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
             instance_create_info.flags = 0;
             instance_create_info.pApplicationInfo = &m_application_info;
-            instance_create_info.enabledExtensionCount = static_cast<uint32_t>(m_required_instance_extensions.size());
-            instance_create_info.ppEnabledExtensionNames = m_required_instance_extensions.data();
+            instance_create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
+            instance_create_info.ppEnabledExtensionNames = required_extensions.data();
 
 #if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
             Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Check_Validation_Layer_Support(Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers());
@@ -123,23 +81,57 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan: Finished destroying instance";
         }
 
-        std::vector<const char*> Instance::Get_Required_Instance_Extensions()
+        unsigned int Instance::Get_Supported_Extension_Count()
         {
-            LOG_TRACE << "Vulkan: Getting required instance extensions";
+            unsigned int extension_count = 0;
+            vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
 
-            std::vector<const char*> required_instance_extensions;
-            required_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+            LOG_DEBUG << "Vulkan: This device supports " << extension_count << " extensions";
 
-#if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
-            required_instance_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-#endif
+            return extension_count;
+        }
 
-#if defined __linux__
-            required_instance_extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-#elif defined _WIN32 || defined WIN32
-            required_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#endif
-            return required_instance_extensions;
+        bool Instance::Is_Vulkan_Supported()
+        {
+            LOG_INFO << "Vulkan: Checking Vulkan support";
+
+            std::vector<bool> extensions_satisfied(m_required_instance_extensions.size());
+
+            unsigned int extension_count = Get_Supported_Extension_Count();
+            std::vector<VkExtensionProperties> supported_extensions(extension_count);
+            vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, supported_extensions.data());
+
+            for (unsigned int i = 0; i < supported_extensions.size(); i++)
+            {
+                LOG_TRACE << "Vulkan: Extension supported " << supported_extensions[i].extensionName;
+            }
+
+            bool vulkan_supported = true;
+            for (const char* extension : m_required_instance_extensions)
+            {
+                bool found_extension = false;
+                for (unsigned int j = 0; j < supported_extensions.size(); j++)
+                {
+                    found_extension |= strcmp(extension, supported_extensions[j].extensionName) == 0;
+                }
+
+                if (!found_extension)
+                {
+                    LOG_ERROR << "Vulkan: Missing support for extension " << extension;
+                    vulkan_supported = false;
+                }
+            }
+
+            if (vulkan_supported)
+            {
+                LOG_DEBUG << "Vulkan: This device has all the required extensions";
+                return true;
+            }
+            else
+            {
+                LOG_FATAL << "Vulkan: This device is missing a required extension";
+                exit(EXIT_FAILURE);
+            }
         }
 
         VkInstance* Instance::Get_Instance()

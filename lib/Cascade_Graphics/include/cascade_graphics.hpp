@@ -2,7 +2,6 @@
 #include "../src/Data_Types/vector_3.hpp"
 #include "../src/Data_Types/vector_4.hpp"
 #include "../src/camera.hpp"
-//#include "../src/object.hpp"
 #include "../src/object_manager.hpp"
 #include "../src/renderer.hpp"
 #include "../src/window_information.hpp"

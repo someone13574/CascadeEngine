@@ -42,7 +42,7 @@ namespace Cascade_Graphics
             {
                 descriptor_set_layout_bindings[i] = {};
                 descriptor_set_layout_bindings[i].binding = i;
-                descriptor_set_layout_bindings[i].descriptorType = (resource_grouping_ptr->resource_ids[i].resource_type == Storage_Manager::Resource_ID::BUFFER_RESOURCE) ?
+                descriptor_set_layout_bindings[i].descriptorType = (resource_grouping_ptr->resource_ids[i].resource_type == Resource_ID::BUFFER_RESOURCE) ?
                                                                        m_storage_manager_ptr->Get_Buffer_Resource(resource_grouping_ptr->resource_ids[i])->descriptor_type :
                                                                        m_storage_manager_ptr->Get_Image_Resource(resource_grouping_ptr->resource_ids[i])->descriptor_type;
                 descriptor_set_layout_bindings[i].descriptorCount = 1;
@@ -74,9 +74,8 @@ namespace Cascade_Graphics
 
                 descriptor_pool_sizes.back() = {};
                 descriptor_pool_sizes.back().descriptorCount = 1;
-                descriptor_pool_sizes.back().type = (resource_grouping_ptr->resource_ids[i].resource_type == Storage_Manager::Resource_ID::BUFFER_RESOURCE) ?
-                                                        m_storage_manager_ptr->Get_Buffer_Resource(resource_grouping_ptr->resource_ids[i])->descriptor_type :
-                                                        m_storage_manager_ptr->Get_Image_Resource(resource_grouping_ptr->resource_ids[i])->descriptor_type;
+                descriptor_pool_sizes.back().type = (resource_grouping_ptr->resource_ids[i].resource_type == Resource_ID::BUFFER_RESOURCE) ? m_storage_manager_ptr->Get_Buffer_Resource(resource_grouping_ptr->resource_ids[i])->descriptor_type :
+                                                                                                                                             m_storage_manager_ptr->Get_Image_Resource(resource_grouping_ptr->resource_ids[i])->descriptor_type;
             }
 
             VkDescriptorPoolCreateInfo descriptor_pool_create_info = {};
@@ -117,7 +116,7 @@ namespace Cascade_Graphics
             unsigned int set_image_descriptor_infos = 0;
             for (unsigned int i = 0; i < resource_grouping_ptr->resource_ids.size(); i++)
             {
-                if (resource_grouping_ptr->resource_ids[i].resource_type == Storage_Manager::Resource_ID::BUFFER_RESOURCE)
+                if (resource_grouping_ptr->resource_ids[i].resource_type == Resource_ID::BUFFER_RESOURCE)
                 {
                     descriptor_set_data_ptr->buffer_descriptor_infos[set_buffer_descriptor_infos] = {};
                     descriptor_set_data_ptr->buffer_descriptor_infos[set_buffer_descriptor_infos].buffer = m_storage_manager_ptr->Get_Buffer_Resource(resource_grouping_ptr->resource_ids[i])->buffer;
@@ -138,7 +137,7 @@ namespace Cascade_Graphics
 
                     set_buffer_descriptor_infos++;
                 }
-                else if (resource_grouping_ptr->resource_ids[i].resource_type == Storage_Manager::Resource_ID::IMAGE_RESOURCE)
+                else if (resource_grouping_ptr->resource_ids[i].resource_type == Resource_ID::IMAGE_RESOURCE)
                 {
                     VkSamplerCreateInfo sampler_create_info = {};
                     sampler_create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -205,6 +204,24 @@ namespace Cascade_Graphics
             Create_Descriptor_Pool(resource_grouping_label);
             Allocate_Descriptor_Set(resource_grouping_label);
             Create_Write_Descriptor_Set(resource_grouping_label);
+        }
+
+        void Descriptor_Set_Manager::Remove_Descriptor_Set(std::string resource_grouping_label)
+        {
+            for (unsigned int i = 0; i < m_descriptor_sets.size(); i++)
+            {
+                if (m_descriptor_sets[i].label == resource_grouping_label)
+                {
+                    vkDestroyDescriptorSetLayout(*m_logical_device_ptr->Get_Device(), m_descriptor_sets[i].descriptor_set_layout, nullptr);
+                    vkDestroyDescriptorPool(*m_logical_device_ptr->Get_Device(), m_descriptor_sets[i].descriptor_pool, nullptr);
+
+                    m_descriptor_sets.erase(m_descriptor_sets.begin() + i);
+                    return;
+                }
+            }
+
+            LOG_ERROR << "Vulkan: The descriptor set '" << resource_grouping_label << "' does not exist";
+            exit(EXIT_FAILURE);
         }
 
         Descriptor_Set_Manager::Descriptor_Set_Data* Descriptor_Set_Manager::Get_Descriptor_Set_Data(std::string label)

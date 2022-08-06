@@ -15,7 +15,8 @@ namespace Cascade_Graphics
 
             VkPhysicalDeviceFeatures physical_device_features = {};
 
-            std::vector<const char*> required_extensions = physical_device_ptr->Get_Required_Extensions();
+            std::set<const char*> required_extensions_set = physical_device_ptr->Get_Required_Extensions();
+            std::vector<const char*> required_extensions(required_extensions_set.begin(), required_extensions_set.end());
             std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos = queue_manager_ptr->Generate_Device_Queue_Create_Infos();
 
             VkDeviceCreateInfo device_create_info = {};

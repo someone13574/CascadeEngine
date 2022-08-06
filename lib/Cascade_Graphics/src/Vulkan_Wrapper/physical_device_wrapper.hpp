@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <optional>
+#include <set>
 #include <vector>
 
 namespace Cascade_Graphics
@@ -19,8 +20,8 @@ namespace Cascade_Graphics
         {
         private:
             VkPhysicalDevice m_physical_device = VK_NULL_HANDLE;
+            std::set<const char*> m_required_extensions;
 
-        private:
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
             std::shared_ptr<Surface> m_surface_ptr;
 
@@ -31,11 +32,11 @@ namespace Cascade_Graphics
             unsigned int Rate_Device(VkPhysicalDeviceProperties physical_device_properties);
 
         public:
-            Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr);
+            Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr, std::set<const char*> required_extensions);
 
         public:
             VkPhysicalDevice* Get_Physical_Device();
-            std::vector<const char*> Get_Required_Extensions();
+            std::set<const char*> Get_Required_Extensions();
         };
     } // namespace Vulkan
 } // namespace Cascade_Graphics

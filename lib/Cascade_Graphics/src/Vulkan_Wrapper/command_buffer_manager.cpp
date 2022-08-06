@@ -37,7 +37,7 @@ namespace Cascade_Graphics
             VkCommandPoolCreateInfo command_pool_create_info = {};
             command_pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
             command_pool_create_info.pNext = nullptr;
-            command_pool_create_info.flags = 0;
+            command_pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
             command_pool_create_info.queueFamilyIndex = queue_family;
 
             VALIDATE_VKRESULT(vkCreateCommandPool(*m_logical_device_ptr->Get_Device(), &command_pool_create_info, nullptr, &m_command_pools.back().command_pool), "Vulkan: Failed to create command pool");
@@ -124,16 +124,16 @@ namespace Cascade_Graphics
 
             Allocate_Command_Buffer(m_command_buffers.size() - 1, command_pool_index);
 
-            std::vector<Storage_Manager::Resource_ID> resource_identifiers;
+            std::vector<Resource_ID> resource_identifiers;
             for (unsigned int i = 0; i < resource_group_labels.size(); i++)
             {
-                std::vector<Storage_Manager::Resource_ID> resource_group_resources = m_storage_manager_ptr->Get_Resource_Grouping(resource_group_labels[i])->resource_ids;
+                std::vector<Resource_ID> resource_group_resources = m_storage_manager_ptr->Get_Resource_Grouping(resource_group_labels[i])->resource_ids;
                 resource_identifiers.insert(resource_identifiers.end(), resource_group_resources.begin(), resource_group_resources.end());
             }
 
             for (unsigned int i = 0; i < resource_identifiers.size(); i++)
             {
-                if (resource_identifiers[i].resource_type == Storage_Manager::Resource_ID::Resource_Type::IMAGE_RESOURCE)
+                if (resource_identifiers[i].resource_type == Resource_ID::Resource_Type::IMAGE_RESOURCE)
                 {
                     m_command_buffers.back().image_resource_states.resize(m_command_buffers.back().image_resource_states.size() + 1);
 
@@ -149,6 +149,20 @@ namespace Cascade_Graphics
             }
 
             LOG_TRACE << "Vulkan: Added command buffer";
+        }
+
+        void Command_Buffer_Manager::Remove_Command_Buffer(Identifier identifier)
+        {
+            unsigned int command_buffer_index = Get_Command_Buffer_Index(identifier);
+
+            m_command_buffers.erase(m_command_buffers.begin() + command_buffer_index);
+        }
+
+        void Command_Buffer_Manager::Reset_Command_Buffer(Identifier identifier)
+        {
+            unsigned int command_buffer_index = Get_Command_Buffer_Index(identifier);
+
+            VALIDATE_VKRESULT(vkResetCommandBuffer(m_command_buffers[command_buffer_index].command_buffer, 0), "Vulkan: Failed to reset command buffer");
         }
 
         void Command_Buffer_Manager::Begin_Recording(Identifier identifier, VkCommandBufferUsageFlagBits usage_flags)
@@ -167,42 +181,45 @@ namespace Cascade_Graphics
 
             LOG_TRACE << "Vulkan: Started command buffer recording";
 
-            LOG_TRACE << "Vulkan: Binding pipeline";
-
-            switch (m_pipeline_manager_ptr->Get_Pipeline_Type(m_command_buffers[command_buffer_index].pipeline_label))
+            if (m_command_buffers[command_buffer_index].pipeline_label != "")
             {
-                case Pipeline_Manager::Pipeline_Type::COMPUTE:
-                {
-                    vkCmdBindPipeline(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline(m_command_buffers[command_buffer_index].pipeline_label));
-                    break;
-                }
-                default:
-                {
-                    LOG_ERROR << "Vulkan: Unknown pipeline type";
-                    exit(EXIT_FAILURE);
-                }
-            }
+                LOG_TRACE << "Vulkan: Binding pipeline";
 
-            LOG_TRACE << "Vulkan: Binding descriptor set";
-
-            switch (m_pipeline_manager_ptr->Get_Pipeline_Type(m_command_buffers[command_buffer_index].pipeline_label))
-            {
-                case Pipeline_Manager::Pipeline_Type::COMPUTE:
+                switch (m_pipeline_manager_ptr->Get_Pipeline_Type(m_command_buffers[command_buffer_index].pipeline_label))
                 {
-                    for (unsigned int i = 0; i < m_command_buffers[command_buffer_index].resource_group_labels.size(); i++)
+                    case Pipeline_Manager::Pipeline_Type::COMPUTE:
                     {
-                        if (m_storage_manager_ptr->Get_Resource_Grouping(m_command_buffers[command_buffer_index].resource_group_labels[i])->has_descriptor_set)
-                        {
-                            vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline_Layout(m_command_buffers[command_buffer_index].pipeline_label), 0, 1,
-                                                    &m_descriptor_set_manager->Get_Descriptor_Set_Data(m_command_buffers[command_buffer_index].resource_group_labels[i])->descriptor_set, 0, nullptr);
-                        }
+                        vkCmdBindPipeline(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline(m_command_buffers[command_buffer_index].pipeline_label));
+                        break;
                     }
-                    break;
+                    default:
+                    {
+                        LOG_ERROR << "Vulkan: Unknown pipeline type";
+                        exit(EXIT_FAILURE);
+                    }
                 }
-                default:
+
+                LOG_TRACE << "Vulkan: Binding descriptor set";
+
+                switch (m_pipeline_manager_ptr->Get_Pipeline_Type(m_command_buffers[command_buffer_index].pipeline_label))
                 {
-                    LOG_ERROR << "Vulkan: Unknown pipeline type";
-                    exit(EXIT_FAILURE);
+                    case Pipeline_Manager::Pipeline_Type::COMPUTE:
+                    {
+                        for (unsigned int i = 0; i < m_command_buffers[command_buffer_index].resource_group_labels.size(); i++)
+                        {
+                            if (m_storage_manager_ptr->Get_Resource_Grouping(m_command_buffers[command_buffer_index].resource_group_labels[i])->has_descriptor_set)
+                            {
+                                vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline_Layout(m_command_buffers[command_buffer_index].pipeline_label), 0,
+                                                        1, &m_descriptor_set_manager->Get_Descriptor_Set_Data(m_command_buffers[command_buffer_index].resource_group_labels[i])->descriptor_set, 0, nullptr);
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                    {
+                        LOG_ERROR << "Vulkan: Unknown pipeline type";
+                        exit(EXIT_FAILURE);
+                    }
                 }
             }
         }
@@ -216,11 +233,11 @@ namespace Cascade_Graphics
             vkEndCommandBuffer(m_command_buffers[command_buffer_index].command_buffer);
         }
 
-        void Command_Buffer_Manager::Image_Memory_Barrier(Identifier identifier, Storage_Manager::Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags)
+        void Command_Buffer_Manager::Image_Memory_Barrier(Identifier identifier, Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags)
         {
             LOG_TRACE << "Vulkan: Image memory barrier in command buffer '" << identifier.label << "-" << identifier.index << "'";
 
-            if (resource_id.resource_type != Storage_Manager::Resource_ID::IMAGE_RESOURCE)
+            if (resource_id.resource_type != Resource_ID::IMAGE_RESOURCE)
             {
                 LOG_ERROR << "Vulkan: Resource type must be an image";
                 exit(EXIT_FAILURE);
@@ -278,7 +295,7 @@ namespace Cascade_Graphics
             vkCmdDispatch(m_command_buffers[Get_Command_Buffer_Index(identifier)].command_buffer, group_count_x, group_count_y, group_count_z);
         }
 
-        void Command_Buffer_Manager::Copy_Image(Identifier identifier, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id, unsigned int width, unsigned int height)
+        void Command_Buffer_Manager::Copy_Image(Identifier identifier, Resource_ID source_resource_id, Resource_ID destination_resource_id, unsigned int width, unsigned int height)
         {
             LOG_TRACE << "Vulkan: Copying image " << source_resource_id.label << "-" << source_resource_id.index << " to " << destination_resource_id.label << "-" << destination_resource_id.index << " in command buffer '" << identifier.label << "-"
                       << identifier.index << "'";
@@ -324,6 +341,20 @@ namespace Cascade_Graphics
 
             vkCmdCopyImage(m_command_buffers[command_buffer_index].command_buffer, m_storage_manager_ptr->Get_Image_Resource(source_resource_id)->image, m_command_buffers[command_buffer_index].image_resource_states[source_index].current_image_layout,
                            m_storage_manager_ptr->Get_Image_Resource(destination_resource_id)->image, m_command_buffers[command_buffer_index].image_resource_states[destination_index].current_image_layout, 1, &copy_region);
+        }
+
+        void Command_Buffer_Manager::Copy_Buffer(Identifier identifier, Resource_ID source, Resource_ID destination, VkDeviceSize src_offset, VkDeviceSize dst_offset, VkDeviceSize copy_size)
+        {
+            LOG_TRACE << "Vulkan: Copying buffer '" << m_storage_manager_ptr->Get_Resource_String(source) << "' to '" << m_storage_manager_ptr->Get_Resource_String(destination) << "'";
+
+            unsigned int command_buffer_index = Get_Command_Buffer_Index(identifier);
+
+            VkBufferCopy buffer_copy_data = {};
+            buffer_copy_data.srcOffset = src_offset;
+            buffer_copy_data.dstOffset = dst_offset;
+            buffer_copy_data.size = copy_size;
+
+            vkCmdCopyBuffer(m_command_buffers[command_buffer_index].command_buffer, m_storage_manager_ptr->Get_Buffer_Resource(source)->buffer, m_storage_manager_ptr->Get_Buffer_Resource(destination)->buffer, 1, &buffer_copy_data);
         }
 
         VkCommandBuffer* Command_Buffer_Manager::Get_Command_Buffer(Identifier identifier)

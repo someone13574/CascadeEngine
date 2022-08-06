@@ -2,7 +2,7 @@
 
 #include "vulkan_header.hpp"
 
-#include <vector>
+#include <set>
 
 namespace Cascade_Graphics
 {
@@ -13,15 +13,17 @@ namespace Cascade_Graphics
         private:
             VkInstance m_instance;
             VkApplicationInfo m_application_info;
-            std::vector<const char*> m_required_instance_extensions;
+            std::set<const char*> m_required_instance_extensions;
+
+        private:
+            unsigned int Get_Supported_Extension_Count();
+            bool Is_Vulkan_Supported();
 
         public:
-            Instance(const char* application_name, unsigned int application_version);
+            Instance(const char* application_name, unsigned int application_version, std::set<const char*> required_instance_extensions);
             ~Instance();
 
         public:
-            static std::vector<const char*> Get_Required_Instance_Extensions();
-
             VkInstance* Get_Instance();
         };
     } // namespace Vulkan

@@ -4,6 +4,7 @@
 #include "device_wrapper.hpp"
 #include "pipeline_manager.hpp"
 #include "storage_manager.hpp"
+#include "storage_manager_resource_id.hpp"
 #include "vulkan_header.hpp"
 
 #include <memory>
@@ -14,6 +15,10 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
+        class Storage_Manager;
+        class Descriptor_Set_Manager;
+        class Pipeline_Manager;
+
         class Command_Buffer_Manager
         {
         public:
@@ -31,7 +36,7 @@ namespace Cascade_Graphics
         private:
             struct Image_Resource_State
             {
-                Storage_Manager::Resource_ID resource_id;
+                Resource_ID resource_id;
 
                 VkAccessFlags previous_access_flags;
                 VkAccessFlags current_access_flags;
@@ -82,12 +87,15 @@ namespace Cascade_Graphics
 
         public:
             void Add_Command_Buffer(std::string label, unsigned int queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label);
+            void Remove_Command_Buffer(Identifier identifier);
+            void Reset_Command_Buffer(Identifier identifier);
 
             void Begin_Recording(Identifier identifier, VkCommandBufferUsageFlagBits usage_flags);
             void End_Recording(Identifier identifier);
-            void Image_Memory_Barrier(Identifier identifier, Storage_Manager::Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
+            void Image_Memory_Barrier(Identifier identifier, Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
             void Dispatch_Compute_Shader(Identifier identifier, unsigned int group_count_x, unsigned int group_count_y, unsigned int group_count_z);
-            void Copy_Image(Identifier identifier, Storage_Manager::Resource_ID source_resource_id, Storage_Manager::Resource_ID destination_resource_id, unsigned int width, unsigned int height);
+            void Copy_Image(Identifier identifier, Resource_ID source_resource_id, Resource_ID destination_resource_id, unsigned int width, unsigned int height);
+            void Copy_Buffer(Identifier identifier, Resource_ID source, Resource_ID destination, VkDeviceSize src_offset, VkDeviceSize dst_offset, VkDeviceSize copy_size);
 
             VkCommandBuffer* Get_Command_Buffer(Identifier identifier);
         };

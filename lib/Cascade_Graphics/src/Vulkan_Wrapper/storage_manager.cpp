@@ -2,6 +2,7 @@
 
 
 #include "debug_tools.hpp"
+#include <cmath>
 #include <cstring>
 
 namespace Cascade_Graphics
@@ -45,11 +46,6 @@ namespace Cascade_Graphics
             m_resource_groupings.clear();
 
             LOG_TRACE << "Vulkan: Finished cleaning up storage";
-        }
-
-        std::string Storage_Manager::Get_Resource_String(Resource_ID resource_id)
-        {
-            return resource_id.label.append("-").append(std::to_string(resource_id.index));
         }
 
         unsigned int Storage_Manager::Get_Buffer_Index(Resource_ID resource_id)
@@ -119,17 +115,34 @@ namespace Cascade_Graphics
 
             vkGetBufferMemoryRequirements(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->buffer, &buffer_resource_ptr->memory_requirements);
 
-            VkPhysicalDeviceMemoryProperties device_memory_properties;
-            vkGetPhysicalDeviceMemoryProperties(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties);
+            VkPhysicalDeviceMemoryBudgetPropertiesEXT device_memory_budget_properties = {};
+            device_memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+            device_memory_budget_properties.pNext = nullptr;
 
-            VkMemoryPropertyFlags required_memory_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            for (unsigned int i = 0; i < device_memory_properties.memoryTypeCount; i++)
+            VkPhysicalDeviceMemoryProperties2 device_memory_properties_2 = {};
+            device_memory_properties_2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+            device_memory_properties_2.pNext = &device_memory_budget_properties;
+
+            vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties_2);
+
+            VkMemoryPropertyFlags required_memory_properties = buffer_resource_ptr->memory_property_flags;
+            for (unsigned int i = 0; i < device_memory_properties_2.memoryProperties.memoryTypeCount; i++)
             {
                 if (buffer_resource_ptr->memory_requirements.memoryTypeBits & (1 << i))
                 {
-                    if ((device_memory_properties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
+                    if ((device_memory_properties_2.memoryProperties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
                     {
                         buffer_resource_ptr->memory_type_index = i;
+                        unsigned int heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
+
+                        if (device_memory_budget_properties.heapBudget[heap_index] < buffer_resource_ptr->memory_requirements.size)
+                        {
+                            LOG_ERROR << "Vulkan: Required memory for buffer '" << Get_Resource_String(resource_id) << "' (" << buffer_resource_ptr->memory_requirements.size << " bytes) exceeds the memory budget for heap " << heap_index << " ("
+                                      << device_memory_budget_properties.heapBudget[heap_index] << " bytes)";
+                            exit(EXIT_FAILURE);
+                        }
+
+                        return;
                     }
                 }
             }
@@ -185,17 +198,34 @@ namespace Cascade_Graphics
 
             vkGetImageMemoryRequirements(*m_logical_device_ptr->Get_Device(), image_resource_ptr->image, &image_resource_ptr->memory_requirements);
 
-            VkPhysicalDeviceMemoryProperties device_memory_properties;
-            vkGetPhysicalDeviceMemoryProperties(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties);
+            VkPhysicalDeviceMemoryBudgetPropertiesEXT device_memory_budget_properties = {};
+            device_memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+            device_memory_budget_properties.pNext = nullptr;
+
+            VkPhysicalDeviceMemoryProperties2 device_memory_properties_2 = {};
+            device_memory_properties_2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+            device_memory_properties_2.pNext = &device_memory_budget_properties;
+
+            vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties_2);
 
             VkMemoryPropertyFlags required_memory_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            for (unsigned int i = 0; i < device_memory_properties.memoryTypeCount; i++)
+            for (unsigned int i = 0; i < device_memory_properties_2.memoryProperties.memoryTypeCount; i++)
             {
                 if (image_resource_ptr->memory_requirements.memoryTypeBits & (1 << i))
                 {
-                    if ((device_memory_properties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
+                    if ((device_memory_properties_2.memoryProperties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
                     {
                         image_resource_ptr->memory_type_index = i;
+                        unsigned int heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
+
+                        if (device_memory_budget_properties.heapBudget[heap_index] < image_resource_ptr->memory_requirements.size)
+                        {
+                            LOG_ERROR << "Vulkan: Required memory for image '" << Get_Resource_String(resource_id) << "' (" << image_resource_ptr->memory_requirements.size << " bytes) exceeds the memory budget for heap " << heap_index << " ("
+                                      << device_memory_budget_properties.heapBudget[heap_index] << " bytes)";
+                            exit(EXIT_FAILURE);
+                        }
+
+                        return;
                     }
                 }
             }
@@ -243,8 +273,36 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_ptr->Get_Device(), &image_view_create_info, nullptr, &image_resource_ptr->image_view), "Vulkan: Failed to create image view");
         }
 
-        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlagBits buffer_usage, VkDescriptorType descriptor_type, unsigned int resource_queue_mask)
+        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, unsigned int resource_queue_mask)
         {
+            if (buffer_size == 0)
+            {
+                LOG_DEBUG << "Vulkan: Buffer size is 0. Creating temporary buffer to find maximum buffer size";
+
+                Create_Buffer(label + "-temp", 1, buffer_usage, descriptor_type, memory_property_flags, resource_queue_mask);
+                Buffer_Resource* buffer_resource_ptr = &m_buffer_resources.back();
+
+                VkPhysicalDeviceMemoryBudgetPropertiesEXT device_memory_budget_properties = {};
+                device_memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+                device_memory_budget_properties.pNext = nullptr;
+
+                VkPhysicalDeviceMemoryProperties2 device_memory_properties = {};
+                device_memory_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+                device_memory_properties.pNext = &device_memory_budget_properties;
+
+                vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties);
+
+                unsigned int memory_type_index = buffer_resource_ptr->memory_type_index;
+                unsigned int heap_index = device_memory_properties.memoryProperties.memoryTypes[memory_type_index].heapIndex;
+
+                LOG_INFO << "Vulkan: Destroying temporary buffer " << Get_Resource_String(buffer_resource_ptr->resource_id) << "'";
+                vkDestroyBuffer(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
+                vkFreeMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
+                m_buffer_resources.pop_back();
+
+                buffer_size = device_memory_budget_properties.heapBudget[heap_index] - device_memory_budget_properties.heapUsage[heap_index];
+            }
+
             Resource_ID resource_id = {};
             resource_id.label = label;
             resource_id.index = 0;
@@ -277,6 +335,7 @@ namespace Cascade_Graphics
             m_buffer_resources.back().buffer_size = buffer_size;
             m_buffer_resources.back().descriptor_type = descriptor_type;
             m_buffer_resources.back().buffer_usage = buffer_usage;
+            m_buffer_resources.back().memory_property_flags = memory_property_flags;
             m_buffer_resources.back().resource_queue_mask = resource_queue_mask;
             m_buffer_resources.back().buffer = VK_NULL_HANDLE;
             m_buffer_resources.back().device_memory = VK_NULL_HANDLE;
@@ -398,6 +457,21 @@ namespace Cascade_Graphics
             m_resource_groupings.back().resource_ids = resource_ids;
         }
 
+        void Storage_Manager::Remove_Resource_Grouping(std::string label)
+        {
+            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            {
+                if (m_resource_groupings[i].label == label)
+                {
+                    m_resource_groupings.erase(m_resource_groupings.begin() + i);
+                    return;
+                }
+            }
+
+            LOG_ERROR << "Vulkan: The resource grouping '" << label << "' does not exist";
+            exit(EXIT_FAILURE);
+        }
+
         void Storage_Manager::Add_Image(std::string label, Image_Resource image_resource)
         {
             Resource_ID resource_id = {};
@@ -449,16 +523,94 @@ namespace Cascade_Graphics
             Allocate_Buffer_Memory(resource_id);
         }
 
-        void Storage_Manager::Upload_To_Buffer(Resource_ID resource_id, void* data, size_t data_size)
+        void Storage_Manager::Upload_To_Buffer_Direct(Resource_ID resource_id, void* data, size_t data_size)
         {
             Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
 
-            void* mapped_memory;
-            VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory, 0, data_size, 0, &mapped_memory), "Vulkan: Failed to map memory");
+            if (buffer_resource_ptr->memory_property_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+            {
+                void* mapped_memory;
+                VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory, 0, data_size, 0, &mapped_memory), "Vulkan: Failed to map memory");
 
-            memcpy(mapped_memory, data, data_size);
+                memcpy(mapped_memory, data, data_size);
 
-            vkUnmapMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory);
+                vkUnmapMemory(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->device_memory);
+            }
+            else
+            {
+                LOG_ERROR << "Vulkan: Cannot upload to non host-visible buffers";
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        void Storage_Manager::Upload_To_Buffer_Staging(Resource_ID resource_id,
+                                                       Resource_ID staging_buffer_id,
+                                                       void* data,
+                                                       size_t data_size,
+                                                       std::shared_ptr<Command_Buffer_Manager> command_buffer_manager_ptr,
+                                                       std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr)
+        {
+            vkDeviceWaitIdle(*m_logical_device_ptr->Get_Device());
+
+            Buffer_Resource* target_buffer = Get_Buffer_Resource(resource_id);
+            Buffer_Resource* staging_buffer = Get_Buffer_Resource(staging_buffer_id);
+
+            if (!(staging_buffer->memory_property_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+            {
+                LOG_ERROR << "Vulkan: Staging buffer must have memory property VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT";
+                exit(EXIT_FAILURE);
+            }
+
+            Create_Resource_Grouping("staging-buffer-upload", {resource_id, staging_buffer_id});
+            descriptor_set_manager_ptr->Create_Descriptor_Set("staging-buffer-upload");
+
+            size_t uploaded = 0;
+            size_t max_upload_size = staging_buffer->buffer_size;
+
+            command_buffer_manager_ptr->Add_Command_Buffer("staging-buffer-upload", m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE), {"staging-buffer-upload"}, "");
+
+            while (uploaded < data_size)
+            {
+                size_t upload_size = std::min(data_size - uploaded, max_upload_size);
+
+                void* mapped_memory;
+                VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_ptr->Get_Device(), staging_buffer->device_memory, 0, upload_size, 0, &mapped_memory), "Vulkan: Failed to map memory");
+                memcpy(((uint8_t*)mapped_memory), ((uint8_t*)data) + uploaded, upload_size);
+                vkUnmapMemory(*m_logical_device_ptr->Get_Device(), staging_buffer->device_memory);
+
+                command_buffer_manager_ptr->Reset_Command_Buffer({"staging-buffer-upload", 0});
+
+                command_buffer_manager_ptr->Begin_Recording({"staging-buffer-upload", 0}, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+                command_buffer_manager_ptr->Copy_Buffer({"staging-buffer-upload", 0}, staging_buffer_id, resource_id, 0, uploaded, upload_size);
+                command_buffer_manager_ptr->End_Recording({"staging-buffer-upload", 0});
+
+                VkSubmitInfo submit_info = {};
+                submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+                submit_info.pNext = nullptr;
+                submit_info.waitSemaphoreCount = 0;
+                submit_info.pWaitSemaphores = nullptr;
+                submit_info.pWaitDstStageMask = nullptr;
+                submit_info.commandBufferCount = 1;
+                submit_info.pCommandBuffers = command_buffer_manager_ptr->Get_Command_Buffer({"staging-buffer-upload", 0});
+                submit_info.signalSemaphoreCount = 0;
+                submit_info.pSignalSemaphores = nullptr;
+
+                VALIDATE_VKRESULT(vkQueueSubmit(*m_queue_manager_ptr->Get_Queue(Queue_Manager::Queue_Types::TRANSFER_QUEUE), 1, &submit_info, VK_NULL_HANDLE), "Vulkan: Failed to submit staging buffer upload command buffer");
+                VALIDATE_VKRESULT(vkQueueWaitIdle(*m_queue_manager_ptr->Get_Queue(Queue_Manager::Queue_Types::TRANSFER_QUEUE)), "Vulkan: Failed to wait for idle transfer queue");
+
+                uploaded += upload_size;
+            }
+
+            Remove_Resource_Grouping("staging-buffer-upload");
+            descriptor_set_manager_ptr->Remove_Descriptor_Set("staging-buffer-upload");
+            command_buffer_manager_ptr->Remove_Command_Buffer({"staging-buffer-upload", 0});
+
+            vkDeviceWaitIdle(*m_logical_device_ptr->Get_Device());
+        }
+
+        std::string Storage_Manager::Get_Resource_String(Resource_ID resource_id)
+        {
+            return resource_id.label.append("-").append(std::to_string(resource_id.index));
         }
 
         Storage_Manager::Buffer_Resource* Storage_Manager::Get_Buffer_Resource(Resource_ID resource_id)
