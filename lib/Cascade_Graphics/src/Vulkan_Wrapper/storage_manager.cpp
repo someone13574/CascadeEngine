@@ -606,6 +606,8 @@ namespace Cascade_Graphics
             command_buffer_manager_ptr->Remove_Command_Buffer({"staging-buffer-upload", 0});
 
             vkDeviceWaitIdle(*m_logical_device_ptr->Get_Device());
+
+            LOG_INFO << "Vulkan: Finished staging buffer upload";
         }
 
         std::string Storage_Manager::Get_Resource_String(Resource_ID resource_id)
