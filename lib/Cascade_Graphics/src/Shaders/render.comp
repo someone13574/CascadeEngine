@@ -107,7 +107,7 @@ void main()
         else
         {
             //
-            if (dot(vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), ray_direction) < 0.3)
+            if (dot(vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), ray_direction) > -0.3)
             {
                 if (camera_data.which_hit_buffer == 0)
                 {
@@ -176,7 +176,7 @@ void main()
                 hits = hit_counts[current_index].z;
             }
 
-            if (temp == -1 || hits < 10)
+            if (temp == -1 || hits < 5)
             {
                 normal = vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z);
                 hit_distance = dst;
