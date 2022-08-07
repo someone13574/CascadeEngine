@@ -21,6 +21,12 @@ namespace Cascade_Graphics
 
             unsigned int hit_links[8];
             unsigned int miss_links[8];
+
+            float normal_x;
+            float normal_y;
+            float normal_z;
+
+            unsigned int padding;
         };
 
     private:
@@ -28,6 +34,7 @@ namespace Cascade_Graphics
         {
             double size;
             Vector_3<double> position;
+            Vector_3<double> normal;
 
             unsigned int parent_index;
             unsigned int child_indices[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -49,11 +56,11 @@ namespace Cascade_Graphics
         std::vector<Object> m_objects;
 
     private:
-        static void Voxel_Sample_Volume_Function(Voxel voxel, double step_size, std::function<bool(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting);
+        static void Voxel_Sample_Volume_Function(Voxel voxel, double step_size, std::function<double(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting);
         static void Create_Object_From_Volume_Function_Thread(unsigned int start_voxel_index,
                                                               unsigned int max_depth,
                                                               unsigned int thread_depth,
-                                                              std::function<bool(Vector_3<double>)> volume_sample_function,
+                                                              std::function<double(Vector_3<double>)> volume_sample_function,
                                                               std::vector<Voxel>* voxels_ptr,
                                                               std::mutex* voxels_mutex,
                                                               std::vector<double> step_size_lookup_table);
@@ -62,7 +69,7 @@ namespace Cascade_Graphics
         Object_Manager();
 
     public:
-        void Create_Object_From_Volume_Function(std::string label, unsigned int max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::function<bool(Vector_3<double>)> volume_sample_function);
+        void Create_Object_From_Volume_Function(std::string label, unsigned int max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::function<double(Vector_3<double>)> volume_sample_function);
 
         std::vector<GPU_Voxel> Get_GPU_Voxels();
     };

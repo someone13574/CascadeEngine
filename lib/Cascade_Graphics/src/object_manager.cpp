@@ -12,7 +12,7 @@ namespace Cascade_Graphics
     {
     }
 
-    void Object_Manager::Voxel_Sample_Volume_Function(Voxel voxel, double step_size, std::function<bool(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting)
+    void Object_Manager::Voxel_Sample_Volume_Function(Voxel voxel, double step_size, std::function<double(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting)
     {
         is_fully_contained = true;
         is_intersecting = false;
@@ -29,7 +29,7 @@ namespace Cascade_Graphics
             {
                 for (sample_position.m_z = start_position.m_z; sample_position.m_z <= end_position.m_z; sample_position.m_z += step_size)
                 {
-                    sample = volume_sample_function(sample_position);
+                    sample = volume_sample_function(sample_position) < 0.0;
 
                     is_fully_contained = is_fully_contained && sample;
                     is_intersecting = is_intersecting || sample;
@@ -46,7 +46,7 @@ namespace Cascade_Graphics
     void Object_Manager::Create_Object_From_Volume_Function_Thread(unsigned int start_voxel_index,
                                                                    unsigned int max_depth,
                                                                    unsigned int thread_depth,
-                                                                   std::function<bool(Vector_3<double>)> volume_sample_function,
+                                                                   std::function<double(Vector_3<double>)> volume_sample_function,
                                                                    std::vector<Voxel>* voxels_ptr,
                                                                    std::mutex* voxels_mutex,
                                                                    std::vector<double> step_size_lookup_table)
@@ -103,6 +103,13 @@ namespace Cascade_Graphics
                     child_voxel.miss_links[6] = current_voxel.miss_links[6];
                     child_voxel.miss_links[7] = current_voxel.miss_links[7];
                     child_voxel.depth = current_voxel.depth + 1;
+
+                    double center_density = volume_sample_function(child_voxel.position);
+                    double x_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.00001, 0.0, 0.0));
+                    double y_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.00001, 0.0));
+                    double z_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.0, 0.00001));
+
+                    child_voxel.normal = (Vector_3<double>(center_density, center_density, center_density) - Vector_3<double>(x_density, y_density, z_density)).Normalized();
 
                     bool is_fully_contained;
                     bool is_intersecting;
@@ -201,7 +208,7 @@ namespace Cascade_Graphics
         }
     }
 
-    void Object_Manager::Create_Object_From_Volume_Function(std::string label, unsigned int max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::function<bool(Vector_3<double>)> volume_sample_function)
+    void Object_Manager::Create_Object_From_Volume_Function(std::string label, unsigned int max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::function<double(Vector_3<double>)> volume_sample_function)
     {
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
 
@@ -229,6 +236,7 @@ namespace Cascade_Graphics
         Voxel root_voxel = {};
         root_voxel.size = sample_region_size;
         root_voxel.position = sample_region_center;
+        root_voxel.normal = Vector_3<double>(0.0, 1.0, 0.0);
         root_voxel.parent_index = -1;
         root_voxel.child_indices[0] = 0;
         root_voxel.child_indices[1] = 0;
@@ -308,6 +316,9 @@ namespace Cascade_Graphics
                 gpu_voxel.miss_links[5] = current_voxel->miss_links[5];
                 gpu_voxel.miss_links[6] = current_voxel->miss_links[6];
                 gpu_voxel.miss_links[7] = current_voxel->miss_links[7];
+                gpu_voxel.normal_x = current_voxel->normal.m_x;
+                gpu_voxel.normal_y = current_voxel->normal.m_y;
+                gpu_voxel.normal_z = current_voxel->normal.m_z;
 
                 gpu_voxels.push_back(gpu_voxel);
             }

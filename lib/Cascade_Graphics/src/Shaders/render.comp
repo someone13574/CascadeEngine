@@ -36,6 +36,12 @@ struct Voxel
     float size;
 
     mat4x4 links;
+
+    float normal_x;
+    float normal_y;
+    float normal_z;
+
+    uint padding;
 };
 
 layout(std140, binding = 2) buffer voxel_buffer
@@ -48,7 +54,7 @@ layout(std140, binding = 3) buffer hit_buffer
     ivec4 hit_counts[];
 };
 
-float Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, float box_size, out vec3 normal)
+float Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, float box_size)
 {
     vec3 n = ray_origin * fractional_ray_direction;
     vec3 k = box_size * abs(fractional_ray_direction);
@@ -61,11 +67,9 @@ float Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, float
 
     if (tN >= tF || tF < 0.0)
     {
-        normal = vec3(0);
         return 1.0/0.0;
     }
 
-    normal = -sign(fractional_ray_direction) * step(t1.yzx, t1.xyz) * step(t1.zxy, t1.xyz);
     return tN;
 }
 
@@ -94,8 +98,7 @@ void main()
 
         Voxel current_voxel = voxels[current_index];
 
-        vec3 current_normal;
-        float dst = Ray_Box_Intersection(ray_origin - vec3(current_voxel.x, current_voxel.y, current_voxel.z), fractional_ray_direction, current_voxel.size, current_normal);
+        float dst = Ray_Box_Intersection(ray_origin - vec3(current_voxel.x, current_voxel.y, current_voxel.z), fractional_ray_direction, current_voxel.size);
 
         if (dst == 1.0 / 0.0)
         {
@@ -104,29 +107,51 @@ void main()
         else
         {
             //
-            if (camera_data.which_hit_buffer == 0)
+            if (dot(vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), ray_direction) < 0.3)
             {
-                atomicAdd(hit_counts[current_index].x, 1);
-                atomicAdd(hit_counts[current_index].y, 1);
-                hit_counts[current_index].z = 0;
+                if (camera_data.which_hit_buffer == 0)
+                {
+                    atomicAdd(hit_counts[current_index].x, 20);
+                    hit_counts[current_index].z = 0;
+                }
+                else if (camera_data.which_hit_buffer == 1)
+                {
+                    atomicAdd(hit_counts[current_index].y, 20);
+                    hit_counts[current_index].w = 0;
+                }
+                else if (camera_data.which_hit_buffer == 2)
+                {
+                    atomicAdd(hit_counts[current_index].z, 20);
+                    hit_counts[current_index].x = 0;
+                }
+                else if (camera_data.which_hit_buffer == 3)
+                {
+                    atomicAdd(hit_counts[current_index].w, 20);
+                    hit_counts[current_index].y = 0;
+                }
             }
-            else if (camera_data.which_hit_buffer == 1)
+            else
             {
-                atomicAdd(hit_counts[current_index].y, 1);
-                atomicAdd(hit_counts[current_index].z, 1);
-                hit_counts[current_index].w = 0;
-            }
-            else if (camera_data.which_hit_buffer == 2)
-            {
-                atomicAdd(hit_counts[current_index].z, 1);
-                atomicAdd(hit_counts[current_index].w, 1);
-                hit_counts[current_index].x = 0;
-            }
-            else if (camera_data.which_hit_buffer == 3)
-            {
-                atomicAdd(hit_counts[current_index].w, 1);
-                atomicAdd(hit_counts[current_index].x, 1);
-                hit_counts[current_index].y = 0;
+                if (camera_data.which_hit_buffer == 0)
+                {
+                    atomicAdd(hit_counts[current_index].x, 1);
+                    hit_counts[current_index].z = 0;
+                }
+                else if (camera_data.which_hit_buffer == 1)
+                {
+                    atomicAdd(hit_counts[current_index].y, 1);
+                    hit_counts[current_index].w = 0;
+                }
+                else if (camera_data.which_hit_buffer == 2)
+                {
+                    atomicAdd(hit_counts[current_index].z, 1);
+                    hit_counts[current_index].x = 0;
+                }
+                else if (camera_data.which_hit_buffer == 3)
+                {
+                    atomicAdd(hit_counts[current_index].w, 1);
+                    hit_counts[current_index].y = 0;
+                }
             }
             //
 
@@ -151,9 +176,9 @@ void main()
                 hits = hit_counts[current_index].z;
             }
 
-            if (temp == -1 || hits < 20)
+            if (temp == -1 || hits < 10)
             {
-                normal = current_normal;
+                normal = vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z);
                 hit_distance = dst;
                 break;
             }
