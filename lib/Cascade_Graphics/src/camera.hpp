@@ -34,6 +34,7 @@ namespace Cascade_Graphics
     private:
         Vector_3<double> m_position;
         Vector_3<double> m_direction;
+        Vector_3<double> m_up_direction = {0.0, 1.0, 0.0};
         Matrix_3x3<double> m_camera_to_world_matrix;
 
     private:
@@ -44,6 +45,7 @@ namespace Cascade_Graphics
 
         void Set_Position(Vector_3<double> position);
         void Set_Direction(Vector_3<double> direction);
+        void Set_Up_Direction(Vector_3<double> up_direction);
         void Look_At(Vector_3<double> position);
 
         Vector_3<double> Get_Camera_Position();

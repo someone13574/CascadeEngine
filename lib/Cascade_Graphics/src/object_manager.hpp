@@ -26,7 +26,12 @@ namespace Cascade_Graphics
             float normal_y;
             float normal_z;
 
-            unsigned int padding;
+            float color_r;
+            float color_g;
+            float color_b;
+
+            unsigned int padding_a;
+            unsigned int padding_b;
         };
 
     private:
@@ -35,6 +40,7 @@ namespace Cascade_Graphics
             double size;
             Vector_3<double> position;
             Vector_3<double> normal;
+            Vector_3<double> color;
 
             unsigned int parent_index;
             unsigned int child_indices[8] = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -61,6 +67,7 @@ namespace Cascade_Graphics
                                                               unsigned int max_depth,
                                                               unsigned int thread_depth,
                                                               std::function<double(Vector_3<double>)> volume_sample_function,
+                                                              std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function,
                                                               std::vector<Voxel>* voxels_ptr,
                                                               std::mutex* voxels_mutex,
                                                               std::vector<double> step_size_lookup_table);
@@ -69,7 +76,12 @@ namespace Cascade_Graphics
         Object_Manager();
 
     public:
-        void Create_Object_From_Volume_Function(std::string label, unsigned int max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::function<double(Vector_3<double>)> volume_sample_function);
+        void Create_Object_From_Volume_Function(std::string label,
+                                                unsigned int max_depth,
+                                                Vector_3<double> sample_region_center,
+                                                double sample_region_size,
+                                                std::function<double(Vector_3<double>)> volume_sample_function,
+                                                std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function);
 
         std::vector<GPU_Voxel> Get_GPU_Voxels();
     };

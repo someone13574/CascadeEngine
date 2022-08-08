@@ -47,6 +47,7 @@ namespace Cascade_Graphics
                                                                    unsigned int max_depth,
                                                                    unsigned int thread_depth,
                                                                    std::function<double(Vector_3<double>)> volume_sample_function,
+                                                                   std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function,
                                                                    std::vector<Voxel>* voxels_ptr,
                                                                    std::mutex* voxels_mutex,
                                                                    std::vector<double> step_size_lookup_table)
@@ -108,8 +109,9 @@ namespace Cascade_Graphics
                     double x_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.00001, 0.0, 0.0));
                     double y_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.00001, 0.0));
                     double z_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.0, 0.00001));
-
                     child_voxel.normal = (Vector_3<double>(center_density, center_density, center_density) - Vector_3<double>(x_density, y_density, z_density)).Normalized();
+
+                    child_voxel.color = color_sample_function(child_voxel.position, child_voxel.normal);
 
                     bool is_fully_contained;
                     bool is_intersecting;
@@ -180,7 +182,8 @@ namespace Cascade_Graphics
                         {
                             if (current_voxel.depth <= thread_depth)
                             {
-                                std::thread child_thread(Create_Object_From_Volume_Function_Thread, current_voxel.child_indices[i], max_depth, thread_depth, volume_sample_function, voxels_ptr, voxels_mutex, step_size_lookup_table);
+                                std::thread child_thread(Create_Object_From_Volume_Function_Thread, current_voxel.child_indices[i], max_depth, thread_depth, volume_sample_function, color_sample_function, voxels_ptr, voxels_mutex,
+                                                         step_size_lookup_table);
 
                                 threads.push_back(std::move(child_thread));
                             }
@@ -208,7 +211,12 @@ namespace Cascade_Graphics
         }
     }
 
-    void Object_Manager::Create_Object_From_Volume_Function(std::string label, unsigned int max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::function<double(Vector_3<double>)> volume_sample_function)
+    void Object_Manager::Create_Object_From_Volume_Function(std::string label,
+                                                            unsigned int max_depth,
+                                                            Vector_3<double> sample_region_center,
+                                                            double sample_region_size,
+                                                            std::function<double(Vector_3<double>)> volume_sample_function,
+                                                            std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function)
     {
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
 
@@ -279,7 +287,7 @@ namespace Cascade_Graphics
 
         std::mutex voxels_mutex;
 
-        std::thread thread(Create_Object_From_Volume_Function_Thread, 0, max_depth, std::min(3u, max_depth), volume_sample_function, &m_objects.back().voxels, &voxels_mutex, step_size_lookup_table);
+        std::thread thread(Create_Object_From_Volume_Function_Thread, 0, max_depth, std::min(3u, max_depth), volume_sample_function, color_sample_function, &m_objects.back().voxels, &voxels_mutex, step_size_lookup_table);
         thread.join();
 
         LOG_TRACE << "Graphics: It took " << (float)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count() / 1000.0 << " seconds to generate " << label;
@@ -319,6 +327,9 @@ namespace Cascade_Graphics
                 gpu_voxel.normal_x = current_voxel->normal.m_x;
                 gpu_voxel.normal_y = current_voxel->normal.m_y;
                 gpu_voxel.normal_z = current_voxel->normal.m_z;
+                gpu_voxel.color_r = current_voxel->color.m_x;
+                gpu_voxel.color_g = current_voxel->color.m_y;
+                gpu_voxel.color_b = current_voxel->color.m_z;
 
                 gpu_voxels.push_back(gpu_voxel);
             }

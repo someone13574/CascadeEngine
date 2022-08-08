@@ -9,7 +9,7 @@ namespace Cascade_Graphics
 
     void Camera::Update_Camera_To_World_Matrix()
     {
-        Vector_3<double> cu = Vector_3<double>::Cross(m_direction, Vector_3<double>(0.0, 1.0, 0.0)).Normalized();
+        Vector_3<double> cu = Vector_3<double>::Cross(m_direction, m_up_direction).Normalized();
         Vector_3<double> cv = Vector_3<double>::Cross(cu, m_direction);
 
         m_camera_to_world_matrix = Matrix_3x3<double>(cu, cv, -m_direction);
@@ -23,6 +23,13 @@ namespace Cascade_Graphics
     void Camera::Set_Direction(Vector_3<double> direction)
     {
         m_direction = direction.Normalized();
+
+        Update_Camera_To_World_Matrix();
+    }
+
+    void Camera::Set_Up_Direction(Vector_3<double> up_direction)
+    {
+        m_up_direction = up_direction.Normalized();
 
         Update_Camera_To_World_Matrix();
     }
