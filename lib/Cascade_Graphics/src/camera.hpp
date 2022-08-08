@@ -24,11 +24,11 @@ namespace Cascade_Graphics
             float origin_y;
             float origin_z;
 
-            unsigned int which_hit_buffer;
+            uint32_t which_hit_buffer;
 
-            unsigned int padding_a;
-            unsigned int padding_b;
-            unsigned int padding_c;
+            uint32_t padding_a;
+            uint32_t padding_b;
+            uint32_t padding_c;
         };
 
     private:
@@ -50,6 +50,6 @@ namespace Cascade_Graphics
 
         Vector_3<double> Get_Camera_Position();
         Matrix_3x3<double> Get_Camera_To_World_Matrix();
-        GPU_Camera_Data Get_GPU_Camera_Data(unsigned int which_hit_buffer);
+        GPU_Camera_Data Get_GPU_Camera_Data(uint32_t which_hit_buffer);
     };
 } // namespace Cascade_Graphics

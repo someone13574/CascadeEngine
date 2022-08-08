@@ -19,7 +19,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Cleaning up storage";
 
-            for (unsigned int i = 0; i < m_buffer_resources.size(); i++)
+            for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
             {
                 Buffer_Resource* buffer_resource_ptr = &m_buffer_resources[i];
 
@@ -30,7 +30,7 @@ namespace Cascade_Graphics
             }
             m_buffer_resources.clear();
 
-            for (unsigned int i = 0; i < m_image_resources.size(); i++)
+            for (uint32_t i = 0; i < m_image_resources.size(); i++)
             {
                 Image_Resource* image_resource_ptr = &m_image_resources[i];
 
@@ -49,11 +49,11 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan: Finished cleaning up storage";
         }
 
-        unsigned int Storage_Manager::Get_Buffer_Index(Resource_ID resource_id)
+        uint32_t Storage_Manager::Get_Buffer_Index(Resource_ID resource_id)
         {
             if (resource_id.resource_type == Resource_ID::BUFFER_RESOURCE)
             {
-                for (unsigned int i = 0; i < m_buffer_resources.size(); i++)
+                for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
                 {
                     Resource_ID current_resource_id = m_buffer_resources[i].resource_id;
 
@@ -68,11 +68,11 @@ namespace Cascade_Graphics
             exit(EXIT_FAILURE);
         }
 
-        unsigned int Storage_Manager::Get_Image_Index(Resource_ID resource_id)
+        uint32_t Storage_Manager::Get_Image_Index(Resource_ID resource_id)
         {
             if (resource_id.resource_type == Resource_ID::IMAGE_RESOURCE)
             {
-                for (unsigned int i = 0; i < m_image_resources.size(); i++)
+                for (uint32_t i = 0; i < m_image_resources.size(); i++)
                 {
                     Resource_ID current_resource_id = m_image_resources[i].resource_id;
 
@@ -93,7 +93,7 @@ namespace Cascade_Graphics
 
             Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
 
-            std::vector<unsigned int> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(buffer_resource_ptr->resource_queue_mask);
+            std::vector<uint32_t> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(buffer_resource_ptr->resource_queue_mask);
 
             VkBufferCreateInfo buffer_create_info = {};
             buffer_create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -127,14 +127,14 @@ namespace Cascade_Graphics
             vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties_2);
 
             VkMemoryPropertyFlags required_memory_properties = buffer_resource_ptr->memory_property_flags;
-            for (unsigned int i = 0; i < device_memory_properties_2.memoryProperties.memoryTypeCount; i++)
+            for (uint32_t i = 0; i < device_memory_properties_2.memoryProperties.memoryTypeCount; i++)
             {
                 if (buffer_resource_ptr->memory_requirements.memoryTypeBits & (1 << i))
                 {
                     if ((device_memory_properties_2.memoryProperties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
                     {
                         buffer_resource_ptr->memory_type_index = i;
-                        unsigned int heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
+                        uint32_t heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
 
                         if (device_memory_budget_properties.heapBudget[heap_index] < buffer_resource_ptr->memory_requirements.size)
                         {
@@ -171,7 +171,7 @@ namespace Cascade_Graphics
 
             Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
 
-            std::vector<unsigned int> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(image_resource_ptr->resource_queue_mask);
+            std::vector<uint32_t> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(image_resource_ptr->resource_queue_mask);
 
             VkImageCreateInfo image_create_info = {};
             image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -210,14 +210,14 @@ namespace Cascade_Graphics
             vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties_2);
 
             VkMemoryPropertyFlags required_memory_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            for (unsigned int i = 0; i < device_memory_properties_2.memoryProperties.memoryTypeCount; i++)
+            for (uint32_t i = 0; i < device_memory_properties_2.memoryProperties.memoryTypeCount; i++)
             {
                 if (image_resource_ptr->memory_requirements.memoryTypeBits & (1 << i))
                 {
                     if ((device_memory_properties_2.memoryProperties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
                     {
                         image_resource_ptr->memory_type_index = i;
-                        unsigned int heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
+                        uint32_t heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
 
                         if (device_memory_budget_properties.heapBudget[heap_index] < image_resource_ptr->memory_requirements.size)
                         {
@@ -274,7 +274,7 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_ptr->Get_Device(), &image_view_create_info, nullptr, &image_resource_ptr->image_view), "Vulkan: Failed to create image view");
         }
 
-        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, unsigned int resource_queue_mask)
+        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask)
         {
             if (buffer_size == 0)
             {
@@ -293,8 +293,8 @@ namespace Cascade_Graphics
 
                 vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_ptr->Get_Physical_Device(), &device_memory_properties);
 
-                unsigned int memory_type_index = buffer_resource_ptr->memory_type_index;
-                unsigned int heap_index = device_memory_properties.memoryProperties.memoryTypes[memory_type_index].heapIndex;
+                uint32_t memory_type_index = buffer_resource_ptr->memory_type_index;
+                uint32_t heap_index = device_memory_properties.memoryProperties.memoryTypes[memory_type_index].heapIndex;
 
                 LOG_INFO << "Vulkan: Destroying temporary buffer " << Get_Resource_String(buffer_resource_ptr->resource_id) << "'";
                 vkDestroyBuffer(*m_logical_device_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
@@ -313,7 +313,7 @@ namespace Cascade_Graphics
             {
                 bool index_in_use = false;
 
-                for (unsigned int i = 0; i < m_buffer_resources.size(); i++)
+                for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
                 {
                     index_in_use |= m_buffer_resources[i].resource_id == resource_id;
                 }
@@ -347,7 +347,7 @@ namespace Cascade_Graphics
             Allocate_Buffer_Memory(resource_id);
         }
 
-        void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, unsigned int resource_queue_mask)
+        void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask)
         {
             Resource_ID resource_id = {};
             resource_id.label = label;
@@ -358,7 +358,7 @@ namespace Cascade_Graphics
             {
                 bool index_in_use = false;
 
-                for (unsigned int i = 0; i < m_image_resources.size(); i++)
+                for (uint32_t i = 0; i < m_image_resources.size(); i++)
                 {
                     index_in_use |= m_buffer_resources[i].resource_id == resource_id;
                 }
@@ -399,7 +399,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Creating resource grouping with label '" << label << "'";
 
-            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            for (uint32_t i = 0; i < m_resource_groupings.size(); i++)
             {
                 if (m_resource_groupings[i].label == label)
                 {
@@ -408,14 +408,14 @@ namespace Cascade_Graphics
                 }
             }
 
-            unsigned int buffer_resource_count = 0;
-            unsigned int image_resource_count = 0;
-            for (unsigned int i = 0; i < resource_ids.size(); i++)
+            uint32_t buffer_resource_count = 0;
+            uint32_t image_resource_count = 0;
+            for (uint32_t i = 0; i < resource_ids.size(); i++)
             {
                 bool resource_exists = false;
                 if (resource_ids[i].resource_type == Resource_ID::BUFFER_RESOURCE)
                 {
-                    for (unsigned int j = 0; j < m_buffer_resources.size(); j++)
+                    for (uint32_t j = 0; j < m_buffer_resources.size(); j++)
                     {
                         if (m_buffer_resources[j].resource_id == resource_ids[i])
                         {
@@ -432,7 +432,7 @@ namespace Cascade_Graphics
                 }
                 else if (resource_ids[i].resource_type == Resource_ID::IMAGE_RESOURCE)
                 {
-                    for (unsigned int j = 0; j < m_image_resources.size(); j++)
+                    for (uint32_t j = 0; j < m_image_resources.size(); j++)
                     {
                         if (m_image_resources[j].resource_id == resource_ids[i])
                         {
@@ -460,7 +460,7 @@ namespace Cascade_Graphics
 
         void Storage_Manager::Remove_Resource_Grouping(std::string label)
         {
-            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            for (uint32_t i = 0; i < m_resource_groupings.size(); i++)
             {
                 if (m_resource_groupings[i].label == label)
                 {
@@ -484,7 +484,7 @@ namespace Cascade_Graphics
             {
                 bool index_in_use = false;
 
-                for (unsigned int i = 0; i < m_image_resources.size(); i++)
+                for (uint32_t i = 0; i < m_image_resources.size(); i++)
                 {
                     index_in_use |= m_image_resources[i].resource_id == resource_id;
                 }
@@ -618,7 +618,7 @@ namespace Cascade_Graphics
 
         Storage_Manager::Buffer_Resource* Storage_Manager::Get_Buffer_Resource(Resource_ID resource_id)
         {
-            for (unsigned int i = 0; i < m_buffer_resources.size(); i++)
+            for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
             {
                 if (m_buffer_resources[i].resource_id == resource_id)
                 {
@@ -632,7 +632,7 @@ namespace Cascade_Graphics
 
         Storage_Manager::Image_Resource* Storage_Manager::Get_Image_Resource(Resource_ID resource_id)
         {
-            for (unsigned int i = 0; i < m_image_resources.size(); i++)
+            for (uint32_t i = 0; i < m_image_resources.size(); i++)
             {
                 if (m_image_resources[i].resource_id == resource_id)
                 {
@@ -646,7 +646,7 @@ namespace Cascade_Graphics
 
         Storage_Manager::Resource_Grouping* Storage_Manager::Get_Resource_Grouping(std::string label)
         {
-            for (unsigned int i = 0; i < m_resource_groupings.size(); i++)
+            for (uint32_t i = 0; i < m_resource_groupings.size(); i++)
             {
                 if (m_resource_groupings[i].label == label)
                 {

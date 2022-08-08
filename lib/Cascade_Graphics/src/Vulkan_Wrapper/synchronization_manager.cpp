@@ -14,12 +14,12 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Destroying synchonization objects";
 
-            for (unsigned int i = 0; i < m_semaphores.size(); i++)
+            for (uint32_t i = 0; i < m_semaphores.size(); i++)
             {
                 vkDestroySemaphore(*m_logical_device_ptr->Get_Device(), m_semaphores[i].semaphore, nullptr);
             }
 
-            for (unsigned int i = 0; i < m_fences.size(); i++)
+            for (uint32_t i = 0; i < m_fences.size(); i++)
             {
                 if (!m_fences[i].added)
                 {
@@ -30,10 +30,10 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan: Finished destroying synchronization objects";
         }
 
-        unsigned int Synchronization_Manager::Get_Next_Semaphore_Index(std::string label)
+        uint32_t Synchronization_Manager::Get_Next_Semaphore_Index(std::string label)
         {
-            unsigned int next_index = 0;
-            for (unsigned int i = 0; i < m_semaphores.size(); i++)
+            uint32_t next_index = 0;
+            for (uint32_t i = 0; i < m_semaphores.size(); i++)
             {
                 if (label == m_semaphores[i].identifier.label && next_index == m_semaphores[i].identifier.index)
                 {
@@ -44,10 +44,10 @@ namespace Cascade_Graphics
             return next_index;
         }
 
-        unsigned int Synchronization_Manager::Get_Next_Fence_Index(std::string label)
+        uint32_t Synchronization_Manager::Get_Next_Fence_Index(std::string label)
         {
-            unsigned int next_index = 0;
-            for (unsigned int i = 0; i < m_fences.size(); i++)
+            uint32_t next_index = 0;
+            for (uint32_t i = 0; i < m_fences.size(); i++)
             {
                 if (label == m_fences[i].identifier.label && next_index == m_fences[i].identifier.index)
                 {
@@ -122,7 +122,7 @@ namespace Cascade_Graphics
 
         VkSemaphore* Synchronization_Manager::Get_Semaphore(Identifier identifier)
         {
-            for (unsigned int i = 0; i < m_semaphores.size(); i++)
+            for (uint32_t i = 0; i < m_semaphores.size(); i++)
             {
                 if (m_semaphores[i].identifier == identifier)
                 {
@@ -136,7 +136,7 @@ namespace Cascade_Graphics
 
         VkFence* Synchronization_Manager::Get_Fence(Identifier identifier)
         {
-            for (unsigned int i = 0; i < m_fences.size(); i++)
+            for (uint32_t i = 0; i < m_fences.size(); i++)
             {
                 if (m_fences[i].identifier == identifier)
                 {

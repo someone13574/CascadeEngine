@@ -16,7 +16,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Cleaning up shaders";
 
-            for (unsigned int i = 0; i < m_shaders.size(); i++)
+            for (uint32_t i = 0; i < m_shaders.size(); i++)
             {
                 LOG_TRACE << "Vulkan: Destroying shader module " << m_shaders[i].shader_info.label;
 
@@ -30,7 +30,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Adding shader at " << path << " as " << label;
 
-            for (unsigned int i = 0; i < m_shaders.size(); i++)
+            for (uint32_t i = 0; i < m_shaders.size(); i++)
             {
                 if (m_shaders[i].shader_info.label == label)
                 {
@@ -115,7 +115,7 @@ namespace Cascade_Graphics
 
         VkShaderModule* Shader_Manager::Get_Shader_Module(std::string label)
         {
-            for (unsigned int i = 0; i < m_shaders.size(); i++)
+            for (uint32_t i = 0; i < m_shaders.size(); i++)
             {
                 if (m_shaders[i].shader_info.label == label)
                 {
@@ -131,7 +131,7 @@ namespace Cascade_Graphics
         {
             std::vector<Shader_Info> shaders_details(m_shaders.size());
 
-            for (unsigned int i = 0; i < m_shaders.size(); i++)
+            for (uint32_t i = 0; i < m_shaders.size(); i++)
             {
                 shaders_details[i] = m_shaders[i].shader_info;
             }

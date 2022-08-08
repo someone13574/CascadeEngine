@@ -14,7 +14,7 @@ namespace Cascade_Core
 
 #endif
 
-    Window::Window(std::string window_title, unsigned int width, unsigned int height) : m_window_title(window_title), m_width(width), m_height(height)
+    Window::Window(std::string window_title, uint32_t width, uint32_t height) : m_window_title(window_title), m_width(width), m_height(height)
     {
         LOG_DEBUG << "Core: Created window '" << m_window_title << "' with dimensions " << m_width << "x" << m_height;
 
@@ -39,8 +39,8 @@ namespace Cascade_Core
         m_xcb_screen_ptr = xcb_setup_roots_iterator(xcb_get_setup(m_xcb_connection_ptr)).data;
         m_xcb_window = xcb_generate_id(m_xcb_connection_ptr);
 
-        unsigned int mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-        unsigned int values[2] = {m_xcb_screen_ptr->white_pixel, 0};
+        uint32_t mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
+        uint32_t values[2] = {m_xcb_screen_ptr->white_pixel, 0};
 
         xcb_create_window(m_xcb_connection_ptr, XCB_COPY_FROM_PARENT, m_xcb_window, m_xcb_screen_ptr->root, 0, 0, m_width, m_height, 10, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_xcb_screen_ptr->root_visual, mask, values);
         xcb_change_property(m_xcb_connection_ptr, XCB_PROP_MODE_REPLACE, m_xcb_window, XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, m_window_title.length(), const_cast<char*>(m_window_title.c_str()));
@@ -51,8 +51,8 @@ namespace Cascade_Core
         m_xcb_close_window_reply_ptr = xcb_intern_atom_reply(m_xcb_connection_ptr, m_xcb_close_window_cookie, 0);
         xcb_change_property(m_xcb_connection_ptr, XCB_PROP_MODE_REPLACE, m_xcb_window, (*close_window_tmp_reply).atom, 4, 32, 1, &(*m_xcb_close_window_reply_ptr).atom);
 
-        unsigned int enabled_events[] = {XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE
-                                         | XCB_EVENT_MASK_STRUCTURE_NOTIFY};
+        uint32_t enabled_events[] = {XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE
+                                     | XCB_EVENT_MASK_STRUCTURE_NOTIFY};
         xcb_change_window_attributes(m_xcb_connection_ptr, m_xcb_window, XCB_CW_EVENT_MASK, enabled_events);
 
         xcb_map_window(m_xcb_connection_ptr, m_xcb_window);
@@ -313,7 +313,7 @@ namespace Cascade_Core
                     event_data.x_position = button_press_event->event_x;
                     event_data.y_position = button_press_event->event_y;
 
-                    switch ((unsigned int)button_press_event->detail)
+                    switch ((uint32_t)button_press_event->detail)
                     {
                         case 1:
                         {
@@ -346,7 +346,7 @@ namespace Cascade_Core
                     event_data.x_position = button_release_event->event_x;
                     event_data.y_position = button_release_event->event_y;
 
-                    switch ((unsigned int)button_release_event->detail)
+                    switch ((uint32_t)button_release_event->detail)
                     {
                         case 1:
                         {
@@ -506,7 +506,7 @@ namespace Cascade_Core
         return m_requesting_close;
     }
 
-    std::pair<unsigned int, unsigned int> Window::Get_Window_Dimensions()
+    std::pair<uint32_t, uint32_t> Window::Get_Window_Dimensions()
     {
 #ifdef __linux__
 
@@ -522,21 +522,21 @@ namespace Cascade_Core
             exit(EXIT_FAILURE);
         }
 
-        return std::pair<unsigned int, unsigned int>(get_geometry_reply_ptr->width, get_geometry_reply_ptr->height);
+        return std::pair<uint32_t, uint32_t>(get_geometry_reply_ptr->width, get_geometry_reply_ptr->height);
 
 #elif defined _WIN32 || defined WIN32
         if (m_initialization_stage != Initialization_Stage::NOT_STARTED)
         {
-            return std::pair<unsigned int, unsigned int>(m_width, m_height);
+            return std::pair<uint32_t, uint32_t>(m_width, m_height);
         }
         else
         {
-            return std::pair<unsigned int, unsigned int>(0, 0);
+            return std::pair<uint32_t, uint32_t>(0, 0);
         }
 #endif
     }
 
-    void Window::Update_Size(unsigned int width, unsigned int height)
+    void Window::Update_Size(uint32_t width, uint32_t height)
     {
         m_width = width;
         m_height = height;

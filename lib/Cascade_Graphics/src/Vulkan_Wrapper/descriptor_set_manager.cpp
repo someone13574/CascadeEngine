@@ -16,13 +16,13 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Cleaning up descriptor set manager";
 
-            for (unsigned int i = 0; i < m_descriptor_sets.size(); i++)
+            for (uint32_t i = 0; i < m_descriptor_sets.size(); i++)
             {
                 vkDestroyDescriptorSetLayout(*m_logical_device_ptr->Get_Device(), m_descriptor_sets[i].descriptor_set_layout, nullptr);
                 vkDestroyDescriptorPool(*m_logical_device_ptr->Get_Device(), m_descriptor_sets[i].descriptor_pool, nullptr);
             }
 
-            for (unsigned int i = 0; i < m_samplers.size(); i++)
+            for (uint32_t i = 0; i < m_samplers.size(); i++)
             {
                 vkDestroySampler(*m_logical_device_ptr->Get_Device(), m_samplers[i], nullptr);
             }
@@ -38,7 +38,7 @@ namespace Cascade_Graphics
             Storage_Manager::Resource_Grouping* resource_grouping_ptr = m_storage_manager_ptr->Get_Resource_Grouping(label);
 
             std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_bindings(resource_grouping_ptr->resource_ids.size());
-            for (unsigned int i = 0; i < resource_grouping_ptr->resource_ids.size(); i++)
+            for (uint32_t i = 0; i < resource_grouping_ptr->resource_ids.size(); i++)
             {
                 descriptor_set_layout_bindings[i] = {};
                 descriptor_set_layout_bindings[i].binding = i;
@@ -68,7 +68,7 @@ namespace Cascade_Graphics
             Storage_Manager::Resource_Grouping* resource_grouping_ptr = m_storage_manager_ptr->Get_Resource_Grouping(label);
 
             std::vector<VkDescriptorPoolSize> descriptor_pool_sizes;
-            for (unsigned int i = 0; i < resource_grouping_ptr->resource_ids.size(); i++)
+            for (uint32_t i = 0; i < resource_grouping_ptr->resource_ids.size(); i++)
             {
                 descriptor_pool_sizes.resize(descriptor_pool_sizes.size() + 1);
 
@@ -112,9 +112,9 @@ namespace Cascade_Graphics
             Descriptor_Set_Data* descriptor_set_data_ptr = Get_Descriptor_Set_Data(label);
             Storage_Manager::Resource_Grouping* resource_grouping_ptr = m_storage_manager_ptr->Get_Resource_Grouping(label);
 
-            unsigned int set_buffer_descriptor_infos = 0;
-            unsigned int set_image_descriptor_infos = 0;
-            for (unsigned int i = 0; i < resource_grouping_ptr->resource_ids.size(); i++)
+            uint32_t set_buffer_descriptor_infos = 0;
+            uint32_t set_image_descriptor_infos = 0;
+            for (uint32_t i = 0; i < resource_grouping_ptr->resource_ids.size(); i++)
             {
                 if (resource_grouping_ptr->resource_ids[i].resource_type == Resource_ID::BUFFER_RESOURCE)
                 {
@@ -208,7 +208,7 @@ namespace Cascade_Graphics
 
         void Descriptor_Set_Manager::Remove_Descriptor_Set(std::string resource_grouping_label)
         {
-            for (unsigned int i = 0; i < m_descriptor_sets.size(); i++)
+            for (uint32_t i = 0; i < m_descriptor_sets.size(); i++)
             {
                 if (m_descriptor_sets[i].label == resource_grouping_label)
                 {
@@ -226,7 +226,7 @@ namespace Cascade_Graphics
 
         Descriptor_Set_Manager::Descriptor_Set_Data* Descriptor_Set_Manager::Get_Descriptor_Set_Data(std::string label)
         {
-            for (unsigned int i = 0; i < m_descriptor_sets.size(); i++)
+            for (uint32_t i = 0; i < m_descriptor_sets.size(); i++)
             {
                 if (m_descriptor_sets[i].label == label)
                 {

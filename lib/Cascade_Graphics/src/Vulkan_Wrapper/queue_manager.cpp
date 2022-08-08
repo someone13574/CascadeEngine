@@ -9,11 +9,11 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Queue_Manager::Queue_Manager(std::shared_ptr<Surface> surface_ptr, unsigned int required_queues) : m_surface_ptr(surface_ptr), m_required_queues(required_queues)
+        Queue_Manager::Queue_Manager(std::shared_ptr<Surface> surface_ptr, uint32_t required_queues) : m_surface_ptr(surface_ptr), m_required_queues(required_queues)
         {
         }
 
-        unsigned int Queue_Manager::Get_Required_Queue_Types()
+        uint32_t Queue_Manager::Get_Required_Queue_Types()
         {
             return m_required_queues;
         }
@@ -31,7 +31,7 @@ namespace Cascade_Graphics
             }
         }
 
-        unsigned int Queue_Manager::Get_Queue_Family_Index(Queue_Types queue_type)
+        uint32_t Queue_Manager::Get_Queue_Family_Index(Queue_Types queue_type)
         {
             if (m_required_queues & queue_type)
             {
@@ -113,7 +113,7 @@ namespace Cascade_Graphics
             m_queue_family_indices = {};
             m_queue_family_indices.required_queues = m_required_queues;
 
-            unsigned int queue_family_count;
+            uint32_t queue_family_count;
             vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_ptr, &queue_family_count, nullptr);
 
             std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
@@ -121,7 +121,7 @@ namespace Cascade_Graphics
 
             LOG_DEBUG << "Vulkan: Found " << queue_family_count << " queue_families";
 
-            for (unsigned int i = 0; i < queue_family_count; i++)
+            for (uint32_t i = 0; i < queue_family_count; i++)
             {
                 bool is_graphics_family = queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT;
                 bool is_compute_family = queue_families[i].queueFlags & VK_QUEUE_COMPUTE_BIT;
@@ -242,7 +242,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Vulkan: Checking if physical device has required queues";
 
-            unsigned int queue_family_count;
+            uint32_t queue_family_count;
             vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_ptr, &queue_family_count, nullptr);
 
             std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
@@ -250,8 +250,8 @@ namespace Cascade_Graphics
 
             LOG_TRACE << "Vulkan: Found " << queue_family_count << " queue_families";
 
-            unsigned int staisfied_queues = 0;
-            for (unsigned int i = 0; i < queue_family_count; i++)
+            uint32_t staisfied_queues = 0;
+            for (uint32_t i = 0; i < queue_family_count; i++)
             {
                 bool is_graphics_family = queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT;
                 bool is_compute_family = queue_families[i].queueFlags & VK_QUEUE_COMPUTE_BIT;
@@ -286,9 +286,9 @@ namespace Cascade_Graphics
             }
         }
 
-        std::vector<unsigned int> Queue_Manager::Get_Unique_Queue_Families(unsigned int required_queues)
+        std::vector<uint32_t> Queue_Manager::Get_Unique_Queue_Families(uint32_t required_queues)
         {
-            std::set<unsigned int> unique_family_indices;
+            std::set<uint32_t> unique_family_indices;
 
             if ((required_queues & Queue_Types::GRAPHICS_QUEUE) && (m_required_queues & Queue_Types::GRAPHICS_QUEUE))
             {
@@ -315,7 +315,7 @@ namespace Cascade_Graphics
                 unique_family_indices.insert(m_queue_family_indices.present_family_index.value());
             }
 
-            std::vector<unsigned int> unique_queue_indices_vector(unique_family_indices.begin(), unique_family_indices.end());
+            std::vector<uint32_t> unique_queue_indices_vector(unique_family_indices.begin(), unique_family_indices.end());
 
             return unique_queue_indices_vector;
         }
@@ -324,13 +324,13 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Generating device queue create infos";
 
-            int protected_queue_family_index = (m_required_queues & Queue_Types::PROTECTED_QUEUE) ? m_queue_family_indices.protected_family_index.value() : -1;
-            std::vector<unsigned int> unique_queue_families = Get_Unique_Queue_Families(m_required_queues);
+            int32_t protected_queue_family_index = (m_required_queues & Queue_Types::PROTECTED_QUEUE) ? m_queue_family_indices.protected_family_index.value() : -1;
+            std::vector<uint32_t> unique_queue_families = Get_Unique_Queue_Families(m_required_queues);
 
             float queue_priority = 1.0;
             std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos;
 
-            for (unsigned int i = 0; i < unique_queue_families.size(); i++)
+            for (uint32_t i = 0; i < unique_queue_families.size(); i++)
             {
                 device_queue_create_infos.resize(device_queue_create_infos.size() + 1);
 

@@ -16,8 +16,8 @@ namespace Cascade_Core
         struct Application_Info
         {
             std::string title;
-            unsigned int major_version;
-            unsigned int minor_version;
+            uint32_t major_version;
+            uint32_t minor_version;
         };
 
     private:
@@ -33,10 +33,10 @@ namespace Cascade_Core
         ~Application();
 
     public:
-        std::shared_ptr<Window> Create_Window(std::string window_title, unsigned int width, unsigned int height);
+        std::shared_ptr<Window> Create_Window(std::string window_title, uint32_t width, uint32_t height);
 
         void Wait_For_Windows_To_Exit();
-        void Run_Program_Loop(std::function<void(Application*)> function_to_run, unsigned int repetitions_per_second);
+        void Run_Program_Loop(std::function<void(Application*)> function_to_run, uint32_t repetitions_per_second);
 
         std::chrono::milliseconds Get_Elapsed_Time();
     };

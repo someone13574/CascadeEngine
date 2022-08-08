@@ -40,7 +40,7 @@ namespace Cascade_Logging
         Logger();
         ~Logger();
 
-        static Log_Stream Log(std::string file, unsigned int line, Severity_Level severity)
+        static Log_Stream Log(std::string file, uint32_t line, Severity_Level severity)
         {
             static Logger m_handler;
             return Log_Stream(m_handler, file, line, severity);

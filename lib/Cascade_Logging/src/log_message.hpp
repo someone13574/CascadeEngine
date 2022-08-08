@@ -19,7 +19,7 @@ namespace Cascade_Logging
     {
         std::string message;
         std::string file;
-        unsigned int line;
+        uint32_t line;
         Severity_Level severity;
         std::chrono::time_point<std::chrono::system_clock> time;
     };

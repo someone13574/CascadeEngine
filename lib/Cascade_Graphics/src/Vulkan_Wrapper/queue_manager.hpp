@@ -28,34 +28,34 @@ namespace Cascade_Graphics
 
             struct Queue_Family_Indices
             {
-                unsigned int required_queues;
+                uint32_t required_queues;
 
-                std::optional<unsigned int> graphics_family_index;
-                std::optional<unsigned int> compute_family_index;
-                std::optional<unsigned int> transfer_family_index;
-                std::optional<unsigned int> sparse_binding_family_index;
-                std::optional<unsigned int> protected_family_index;
-                std::optional<unsigned int> present_family_index;
+                std::optional<uint32_t> graphics_family_index;
+                std::optional<uint32_t> compute_family_index;
+                std::optional<uint32_t> transfer_family_index;
+                std::optional<uint32_t> sparse_binding_family_index;
+                std::optional<uint32_t> protected_family_index;
+                std::optional<uint32_t> present_family_index;
             };
 
         private:
             std::shared_ptr<Surface> m_surface_ptr;
 
-            unsigned int m_required_queues;
-            std::map<unsigned int, VkQueue> m_queues;
+            uint32_t m_required_queues;
+            std::map<uint32_t, VkQueue> m_queues;
             Queue_Family_Indices m_queue_family_indices;
 
         public:
-            Queue_Manager(std::shared_ptr<Surface> surface_ptr, unsigned int required_queues);
+            Queue_Manager(std::shared_ptr<Surface> surface_ptr, uint32_t required_queues);
 
         public:
-            unsigned int Get_Required_Queue_Types();
+            uint32_t Get_Required_Queue_Types();
             VkQueue* Get_Queue(Queue_Types queue_type);
             void Get_Device_Queue_Handles(VkDevice* device_ptr);
-            unsigned int Get_Queue_Family_Index(Queue_Types queue_type);
+            uint32_t Get_Queue_Family_Index(Queue_Types queue_type);
             void Get_Queue_Families(VkPhysicalDevice* physical_device_ptr);
             bool Has_Required_Queues(VkPhysicalDevice* physical_device_ptr);
-            std::vector<unsigned int> Get_Unique_Queue_Families(unsigned int required_queues);
+            std::vector<uint32_t> Get_Unique_Queue_Families(uint32_t required_queues);
             std::vector<VkDeviceQueueCreateInfo> Generate_Device_Queue_Create_Infos();
         };
     } // namespace Vulkan

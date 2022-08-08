@@ -29,7 +29,7 @@ namespace Cascade_Graphics
             bool Is_Device_Suitable(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features);
             bool Check_Device_Extension_Support(VkPhysicalDevice physical_device);
 
-            unsigned int Rate_Device(VkPhysicalDeviceProperties physical_device_properties);
+            uint32_t Rate_Device(VkPhysicalDeviceProperties physical_device_properties);
 
         public:
             Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr, std::set<const char*> required_extensions);

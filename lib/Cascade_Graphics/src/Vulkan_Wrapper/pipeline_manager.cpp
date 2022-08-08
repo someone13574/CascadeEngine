@@ -18,7 +18,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Destroying pipelines";
 
-            for (unsigned int i = 0; i < m_pipelines.size(); i++)
+            for (uint32_t i = 0; i < m_pipelines.size(); i++)
             {
                 vkDestroyPipeline(*m_logical_device_ptr->Get_Device(), m_pipelines[i].pipeline, nullptr);
                 vkDestroyPipelineLayout(*m_logical_device_ptr->Get_Device(), m_pipelines[i].pipeline_layout, nullptr);
@@ -27,9 +27,9 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan: Finished destroying pipelines";
         }
 
-        unsigned int Pipeline_Manager::Get_Pipeline_Index(std::string label)
+        uint32_t Pipeline_Manager::Get_Pipeline_Index(std::string label)
         {
-            for (unsigned int i = 0; i < m_pipelines.size(); i++)
+            for (uint32_t i = 0; i < m_pipelines.size(); i++)
             {
                 if (m_pipelines[i].label == label)
                 {
@@ -45,7 +45,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Creating compute pipeline with label " << label;
 
-            for (unsigned int i = 0; i < m_pipelines.size(); i++)
+            for (uint32_t i = 0; i < m_pipelines.size(); i++)
             {
                 if (m_pipelines[i].label == label)
                 {

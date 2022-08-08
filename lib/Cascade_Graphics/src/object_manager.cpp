@@ -43,27 +43,27 @@ namespace Cascade_Graphics
         }
     }
 
-    void Object_Manager::Create_Object_From_Volume_Function_Thread(unsigned int start_voxel_index,
-                                                                   unsigned int max_depth,
-                                                                   unsigned int thread_depth,
+    void Object_Manager::Create_Object_From_Volume_Function_Thread(uint32_t start_voxel_index,
+                                                                   uint32_t max_depth,
+                                                                   uint32_t thread_depth,
                                                                    std::function<double(Vector_3<double>)> volume_sample_function,
                                                                    std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function,
                                                                    std::vector<Voxel>* voxels_ptr,
                                                                    std::mutex* voxels_mutex,
                                                                    std::vector<double> step_size_lookup_table)
     {
-        static const unsigned int link_order_lookup[8][8]
+        static const uint32_t link_order_lookup[8][8]
             = {{0, 1, 4, 2, 5, 3, 6, 7}, {1, 5, 0, 3, 4, 7, 2, 6}, {2, 3, 6, 7, 0, 1, 4, 5}, {3, 7, 2, 6, 1, 5, 0, 4}, {4, 0, 5, 6, 1, 2, 7, 3}, {5, 4, 1, 7, 0, 6, 3, 2}, {6, 2, 7, 3, 4, 0, 5, 1}, {7, 6, 3, 2, 5, 4, 1, 0}};
 
-        static const unsigned int inverse_link_order_lookup[8][8]
+        static const uint32_t inverse_link_order_lookup[8][8]
             = {{0, 1, 3, 5, 2, 4, 6, 7}, {2, 0, 6, 3, 4, 1, 7, 5}, {4, 5, 0, 1, 6, 7, 2, 3}, {6, 4, 2, 0, 7, 5, 3, 1}, {1, 4, 5, 7, 0, 2, 3, 6}, {4, 2, 7, 6, 1, 0, 5, 3}, {5, 7, 1, 3, 4, 6, 0, 2}, {7, 6, 3, 2, 5, 4, 1, 0}};
 
-        std::stack<unsigned int> voxel_stack;
+        std::stack<uint32_t> voxel_stack;
         voxel_stack.push(start_voxel_index);
 
         while (!voxel_stack.empty())
         {
-            unsigned int current_voxel_index = voxel_stack.top();
+            uint32_t current_voxel_index = voxel_stack.top();
             Voxel current_voxel;
 
             voxels_mutex->lock();
@@ -72,7 +72,7 @@ namespace Cascade_Graphics
 
             if (current_voxel.depth != max_depth)
             {
-                for (unsigned int i = 0; i < 8; i++)
+                for (uint32_t i = 0; i < 8; i++)
                 {
                     Voxel child_voxel = {};
                     child_voxel.size = current_voxel.size * 0.5;
@@ -132,11 +132,11 @@ namespace Cascade_Graphics
                     }
                 }
 
-                for (unsigned int direction_index = 0; direction_index < 8; direction_index++)
+                for (uint32_t direction_index = 0; direction_index < 8; direction_index++)
                 {
-                    for (unsigned int link_index = 0; link_index < 8; link_index++)
+                    for (uint32_t link_index = 0; link_index < 8; link_index++)
                     {
-                        unsigned int link = current_voxel.child_indices[link_order_lookup[direction_index][link_index]];
+                        uint32_t link = current_voxel.child_indices[link_order_lookup[direction_index][link_index]];
 
                         if (link != -1)
                         {
@@ -158,15 +158,15 @@ namespace Cascade_Graphics
 
             if (current_voxel.depth != max_depth)
             {
-                for (unsigned int i = 0; i < 8; i++)
+                for (uint32_t i = 0; i < 8; i++)
                 {
                     if (current_voxel.child_indices[i] != -1)
                     {
-                        for (unsigned int direction_index = 0; direction_index < 8; direction_index++)
+                        for (uint32_t direction_index = 0; direction_index < 8; direction_index++)
                         {
-                            for (unsigned int link_index = inverse_link_order_lookup[direction_index][i] + 1; link_index < 8; link_index++)
+                            for (uint32_t link_index = inverse_link_order_lookup[direction_index][i] + 1; link_index < 8; link_index++)
                             {
-                                unsigned int link = current_voxel.child_indices[link_order_lookup[direction_index][link_index]];
+                                uint32_t link = current_voxel.child_indices[link_order_lookup[direction_index][link_index]];
 
                                 if (link != -1)
                                 {
@@ -198,7 +198,7 @@ namespace Cascade_Graphics
 
             while (!threads.empty())
             {
-                for (unsigned int i = 0; i < threads.size(); i++)
+                for (uint32_t i = 0; i < threads.size(); i++)
                 {
                     if (threads[i].joinable())
                     {
@@ -212,7 +212,7 @@ namespace Cascade_Graphics
     }
 
     void Object_Manager::Create_Object_From_Volume_Function(std::string label,
-                                                            unsigned int max_depth,
+                                                            uint32_t max_depth,
                                                             Vector_3<double> sample_region_center,
                                                             double sample_region_size,
                                                             std::function<double(Vector_3<double>)> volume_sample_function,
@@ -222,13 +222,13 @@ namespace Cascade_Graphics
 
         LOG_INFO << "Graphics: Creating object with label '" << label << "'";
 
-        static const unsigned int link_order_lookup[8][8]
+        static const uint32_t link_order_lookup[8][8]
             = {{0, 1, 4, 2, 5, 3, 6, 7}, {1, 5, 0, 3, 4, 7, 2, 6}, {2, 3, 6, 7, 0, 1, 4, 5}, {3, 7, 2, 6, 1, 5, 0, 4}, {4, 0, 5, 6, 1, 2, 7, 3}, {5, 4, 1, 7, 0, 6, 3, 2}, {6, 2, 7, 3, 4, 0, 5, 1}, {7, 6, 3, 2, 5, 4, 1, 0}};
 
-        static const unsigned int inverse_link_order_lookup[8][8]
+        static const uint32_t inverse_link_order_lookup[8][8]
             = {{0, 1, 3, 5, 2, 4, 6, 7}, {2, 0, 6, 3, 4, 1, 7, 5}, {4, 5, 0, 1, 6, 7, 2, 3}, {6, 4, 2, 0, 7, 5, 3, 1}, {1, 4, 5, 7, 0, 2, 3, 6}, {4, 2, 7, 6, 1, 0, 5, 3}, {5, 7, 1, 3, 4, 6, 0, 2}, {7, 6, 3, 2, 5, 4, 1, 0}};
 
-        for (unsigned int i = 0; i < m_objects.size(); i++)
+        for (uint32_t i = 0; i < m_objects.size(); i++)
         {
             if (m_objects[i].label == label)
             {
@@ -277,12 +277,12 @@ namespace Cascade_Graphics
         m_objects.back().voxels.push_back(root_voxel);
 
         std::vector<double> step_size_lookup_table;
-        for (unsigned int i = 0; i <= max_depth; i++)
+        for (uint32_t i = 0; i <= max_depth; i++)
         {
             step_size_lookup_table.push_back((1.0 / (std::pow(2, (max_depth - i)))) * (root_voxel.size / std::pow(2, i)) * 2.0);
         }
 
-        std::stack<unsigned int> voxel_stack;
+        std::stack<uint32_t> voxel_stack;
         voxel_stack.push(0);
 
         std::mutex voxels_mutex;
@@ -297,9 +297,9 @@ namespace Cascade_Graphics
     {
         std::vector<GPU_Voxel> gpu_voxels;
 
-        for (unsigned int i = 0; i < m_objects.size(); i++)
+        for (uint32_t i = 0; i < m_objects.size(); i++)
         {
-            for (unsigned int j = 0; j < m_objects[i].voxels.size(); j++)
+            for (uint32_t j = 0; j < m_objects[i].voxels.size(); j++)
             {
                 Voxel* current_voxel = &m_objects[i].voxels[j];
 

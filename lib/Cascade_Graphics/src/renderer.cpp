@@ -47,8 +47,8 @@ namespace Cascade_Graphics
 
     void Renderer::Initialize_Vulkan()
     {
-        unsigned int width = *m_window_information.width_ptr;
-        unsigned int height = *m_window_information.height_ptr;
+        uint32_t width = *m_window_information.width_ptr;
+        uint32_t height = *m_window_information.height_ptr;
 
         std::set<const char*> required_instance_extensions = {VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
         std::set<const char*> required_device_extensions = {VK_EXT_MEMORY_BUDGET_EXTENSION_NAME};
@@ -68,12 +68,12 @@ namespace Cascade_Graphics
                                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
         m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
-        m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(unsigned int) * 4, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan::Queue_Manager::COMPUTE_QUEUE);
+        m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan::Queue_Manager::COMPUTE_QUEUE);
         m_storage_manager_ptr->Create_Buffer("staging_buffer", 0, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan::Queue_Manager::TRANSFER_QUEUE);
 
         std::vector<Vulkan::Storage_Manager::Image_Resource> swapchain_image_resources = m_swapchain_ptr->Get_Swapchain_Image_Resources();
-        for (unsigned int i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
+        for (uint32_t i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
         {
             m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]);
         }
@@ -106,11 +106,11 @@ namespace Cascade_Graphics
         m_synchronization_manager_ptr->Create_Fence("in_flight_fence");
     }
 
-    void Renderer::Record_Vulkan_Command_Buffers(unsigned int width, unsigned int height)
+    void Renderer::Record_Vulkan_Command_Buffers(uint32_t width, uint32_t height)
     {
         if (m_command_buffer_manager_ptr != nullptr)
         {
-            for (unsigned int i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
+            for (uint32_t i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
             {
                 m_command_buffer_manager_ptr->Add_Command_Buffer("render_frame", m_queue_manager_ptr->Get_Queue_Family_Index(Vulkan::Queue_Manager::Queue_Types::COMPUTE_QUEUE), {"per_frame_descriptors", "swapchain_images"}, "rendering_pipeline");
                 m_command_buffer_manager_ptr->Begin_Recording({"render_frame", i}, (VkCommandBufferUsageFlagBits)0);
@@ -146,8 +146,8 @@ namespace Cascade_Graphics
             m_swapchain_ptr.reset();
             m_synchronization_manager_ptr.reset();
 
-            unsigned int width = *m_window_information.width_ptr;
-            unsigned int height = *m_window_information.height_ptr;
+            uint32_t width = *m_window_information.width_ptr;
+            uint32_t height = *m_window_information.height_ptr;
             LOG_DEBUG << "Vulkan: New window size " << width << "x" << height;
 
             m_swapchain_ptr = std::make_shared<Vulkan::Swapchain>(m_logical_device_ptr, m_physical_device_ptr, m_surface_ptr, m_queue_manager_ptr, width, height);
@@ -162,13 +162,13 @@ namespace Cascade_Graphics
                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
             m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan::Queue_Manager::COMPUTE_QUEUE | Vulkan::Queue_Manager::TRANSFER_QUEUE);
-            m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(unsigned int) * 4 * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4 * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                                  Vulkan::Queue_Manager::COMPUTE_QUEUE);
             m_storage_manager_ptr->Create_Buffer("staging_buffer", 0, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan::Queue_Manager::TRANSFER_QUEUE);
 
             std::vector<Vulkan::Storage_Manager::Image_Resource> swapchain_image_resources = m_swapchain_ptr->Get_Swapchain_Image_Resources();
-            for (unsigned int i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
+            for (uint32_t i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
             {
                 m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]);
             }
@@ -218,7 +218,7 @@ namespace Cascade_Graphics
             if (m_storage_manager_ptr->Get_Buffer_Resource({"voxel_buffer", 0, Vulkan::Resource_ID::BUFFER_RESOURCE})->buffer_size < sizeof(Object_Manager::GPU_Voxel) * gpu_voxels.size())
             {
                 m_storage_manager_ptr->Resize_Buffer({"voxel_buffer", 0, Vulkan::Resource_ID::BUFFER_RESOURCE}, sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size());
-                m_storage_manager_ptr->Resize_Buffer({"hit_buffer", 0, Vulkan::Resource_ID::BUFFER_RESOURCE}, sizeof(unsigned int) * 4 * gpu_voxels.size());
+                m_storage_manager_ptr->Resize_Buffer({"hit_buffer", 0, Vulkan::Resource_ID::BUFFER_RESOURCE}, sizeof(uint32_t) * 4 * gpu_voxels.size());
 
                 m_command_buffer_manager_ptr.reset();
                 m_pipeline_manager_ptr.reset();

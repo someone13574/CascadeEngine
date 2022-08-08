@@ -16,11 +16,11 @@ namespace Cascade_Graphics
             std::set<const char*> m_required_instance_extensions;
 
         private:
-            unsigned int Get_Supported_Extension_Count();
+            uint32_t Get_Supported_Extension_Count();
             bool Is_Vulkan_Supported();
 
         public:
-            Instance(const char* application_name, unsigned int application_version, std::set<const char*> required_instance_extensions);
+            Instance(const char* application_name, uint32_t application_version, std::set<const char*> required_instance_extensions);
             ~Instance();
 
         public:

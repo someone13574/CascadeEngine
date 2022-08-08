@@ -46,7 +46,7 @@ namespace Cascade_Graphics
 
     private:
 #ifdef CSD_USE_VULKAN
-        unsigned int which_hit_buffer = 0;
+        uint32_t which_hit_buffer = 0;
 
         std::shared_ptr<Vulkan::Instance> m_instance_ptr;
         std::shared_ptr<Vulkan::Surface> m_surface_ptr;
@@ -65,7 +65,7 @@ namespace Cascade_Graphics
     private:
 #ifdef CSD_USE_VULKAN
         void Initialize_Vulkan();
-        void Record_Vulkan_Command_Buffers(unsigned int width, unsigned int height);
+        void Record_Vulkan_Command_Buffers(uint32_t width, uint32_t height);
         void Recreate_Swapchain();
 #endif
     public:

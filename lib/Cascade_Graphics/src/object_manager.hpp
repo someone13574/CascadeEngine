@@ -19,8 +19,8 @@ namespace Cascade_Graphics
             float position_z;
             float size;
 
-            unsigned int hit_links[8];
-            unsigned int miss_links[8];
+            uint32_t hit_links[8];
+            uint32_t miss_links[8];
 
             float normal_x;
             float normal_y;
@@ -30,8 +30,8 @@ namespace Cascade_Graphics
             float color_g;
             float color_b;
 
-            unsigned int padding_a;
-            unsigned int padding_b;
+            uint32_t padding_a;
+            uint32_t padding_b;
         };
 
     private:
@@ -42,13 +42,13 @@ namespace Cascade_Graphics
             Vector_3<double> normal;
             Vector_3<double> color;
 
-            unsigned int parent_index;
-            unsigned int child_indices[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-            unsigned int child_index;
-            unsigned int hit_links[8];
-            unsigned int miss_links[8];
+            uint32_t parent_index;
+            uint32_t child_indices[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+            uint32_t child_index;
+            uint32_t hit_links[8];
+            uint32_t miss_links[8];
 
-            unsigned int depth;
+            uint32_t depth;
             bool is_leaf;
         };
 
@@ -63,9 +63,9 @@ namespace Cascade_Graphics
 
     private:
         static void Voxel_Sample_Volume_Function(Voxel voxel, double step_size, std::function<double(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting);
-        static void Create_Object_From_Volume_Function_Thread(unsigned int start_voxel_index,
-                                                              unsigned int max_depth,
-                                                              unsigned int thread_depth,
+        static void Create_Object_From_Volume_Function_Thread(uint32_t start_voxel_index,
+                                                              uint32_t max_depth,
+                                                              uint32_t thread_depth,
                                                               std::function<double(Vector_3<double>)> volume_sample_function,
                                                               std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function,
                                                               std::vector<Voxel>* voxels_ptr,
@@ -77,7 +77,7 @@ namespace Cascade_Graphics
 
     public:
         void Create_Object_From_Volume_Function(std::string label,
-                                                unsigned int max_depth,
+                                                uint32_t max_depth,
                                                 Vector_3<double> sample_region_center,
                                                 double sample_region_size,
                                                 std::function<double(Vector_3<double>)> volume_sample_function,

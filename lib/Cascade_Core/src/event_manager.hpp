@@ -22,8 +22,8 @@ namespace Cascade_Core
 
         struct Mouse_State
         {
-            int x_position;
-            int y_position;
+            int32_t x_position;
+            int32_t y_position;
 
             bool left_down;
             bool middle_down;
@@ -34,8 +34,8 @@ namespace Cascade_Core
         {
             Event_Type event_type;
 
-            int x_position;
-            int y_position;
+            int32_t x_position;
+            int32_t y_position;
 
             enum Button
             {
@@ -49,8 +49,8 @@ namespace Cascade_Core
         {
             Event_Type event_type;
 
-            int x_position;
-            int y_position;
+            int32_t x_position;
+            int32_t y_position;
 
             enum Button
             {
@@ -64,14 +64,14 @@ namespace Cascade_Core
         {
             Event_Type event_type;
 
-            int x_position;
-            int y_position;
+            int32_t x_position;
+            int32_t y_position;
         };
 
     private:
         Mouse_State m_mouse_state;
 
-        unsigned int m_max_events;
+        uint32_t m_max_events;
         std::vector<std::pair<void*, std::chrono::time_point<std::chrono::system_clock>>> m_all_events;
         std::vector<std::pair<Button_Press_Event, std::chrono::time_point<std::chrono::system_clock>>> m_button_press_events;
         std::vector<std::pair<Button_Release_Event, std::chrono::time_point<std::chrono::system_clock>>> m_button_release_events;
@@ -81,7 +81,7 @@ namespace Cascade_Core
         Event_Type Get_Event_Type(void* event_data);
 
     public:
-        Event_Manager(unsigned int max_events);
+        Event_Manager(uint32_t max_events);
 
     public:
         void Add_Event(void* event_data);

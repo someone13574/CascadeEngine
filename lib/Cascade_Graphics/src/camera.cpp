@@ -51,7 +51,7 @@ namespace Cascade_Graphics
         return m_camera_to_world_matrix;
     }
 
-    Camera::GPU_Camera_Data Camera::Get_GPU_Camera_Data(unsigned int which_hit_buffer)
+    Camera::GPU_Camera_Data Camera::Get_GPU_Camera_Data(uint32_t which_hit_buffer)
     {
         GPU_Camera_Data camera_data = {};
         camera_data.matrix_x0 = static_cast<float>(m_camera_to_world_matrix.m_x0);

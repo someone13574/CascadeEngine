@@ -7,7 +7,7 @@
 const char* VkResult_To_Message(VkResult vkresult);
 
 #define VALIDATE_VKRESULT(vkresult, error_message)                                                                              \
-    if (vkresult != VK_SUCCESS && (unsigned int)vkresult != 0)                                                                  \
+    if (vkresult != VK_SUCCESS && (uint32_t)vkresult != 0)                                                                      \
     {                                                                                                                           \
         LOG_FATAL << error_message << " - failed with VkResult '" << VkResult_To_Message(vkresult) << "' (" << vkresult << ")"; \
         exit(EXIT_FAILURE);                                                                                                     \

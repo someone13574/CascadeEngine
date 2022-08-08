@@ -18,7 +18,7 @@ namespace Cascade_Graphics
 
             m_required_extensions.insert(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
-            unsigned int device_count = 0;
+            uint32_t device_count = 0;
             vkEnumeratePhysicalDevices(*instance_ptr->Get_Instance(), &device_count, nullptr);
             LOG_DEBUG << "Vulkan: " << device_count << " physical device(s) found";
 
@@ -31,11 +31,11 @@ namespace Cascade_Graphics
             std::vector<VkPhysicalDevice> physical_devices(device_count);
             vkEnumeratePhysicalDevices(*instance_ptr->Get_Instance(), &device_count, physical_devices.data());
 
-            unsigned int best_device_rating = 0;
+            uint32_t best_device_rating = 0;
             VkPhysicalDevice best_rated_device = VK_NULL_HANDLE;
             VkPhysicalDeviceProperties best_rated_device_properties;
 
-            for (unsigned int i = 0; i < physical_devices.size(); i++)
+            for (uint32_t i = 0; i < physical_devices.size(); i++)
             {
                 VkPhysicalDeviceProperties physical_device_properties;
                 VkPhysicalDeviceFeatures physical_device_features;
@@ -44,7 +44,7 @@ namespace Cascade_Graphics
 
                 if (Is_Device_Suitable(physical_devices[i], physical_device_properties, physical_device_features))
                 {
-                    unsigned int device_rating = Rate_Device(physical_device_properties);
+                    uint32_t device_rating = Rate_Device(physical_device_properties);
 
                     if (device_rating > best_device_rating)
                     {
@@ -96,7 +96,7 @@ namespace Cascade_Graphics
                 return true;
             }
 
-            unsigned int extension_count;
+            uint32_t extension_count;
             vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, nullptr);
             LOG_DEBUG << "Vulkan: Found " << extension_count << " physical device extensions";
 
@@ -108,7 +108,7 @@ namespace Cascade_Graphics
             std::vector<VkExtensionProperties> available_extensions(extension_count);
             vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extension_count, available_extensions.data());
 
-            for (unsigned int i = 0; i < available_extensions.size(); i++)
+            for (uint32_t i = 0; i < available_extensions.size(); i++)
             {
                 LOG_TRACE << "Vulkan: Found physical device extension " << available_extensions[i].extensionName;
             }
@@ -117,7 +117,7 @@ namespace Cascade_Graphics
             for (const char* extension : m_required_extensions)
             {
                 bool extension_found = false;
-                for (unsigned int j = 0; j < available_extensions.size(); j++)
+                for (uint32_t j = 0; j < available_extensions.size(); j++)
                 {
                     extension_found |= strcmp(extension, available_extensions[j].extensionName) == 0;
                 }
@@ -141,9 +141,9 @@ namespace Cascade_Graphics
             return device_supports_extensions;
         }
 
-        unsigned int Physical_Device::Rate_Device(VkPhysicalDeviceProperties physical_device_properties)
+        uint32_t Physical_Device::Rate_Device(VkPhysicalDeviceProperties physical_device_properties)
         {
-            unsigned int rating = 0;
+            uint32_t rating = 0;
 
             if (physical_device_properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
             {

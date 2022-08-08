@@ -10,7 +10,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Instance::Instance(const char* application_name, unsigned int application_version, std::set<const char*> required_instance_extensions) : m_required_instance_extensions(required_instance_extensions)
+        Instance::Instance(const char* application_name, uint32_t application_version, std::set<const char*> required_instance_extensions) : m_required_instance_extensions(required_instance_extensions)
         {
             LOG_INFO << "Vulkan: Creating instance";
 
@@ -81,9 +81,9 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan: Finished destroying instance";
         }
 
-        unsigned int Instance::Get_Supported_Extension_Count()
+        uint32_t Instance::Get_Supported_Extension_Count()
         {
-            unsigned int extension_count = 0;
+            uint32_t extension_count = 0;
             vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
 
             LOG_DEBUG << "Vulkan: This device supports " << extension_count << " extensions";
@@ -97,11 +97,11 @@ namespace Cascade_Graphics
 
             std::vector<bool> extensions_satisfied(m_required_instance_extensions.size());
 
-            unsigned int extension_count = Get_Supported_Extension_Count();
+            uint32_t extension_count = Get_Supported_Extension_Count();
             std::vector<VkExtensionProperties> supported_extensions(extension_count);
             vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, supported_extensions.data());
 
-            for (unsigned int i = 0; i < supported_extensions.size(); i++)
+            for (uint32_t i = 0; i < supported_extensions.size(); i++)
             {
                 LOG_TRACE << "Vulkan: Extension supported " << supported_extensions[i].extensionName;
             }
@@ -110,7 +110,7 @@ namespace Cascade_Graphics
             for (const char* extension : m_required_instance_extensions)
             {
                 bool found_extension = false;
-                for (unsigned int j = 0; j < supported_extensions.size(); j++)
+                for (uint32_t j = 0; j < supported_extensions.size(); j++)
                 {
                     found_extension |= strcmp(extension, supported_extensions[j].extensionName) == 0;
                 }

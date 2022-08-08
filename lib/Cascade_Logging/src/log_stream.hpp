@@ -14,12 +14,12 @@ namespace Cascade_Logging
     private:
         Logger& m_logger;
         std::string m_occurence_file;
-        unsigned int m_occurence_line;
+        uint32_t m_occurence_line;
         Severity_Level m_message_severity;
         std::chrono::time_point<std::chrono::system_clock> m_occurence_time;
 
     public:
-        Log_Stream(Logger& logger, std::string file, unsigned int line, Severity_Level severity);
+        Log_Stream(Logger& logger, std::string file, uint32_t line, Severity_Level severity);
         ~Log_Stream();
     };
 } // namespace Cascade_Logging

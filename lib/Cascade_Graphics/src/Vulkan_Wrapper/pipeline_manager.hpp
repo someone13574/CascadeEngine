@@ -44,7 +44,7 @@ namespace Cascade_Graphics
             std::vector<Pipeline> m_pipelines;
 
         private:
-            unsigned int Get_Pipeline_Index(std::string label);
+            uint32_t Get_Pipeline_Index(std::string label);
 
         public:
             Pipeline_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr, std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr, std::shared_ptr<Shader_Manager> shader_manager_ptr);

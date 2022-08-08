@@ -9,12 +9,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Swapchain::Swapchain(std::shared_ptr<Device> logical_device_ptr,
-                             std::shared_ptr<Physical_Device> physical_device_ptr,
-                             std::shared_ptr<Surface> surface_ptr,
-                             std::shared_ptr<Queue_Manager> queue_manager_ptr,
-                             unsigned int width,
-                             unsigned int height)
+        Swapchain::Swapchain(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Surface> surface_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, uint32_t width, uint32_t height)
             : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_surface_ptr(surface_ptr), m_queue_manager_ptr(queue_manager_ptr)
         {
             LOG_INFO << "Vulkan: Creating swapchain";
@@ -36,7 +31,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Destroying swapchain";
 
-            for (unsigned int i = 0; i < m_swapchain_image_count; i++)
+            for (uint32_t i = 0; i < m_swapchain_image_count; i++)
             {
                 vkDestroyImageView(*m_logical_device_ptr->Get_Device(), m_swapchain_image_views[i], nullptr);
             }
@@ -52,7 +47,7 @@ namespace Cascade_Graphics
 
             VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &m_surface_capabilities), "Vulkan: Failed to get physical device surface capabilities");
 
-            unsigned int surface_format_count;
+            uint32_t surface_format_count;
             VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &surface_format_count, nullptr), "Vulkan: Failed to get supported surface formats");
 
             LOG_TRACE << "Vulkan: Found " << surface_format_count << " surface formats";
@@ -64,7 +59,7 @@ namespace Cascade_Graphics
                 VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &surface_format_count, m_supported_surface_formats.data()),
                                   "Vulkan: Failed to get supported surface formats");
 
-                for (unsigned int i = 0; i < surface_format_count; i++)
+                for (uint32_t i = 0; i < surface_format_count; i++)
                 {
                     LOG_TRACE << "Vulkan: Found surface format " << m_supported_surface_formats[i].format;
                 }
@@ -75,7 +70,7 @@ namespace Cascade_Graphics
                 exit(EXIT_FAILURE);
             }
 
-            unsigned int present_mode_count;
+            uint32_t present_mode_count;
             VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &present_mode_count, nullptr), "Vulkan: Failed to get supported present modes");
             LOG_TRACE << "Vulkan: Found " << present_mode_count << " present modes";
 
@@ -85,7 +80,7 @@ namespace Cascade_Graphics
                 VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &present_mode_count, m_supported_present_modes.data()),
                                   "Vulkan: Failed to get supported present modes");
 
-                for (unsigned int i = 0; i < present_mode_count; i++)
+                for (uint32_t i = 0; i < present_mode_count; i++)
                 {
                     LOG_TRACE << "Vulkan: Found present mode " << m_supported_present_modes[i];
                 }
@@ -100,7 +95,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Vulkan: Selecting surface format";
 
-            for (unsigned int i = 0; i < m_supported_surface_formats.size(); i++)
+            for (uint32_t i = 0; i < m_supported_surface_formats.size(); i++)
             {
                 if (m_supported_surface_formats[i].format == VK_FORMAT_B8G8R8_SRGB && m_supported_surface_formats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
                 {
@@ -123,7 +118,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Vulkan: Selecting present mode";
 
-            for (unsigned int i = 0; i < m_supported_present_modes.size(); i++)
+            for (uint32_t i = 0; i < m_supported_present_modes.size(); i++)
             {
                 if (m_supported_present_modes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
                 {
@@ -140,7 +135,7 @@ namespace Cascade_Graphics
             LOG_DEBUG << "Vulkan: Selected present mode " << m_present_mode;
         }
 
-        void Swapchain::Select_Swapchain_Extent(unsigned int width, unsigned int height)
+        void Swapchain::Select_Swapchain_Extent(uint32_t width, uint32_t height)
         {
             LOG_TRACE << "Vulkan: Selecting swapchain extent";
 
@@ -170,7 +165,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan: Creating swapchain";
 
-            std::vector<unsigned int> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(Queue_Manager::Queue_Types::TRANSFER_QUEUE | Queue_Manager::Queue_Types::PRESENT_QUEUE);
+            std::vector<uint32_t> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(Queue_Manager::Queue_Types::TRANSFER_QUEUE | Queue_Manager::Queue_Types::PRESENT_QUEUE);
 
             VkSwapchainCreateInfoKHR swapchain_create_info = {};
             swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -210,7 +205,7 @@ namespace Cascade_Graphics
 
             m_swapchain_image_views.resize(m_swapchain_image_count);
 
-            for (unsigned int i = 0; i < m_swapchain_image_count; i++)
+            for (uint32_t i = 0; i < m_swapchain_image_count; i++)
             {
                 VkImageViewCreateInfo swapchain_image_view_create_info = {};
                 swapchain_image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -240,7 +235,7 @@ namespace Cascade_Graphics
             std::vector<VkSurfaceFormatKHR> surface_formats;
             std::vector<VkPresentModeKHR> present_modes;
 
-            unsigned int surface_format_count;
+            uint32_t surface_format_count;
             VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &surface_format_count, nullptr), "Vulkan: Failed to get supported surface formats");
             LOG_TRACE << "Vulkan: Physical device has " << surface_format_count << " surface formats";
 
@@ -249,13 +244,13 @@ namespace Cascade_Graphics
                 surface_formats.resize(surface_format_count);
                 VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &surface_format_count, surface_formats.data()), "Vulkan: Failed to get supported surface formats");
 
-                for (unsigned int i = 0; i < surface_format_count; i++)
+                for (uint32_t i = 0; i < surface_format_count; i++)
                 {
                     LOG_TRACE << "Vulkan: Surface format supported: " << surface_formats[i].format;
                 }
             }
 
-            unsigned int present_mode_count;
+            uint32_t present_mode_count;
             VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &present_mode_count, nullptr), "Vulkan: Failed to get supported present modes");
             LOG_TRACE << "Vulkan: Physical device has " << present_mode_count << " present modes";
 
@@ -264,7 +259,7 @@ namespace Cascade_Graphics
                 present_modes.resize(present_mode_count);
                 VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &present_mode_count, present_modes.data()), "Vulkan: Failed to get supported present modes");
 
-                for (unsigned int i = 0; i < present_mode_count; i++)
+                for (uint32_t i = 0; i < present_mode_count; i++)
                 {
                     LOG_TRACE << "Vulkan: Present mode supported: " << present_modes[i];
                 }
@@ -284,7 +279,7 @@ namespace Cascade_Graphics
 
             std::vector<Storage_Manager::Image_Resource> swapchain_image_resources(m_swapchain_image_count);
 
-            for (unsigned int i = 0; i < m_swapchain_image_count; i++)
+            for (uint32_t i = 0; i < m_swapchain_image_count; i++)
             {
                 swapchain_image_resources[i] = {};
                 swapchain_image_resources[i].resource_id = {"swapchain", i, Resource_ID::IMAGE_RESOURCE};
@@ -308,12 +303,12 @@ namespace Cascade_Graphics
             return &m_swapchain;
         }
 
-        VkImage* Swapchain::Get_Swapchain_Image(unsigned int index)
+        VkImage* Swapchain::Get_Swapchain_Image(uint32_t index)
         {
             return &m_swapchain_images[index];
         }
 
-        unsigned int Swapchain::Get_Swapchain_Image_Count()
+        uint32_t Swapchain::Get_Swapchain_Image_Count()
         {
             return m_swapchain_image_count;
         }

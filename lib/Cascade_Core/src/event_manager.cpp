@@ -4,7 +4,7 @@
 
 namespace Cascade_Core
 {
-    Event_Manager::Event_Manager(unsigned int max_events) : m_max_events(max_events)
+    Event_Manager::Event_Manager(uint32_t max_events) : m_max_events(max_events)
     {
         LOG_INFO << "Core: Created event manager";
 

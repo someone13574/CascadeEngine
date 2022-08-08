@@ -17,7 +17,7 @@ namespace Cascade_Graphics
             struct Identifier
             {
                 std::string label;
-                unsigned int index;
+                uint32_t index;
 
                 bool operator==(Identifier other_identifier)
                 {
@@ -47,8 +47,8 @@ namespace Cascade_Graphics
             std::vector<Fence> m_fences;
 
         private:
-            unsigned int Get_Next_Semaphore_Index(std::string label);
-            unsigned int Get_Next_Fence_Index(std::string label);
+            uint32_t Get_Next_Semaphore_Index(std::string label);
+            uint32_t Get_Next_Fence_Index(std::string label);
 
         public:
             Synchronization_Manager(std::shared_ptr<Device> logical_device_ptr);

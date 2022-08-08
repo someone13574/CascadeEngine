@@ -9,7 +9,7 @@ namespace Cascade_Graphics
         struct Resource_ID
         {
             std::string label;
-            unsigned int index;
+            uint32_t index;
 
             enum Resource_Type
             {

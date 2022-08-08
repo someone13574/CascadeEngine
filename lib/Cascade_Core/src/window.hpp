@@ -35,8 +35,8 @@ namespace Cascade_Core
 
     private:
         std::string m_window_title;
-        unsigned int m_width;
-        unsigned int m_height;
+        uint32_t m_width;
+        uint32_t m_height;
 
         std::shared_ptr<Event_Manager> m_event_manager_ptr;
         std::shared_ptr<Cascade_Graphics::Renderer> m_renderer_ptr;
@@ -74,7 +74,7 @@ namespace Cascade_Core
         static void Render_Loop(Window* window_ptr);
 
     public:
-        Window(std::string window_title, unsigned int width, unsigned int height);
+        Window(std::string window_title, uint32_t width, uint32_t height);
 
     public:
         void Close_Window();
@@ -82,9 +82,9 @@ namespace Cascade_Core
         bool Is_Window_Closed();
         bool Is_Requesting_Close();
 
-        void Update_Size(unsigned int width, unsigned int height);
+        void Update_Size(uint32_t width, uint32_t height);
 
-        std::pair<unsigned int, unsigned int> Get_Window_Dimensions();
+        std::pair<uint32_t, uint32_t> Get_Window_Dimensions();
         Initialization_Stage Get_Initialization_Stage();
         std::shared_ptr<Event_Manager> Get_Event_Manager();
         std::shared_ptr<Cascade_Graphics::Renderer> Get_Renderer();

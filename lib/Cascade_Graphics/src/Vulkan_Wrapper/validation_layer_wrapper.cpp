@@ -163,22 +163,22 @@ namespace Cascade_Graphics_Debugging
         {
             LOG_INFO << "Vulkan: Checking validation layer support";
 
-            unsigned int layer_count;
+            uint32_t layer_count;
             vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
 
             std::vector<VkLayerProperties> supported_layers(layer_count);
             vkEnumerateInstanceLayerProperties(&layer_count, supported_layers.data());
 
-            for (unsigned int i = 0; i < supported_layers.size(); i++)
+            for (uint32_t i = 0; i < supported_layers.size(); i++)
             {
                 LOG_TRACE << "Vulkan: Validation layer supported " << supported_layers[i].layerName;
             }
 
             bool requested_layers_satisfied = true;
-            for (unsigned int i = 0; i < layers_to_check.size(); i++)
+            for (uint32_t i = 0; i < layers_to_check.size(); i++)
             {
                 bool layer_found = false;
-                for (unsigned int j = 0; j < supported_layers.size(); j++)
+                for (uint32_t j = 0; j < supported_layers.size(); j++)
                 {
                     layer_found |= strcmp(layers_to_check[i], supported_layers[j].layerName) == 0;
                 }

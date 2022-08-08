@@ -18,7 +18,7 @@ namespace Cascade_Core
     {
         LOG_INFO << "Core: Cleaning up application '" << m_application_info.title << "' v" << m_application_info.major_version << "." << m_application_info.minor_version;
 
-        for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+        for (uint32_t i = 0; i < m_window_ptrs.size(); i++)
         {
             if (!m_window_ptrs[i]->Is_Window_Closed())
             {
@@ -34,7 +34,7 @@ namespace Cascade_Core
         while (true)
         {
             bool all_windows_initialized = true;
-            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            for (uint32_t i = 0; i < m_window_ptrs.size(); i++)
             {
                 if (m_window_ptrs[i]->Get_Initialization_Stage() != Window::Initialization_Stage::RENDERER_CREATED)
                 {
@@ -51,7 +51,7 @@ namespace Cascade_Core
         }
     }
 
-    std::shared_ptr<Window> Application::Create_Window(std::string window_title, unsigned int width, unsigned int height)
+    std::shared_ptr<Window> Application::Create_Window(std::string window_title, uint32_t width, uint32_t height)
     {
         m_window_ptrs.push_back(std::make_shared<Window>(window_title, width, height));
 
@@ -66,7 +66,7 @@ namespace Cascade_Core
 
         while (true)
         {
-            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            for (uint32_t i = 0; i < m_window_ptrs.size(); i++)
             {
                 if (m_window_ptrs[i]->Is_Requesting_Close())
                 {
@@ -75,7 +75,7 @@ namespace Cascade_Core
             }
 
             bool all_windows_exited = true;
-            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            for (uint32_t i = 0; i < m_window_ptrs.size(); i++)
             {
                 if (!m_window_ptrs[i]->Is_Window_Closed())
                 {
@@ -93,7 +93,7 @@ namespace Cascade_Core
         }
     }
 
-    void Application::Run_Program_Loop(std::function<void(Application*)> function_to_run, unsigned int repetitions_per_second)
+    void Application::Run_Program_Loop(std::function<void(Application*)> function_to_run, uint32_t repetitions_per_second)
     {
         Wait_For_Window_Initialization();
 
@@ -104,7 +104,7 @@ namespace Cascade_Core
         {
             iteration_start = std::chrono::high_resolution_clock::now();
 
-            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            for (uint32_t i = 0; i < m_window_ptrs.size(); i++)
             {
                 if (m_window_ptrs[i]->Is_Requesting_Close())
                 {
@@ -113,7 +113,7 @@ namespace Cascade_Core
             }
 
             bool all_windows_exited = true;
-            for (unsigned int i = 0; i < m_window_ptrs.size(); i++)
+            for (uint32_t i = 0; i < m_window_ptrs.size(); i++)
             {
                 if (!m_window_ptrs[i]->Is_Window_Closed())
                 {

@@ -31,12 +31,12 @@ namespace Cascade_Graphics
                 VkDescriptorType descriptor_type;
                 VkBufferUsageFlags buffer_usage;
                 VkMemoryPropertyFlags memory_property_flags;
-                unsigned int resource_queue_mask;
+                uint32_t resource_queue_mask;
 
                 VkBuffer buffer;
                 VkDeviceMemory device_memory;
                 VkMemoryRequirements memory_requirements;
-                unsigned int memory_type_index;
+                uint32_t memory_type_index;
             };
 
             struct Image_Resource
@@ -48,13 +48,13 @@ namespace Cascade_Graphics
                 VkImageUsageFlags image_usage;
                 VkDescriptorType descriptor_type;
                 VkExtent2D image_size;
-                unsigned int resource_queue_mask;
+                uint32_t resource_queue_mask;
 
                 VkImage image;
                 VkImageView image_view;
                 VkDeviceMemory device_memory;
                 VkMemoryRequirements memory_requirements;
-                unsigned int memory_type_index;
+                uint32_t memory_type_index;
             };
 
             struct Resource_Grouping
@@ -62,8 +62,8 @@ namespace Cascade_Graphics
                 std::string label;
 
                 bool has_descriptor_set;
-                unsigned int buffer_resource_count;
-                unsigned int image_resource_count;
+                uint32_t buffer_resource_count;
+                uint32_t image_resource_count;
                 std::vector<Resource_ID> resource_ids;
             };
 
@@ -77,8 +77,8 @@ namespace Cascade_Graphics
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
 
         private:
-            unsigned int Get_Buffer_Index(Resource_ID resource_id);
-            unsigned int Get_Image_Index(Resource_ID resource_id);
+            uint32_t Get_Buffer_Index(Resource_ID resource_id);
+            uint32_t Get_Image_Index(Resource_ID resource_id);
 
             void Create_VkBuffer(Resource_ID resource_id);
             void Get_Buffer_Memory_Info(Resource_ID resource_id);
@@ -94,8 +94,8 @@ namespace Cascade_Graphics
             ~Storage_Manager();
 
         public:
-            void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, unsigned int resource_queue_mask);
-            void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, unsigned int resource_queue_mask);
+            void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask);
+            void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask);
             void Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids);
 
             void Remove_Resource_Grouping(std::string label);
