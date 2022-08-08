@@ -184,7 +184,7 @@ namespace Cascade_Graphics
             swapchain_create_info.imageArrayLayers = 1;
             swapchain_create_info.imageUsage = SWAPCHAIN_USAGE;
             swapchain_create_info.imageSharingMode = (unique_queues.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
-            swapchain_create_info.queueFamilyIndexCount = unique_queues.size();
+            swapchain_create_info.queueFamilyIndexCount = static_cast<uint32_t>(unique_queues.size());
             swapchain_create_info.pQueueFamilyIndices = unique_queues.data();
             swapchain_create_info.preTransform = m_surface_capabilities.currentTransform;
             swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;

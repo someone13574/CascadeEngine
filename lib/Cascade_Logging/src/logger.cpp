@@ -92,8 +92,12 @@ namespace Cascade_Logging
                 break;
         }
 
-        // Convert file path to file name and line
+// Convert file path to file name and line
+#if defined _WIN32 | defined WIN32
+        message.file.erase(0, message.file.find_last_of("\\") + 1);
+#elif defined __linux__
         message.file.erase(0, message.file.find_last_of("/") + 1);
+#endif
 
         message.file = "[" + message.file + ":" + std::to_string(message.line) + "]";
 
@@ -128,5 +132,5 @@ namespace Cascade_Logging
         std::lock_guard<std::mutex> lock(m_queue_mutex);
         m_message_queue.push(std::move(final_message));
         m_condition_varable.notify_all();
-        }
+    }
 } // namespace Cascade_Logging

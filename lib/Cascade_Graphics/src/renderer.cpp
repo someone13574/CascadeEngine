@@ -82,7 +82,7 @@ namespace Cascade_Graphics
 #if defined __linux__
         m_shader_manager_ptr->Add_Shader("render_shader", "/home/owen/Documents/Code/C++/CascadeEngine/build/build/build/Cascade_Graphics/src/Shaders/render.comp.spv");
 #elif defined _WIN32 || defined WIN32
-        m_shader_manager_ptr->Add_Shader("render_shader", "C:/Users/Owen Law/Documents/Code/C++/CascadeEngine/build/build/build/Cascade_Graphics/src/Shaders/render.comp.spv");
+        m_shader_manager_ptr->Add_Shader("render_shader", "C:/Users/owenl/Documents/Code/C++/CascadeEngine/build/src/Shaders/render.comp.spv");
 #endif
 
         m_storage_manager_ptr->Create_Resource_Grouping(
@@ -116,7 +116,7 @@ namespace Cascade_Graphics
                 m_command_buffer_manager_ptr->Begin_Recording({"render_frame", i}, (VkCommandBufferUsageFlagBits)0);
                 m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"swapchain", i, Vulkan::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
                 m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-                m_command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", i}, std::ceil(width / 32.0), std::ceil(height / 32.0), 1);
+                m_command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", i}, static_cast<uint32_t>(std::ceil(width / 32.0)), static_cast<uint32_t>(std::ceil(height / 32.0)), 1);
                 m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
                 m_command_buffer_manager_ptr->Copy_Image({"render_frame", i}, {"render_target", 0, Vulkan::Resource_ID::IMAGE_RESOURCE}, {"swapchain", i, Vulkan::Resource_ID::IMAGE_RESOURCE}, width, height);
                 m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);

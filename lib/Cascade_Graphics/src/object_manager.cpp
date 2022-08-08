@@ -122,7 +122,7 @@ namespace Cascade_Graphics
                         child_voxel.is_leaf = is_fully_contained || child_voxel.depth == max_depth;
 
                         voxels_mutex->lock();
-                        current_voxel.child_indices[i] = voxels_ptr->size();
+                        current_voxel.child_indices[i] = static_cast<uint32_t>(voxels_ptr->size());
                         voxels_ptr->push_back(child_voxel);
                         voxels_mutex->unlock();
                     }
@@ -304,10 +304,10 @@ namespace Cascade_Graphics
                 Voxel* current_voxel = &m_objects[i].voxels[j];
 
                 GPU_Voxel gpu_voxel = {};
-                gpu_voxel.position_x = current_voxel->position.m_x;
-                gpu_voxel.position_y = current_voxel->position.m_y;
-                gpu_voxel.position_z = current_voxel->position.m_z;
-                gpu_voxel.size = current_voxel->size;
+                gpu_voxel.position_x = static_cast<float>(current_voxel->position.m_x);
+                gpu_voxel.position_y = static_cast<float>(current_voxel->position.m_y);
+                gpu_voxel.position_z = static_cast<float>(current_voxel->position.m_z);
+                gpu_voxel.size = static_cast<float>(current_voxel->size);
                 gpu_voxel.hit_links[0] = current_voxel->hit_links[0];
                 gpu_voxel.hit_links[1] = current_voxel->hit_links[1];
                 gpu_voxel.hit_links[2] = current_voxel->hit_links[2];
@@ -324,12 +324,12 @@ namespace Cascade_Graphics
                 gpu_voxel.miss_links[5] = current_voxel->miss_links[5];
                 gpu_voxel.miss_links[6] = current_voxel->miss_links[6];
                 gpu_voxel.miss_links[7] = current_voxel->miss_links[7];
-                gpu_voxel.normal_x = current_voxel->normal.m_x;
-                gpu_voxel.normal_y = current_voxel->normal.m_y;
-                gpu_voxel.normal_z = current_voxel->normal.m_z;
-                gpu_voxel.color_r = current_voxel->color.m_x;
-                gpu_voxel.color_g = current_voxel->color.m_y;
-                gpu_voxel.color_b = current_voxel->color.m_z;
+                gpu_voxel.normal_x = static_cast<float>(current_voxel->normal.m_x);
+                gpu_voxel.normal_y = static_cast<float>(current_voxel->normal.m_y);
+                gpu_voxel.normal_z = static_cast<float>(current_voxel->normal.m_z);
+                gpu_voxel.color_r = static_cast<float>(current_voxel->color.m_x);
+                gpu_voxel.color_g = static_cast<float>(current_voxel->color.m_y);
+                gpu_voxel.color_b = static_cast<float>(current_voxel->color.m_z);
 
                 gpu_voxels.push_back(gpu_voxel);
             }

@@ -33,7 +33,7 @@ namespace Cascade_Graphics
             device_create_info.enabledLayerCount = 0;
             device_create_info.ppEnabledLayerNames = nullptr;
 #endif
-            device_create_info.enabledExtensionCount = required_extensions.size();
+            device_create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
             device_create_info.ppEnabledExtensionNames = required_extensions.data();
 
             VkResult device_creation_result = vkCreateDevice(*physical_device_ptr->Get_Physical_Device(), &device_create_info, nullptr, &m_device);

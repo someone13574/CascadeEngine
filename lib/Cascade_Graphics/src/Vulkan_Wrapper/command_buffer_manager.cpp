@@ -97,7 +97,7 @@ namespace Cascade_Graphics
 
             LOG_INFO << "Vulkan: Adding command buffer with identifier '" << identifer.label << "-" << identifer.index << "'";
 
-            int command_pool_index = -1;
+            uint32_t command_pool_index = -1;
             for (unsigned int i = 0; i < m_command_pools.size(); i++)
             {
                 if (m_command_pools[i].queue_family == queue_family)
@@ -112,7 +112,7 @@ namespace Cascade_Graphics
             {
                 LOG_TRACE << "Vulkan: Could not find pre-existing command pool";
 
-                command_pool_index = m_command_pools.size();
+                command_pool_index = static_cast<uint32_t>(m_command_pools.size());
                 Create_Command_Pool(queue_family);
             }
 
@@ -122,7 +122,7 @@ namespace Cascade_Graphics
             m_command_buffers.back().resource_group_labels = resource_group_labels;
             m_command_buffers.back().pipeline_label = pipeline_label;
 
-            Allocate_Command_Buffer(m_command_buffers.size() - 1, command_pool_index);
+            Allocate_Command_Buffer(static_cast<uint32_t>(m_command_buffers.size() - 1), command_pool_index);
 
             std::vector<Resource_ID> resource_identifiers;
             for (unsigned int i = 0; i < resource_group_labels.size(); i++)

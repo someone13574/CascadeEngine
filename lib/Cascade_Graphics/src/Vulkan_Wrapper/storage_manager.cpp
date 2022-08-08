@@ -2,6 +2,7 @@
 
 
 #include "debug_tools.hpp"
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 
@@ -101,7 +102,7 @@ namespace Cascade_Graphics
             buffer_create_info.size = buffer_resource_ptr->buffer_size;
             buffer_create_info.usage = buffer_resource_ptr->buffer_usage;
             buffer_create_info.sharingMode = (unique_queues.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
-            buffer_create_info.queueFamilyIndexCount = unique_queues.size();
+            buffer_create_info.queueFamilyIndexCount = static_cast<uint32_t>(unique_queues.size());
             buffer_create_info.pQueueFamilyIndices = unique_queues.data();
 
             VALIDATE_VKRESULT(vkCreateBuffer(*m_logical_device_ptr->Get_Device(), &buffer_create_info, nullptr, &buffer_resource_ptr->buffer), "Vulkan: Failed to create VkBuffer");
@@ -571,7 +572,7 @@ namespace Cascade_Graphics
 
             while (uploaded < data_size)
             {
-                size_t upload_size = std::min(data_size - uploaded, max_upload_size);
+                size_t upload_size = std::min<size_t>(data_size - uploaded, max_upload_size);
 
                 void* mapped_memory;
                 VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_ptr->Get_Device(), staging_buffer->device_memory, 0, upload_size, 0, &mapped_memory), "Vulkan: Failed to map memory");

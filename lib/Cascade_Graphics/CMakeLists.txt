@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_subdirectory(../Cascade_Logging ../../build/build/Cascade_Logging)
 
 if(WIN32)
-    set(ENV{VULKAN_SDK} "C:/VulkanSDK/1.3.204.1")
     find_package(Vulkan REQUIRED)
 endif(WIN32)
 
@@ -42,7 +41,7 @@ if(UNIX)
 else()
     target_include_directories(Cascade_Graphics
         PUBLIC include
-        PUBLIC "C:/VulkanSDK/1.3.204.1/Include")
+        PUBLIC "$ENV{VK_SDK_PATH}/Include")
 
     target_link_libraries(Cascade_Graphics ${Vulkan_LIBRARIES})
 endif(UNIX)
@@ -52,7 +51,7 @@ target_link_libraries(Cascade_Graphics Cascade_Logging)
 if(UNIX)
     set(GLSL_COMMAND "/usr/bin/glslangValidator")
 else()
-    set(GLSL_COMMAND "$ENV{VULKAN_SDK}/Bin/glslangValidator.exe")
+    set(GLSL_COMMAND "$ENV{VK_SDK_PATH}/Bin/glslangValidator.exe")
 endif(UNIX)
 
 file(GLOB_RECURSE GLSL_SOURCE_FILES

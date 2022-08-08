@@ -54,18 +54,18 @@ namespace Cascade_Graphics
     Camera::GPU_Camera_Data Camera::Get_GPU_Camera_Data(unsigned int which_hit_buffer)
     {
         GPU_Camera_Data camera_data = {};
-        camera_data.matrix_x0 = m_camera_to_world_matrix.m_x0;
-        camera_data.matrix_x1 = m_camera_to_world_matrix.m_x1;
-        camera_data.matrix_x2 = m_camera_to_world_matrix.m_x2;
-        camera_data.matrix_y0 = m_camera_to_world_matrix.m_y0;
-        camera_data.matrix_y1 = m_camera_to_world_matrix.m_y1;
-        camera_data.matrix_y2 = m_camera_to_world_matrix.m_y2;
-        camera_data.matrix_z0 = m_camera_to_world_matrix.m_z0;
-        camera_data.matrix_z1 = m_camera_to_world_matrix.m_z1;
-        camera_data.matrix_z2 = m_camera_to_world_matrix.m_z2;
-        camera_data.origin_x = m_position.m_x;
-        camera_data.origin_y = m_position.m_y;
-        camera_data.origin_z = m_position.m_z;
+        camera_data.matrix_x0 = static_cast<float>(m_camera_to_world_matrix.m_x0);
+        camera_data.matrix_x1 = static_cast<float>(m_camera_to_world_matrix.m_x1);
+        camera_data.matrix_x2 = static_cast<float>(m_camera_to_world_matrix.m_x2);
+        camera_data.matrix_y0 = static_cast<float>(m_camera_to_world_matrix.m_y0);
+        camera_data.matrix_y1 = static_cast<float>(m_camera_to_world_matrix.m_y1);
+        camera_data.matrix_y2 = static_cast<float>(m_camera_to_world_matrix.m_y2);
+        camera_data.matrix_z0 = static_cast<float>(m_camera_to_world_matrix.m_z0);
+        camera_data.matrix_z1 = static_cast<float>(m_camera_to_world_matrix.m_z1);
+        camera_data.matrix_z2 = static_cast<float>(m_camera_to_world_matrix.m_z2);
+        camera_data.origin_x = static_cast<float>(m_position.m_x);
+        camera_data.origin_y = static_cast<float>(m_position.m_y);
+        camera_data.origin_z = static_cast<float>(m_position.m_z);
         camera_data.which_hit_buffer = which_hit_buffer;
 
         return camera_data;
