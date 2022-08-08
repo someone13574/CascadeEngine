@@ -1,7 +1,9 @@
 #pragma once
 
+
 #include "Data_Types/matrix_3x3.hpp"
 #include "Data_Types/vector_3.hpp"
+#include <cstdint>
 
 namespace Cascade_Graphics
 {
