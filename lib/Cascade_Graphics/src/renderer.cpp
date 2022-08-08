@@ -101,12 +101,9 @@ namespace Cascade_Graphics
         Record_Vulkan_Command_Buffers(width, height);
 
         m_synchronization_manager_ptr = std::make_shared<Vulkan::Synchronization_Manager>(m_logical_device_ptr);
-        for (unsigned int i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
-        {
-            m_synchronization_manager_ptr->Create_Semaphore("image_available_semaphore");
-            m_synchronization_manager_ptr->Create_Semaphore("render_finished_semaphore");
-            m_synchronization_manager_ptr->Create_Fence("in_flight_fence");
-        }
+        m_synchronization_manager_ptr->Create_Semaphore("image_available_semaphore");
+        m_synchronization_manager_ptr->Create_Semaphore("render_finished_semaphore");
+        m_synchronization_manager_ptr->Create_Fence("in_flight_fence");
     }
 
     void Renderer::Record_Vulkan_Command_Buffers(unsigned int width, unsigned int height)
@@ -148,7 +145,6 @@ namespace Cascade_Graphics
             m_storage_manager_ptr.reset();
             m_swapchain_ptr.reset();
             m_synchronization_manager_ptr.reset();
-            m_current_frame = 0;
 
             unsigned int width = *m_window_information.width_ptr;
             unsigned int height = *m_window_information.height_ptr;
@@ -197,12 +193,9 @@ namespace Cascade_Graphics
                                                             sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), m_command_buffer_manager_ptr, m_descriptor_set_manager_ptr);
 
             m_synchronization_manager_ptr = std::make_shared<Vulkan::Synchronization_Manager>(m_logical_device_ptr);
-            for (unsigned int i = 0; i < m_swapchain_ptr->Get_Swapchain_Image_Count(); i++)
-            {
-                m_synchronization_manager_ptr->Create_Semaphore("image_available_semaphore");
-                m_synchronization_manager_ptr->Create_Semaphore("render_finished_semaphore");
-                m_synchronization_manager_ptr->Create_Fence("in_flight_fence");
-            }
+            m_synchronization_manager_ptr->Create_Semaphore("image_available_semaphore");
+            m_synchronization_manager_ptr->Create_Semaphore("render_finished_semaphore");
+            m_synchronization_manager_ptr->Create_Fence("in_flight_fence");
         }
     }
 
@@ -256,11 +249,12 @@ namespace Cascade_Graphics
             std::lock_guard<std::mutex> lock_guard(m_renderer_mutex);
 
 
-            vkWaitForFences(*m_logical_device_ptr->Get_Device(), 1, m_synchronization_manager_ptr->Get_Fence({"in_flight_fence", m_current_frame}), VK_TRUE, UINT64_MAX);
+            vkWaitForFences(*m_logical_device_ptr->Get_Device(), 1, m_synchronization_manager_ptr->Get_Fence({"in_flight_fence", 0}), VK_TRUE, UINT64_MAX);
+            vkResetFences(*m_logical_device_ptr->Get_Device(), 1, m_synchronization_manager_ptr->Get_Fence({"in_flight_fence", 0}));
 
             uint32_t image_index;
             VkResult acquire_next_image_result
-                = vkAcquireNextImageKHR(*m_logical_device_ptr->Get_Device(), *m_swapchain_ptr->Get_Swapchain(), UINT64_MAX, *m_synchronization_manager_ptr->Get_Semaphore({"image_available_semaphore", m_current_frame}), VK_NULL_HANDLE, &image_index);
+                = vkAcquireNextImageKHR(*m_logical_device_ptr->Get_Device(), *m_swapchain_ptr->Get_Swapchain(), UINT64_MAX, *m_synchronization_manager_ptr->Get_Semaphore({"image_available_semaphore", 0}), VK_NULL_HANDLE, &image_index);
 
             if (acquire_next_image_result == VK_ERROR_OUT_OF_DATE_KHR)
             {
@@ -273,8 +267,6 @@ namespace Cascade_Graphics
             {
                 VALIDATE_VKRESULT(acquire_next_image_result, "Vulkan: Failed to acquire next image");
             }
-
-            vkResetFences(*m_logical_device_ptr->Get_Device(), 1, m_synchronization_manager_ptr->Get_Fence({"in_flight_fence", m_current_frame}));
 
             Cascade_Graphics::Camera::GPU_Camera_Data camera_data = m_camera_ptr->Get_GPU_Camera_Data(which_hit_buffer);
             m_storage_manager_ptr->Upload_To_Buffer_Direct({"camera_data", 0, Vulkan::Resource_ID::BUFFER_RESOURCE}, &camera_data, sizeof(Cascade_Graphics::Camera::GPU_Camera_Data));
@@ -301,21 +293,20 @@ namespace Cascade_Graphics
             submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
             submit_info.pNext = nullptr;
             submit_info.waitSemaphoreCount = 1;
-            submit_info.pWaitSemaphores = m_synchronization_manager_ptr->Get_Semaphore({"image_available_semaphore", m_current_frame});
+            submit_info.pWaitSemaphores = m_synchronization_manager_ptr->Get_Semaphore({"image_available_semaphore", 0});
             submit_info.pWaitDstStageMask = &pipeline_wait_stage_mask;
             submit_info.commandBufferCount = 1;
             submit_info.pCommandBuffers = m_command_buffer_manager_ptr->Get_Command_Buffer({"render_frame", image_index});
             submit_info.signalSemaphoreCount = 1;
-            submit_info.pSignalSemaphores = m_synchronization_manager_ptr->Get_Semaphore({"render_finished_semaphore", m_current_frame});
+            submit_info.pSignalSemaphores = m_synchronization_manager_ptr->Get_Semaphore({"render_finished_semaphore", 0});
 
-            VALIDATE_VKRESULT(vkQueueSubmit(*m_queue_manager_ptr->Get_Queue(Vulkan::Queue_Manager::Queue_Types::COMPUTE_QUEUE), 1, &submit_info, *m_synchronization_manager_ptr->Get_Fence({"in_flight_fence", m_current_frame})),
-                              "Vulkan: Failed to submit queue");
+            VALIDATE_VKRESULT(vkQueueSubmit(*m_queue_manager_ptr->Get_Queue(Vulkan::Queue_Manager::Queue_Types::COMPUTE_QUEUE), 1, &submit_info, *m_synchronization_manager_ptr->Get_Fence({"in_flight_fence", 0})), "Vulkan: Failed to submit queue");
 
             VkPresentInfoKHR present_info = {};
             present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
             present_info.pNext = nullptr;
             present_info.waitSemaphoreCount = 1;
-            present_info.pWaitSemaphores = m_synchronization_manager_ptr->Get_Semaphore({"render_finished_semaphore", m_current_frame});
+            present_info.pWaitSemaphores = m_synchronization_manager_ptr->Get_Semaphore({"render_finished_semaphore", 0});
             present_info.swapchainCount = 1;
             present_info.pSwapchains = m_swapchain_ptr->Get_Swapchain();
             present_info.pImageIndices = &image_index;
@@ -334,8 +325,6 @@ namespace Cascade_Graphics
             {
                 VALIDATE_VKRESULT(acquire_next_image_result, "Vulkan: Failed to present swapchain image");
             }
-
-            m_current_frame = (m_current_frame + 1) % m_swapchain_ptr->Get_Swapchain_Image_Count();
 
 #ifdef CSD_LOG_FPS
             std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
