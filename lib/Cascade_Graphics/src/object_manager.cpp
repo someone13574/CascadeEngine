@@ -117,7 +117,7 @@ namespace Cascade_Graphics
                     bool is_intersecting;
                     Voxel_Sample_Volume_Function(child_voxel, step_size_lookup_table[child_voxel.depth], volume_sample_function, is_fully_contained, is_intersecting);
 
-                    if (is_intersecting)
+                    if (is_intersecting && !is_fully_contained)
                     {
                         child_voxel.is_leaf = is_fully_contained || child_voxel.depth == max_depth;
 

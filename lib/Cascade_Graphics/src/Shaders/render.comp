@@ -67,7 +67,10 @@ bool Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, vec3 b
     vec3 tmin = min(t0, t1);
     vec3 tmax = max(t0, t1);
 
-    return max(max(tmin.x, tmin.y), tmin.z) <= min(min(tmax.x, tmax.y), tmax.z);
+    float min_component = min(min(tmax.x, tmax.y), tmax.z);
+    float max_component = max(max(tmin.x, tmin.y), tmin.z);
+
+    return max_component <= min_component && min_component >= 0.0;
 }
 
 // code
@@ -89,7 +92,7 @@ void main()
     uint current_index = 0;
 
     uint iteration = 0;
-    while (iteration < 1000000000 && current_index != -1 && current_index < voxels.length())
+    while (iteration < 1000000000)
     {
         iteration++;
 
@@ -171,7 +174,7 @@ void main()
                 hits = hit_counts[current_index].z;
             }
 
-            if (temp == -1 || hits < 5)
+            if (temp == -1 || hits < 10)
             {
                 normal = vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z);
                 color = vec3(current_voxel.color_r, current_voxel.color_g, current_voxel.color_b);
@@ -185,6 +188,12 @@ void main()
         else
         {
             current_index = floatBitsToUint(current_voxel.links[2 + direction_index_high][direction_index_low]);
+
+            if (current_index == -1)
+            {
+                imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(0.0, 0.0, 0.0, 1.0));
+                return;
+            }
         }
     }
 
