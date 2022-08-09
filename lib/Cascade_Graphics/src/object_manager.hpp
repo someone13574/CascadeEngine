@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Data_Types/vector_3.hpp"
+#include <condition_variable>
 #include <functional>
 #include <mutex>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -62,15 +64,25 @@ namespace Cascade_Graphics
         std::vector<Object> m_objects;
 
     private:
-        static void Voxel_Sample_Volume_Function(Voxel voxel, double step_size, std::function<double(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting);
-        static void Create_Object_From_Volume_Function_Thread(uint32_t start_voxel_index,
-                                                              uint32_t max_depth,
-                                                              uint32_t thread_depth,
+        static void Voxel_Sample_Volume_Function(Vector_3<double> voxel_position, double voxel_size, double step_size, std::function<double(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting);
+
+        static void Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
                                                               std::function<double(Vector_3<double>)> volume_sample_function,
                                                               std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function,
                                                               std::vector<Voxel>* voxels_ptr,
+                                                              std::stack<uint32_t>* leaf_node_stack_ptr,
+                                                              std::stack<uint32_t>* idle_thread_stack_ptr,
+                                                              std::vector<double> step_size_lookup_table,
                                                               std::mutex* voxels_mutex,
-                                                              std::vector<double> step_size_lookup_table);
+                                                              std::mutex* leaf_node_stack_mutex,
+                                                              std::mutex* idle_thread_stack_mutex,
+                                                              std::condition_variable* idle_thread_notify,
+                                                              uint32_t* idle_threads,
+                                                              std::vector<bool>* data_ready_ptr,
+                                                              std::vector<uint32_t>* current_voxel_index_ptr,
+                                                              uint32_t thread_index,
+                                                              std::vector<std::mutex>* mutex,
+                                                              std::vector<std::condition_variable>* work_available_notify);
 
     public:
         Object_Manager();
