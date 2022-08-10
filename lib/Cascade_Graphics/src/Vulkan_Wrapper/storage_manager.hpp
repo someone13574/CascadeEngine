@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "vulkan_header.hpp"
 
 #include "command_buffer_manager.hpp"
@@ -9,9 +8,9 @@
 #include "physical_device_wrapper.hpp"
 #include "queue_manager.hpp"
 #include "storage_manager_resource_id.hpp"
-
 #include <string>
 #include <vector>
+
 
 namespace Cascade_Graphics
 {
@@ -72,8 +71,8 @@ namespace Cascade_Graphics
             std::vector<Image_Resource> m_image_resources;
             std::vector<Resource_Grouping> m_resource_groupings;
 
-            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_ptr;
-            std::shared_ptr<Physical_Device_Wrapper> m_physical_device_ptr;
+            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_wrapper_ptr;
+            std::shared_ptr<Physical_Device_Wrapper> m_physical_device_wrapper_ptr;
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
 
         private:
@@ -90,17 +89,16 @@ namespace Cascade_Graphics
             void Create_Image_View(Resource_ID resource_id);
 
         public:
-            Storage_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr, std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
+            Storage_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr, std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
             ~Storage_Manager();
 
         public:
             void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask);
             void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask);
             void Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids);
+            void Add_Image(std::string label, Image_Resource image_resource);
 
             void Remove_Resource_Grouping(std::string label);
-
-            void Add_Image(std::string label, Image_Resource image_resource);
 
             void Resize_Buffer(Resource_ID resource_id, VkDeviceSize buffer_size);
             void Upload_To_Buffer_Direct(Resource_ID resource_id, void* data, size_t data_size);
