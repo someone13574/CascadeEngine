@@ -14,32 +14,32 @@ namespace Cascade_Graphics
 
         Shader_Manager::~Shader_Manager()
         {
-            LOG_INFO << "Vulkan: Cleaning up shaders";
+            LOG_INFO << "Vulkan Backend: Cleaning up shaders";
 
             for (uint32_t i = 0; i < m_shaders.size(); i++)
             {
-                LOG_TRACE << "Vulkan: Destroying shader module " << m_shaders[i].label;
+                LOG_TRACE << "Vulkan Backend: Destroying shader module " << m_shaders[i].label;
 
                 vkDestroyShaderModule(*m_logical_device_wrapper_ptr->Get_Device(), m_shaders[i].shader_module, nullptr);
             }
 
-            LOG_TRACE << "Vulkan: Finished cleaning up shaders";
+            LOG_TRACE << "Vulkan Backend: Finished cleaning up shaders";
         }
 
         void Shader_Manager::Add_Shader(std::string label, std::string path)
         {
-            LOG_INFO << "Vulkan: Adding shader at " << path << " as " << label;
+            LOG_INFO << "Vulkan Backend: Adding shader at " << path << " as " << label;
 
             for (uint32_t i = 0; i < m_shaders.size(); i++)
             {
                 if (m_shaders[i].label == label)
                 {
-                    LOG_ERROR << "Vulkan: The label '" << label << "' is already in use";
+                    LOG_ERROR << "Vulkan Backend: The label '" << label << "' is already in use";
                     exit(EXIT_FAILURE);
                 }
                 if (m_shaders[i].file_path == path)
                 {
-                    LOG_WARN << "Vulkan: Shader with path already added";
+                    LOG_WARN << "Vulkan Backend: Shader with path already added";
                 }
             }
 
@@ -47,7 +47,7 @@ namespace Cascade_Graphics
 
             if (!file_stream.is_open())
             {
-                LOG_ERROR << "Vulkan: Failed to open shader at path " << path;
+                LOG_ERROR << "Vulkan Backend: Failed to open shader at path " << path;
                 exit(EXIT_FAILURE);
             }
 
@@ -68,7 +68,7 @@ namespace Cascade_Graphics
             size_t last_index = path.find_last_of(".");
             if (last_index == std::string::npos)
             {
-                LOG_ERROR << "Vulkan: SPIR-V doesn't have a file extension. Ensure the name of shader binaries are formatted like this 'shader_name.shader_type.spv' with shader_type being comp, frag, "
+                LOG_ERROR << "Vulkan Backend: SPIR-V doesn't have a file extension. Ensure the name of shader binaries are formatted like this 'shader_name.shader_type.spv' with shader_type being comp, frag, "
                              "vert, etc...";
                 exit(EXIT_FAILURE);
             }
@@ -77,9 +77,9 @@ namespace Cascade_Graphics
             m_shaders.back() = {};
             m_shaders.back().label = label;
             m_shaders.back().file_path = path;
-            VALIDATE_VKRESULT(vkCreateShaderModule(*m_logical_device_wrapper_ptr->Get_Device(), &shader_module_create_info, nullptr, &m_shaders.back().shader_module), "Vulkan: Failed to create shader module");
+            VALIDATE_VKRESULT(vkCreateShaderModule(*m_logical_device_wrapper_ptr->Get_Device(), &shader_module_create_info, nullptr, &m_shaders.back().shader_module), "Vulkan Backend: Failed to create shader module");
 
-            LOG_TRACE << "Vulkan: Finished adding shader";
+            LOG_TRACE << "Vulkan Backend: Finished adding shader";
         }
 
         Shader_Manager::Shader* Shader_Manager::Get_Shader_Data(std::string label)
@@ -92,7 +92,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan: The shader '" << label << "' does not exist";
+            LOG_ERROR << "Vulkan Backend: The shader '" << label << "' does not exist";
             exit(EXIT_FAILURE);
         }
     } // namespace Vulkan_Backend
