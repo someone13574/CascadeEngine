@@ -2,25 +2,24 @@
 
 #include "instance_wrapper.hpp"
 #include "vulkan_header.hpp"
-
 #include <memory>
 #include <vector>
+
 
 namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        class Validation_Layer
+        class Validation_Layer_Wrapper
         {
         private:
-            const std::vector<const char*> ENABLED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
             VkDebugUtilsMessengerEXT m_debug_messenger;
 
-            std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance_Wrapper> m_instance_ptr;
+            std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance_Wrapper> m_instance_wrapper_ptr;
 
         public:
-            Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance_Wrapper> instance_ptr);
-            ~Validation_Layer();
+            Validation_Layer_Wrapper(std::shared_ptr<Instance_Wrapper> instance_wrapper_ptr);
+            ~Validation_Layer_Wrapper();
 
         public:
             static bool Check_Validation_Layer_Support(std::vector<const char*> layers_to_check);

@@ -60,7 +60,7 @@ namespace Cascade_Graphics
         std::shared_ptr<Vulkan_Backend::Pipeline_Manager> m_pipeline_manager_ptr;
         std::shared_ptr<Vulkan_Backend::Command_Buffer_Manager> m_command_buffer_manager_ptr;
         std::shared_ptr<Vulkan_Backend::Synchronization_Manager> m_synchronization_manager_ptr;
-        std::shared_ptr<Vulkan_Backend::Validation_Layer> m_validation_layer_ptr;
+        std::shared_ptr<Vulkan_Backend::Validation_Layer_Wrapper> m_validation_layer_ptr;
 #endif
     private:
 #ifdef CSD_USE_VULKAN

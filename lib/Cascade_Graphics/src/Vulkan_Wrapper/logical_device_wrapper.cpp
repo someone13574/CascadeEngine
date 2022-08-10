@@ -8,7 +8,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Logical_Device_Wrapper::Logical_Device_Wrapper(std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr)
+        Logical_Device_Wrapper::Logical_Device_Wrapper(std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer_Wrapper> validation_layer_wrapper_ptr)
         {
             LOG_INFO << "Vulkan Backend: Creating logical device";
 
@@ -28,7 +28,7 @@ namespace Cascade_Graphics
             device_create_info.ppEnabledExtensionNames = required_extensions.data();
 
 #if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
-            std::vector<const char*> enabled_validation_layers = Validation_Layer::Get_Enabled_Validation_Layers();
+            std::vector<const char*> enabled_validation_layers = Validation_Layer_Wrapper::Get_Enabled_Validation_Layers();
 
             device_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
             device_create_info.ppEnabledLayerNames = enabled_validation_layers.data();

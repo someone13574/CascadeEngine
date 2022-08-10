@@ -19,7 +19,7 @@ namespace Cascade_Graphics
             VkDevice m_device;
 
         public:
-            Logical_Device_Wrapper(std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr);
+            Logical_Device_Wrapper(std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer_Wrapper> validation_layer_wrapper_ptr);
             ~Logical_Device_Wrapper();
 
         public:

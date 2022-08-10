@@ -45,13 +45,13 @@ namespace Cascade_Graphics
             instance_create_info.ppEnabledExtensionNames = required_extensions.data();
 
 #if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
-            Validation_Layer::Check_Validation_Layer_Support(Validation_Layer::Get_Enabled_Validation_Layers());
+            std::vector<const char*> enabled_validation_layers = Validation_Layer_Wrapper::Get_Enabled_Validation_Layers();
+            Validation_Layer_Wrapper::Check_Validation_Layer_Support(enabled_validation_layers);
 
-            std::vector<const char*> enabled_validation_layers = Validation_Layer::Get_Enabled_Validation_Layers();
             instance_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
             instance_create_info.ppEnabledLayerNames = enabled_validation_layers.data();
 
-            VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Validation_Layer::Generate_Messenger_Create_Info();
+            VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Validation_Layer_Wrapper::Generate_Messenger_Create_Info();
             instance_create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&messenger_create_info;
 #else
             instance_create_info.enabledLayerCount = 0;
