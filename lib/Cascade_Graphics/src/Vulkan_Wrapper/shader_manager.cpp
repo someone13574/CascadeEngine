@@ -82,7 +82,7 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan Backend: Finished adding shader";
         }
 
-        Shader_Manager::Shader* Shader_Manager::Get_Shader_Data(std::string label)
+        Shader_Manager::Shader_Data* Shader_Manager::Get_Shader_Data(std::string label)
         {
             for (uint32_t i = 0; i < m_shaders.size(); i++)
             {

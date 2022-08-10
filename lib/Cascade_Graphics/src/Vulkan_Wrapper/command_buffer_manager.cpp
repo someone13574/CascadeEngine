@@ -2,33 +2,34 @@
 
 #include "debug_tools.hpp"
 
+
 namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
         Command_Buffer_Manager::Command_Buffer_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager,
-                                                       std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr,
+                                                       std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr,
                                                        std::shared_ptr<Pipeline_Manager> pipeline_manager_ptr,
                                                        std::shared_ptr<Storage_Manager> storage_manager_ptr)
-            : m_descriptor_set_manager(descriptor_set_manager), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr)
+            : m_descriptor_set_manager(descriptor_set_manager), m_logical_device_wrapper_ptr(logical_device_wrapper_ptr), m_storage_manager_ptr(storage_manager_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr)
         {
         }
 
         Command_Buffer_Manager::~Command_Buffer_Manager()
         {
-            LOG_INFO << "Vulkan: Destroying command pools";
+            LOG_INFO << "Vulkan Backend: Destroying command pools";
 
             for (uint32_t i = 0; i < m_command_pools.size(); i++)
             {
-                vkDestroyCommandPool(*m_logical_device_ptr->Get_Device(), m_command_pools[i].command_pool, nullptr);
+                vkDestroyCommandPool(*m_logical_device_wrapper_ptr->Get_Device(), m_command_pools[i].command_pool, nullptr);
             }
 
-            LOG_TRACE << "Vulkan: Finished destroying command pools";
+            LOG_TRACE << "Vulkan Backend: Finished destroying command pools";
         }
 
         void Command_Buffer_Manager::Create_Command_Pool(uint32_t queue_family)
         {
-            LOG_INFO << "Vulkan: Creating command pool with queue family " << queue_family;
+            LOG_INFO << "Vulkan Backend: Creating command pool with queue family " << queue_family;
 
             m_command_pools.resize(m_command_pools.size() + 1);
             m_command_pools.back() = {};
@@ -40,25 +41,25 @@ namespace Cascade_Graphics
             command_pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
             command_pool_create_info.queueFamilyIndex = queue_family;
 
-            VALIDATE_VKRESULT(vkCreateCommandPool(*m_logical_device_ptr->Get_Device(), &command_pool_create_info, nullptr, &m_command_pools.back().command_pool), "Vulkan: Failed to create command pool");
+            VALIDATE_VKRESULT(vkCreateCommandPool(*m_logical_device_wrapper_ptr->Get_Device(), &command_pool_create_info, nullptr, &m_command_pools.back().command_pool), "Vulkan Backend: Failed to create command pool");
 
-            LOG_TRACE << "Vulkan: Finished creating command pool";
+            LOG_TRACE << "Vulkan Backend: Finished creating command pool";
         }
 
         void Command_Buffer_Manager::Allocate_Command_Buffer(uint32_t command_buffer_index, uint32_t command_pool_index)
         {
-            LOG_INFO << "Vulkan: Allocating command buffer";
+            LOG_INFO << "Vulkan Backend: Allocating command buffer";
 
             VkCommandBufferAllocateInfo command_buffer_allocate_info = {};
             command_buffer_allocate_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
             command_buffer_allocate_info.pNext = nullptr;
             command_buffer_allocate_info.commandPool = m_command_pools[command_pool_index].command_pool;
             command_buffer_allocate_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-            command_buffer_allocate_info.commandBufferCount = 1; // Not efficient
+            command_buffer_allocate_info.commandBufferCount = 1;
 
-            VALIDATE_VKRESULT(vkAllocateCommandBuffers(*m_logical_device_ptr->Get_Device(), &command_buffer_allocate_info, &m_command_buffers[command_buffer_index].command_buffer), "Vulkan: Failed to allocate command buffer");
+            VALIDATE_VKRESULT(vkAllocateCommandBuffers(*m_logical_device_wrapper_ptr->Get_Device(), &command_buffer_allocate_info, &m_command_buffers[command_buffer_index].command_buffer), "Vulkan Backend: Failed to allocate command buffer");
 
-            LOG_TRACE << "Vulkan: Finished allocating command buffer";
+            LOG_TRACE << "Vulkan Backend: Finished allocating command buffer";
         }
 
         uint32_t Command_Buffer_Manager::Get_Command_Buffer_Index(Identifier identifier)
@@ -71,7 +72,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan: No command buffer with identifier '" << identifier.label << "-" << identifier.index << "' exists";
+            LOG_ERROR << "Vulkan Backend: No command buffer with identifier '" << identifier.label << "-" << identifier.index << "' exists";
             exit(EXIT_FAILURE);
         }
 
@@ -95,14 +96,14 @@ namespace Cascade_Graphics
             identifer.label = label;
             identifer.index = Get_Next_Index(label);
 
-            LOG_INFO << "Vulkan: Adding command buffer with identifier '" << identifer.label << "-" << identifer.index << "'";
+            LOG_INFO << "Vulkan Backend: Adding command buffer with identifier '" << identifer.label << "-" << identifer.index << "'";
 
             uint32_t command_pool_index = -1;
             for (uint32_t i = 0; i < m_command_pools.size(); i++)
             {
                 if (m_command_pools[i].queue_family == queue_family)
                 {
-                    LOG_TRACE << "Vulkan: Using pre-existing command pool";
+                    LOG_TRACE << "Vulkan Backend: Using pre-existing command pool";
 
                     command_pool_index = i;
                 }
@@ -110,7 +111,7 @@ namespace Cascade_Graphics
 
             if (command_pool_index == -1)
             {
-                LOG_TRACE << "Vulkan: Could not find pre-existing command pool";
+                LOG_TRACE << "Vulkan Backend: Could not find pre-existing command pool";
 
                 command_pool_index = static_cast<uint32_t>(m_command_pools.size());
                 Create_Command_Pool(queue_family);
@@ -119,8 +120,8 @@ namespace Cascade_Graphics
             m_command_buffers.resize(m_command_buffers.size() + 1);
             m_command_buffers.back() = {};
             m_command_buffers.back().identifier = identifer;
-            m_command_buffers.back().resource_group_labels = resource_group_labels;
             m_command_buffers.back().pipeline_label = pipeline_label;
+            m_command_buffers.back().resource_group_labels = resource_group_labels;
 
             Allocate_Command_Buffer(static_cast<uint32_t>(m_command_buffers.size() - 1), command_pool_index);
 
@@ -148,7 +149,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_TRACE << "Vulkan: Added command buffer";
+            LOG_TRACE << "Vulkan Backend: Added command buffer";
         }
 
         void Command_Buffer_Manager::Remove_Command_Buffer(Identifier identifier)
@@ -162,12 +163,12 @@ namespace Cascade_Graphics
         {
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
-            VALIDATE_VKRESULT(vkResetCommandBuffer(m_command_buffers[command_buffer_index].command_buffer, 0), "Vulkan: Failed to reset command buffer");
+            VALIDATE_VKRESULT(vkResetCommandBuffer(m_command_buffers[command_buffer_index].command_buffer, 0), "Vulkan Backend: Failed to reset command buffer");
         }
 
         void Command_Buffer_Manager::Begin_Recording(Identifier identifier, VkCommandBufferUsageFlagBits usage_flags)
         {
-            LOG_INFO << "Vulkan: Starting recording of command buffer '" << identifier.label << "-" << identifier.index << "'";
+            LOG_INFO << "Vulkan Backend: Starting recording of command buffer '" << identifier.label << "-" << identifier.index << "'";
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
@@ -177,13 +178,13 @@ namespace Cascade_Graphics
             command_buffer_begin_info.flags = usage_flags;
             command_buffer_begin_info.pInheritanceInfo = nullptr;
 
-            VALIDATE_VKRESULT(vkBeginCommandBuffer(m_command_buffers[command_buffer_index].command_buffer, &command_buffer_begin_info), "Vulkan: Failed to begin command buffer recording");
+            VALIDATE_VKRESULT(vkBeginCommandBuffer(m_command_buffers[command_buffer_index].command_buffer, &command_buffer_begin_info), "Vulkan Backend: Failed to begin command buffer recording");
 
-            LOG_TRACE << "Vulkan: Started command buffer recording";
+            LOG_TRACE << "Vulkan Backend: Started command buffer recording";
 
             if (m_command_buffers[command_buffer_index].pipeline_label != "")
             {
-                LOG_TRACE << "Vulkan: Binding pipeline";
+                LOG_TRACE << "Vulkan Backend: Binding pipeline";
 
                 switch (m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->type)
                 {
@@ -194,12 +195,12 @@ namespace Cascade_Graphics
                     }
                     default:
                     {
-                        LOG_ERROR << "Vulkan: Unknown pipeline type";
+                        LOG_ERROR << "Vulkan Backend: Unknown pipeline type";
                         exit(EXIT_FAILURE);
                     }
                 }
 
-                LOG_TRACE << "Vulkan: Binding descriptor set";
+                LOG_TRACE << "Vulkan Backend: Binding descriptor set";
 
                 switch (m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->type)
                 {
@@ -218,7 +219,7 @@ namespace Cascade_Graphics
                     }
                     default:
                     {
-                        LOG_ERROR << "Vulkan: Unknown pipeline type";
+                        LOG_ERROR << "Vulkan Backend: Unknown pipeline type";
                         exit(EXIT_FAILURE);
                     }
                 }
@@ -227,7 +228,7 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::End_Recording(Identifier identifier)
         {
-            LOG_INFO << "Vulkan: Ending recording of command buffer '" << identifier.label << "-" << identifier.index << "'";
+            LOG_INFO << "Vulkan Backend: Ending recording of command buffer '" << identifier.label << "-" << identifier.index << "'";
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
@@ -236,11 +237,11 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::Image_Memory_Barrier(Identifier identifier, Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags)
         {
-            LOG_TRACE << "Vulkan: Image memory barrier in command buffer '" << identifier.label << "-" << identifier.index << "'";
+            LOG_TRACE << "Vulkan Backend: Image memory barrier in command buffer '" << identifier.label << "-" << identifier.index << "'";
 
             if (resource_id.resource_type != Resource_ID::IMAGE_RESOURCE)
             {
-                LOG_ERROR << "Vulkan: Resource type must be an image";
+                LOG_ERROR << "Vulkan Backend: Resource type must be an image";
                 exit(EXIT_FAILURE);
             }
 
@@ -257,7 +258,7 @@ namespace Cascade_Graphics
 
             if (resource_index == -1)
             {
-                LOG_ERROR << "Vulkan: No image resources with the id '" << resource_id.label << "-" << resource_id.index << "' exists in provided resource groupings";
+                LOG_ERROR << "Vulkan Backend: No image resources with the id '" << resource_id.label << "-" << resource_id.index << "' exists in provided resource groupings";
                 exit(EXIT_FAILURE);
             }
 
@@ -291,15 +292,15 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::Dispatch_Compute_Shader(Identifier identifier, uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z)
         {
-            LOG_TRACE << "Vulkan: Dispatching compute shader in command buffer '" << identifier.label << "-" << identifier.index << "'";
+            LOG_TRACE << "Vulkan Backend: Dispatching compute shader in command buffer '" << identifier.label << "-" << identifier.index << "'";
 
             vkCmdDispatch(m_command_buffers[Get_Command_Buffer_Index(identifier)].command_buffer, group_count_x, group_count_y, group_count_z);
         }
 
         void Command_Buffer_Manager::Copy_Image(Identifier identifier, Resource_ID source_resource_id, Resource_ID destination_resource_id, uint32_t width, uint32_t height)
         {
-            LOG_TRACE << "Vulkan: Copying image " << source_resource_id.label << "-" << source_resource_id.index << " to " << destination_resource_id.label << "-" << destination_resource_id.index << " in command buffer '" << identifier.label << "-"
-                      << identifier.index << "'";
+            LOG_TRACE << "Vulkan Backend: Copying image " << source_resource_id.label << "-" << source_resource_id.index << " to " << destination_resource_id.label << "-" << destination_resource_id.index << " in command buffer '" << identifier.label
+                      << "-" << identifier.index << "'";
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
@@ -319,7 +320,7 @@ namespace Cascade_Graphics
 
             if (source_index == -1 || destination_index == -1)
             {
-                LOG_ERROR << "Vulkan: Cannot copy to image not added to command buffer";
+                LOG_ERROR << "Vulkan Backend: Cannot copy to image not added to command buffer";
                 exit(EXIT_FAILURE);
             }
 
@@ -346,7 +347,7 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::Copy_Buffer(Identifier identifier, Resource_ID source, Resource_ID destination, VkDeviceSize src_offset, VkDeviceSize dst_offset, VkDeviceSize copy_size)
         {
-            LOG_TRACE << "Vulkan: Copying buffer '" << m_storage_manager_ptr->Get_Resource_String(source) << "' to '" << m_storage_manager_ptr->Get_Resource_String(destination) << "'";
+            LOG_TRACE << "Vulkan Backend: Copying buffer '" << m_storage_manager_ptr->Get_Resource_String(source) << "' to '" << m_storage_manager_ptr->Get_Resource_String(destination) << "'";
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 

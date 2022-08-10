@@ -14,7 +14,7 @@ namespace Cascade_Graphics
         class Shader_Manager
         {
         public:
-            struct Shader
+            struct Shader_Data
             {
                 std::string label;
 
@@ -23,7 +23,7 @@ namespace Cascade_Graphics
             };
 
         private:
-            std::vector<Shader> m_shaders;
+            std::vector<Shader_Data> m_shaders;
 
             std::shared_ptr<Logical_Device_Wrapper> m_logical_device_wrapper_ptr;
 
@@ -34,7 +34,7 @@ namespace Cascade_Graphics
         public:
             void Add_Shader(std::string label, std::string path);
 
-            Shader* Get_Shader_Data(std::string label);
+            Shader_Data* Get_Shader_Data(std::string label);
         };
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics
