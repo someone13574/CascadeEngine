@@ -15,10 +15,10 @@ namespace Cascade_Graphics
         private:
             VkSurfaceKHR m_surface;
 
-            std::shared_ptr<Instance> m_instance_ptr;
+            std::shared_ptr<Instance_Wrapper> m_instance_ptr;
 
         public:
-            Surface(Window_Information window_data, std::shared_ptr<Instance> instance_ptr);
+            Surface(Window_Information window_data, std::shared_ptr<Instance_Wrapper> instance_ptr);
             ~Surface();
 
         public:

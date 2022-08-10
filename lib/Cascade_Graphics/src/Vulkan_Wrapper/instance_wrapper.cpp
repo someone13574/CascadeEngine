@@ -1,38 +1,16 @@
-/**
- * @file instance_wrapper.cpp
- * @brief A wrapper class for managing a Vulkan instance's creation and functions
- * @version 0.1
- * @date 09-08-2022
- */
-
 #include "instance_wrapper.hpp"
 
 #include "cascade_logging.hpp"
 #include "validation_layer_wrapper.hpp"
 #include <cstring>
 
-/**
- * @brief A namespace encapsulating all classes and utilities related to graphics and gpu processing
- *
- */
 namespace Cascade_Graphics
 {
-    /**
-     * @brief A namespace encapsulating the Vulkan backend
-     *
-     */
     namespace Vulkan_Backend
     {
-        /**
-         * @brief Construct a new Instance:: Instance object
-         *
-         * @param application_name
-         * @param application_version
-         * @param required_instance_extensions
-         */
-        Instance::Instance(const char* application_name, uint32_t application_version, std::set<const char*> required_instance_extensions) : m_required_instance_extensions(required_instance_extensions)
+        Instance_Wrapper::Instance_Wrapper(const char* application_name, uint32_t application_version, std::set<const char*> required_instance_extensions) : m_required_instance_extensions(required_instance_extensions)
         {
-            LOG_INFO << "Vulkan: Creating instance";
+            LOG_INFO << "Vulkan Backend: Creating instance";
 
             m_required_instance_extensions.insert(VK_KHR_SURFACE_EXTENSION_NAME);
 
@@ -85,50 +63,35 @@ namespace Cascade_Graphics
             VkResult instance_creation_result = vkCreateInstance(&instance_create_info, nullptr, &m_instance);
             if (instance_creation_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Vulkan: Instance creation failed with VkResult " << instance_creation_result;
+                LOG_FATAL << "Vulkan Backend: Instance creation failed with VkResult " << instance_creation_result;
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Vulkan: Finished creating instance";
+            LOG_TRACE << "Vulkan Backend: Finished creating instance";
         }
 
-        /**
-         * @brief Destroy the Instance:: Instance object
-         *
-         */
-        Instance::~Instance()
+        Instance_Wrapper::~Instance_Wrapper()
         {
-            LOG_INFO << "Vulkan: Destroying instance";
+            LOG_INFO << "Vulkan Backend: Destroying instance";
 
             vkDestroyInstance(m_instance, nullptr);
 
-            LOG_TRACE << "Vulkan: Finished destroying instance";
+            LOG_TRACE << "Vulkan Backend: Finished destroying instance";
         }
 
-        /**
-         * @brief Get the number of supported Vulkan instance extensions
-         *
-         * @return uint32_t
-         */
-        uint32_t Instance::Get_Supported_Extension_Count()
+        uint32_t Instance_Wrapper::Get_Supported_Extension_Count()
         {
             uint32_t extension_count = 0;
             vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
 
-            LOG_DEBUG << "Vulkan: This device supports " << extension_count << " instance extensions";
+            LOG_DEBUG << "Vulkan Backend: This device supports " << extension_count << " instance extensions";
 
             return extension_count;
         }
 
-        /**
-         * @brief Determine whether the required instance extensions are supported
-         *
-         * @return true
-         * @return false
-         */
-        bool Instance::Is_Vulkan_Supported()
+        bool Instance_Wrapper::Is_Vulkan_Supported()
         {
-            LOG_INFO << "Vulkan: Checking this device's Vulkan support";
+            LOG_INFO << "Vulkan Backend: Checking this device's Vulkan support";
 
             std::vector<bool> extensions_satisfied(m_required_instance_extensions.size());
 
@@ -138,7 +101,7 @@ namespace Cascade_Graphics
 
             for (uint32_t i = 0; i < supported_extensions.size(); i++)
             {
-                LOG_TRACE << "Vulkan: Instance extension supported " << supported_extensions[i].extensionName;
+                LOG_TRACE << "Vulkan Backend: Instance extension supported " << supported_extensions[i].extensionName;
             }
 
             bool vulkan_supported = true;
@@ -152,29 +115,24 @@ namespace Cascade_Graphics
 
                 if (!found_extension)
                 {
-                    LOG_ERROR << "Vulkan: Missing support for instance extension " << extension;
+                    LOG_ERROR << "Vulkan Backend: Missing support for instance extension " << extension;
                     vulkan_supported = false;
                 }
             }
 
             if (vulkan_supported)
             {
-                LOG_DEBUG << "Vulkan: This device has all the required instance extensions";
+                LOG_DEBUG << "Vulkan Backend: This device has all the required instance extensions";
                 return true;
             }
             else
             {
-                LOG_FATAL << "Vulkan: This device is missing a required instance extension";
+                LOG_FATAL << "Vulkan Backend: This device is missing a required instance extension";
                 exit(EXIT_FAILURE);
             }
         }
 
-        /**
-         * @brief Return a pointer of the VkInstance
-         *
-         * @return VkInstance*
-         */
-        VkInstance* Instance::Get_Instance()
+        VkInstance* Instance_Wrapper::Get_Instance()
         {
             return &m_instance;
         }

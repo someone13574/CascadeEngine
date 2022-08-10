@@ -16,10 +16,10 @@ namespace Cascade_Graphics
             const std::vector<const char*> ENABLED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
             VkDebugUtilsMessengerEXT m_debug_messenger;
 
-            std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance> m_instance_ptr;
+            std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance_Wrapper> m_instance_ptr;
 
         public:
-            Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance> instance_ptr);
+            Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance_Wrapper> instance_ptr);
             ~Validation_Layer();
 
         public:

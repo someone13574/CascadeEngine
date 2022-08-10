@@ -9,7 +9,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Device::Device(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr)
+        Device::Device(std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr)
         {
             LOG_INFO << "Vulkan: Creating logical device";
 

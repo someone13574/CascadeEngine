@@ -8,11 +8,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        /**
-         * @brief A wrapper class for managing a Vulkan instance's creation and functions
-         *
-         */
-        class Instance
+        class Instance_Wrapper
         {
         private:
             VkInstance m_instance;
@@ -24,8 +20,8 @@ namespace Cascade_Graphics
             bool Is_Vulkan_Supported();
 
         public:
-            Instance(const char* application_name, uint32_t application_version, std::set<const char*> required_instance_extensions);
-            ~Instance();
+            Instance_Wrapper(const char* application_name, uint32_t application_version, std::set<const char*> required_instance_extensions);
+            ~Instance_Wrapper();
 
         public:
             VkInstance* Get_Instance();

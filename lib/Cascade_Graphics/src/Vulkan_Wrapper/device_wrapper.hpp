@@ -12,7 +12,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        class Physical_Device;
+        class Physical_Device_Wrapper;
 
         class Device
         {
@@ -20,7 +20,7 @@ namespace Cascade_Graphics
             VkDevice m_device;
 
         public:
-            Device(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr);
+            Device(std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr);
             ~Device();
 
         public:

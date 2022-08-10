@@ -9,7 +9,12 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Swapchain::Swapchain(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Surface> surface_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, uint32_t width, uint32_t height)
+        Swapchain::Swapchain(std::shared_ptr<Device> logical_device_ptr,
+                             std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr,
+                             std::shared_ptr<Surface> surface_ptr,
+                             std::shared_ptr<Queue_Manager> queue_manager_ptr,
+                             uint32_t width,
+                             uint32_t height)
             : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_surface_ptr(surface_ptr), m_queue_manager_ptr(queue_manager_ptr)
         {
             LOG_INFO << "Vulkan: Creating swapchain";

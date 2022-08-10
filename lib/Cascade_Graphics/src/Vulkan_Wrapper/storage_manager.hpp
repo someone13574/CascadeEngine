@@ -73,7 +73,7 @@ namespace Cascade_Graphics
             std::vector<Resource_Grouping> m_resource_groupings;
 
             std::shared_ptr<Device> m_logical_device_ptr;
-            std::shared_ptr<Physical_Device> m_physical_device_ptr;
+            std::shared_ptr<Physical_Device_Wrapper> m_physical_device_ptr;
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
 
         private:
@@ -90,7 +90,7 @@ namespace Cascade_Graphics
             void Create_Image_View(Resource_ID resource_id);
 
         public:
-            Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
+            Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
             ~Storage_Manager();
 
         public:

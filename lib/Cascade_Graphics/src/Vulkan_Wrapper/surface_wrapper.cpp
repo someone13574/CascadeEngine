@@ -6,7 +6,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Surface::Surface(Window_Information window_data, std::shared_ptr<Instance> instance_ptr) : m_instance_ptr(instance_ptr)
+        Surface::Surface(Window_Information window_data, std::shared_ptr<Instance_Wrapper> instance_ptr) : m_instance_ptr(instance_ptr)
         {
 #if defined __linux__
             LOG_INFO << "Vulkan: Creating xcb window surface";

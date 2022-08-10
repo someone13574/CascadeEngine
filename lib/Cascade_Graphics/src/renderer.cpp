@@ -53,11 +53,11 @@ namespace Cascade_Graphics
         std::set<const char*> required_instance_extensions = {VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
         std::set<const char*> required_device_extensions = {VK_EXT_MEMORY_BUDGET_EXTENSION_NAME};
 
-        m_instance_ptr = std::make_shared<Vulkan_Backend::Instance>("Application name", 0, required_instance_extensions);
+        m_instance_ptr = std::make_shared<Vulkan_Backend::Instance_Wrapper>("Application name", 0, required_instance_extensions);
         m_surface_ptr = std::make_shared<Vulkan_Backend::Surface>(m_window_information, m_instance_ptr);
         m_validation_layer_ptr = std::make_shared<Vulkan_Backend::Validation_Layer>(m_instance_ptr);
         m_queue_manager_ptr = std::make_shared<Vulkan_Backend::Queue_Manager>(m_surface_ptr, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE | Vulkan_Backend::Queue_Manager::PRESENT_QUEUE);
-        m_physical_device_ptr = std::make_shared<Vulkan_Backend::Physical_Device>(m_instance_ptr, m_queue_manager_ptr, m_surface_ptr, required_device_extensions);
+        m_physical_device_ptr = std::make_shared<Vulkan_Backend::Physical_Device_Wrapper>(m_instance_ptr, m_queue_manager_ptr, m_surface_ptr, required_device_extensions);
         m_logical_device_ptr = std::make_shared<Vulkan_Backend::Device>(m_physical_device_ptr, m_queue_manager_ptr, m_validation_layer_ptr);
         m_swapchain_ptr = std::make_shared<Vulkan_Backend::Swapchain>(m_logical_device_ptr, m_physical_device_ptr, m_surface_ptr, m_queue_manager_ptr, width, height);
 

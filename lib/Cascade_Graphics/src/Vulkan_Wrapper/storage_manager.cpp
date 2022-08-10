@@ -10,7 +10,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Storage_Manager::Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr)
+        Storage_Manager::Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr)
             : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_queue_manager_ptr(queue_manager_ptr)
         {
         }

@@ -48,10 +48,10 @@ namespace Cascade_Graphics
 #ifdef CSD_USE_VULKAN
         uint32_t which_hit_buffer = 0;
 
-        std::shared_ptr<Vulkan_Backend::Instance> m_instance_ptr;
+        std::shared_ptr<Vulkan_Backend::Instance_Wrapper> m_instance_ptr;
         std::shared_ptr<Vulkan_Backend::Surface> m_surface_ptr;
         std::shared_ptr<Vulkan_Backend::Queue_Manager> m_queue_manager_ptr;
-        std::shared_ptr<Vulkan_Backend::Physical_Device> m_physical_device_ptr;
+        std::shared_ptr<Vulkan_Backend::Physical_Device_Wrapper> m_physical_device_ptr;
         std::shared_ptr<Vulkan_Backend::Device> m_logical_device_ptr;
         std::shared_ptr<Vulkan_Backend::Swapchain> m_swapchain_ptr;
         std::shared_ptr<Vulkan_Backend::Storage_Manager> m_storage_manager_ptr;
