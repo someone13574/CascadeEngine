@@ -2,10 +2,10 @@
 
 #include "logical_device_wrapper.hpp"
 #include "vulkan_header.hpp"
-
 #include <memory>
 #include <string>
 #include <vector>
+
 
 namespace Cascade_Graphics
 {
@@ -41,17 +41,17 @@ namespace Cascade_Graphics
             };
 
         private:
-            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_ptr;
-
             std::vector<Semaphore> m_semaphores;
             std::vector<Fence> m_fences;
+
+            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_wrapper_ptr;
 
         private:
             uint32_t Get_Next_Semaphore_Index(std::string label);
             uint32_t Get_Next_Fence_Index(std::string label);
 
         public:
-            Synchronization_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr);
+            Synchronization_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr);
             ~Synchronization_Manager();
 
             void Create_Semaphore(std::string label);
