@@ -1,7 +1,6 @@
-#include "device_wrapper.hpp"
+#include "logical_device_wrapper.hpp"
 
-#include "cascade_logging.hpp"
-
+#include "debug_tools.hpp"
 #include <set>
 #include <vector>
 
@@ -9,13 +8,13 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Device::Device(std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr)
+        Logical_Device_Wrapper::Logical_Device_Wrapper(std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr)
         {
-            LOG_INFO << "Vulkan: Creating logical device";
+            LOG_INFO << "Vulkan Backend: Creating logical device";
 
             VkPhysicalDeviceFeatures physical_device_features = {};
 
-            std::set<const char*> required_extensions_set = physical_device_ptr->Get_Required_Extensions();
+            std::set<const char*> required_extensions_set = physical_device_wrapper_ptr->Get_Required_Extensions();
             std::vector<const char*> required_extensions(required_extensions_set.begin(), required_extensions_set.end());
             std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos = queue_manager_ptr->Generate_Device_Queue_Create_Infos();
 
@@ -25,39 +24,35 @@ namespace Cascade_Graphics
             device_create_info.flags = 0;
             device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_infos.size());
             device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
+            device_create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
+            device_create_info.ppEnabledExtensionNames = required_extensions.data();
+
 #if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
             std::vector<const char*> enabled_validation_layers = Validation_Layer::Get_Enabled_Validation_Layers();
+
             device_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
             device_create_info.ppEnabledLayerNames = enabled_validation_layers.data();
 #else
             device_create_info.enabledLayerCount = 0;
             device_create_info.ppEnabledLayerNames = nullptr;
 #endif
-            device_create_info.enabledExtensionCount = static_cast<uint32_t>(required_extensions.size());
-            device_create_info.ppEnabledExtensionNames = required_extensions.data();
 
-            VkResult device_creation_result = vkCreateDevice(*physical_device_ptr->Get_Physical_Device(), &device_create_info, nullptr, &m_device);
-            if (device_creation_result != VK_SUCCESS)
-            {
-                LOG_FATAL << "Vulkan: Failed to create logical device with VkResult " << device_creation_result;
-                exit(EXIT_FAILURE);
-            }
-
+            VALIDATE_VKRESULT(vkCreateDevice(*physical_device_wrapper_ptr->Get_Physical_Device(), &device_create_info, nullptr, &m_device), "Vulkan Backend: Failed to create logical device");
             queue_manager_ptr->Get_Device_Queue_Handles(&m_device);
 
-            LOG_TRACE << "Vulkan: Finished creating logical device";
+            LOG_TRACE << "Vulkan Backend: Finished creating logical device";
         }
 
-        Device::~Device()
+        Logical_Device_Wrapper::~Logical_Device_Wrapper()
         {
-            LOG_INFO << "Vulkan: Destroying logical device";
+            LOG_INFO << "Vulkan Backend: Destroying logical device";
 
             vkDestroyDevice(m_device, nullptr);
 
-            LOG_TRACE << "Vulkan: Finished destroying logical device";
+            LOG_TRACE << "Vulkan Backend: Finished destroying logical device";
         }
 
-        VkDevice* Device::Get_Device()
+        VkDevice* Logical_Device_Wrapper::Get_Device()
         {
             return &m_device;
         }
