@@ -8,7 +8,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         Storage_Manager::Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr)
             : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_queue_manager_ptr(queue_manager_ptr)
@@ -657,5 +657,5 @@ namespace Cascade_Graphics
             LOG_ERROR << "Vulkan: The resource grouping '" << label << "' does not exist";
             exit(EXIT_FAILURE);
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

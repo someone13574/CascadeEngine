@@ -48,19 +48,19 @@ namespace Cascade_Graphics
 #ifdef CSD_USE_VULKAN
         uint32_t which_hit_buffer = 0;
 
-        std::shared_ptr<Vulkan::Instance> m_instance_ptr;
-        std::shared_ptr<Vulkan::Surface> m_surface_ptr;
-        std::shared_ptr<Vulkan::Queue_Manager> m_queue_manager_ptr;
-        std::shared_ptr<Vulkan::Physical_Device> m_physical_device_ptr;
-        std::shared_ptr<Vulkan::Device> m_logical_device_ptr;
-        std::shared_ptr<Vulkan::Swapchain> m_swapchain_ptr;
-        std::shared_ptr<Vulkan::Storage_Manager> m_storage_manager_ptr;
-        std::shared_ptr<Vulkan::Shader_Manager> m_shader_manager_ptr;
-        std::shared_ptr<Vulkan::Descriptor_Set_Manager> m_descriptor_set_manager_ptr;
-        std::shared_ptr<Vulkan::Pipeline_Manager> m_pipeline_manager_ptr;
-        std::shared_ptr<Vulkan::Command_Buffer_Manager> m_command_buffer_manager_ptr;
-        std::shared_ptr<Vulkan::Synchronization_Manager> m_synchronization_manager_ptr;
-        std::shared_ptr<Cascade_Graphics_Debugging::Vulkan::Validation_Layer> m_validation_layer_ptr;
+        std::shared_ptr<Vulkan_Backend::Instance> m_instance_ptr;
+        std::shared_ptr<Vulkan_Backend::Surface> m_surface_ptr;
+        std::shared_ptr<Vulkan_Backend::Queue_Manager> m_queue_manager_ptr;
+        std::shared_ptr<Vulkan_Backend::Physical_Device> m_physical_device_ptr;
+        std::shared_ptr<Vulkan_Backend::Device> m_logical_device_ptr;
+        std::shared_ptr<Vulkan_Backend::Swapchain> m_swapchain_ptr;
+        std::shared_ptr<Vulkan_Backend::Storage_Manager> m_storage_manager_ptr;
+        std::shared_ptr<Vulkan_Backend::Shader_Manager> m_shader_manager_ptr;
+        std::shared_ptr<Vulkan_Backend::Descriptor_Set_Manager> m_descriptor_set_manager_ptr;
+        std::shared_ptr<Vulkan_Backend::Pipeline_Manager> m_pipeline_manager_ptr;
+        std::shared_ptr<Vulkan_Backend::Command_Buffer_Manager> m_command_buffer_manager_ptr;
+        std::shared_ptr<Vulkan_Backend::Synchronization_Manager> m_synchronization_manager_ptr;
+        std::shared_ptr<Vulkan_Backend::Validation_Layer> m_validation_layer_ptr;
 #endif
     private:
 #ifdef CSD_USE_VULKAN

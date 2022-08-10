@@ -105,5 +105,10 @@
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "editor.formatOnSave": true,
     "C_Cpp.default.cppStandard": "c++17",
-    "C_Cpp.intelliSenseCacheSize": 2048
+    "C_Cpp.intelliSenseCacheSize": 2048,
+    "doxdocgen.generic.authorTag": "",
+    "doxdocgen.generic.authorName": "",
+    "doxdocgen.generic.authorEmail": "",
+    "doxdocgen.generic.dateFormat": "DD-MM-YYYY",
+    "doxdocgen.file.copyrightTag": []
 }

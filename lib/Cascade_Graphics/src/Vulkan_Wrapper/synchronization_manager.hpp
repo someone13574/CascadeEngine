@@ -9,7 +9,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Synchronization_Manager
         {
@@ -61,5 +61,5 @@ namespace Cascade_Graphics
             VkSemaphore* Get_Semaphore(Identifier identifier);
             VkFence* Get_Fence(Identifier identifier);
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

@@ -15,7 +15,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Command_Buffer_Manager;
         class Descriptor_Set_Manager;
@@ -116,5 +116,5 @@ namespace Cascade_Graphics
             Image_Resource* Get_Image_Resource(Resource_ID resource_id);
             Resource_Grouping* Get_Resource_Grouping(std::string label);
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

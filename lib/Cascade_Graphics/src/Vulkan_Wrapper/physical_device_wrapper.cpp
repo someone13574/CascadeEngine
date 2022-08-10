@@ -9,7 +9,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         Physical_Device::Physical_Device(std::shared_ptr<Instance> instance_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr, std::set<const char*> required_extensions)
             : m_queue_manager_ptr(queue_manager_ptr), m_surface_ptr(surface_ptr), m_required_extensions(required_extensions)
@@ -166,5 +166,5 @@ namespace Cascade_Graphics
         {
             return m_required_extensions;
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

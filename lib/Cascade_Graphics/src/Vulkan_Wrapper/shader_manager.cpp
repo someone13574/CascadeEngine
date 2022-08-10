@@ -6,7 +6,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         Shader_Manager::Shader_Manager(std::shared_ptr<Device> logical_device_ptr) : m_logical_device_ptr(logical_device_ptr)
         {
@@ -138,5 +138,5 @@ namespace Cascade_Graphics
 
             return shaders_details;
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

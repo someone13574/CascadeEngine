@@ -1,15 +1,35 @@
+/**
+ * @file instance_wrapper.cpp
+ * @brief A wrapper class for managing a Vulkan instance's creation and functions
+ * @version 0.1
+ * @date 09-08-2022
+ */
+
 #include "instance_wrapper.hpp"
 
 #include "cascade_logging.hpp"
-
 #include "validation_layer_wrapper.hpp"
-
 #include <cstring>
 
+/**
+ * @brief A namespace encapsulating all classes and utilities related to graphics and gpu processing
+ *
+ */
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    /**
+     * @brief A namespace encapsulating the Vulkan backend
+     *
+     */
+    namespace Vulkan_Backend
     {
+        /**
+         * @brief Construct a new Instance:: Instance object
+         *
+         * @param application_name
+         * @param application_version
+         * @param required_instance_extensions
+         */
         Instance::Instance(const char* application_name, uint32_t application_version, std::set<const char*> required_instance_extensions) : m_required_instance_extensions(required_instance_extensions)
         {
             LOG_INFO << "Vulkan: Creating instance";
@@ -47,13 +67,13 @@ namespace Cascade_Graphics
             instance_create_info.ppEnabledExtensionNames = required_extensions.data();
 
 #if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
-            Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Check_Validation_Layer_Support(Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers());
+            Validation_Layer::Check_Validation_Layer_Support(Validation_Layer::Get_Enabled_Validation_Layers());
 
-            std::vector<const char*> enabled_validation_layers = Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers();
+            std::vector<const char*> enabled_validation_layers = Validation_Layer::Get_Enabled_Validation_Layers();
             instance_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
             instance_create_info.ppEnabledLayerNames = enabled_validation_layers.data();
 
-            VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Generate_Messenger_Create_Info();
+            VkDebugUtilsMessengerCreateInfoEXT messenger_create_info = Validation_Layer::Generate_Messenger_Create_Info();
             instance_create_info.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&messenger_create_info;
 #else
             instance_create_info.enabledLayerCount = 0;
@@ -72,6 +92,10 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan: Finished creating instance";
         }
 
+        /**
+         * @brief Destroy the Instance:: Instance object
+         *
+         */
         Instance::~Instance()
         {
             LOG_INFO << "Vulkan: Destroying instance";
@@ -81,19 +105,30 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan: Finished destroying instance";
         }
 
+        /**
+         * @brief Get the number of supported Vulkan instance extensions
+         *
+         * @return uint32_t
+         */
         uint32_t Instance::Get_Supported_Extension_Count()
         {
             uint32_t extension_count = 0;
             vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
 
-            LOG_DEBUG << "Vulkan: This device supports " << extension_count << " extensions";
+            LOG_DEBUG << "Vulkan: This device supports " << extension_count << " instance extensions";
 
             return extension_count;
         }
 
+        /**
+         * @brief Determine whether the required instance extensions are supported
+         *
+         * @return true
+         * @return false
+         */
         bool Instance::Is_Vulkan_Supported()
         {
-            LOG_INFO << "Vulkan: Checking Vulkan support";
+            LOG_INFO << "Vulkan: Checking this device's Vulkan support";
 
             std::vector<bool> extensions_satisfied(m_required_instance_extensions.size());
 
@@ -103,7 +138,7 @@ namespace Cascade_Graphics
 
             for (uint32_t i = 0; i < supported_extensions.size(); i++)
             {
-                LOG_TRACE << "Vulkan: Extension supported " << supported_extensions[i].extensionName;
+                LOG_TRACE << "Vulkan: Instance extension supported " << supported_extensions[i].extensionName;
             }
 
             bool vulkan_supported = true;
@@ -117,26 +152,31 @@ namespace Cascade_Graphics
 
                 if (!found_extension)
                 {
-                    LOG_ERROR << "Vulkan: Missing support for extension " << extension;
+                    LOG_ERROR << "Vulkan: Missing support for instance extension " << extension;
                     vulkan_supported = false;
                 }
             }
 
             if (vulkan_supported)
             {
-                LOG_DEBUG << "Vulkan: This device has all the required extensions";
+                LOG_DEBUG << "Vulkan: This device has all the required instance extensions";
                 return true;
             }
             else
             {
-                LOG_FATAL << "Vulkan: This device is missing a required extension";
+                LOG_FATAL << "Vulkan: This device is missing a required instance extension";
                 exit(EXIT_FAILURE);
             }
         }
 
+        /**
+         * @brief Return a pointer of the VkInstance
+         *
+         * @return VkInstance*
+         */
         VkInstance* Instance::Get_Instance()
         {
             return &m_instance;
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

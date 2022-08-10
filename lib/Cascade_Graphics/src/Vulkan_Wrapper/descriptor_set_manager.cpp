@@ -6,7 +6,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         Descriptor_Set_Manager::Descriptor_Set_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr) : m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr)
         {
@@ -237,5 +237,5 @@ namespace Cascade_Graphics
             LOG_ERROR << "Vulkan: The descriptor set '" << label << "' does not exist";
             exit(EXIT_FAILURE);
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

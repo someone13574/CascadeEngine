@@ -4,7 +4,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         Surface::Surface(Window_Information window_data, std::shared_ptr<Instance> instance_ptr) : m_instance_ptr(instance_ptr)
         {
@@ -62,5 +62,5 @@ namespace Cascade_Graphics
         {
             return &m_surface;
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

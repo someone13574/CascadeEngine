@@ -7,7 +7,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         Queue_Manager::Queue_Manager(std::shared_ptr<Surface> surface_ptr, uint32_t required_queues) : m_surface_ptr(surface_ptr), m_required_queues(required_queues)
         {
@@ -345,5 +345,5 @@ namespace Cascade_Graphics
 
             return device_queue_create_infos;
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

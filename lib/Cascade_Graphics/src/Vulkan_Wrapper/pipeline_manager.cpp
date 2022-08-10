@@ -4,7 +4,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         Pipeline_Manager::Pipeline_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr,
                                            std::shared_ptr<Device> logical_device_ptr,
@@ -108,5 +108,5 @@ namespace Cascade_Graphics
         {
             return &m_pipelines[Get_Pipeline_Index(label)].pipeline_layout;
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

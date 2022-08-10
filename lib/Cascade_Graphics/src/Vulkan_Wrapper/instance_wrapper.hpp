@@ -1,13 +1,17 @@
 #pragma once
 
 #include "vulkan_header.hpp"
-
 #include <set>
+
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
+        /**
+         * @brief A wrapper class for managing a Vulkan instance's creation and functions
+         *
+         */
         class Instance
         {
         private:
@@ -26,5 +30,5 @@ namespace Cascade_Graphics
         public:
             VkInstance* Get_Instance();
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

@@ -12,7 +12,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Queue_Manager;
 
@@ -38,5 +38,5 @@ namespace Cascade_Graphics
             VkPhysicalDevice* Get_Physical_Device();
             std::set<const char*> Get_Required_Extensions();
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

@@ -11,7 +11,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Queue_Manager
         {
@@ -58,5 +58,5 @@ namespace Cascade_Graphics
             std::vector<uint32_t> Get_Unique_Queue_Families(uint32_t required_queues);
             std::vector<VkDeviceQueueCreateInfo> Generate_Device_Queue_Create_Infos();
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

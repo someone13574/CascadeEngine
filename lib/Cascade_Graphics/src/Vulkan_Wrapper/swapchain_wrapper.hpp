@@ -13,7 +13,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Swapchain
         {
@@ -61,5 +61,5 @@ namespace Cascade_Graphics
             uint32_t Get_Swapchain_Image_Count();
             VkExtent2D Get_Swapchain_Extent();
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

@@ -13,7 +13,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Storage_Manager;
         class Descriptor_Set_Manager;
@@ -99,5 +99,5 @@ namespace Cascade_Graphics
 
             VkCommandBuffer* Get_Command_Buffer(Identifier identifier);
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

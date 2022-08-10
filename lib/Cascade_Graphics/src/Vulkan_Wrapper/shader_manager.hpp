@@ -9,7 +9,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         enum Shader_Type
         {
@@ -47,5 +47,5 @@ namespace Cascade_Graphics
             VkShaderModule* Get_Shader_Module(std::string label);
             std::vector<Shader_Info> Get_Shaders_Details();
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

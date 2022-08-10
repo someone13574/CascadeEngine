@@ -13,7 +13,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Storage_Manager;
         class Descriptor_Set_Manager;
@@ -57,5 +57,5 @@ namespace Cascade_Graphics
             VkPipeline* Get_Pipeline(std::string label);
             VkPipelineLayout* Get_Pipeline_Layout(std::string label);
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

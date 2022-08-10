@@ -8,7 +8,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Surface
         {
@@ -24,5 +24,5 @@ namespace Cascade_Graphics
         public:
             VkSurfaceKHR* Get_Surface();
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

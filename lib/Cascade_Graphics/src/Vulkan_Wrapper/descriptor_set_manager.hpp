@@ -11,7 +11,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Storage_Manager;
 
@@ -54,5 +54,5 @@ namespace Cascade_Graphics
 
             Descriptor_Set_Data* Get_Descriptor_Set_Data(std::string label);
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

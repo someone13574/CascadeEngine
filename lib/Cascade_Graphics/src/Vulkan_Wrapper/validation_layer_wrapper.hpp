@@ -6,9 +6,9 @@
 #include <memory>
 #include <vector>
 
-namespace Cascade_Graphics_Debugging
+namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         class Validation_Layer
         {
@@ -16,10 +16,10 @@ namespace Cascade_Graphics_Debugging
             const std::vector<const char*> ENABLED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
             VkDebugUtilsMessengerEXT m_debug_messenger;
 
-            std::shared_ptr<Cascade_Graphics::Vulkan::Instance> m_instance_ptr;
+            std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance> m_instance_ptr;
 
         public:
-            Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan::Instance> instance_ptr);
+            Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance> instance_ptr);
             ~Validation_Layer();
 
         public:
@@ -28,5 +28,5 @@ namespace Cascade_Graphics_Debugging
 
             static std::vector<const char*> Get_Enabled_Validation_Layers();
         };
-    } // namespace Vulkan
-} // namespace Cascade_Graphics_Debugging
+    } // namespace Vulkan_Backend
+} // namespace Cascade_Graphics

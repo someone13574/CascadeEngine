@@ -4,11 +4,11 @@
 
 #include <cstring>
 
-namespace Cascade_Graphics_Debugging
+namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
-        Validation_Layer::Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan::Instance> instance_ptr) : m_instance_ptr(instance_ptr)
+        Validation_Layer::Validation_Layer(std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Instance> instance_ptr) : m_instance_ptr(instance_ptr)
         {
 #if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
             LOG_INFO << "Vulkan: Creating validation layer debug messenger";
@@ -220,5 +220,5 @@ namespace Cascade_Graphics_Debugging
         {
             return {"VK_LAYER_KHRONOS_validation"};
         }
-    } // namespace Vulkan
-} // namespace Cascade_Graphics_Debugging
+    } // namespace Vulkan_Backend
+} // namespace Cascade_Graphics

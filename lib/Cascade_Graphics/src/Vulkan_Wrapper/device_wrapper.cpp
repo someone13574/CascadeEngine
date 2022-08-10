@@ -7,9 +7,9 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
-        Device::Device(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Cascade_Graphics_Debugging::Vulkan::Validation_Layer> validation_layer_ptr)
+        Device::Device(std::shared_ptr<Physical_Device> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer> validation_layer_ptr)
         {
             LOG_INFO << "Vulkan: Creating logical device";
 
@@ -26,7 +26,7 @@ namespace Cascade_Graphics
             device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_infos.size());
             device_create_info.pQueueCreateInfos = device_queue_create_infos.data();
 #if defined CSD_VULKAN_ENABLE_DEBUG_LAYERS
-            std::vector<const char*> enabled_validation_layers = Cascade_Graphics_Debugging::Vulkan::Validation_Layer::Get_Enabled_Validation_Layers();
+            std::vector<const char*> enabled_validation_layers = Validation_Layer::Get_Enabled_Validation_Layers();
             device_create_info.enabledLayerCount = static_cast<uint32_t>(enabled_validation_layers.size());
             device_create_info.ppEnabledLayerNames = enabled_validation_layers.data();
 #else
@@ -61,5 +61,5 @@ namespace Cascade_Graphics
         {
             return &m_device;
         }
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

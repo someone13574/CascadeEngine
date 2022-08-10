@@ -4,7 +4,7 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
+    namespace Vulkan_Backend
     {
         struct Resource_ID
         {
@@ -22,5 +22,5 @@ namespace Cascade_Graphics
                 return index == other_id.index && label == other_id.label && resource_type == other_id.resource_type;
             }
         };
-    } // namespace Vulkan
+    } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics
