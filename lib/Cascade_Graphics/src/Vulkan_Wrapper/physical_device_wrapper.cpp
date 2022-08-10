@@ -74,22 +74,22 @@ namespace Cascade_Graphics
 
             if (!m_queue_manager_ptr->Has_Required_Queues(&physical_device))
             {
-                LOG_INFO << "Vulkan: Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
+                LOG_INFO << "Vulkan Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
                 return false;
             }
 
             if (!Check_Device_Extension_Support(physical_device))
             {
-                LOG_INFO << "Vulkan: Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
+                LOG_INFO << "Vulkan Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
                 return false;
             }
 
             if (!Swapchain_Wrapper::Is_Swapchain_Adequate(&physical_device, m_surface_wrapper_ptr))
             {
-                LOG_INFO << "Vulkan: Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
+                LOG_INFO << "Vulkan Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
                 return false;
             }
-            LOG_INFO << "Vulkan: Backend: Physical device '" << physical_device_properties.deviceName << "' has all required features";
+            LOG_INFO << "Vulkan Backend: Physical device '" << physical_device_properties.deviceName << "' has all required features";
             return true;
         }
 
@@ -153,7 +153,7 @@ namespace Cascade_Graphics
 
             rating += physical_device_properties.limits.maxImageDimension2D;
 
-            LOG_TRACE << "Vulkan: Physical device '" << physical_device_properties.deviceName << "' has a rating of " << rating;
+            LOG_TRACE << "Vulkan Backend: Physical device '" << physical_device_properties.deviceName << "' has a rating of " << rating;
 
             return rating;
         }

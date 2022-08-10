@@ -1,13 +1,12 @@
 #pragma once
 
-
 #include "surface_wrapper.hpp"
 #include "vulkan_header.hpp"
-
 #include <map>
 #include <memory>
 #include <optional>
 #include <vector>
+
 
 namespace Cascade_Graphics
 {
@@ -39,24 +38,24 @@ namespace Cascade_Graphics
             };
 
         private:
-            std::shared_ptr<Surface_Wrapper> m_surface_ptr;
-
             uint32_t m_required_queues;
-            std::map<uint32_t, VkQueue> m_queues;
             Queue_Family_Indices m_queue_family_indices;
+            std::map<uint32_t, VkQueue> m_queues;
+
+            std::shared_ptr<Surface_Wrapper> m_surface_wrapper_ptr;
 
         public:
-            Queue_Manager(std::shared_ptr<Surface_Wrapper> surface_ptr, uint32_t required_queues);
+            Queue_Manager(std::shared_ptr<Surface_Wrapper> surface_wrapper_ptr, uint32_t required_queues);
 
         public:
-            uint32_t Get_Required_Queue_Types();
-            VkQueue* Get_Queue(Queue_Types queue_type);
-            void Get_Device_Queue_Handles(VkDevice* device_ptr);
-            uint32_t Get_Queue_Family_Index(Queue_Types queue_type);
-            void Get_Queue_Families(VkPhysicalDevice* physical_device_ptr);
             bool Has_Required_Queues(VkPhysicalDevice* physical_device_ptr);
-            std::vector<uint32_t> Get_Unique_Queue_Families(uint32_t required_queues);
+            void Get_Queue_Families(VkPhysicalDevice* physical_device_ptr);
+            void Get_Device_Queue_Handles(VkDevice* device_ptr);
             std::vector<VkDeviceQueueCreateInfo> Generate_Device_Queue_Create_Infos();
+
+            VkQueue* Get_Queue(Queue_Types queue_type);
+            uint32_t Get_Queue_Family_Index(Queue_Types queue_type);
+            std::vector<uint32_t> Get_Unique_Queue_Families(uint32_t required_queues);
         };
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics
