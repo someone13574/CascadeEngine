@@ -2,7 +2,7 @@
 
 #include "vulkan_header.hpp"
 
-#include "device_wrapper.hpp"
+#include "logical_device_wrapper.hpp"
 #include "storage_manager.hpp"
 #include <memory>
 #include <string>
@@ -35,7 +35,7 @@ namespace Cascade_Graphics
             std::vector<Descriptor_Set_Data> m_descriptor_sets;
             std::vector<VkSampler> m_samplers;
 
-            std::shared_ptr<Device> m_logical_device_ptr;
+            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_ptr;
             std::shared_ptr<Storage_Manager> m_storage_manager_ptr;
 
         private:
@@ -45,7 +45,7 @@ namespace Cascade_Graphics
             void Create_Write_Descriptor_Set(std::string label);
 
         public:
-            Descriptor_Set_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr);
+            Descriptor_Set_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr);
             ~Descriptor_Set_Manager();
 
         public:

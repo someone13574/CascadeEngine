@@ -1,6 +1,6 @@
 #pragma once
 
-#include "device_wrapper.hpp"
+#include "logical_device_wrapper.hpp"
 #include "vulkan_header.hpp"
 
 #include <memory>
@@ -33,12 +33,12 @@ namespace Cascade_Graphics
         class Shader_Manager
         {
         private:
-            std::shared_ptr<Device> m_logical_device_ptr;
+            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_ptr;
 
             std::vector<Shader> m_shaders;
 
         public:
-            Shader_Manager(std::shared_ptr<Device> logical_device_ptr);
+            Shader_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr);
             ~Shader_Manager();
 
         public:

@@ -5,7 +5,7 @@
 
 #include "command_buffer_manager.hpp"
 #include "descriptor_set_manager.hpp"
-#include "device_wrapper.hpp"
+#include "logical_device_wrapper.hpp"
 #include "physical_device_wrapper.hpp"
 #include "queue_manager.hpp"
 #include "storage_manager_resource_id.hpp"
@@ -72,7 +72,7 @@ namespace Cascade_Graphics
             std::vector<Image_Resource> m_image_resources;
             std::vector<Resource_Grouping> m_resource_groupings;
 
-            std::shared_ptr<Device> m_logical_device_ptr;
+            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_ptr;
             std::shared_ptr<Physical_Device_Wrapper> m_physical_device_ptr;
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
 
@@ -90,7 +90,7 @@ namespace Cascade_Graphics
             void Create_Image_View(Resource_ID resource_id);
 
         public:
-            Storage_Manager(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
+            Storage_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr, std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
             ~Storage_Manager();
 
         public:

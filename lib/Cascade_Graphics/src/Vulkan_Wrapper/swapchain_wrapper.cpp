@@ -9,7 +9,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Swapchain::Swapchain(std::shared_ptr<Device> logical_device_ptr,
+        Swapchain::Swapchain(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr,
                              std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr,
                              std::shared_ptr<Surface_Wrapper> surface_ptr,
                              std::shared_ptr<Queue_Manager> queue_manager_ptr,

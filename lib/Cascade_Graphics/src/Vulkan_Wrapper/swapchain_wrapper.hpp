@@ -2,7 +2,7 @@
 
 #include "vulkan_header.hpp"
 
-#include "device_wrapper.hpp"
+#include "logical_device_wrapper.hpp"
 #include "physical_device_wrapper.hpp"
 #include "queue_manager.hpp"
 #include "storage_manager.hpp"
@@ -18,7 +18,7 @@ namespace Cascade_Graphics
         class Swapchain
         {
         private:
-            std::shared_ptr<Device> m_logical_device_ptr;
+            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_ptr;
             std::shared_ptr<Physical_Device_Wrapper> m_physical_device_ptr;
             std::shared_ptr<Surface_Wrapper> m_surface_ptr;
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
@@ -49,7 +49,7 @@ namespace Cascade_Graphics
             void Create_Swapchain_Image_Views();
 
         public:
-            Swapchain(std::shared_ptr<Device> logical_device_ptr,
+            Swapchain(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr,
                       std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr,
                       std::shared_ptr<Surface_Wrapper> surface_ptr,
                       std::shared_ptr<Queue_Manager> queue_manager_ptr,
