@@ -1,7 +1,7 @@
 #pragma once
 
 #include "descriptor_set_manager.hpp"
-#include "logical_device_wrapper.hpp"
+#include "device_wrapper.hpp"
 #include "pipeline_manager.hpp"
 #include "storage_manager.hpp"
 #include "storage_manager_resource_id.hpp"
@@ -65,7 +65,7 @@ namespace Cascade_Graphics
 
         private:
             std::shared_ptr<Descriptor_Set_Manager> m_descriptor_set_manager;
-            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_ptr;
+            std::shared_ptr<Device> m_logical_device_ptr;
             std::shared_ptr<Pipeline_Manager> m_pipeline_manager_ptr;
             std::shared_ptr<Storage_Manager> m_storage_manager_ptr;
 
@@ -80,7 +80,7 @@ namespace Cascade_Graphics
 
         public:
             Command_Buffer_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager,
-                                   std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr,
+                                   std::shared_ptr<Device> logical_device_ptr,
                                    std::shared_ptr<Pipeline_Manager> pipeline_manager_ptr,
                                    std::shared_ptr<Storage_Manager> storage_manager_ptr);
             ~Command_Buffer_Manager();

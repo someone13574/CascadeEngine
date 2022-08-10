@@ -3,7 +3,7 @@
 #include "vulkan_header.hpp"
 
 #include "descriptor_set_manager.hpp"
-#include "logical_device_wrapper.hpp"
+#include "device_wrapper.hpp"
 #include "shader_manager.hpp"
 #include "storage_manager.hpp"
 
@@ -37,7 +37,7 @@ namespace Cascade_Graphics
 
         private:
             std::shared_ptr<Descriptor_Set_Manager> m_descriptor_set_manager_ptr;
-            std::shared_ptr<Logical_Device_Wrapper> m_logical_device_ptr;
+            std::shared_ptr<Device> m_logical_device_ptr;
             std::shared_ptr<Storage_Manager> m_storage_manager_ptr;
             std::shared_ptr<Shader_Manager> m_shader_manager_ptr;
 
@@ -47,10 +47,7 @@ namespace Cascade_Graphics
             uint32_t Get_Pipeline_Index(std::string label);
 
         public:
-            Pipeline_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr,
-                             std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr,
-                             std::shared_ptr<Storage_Manager> storage_manager_ptr,
-                             std::shared_ptr<Shader_Manager> shader_manager_ptr);
+            Pipeline_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr, std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr, std::shared_ptr<Shader_Manager> shader_manager_ptr);
             ~Pipeline_Manager();
 
         public:

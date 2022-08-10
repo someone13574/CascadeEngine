@@ -8,7 +8,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Shader_Manager::Shader_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr) : m_logical_device_ptr(logical_device_ptr)
+        Shader_Manager::Shader_Manager(std::shared_ptr<Device> logical_device_ptr) : m_logical_device_ptr(logical_device_ptr)
         {
         }
 

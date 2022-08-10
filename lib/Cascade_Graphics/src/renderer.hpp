@@ -13,8 +13,8 @@
 #include "Vulkan_Wrapper/command_buffer_manager.hpp"
 #include "Vulkan_Wrapper/debug_tools.hpp"
 #include "Vulkan_Wrapper/descriptor_set_manager.hpp"
+#include "Vulkan_Wrapper/device_wrapper.hpp"
 #include "Vulkan_Wrapper/instance_wrapper.hpp"
-#include "Vulkan_Wrapper/logical_device_wrapper.hpp"
 #include "Vulkan_Wrapper/physical_device_wrapper.hpp"
 #include "Vulkan_Wrapper/pipeline_manager.hpp"
 #include "Vulkan_Wrapper/queue_manager.hpp"
@@ -52,7 +52,7 @@ namespace Cascade_Graphics
         std::shared_ptr<Vulkan_Backend::Surface_Wrapper> m_surface_ptr;
         std::shared_ptr<Vulkan_Backend::Queue_Manager> m_queue_manager_ptr;
         std::shared_ptr<Vulkan_Backend::Physical_Device_Wrapper> m_physical_device_ptr;
-        std::shared_ptr<Vulkan_Backend::Logical_Device_Wrapper> m_logical_device_ptr;
+        std::shared_ptr<Vulkan_Backend::Device> m_logical_device_ptr;
         std::shared_ptr<Vulkan_Backend::Swapchain> m_swapchain_ptr;
         std::shared_ptr<Vulkan_Backend::Storage_Manager> m_storage_manager_ptr;
         std::shared_ptr<Vulkan_Backend::Shader_Manager> m_shader_manager_ptr;

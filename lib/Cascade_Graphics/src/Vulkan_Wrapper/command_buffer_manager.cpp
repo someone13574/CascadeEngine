@@ -7,7 +7,7 @@ namespace Cascade_Graphics
     namespace Vulkan_Backend
     {
         Command_Buffer_Manager::Command_Buffer_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager,
-                                                       std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr,
+                                                       std::shared_ptr<Device> logical_device_ptr,
                                                        std::shared_ptr<Pipeline_Manager> pipeline_manager_ptr,
                                                        std::shared_ptr<Storage_Manager> storage_manager_ptr)
             : m_descriptor_set_manager(descriptor_set_manager), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr)
