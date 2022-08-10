@@ -84,7 +84,7 @@ namespace Cascade_Graphics
                 return false;
             }
 
-            if (!Swapchain::Is_Swapchain_Adequate(&physical_device, m_surface_wrapper_ptr))
+            if (!Swapchain_Wrapper::Is_Swapchain_Adequate(&physical_device, m_surface_wrapper_ptr))
             {
                 LOG_INFO << "Vulkan: Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
                 return false;

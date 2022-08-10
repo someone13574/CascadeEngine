@@ -1,7 +1,6 @@
 #include "swapchain_wrapper.hpp"
 
 #include "debug_tools.hpp"
-#include "queue_manager.hpp"
 #include <algorithm>
 
 
@@ -9,96 +8,93 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Swapchain::Swapchain(std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr,
-                             std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr,
-                             std::shared_ptr<Surface_Wrapper> surface_ptr,
-                             std::shared_ptr<Queue_Manager> queue_manager_ptr,
-                             uint32_t width,
-                             uint32_t height)
-            : m_logical_device_ptr(logical_device_ptr), m_physical_device_ptr(physical_device_ptr), m_surface_ptr(surface_ptr), m_queue_manager_ptr(queue_manager_ptr)
+        Swapchain_Wrapper::Swapchain_Wrapper(std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr,
+                                             std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr,
+                                             std::shared_ptr<Surface_Wrapper> surface_wrapper_ptr,
+                                             std::shared_ptr<Queue_Manager> queue_manager_ptr,
+                                             uint32_t width,
+                                             uint32_t height)
+            : m_logical_device_wrapper_ptr(logical_device_wrapper_ptr), m_physical_device_wrapper_ptr(physical_device_wrapper_ptr), m_surface_wrapper_ptr(surface_wrapper_ptr), m_queue_manager_ptr(queue_manager_ptr)
         {
-            LOG_INFO << "Vulkan: Creating swapchain";
+            LOG_INFO << "Vulkan Backend: Creating swapchain";
 
-            Get_Swapchain_Support();
-            Select_Swapchain_Format();
+            Get_Swapchain_Support_Details();
+
+            Select_Swapchain_Image_Format();
             Select_Present_Mode();
-            Select_Swapchain_Extent(width, height);
+            Select_Swapchain_Image_Extent(width, height);
             Select_Swapchain_Image_Count();
+
             Create_Swapchain();
-            Get_Swapchain_Images();
+            Create_Swapchain_Images();
             Create_Swapchain_Image_Views();
 
-
-            LOG_TRACE << "Vulkan: Finished creating swapchain";
+            LOG_TRACE << "Vulkan Backend: Finished creating swapchain";
         }
 
-        Swapchain::~Swapchain()
+        Swapchain_Wrapper::~Swapchain_Wrapper()
         {
-            LOG_INFO << "Vulkan: Destroying swapchain";
+            LOG_INFO << "Vulkan Backend: Destroying swapchain";
 
             for (uint32_t i = 0; i < m_swapchain_image_count; i++)
             {
-                vkDestroyImageView(*m_logical_device_ptr->Get_Device(), m_swapchain_image_views[i], nullptr);
+                vkDestroyImageView(*m_logical_device_wrapper_ptr->Get_Device(), m_swapchain_image_views[i], nullptr);
             }
 
-            vkDestroySwapchainKHR(*m_logical_device_ptr->Get_Device(), m_swapchain, nullptr);
+            vkDestroySwapchainKHR(*m_logical_device_wrapper_ptr->Get_Device(), m_swapchain, nullptr);
 
-            LOG_TRACE << "Vulkan: Finished destroying swapchain";
+            LOG_TRACE << "Vulkan Backend: Finished destroying swapchain";
         }
 
-        void Swapchain::Get_Swapchain_Support()
+        void Swapchain_Wrapper::Get_Swapchain_Support_Details()
         {
-            LOG_INFO << "Vulkan: Getting swapchain support";
-
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &m_surface_capabilities), "Vulkan: Failed to get physical device surface capabilities");
+            LOG_INFO << "Vulkan Backend: Getting swapchain support details";
 
             uint32_t surface_format_count;
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &surface_format_count, nullptr), "Vulkan: Failed to get supported surface formats");
+            uint32_t present_mode_count;
 
-            LOG_TRACE << "Vulkan: Found " << surface_format_count << " surface formats";
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*m_physical_device_wrapper_ptr->Get_Physical_Device(), *m_surface_wrapper_ptr->Get_Surface(), &m_surface_capabilities),
+                              "Vulkan Backend: Failed to get physical device surface capabilities");
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_wrapper_ptr->Get_Physical_Device(), *m_surface_wrapper_ptr->Get_Surface(), &surface_format_count, nullptr),
+                              "Vulkan Backend: Failed to get supported surface formats");
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_wrapper_ptr->Get_Physical_Device(), *m_surface_wrapper_ptr->Get_Surface(), &present_mode_count, nullptr),
+                              "Vulkan Backend: Failed to get supported present modes");
 
-            if (surface_format_count != 0)
+            LOG_TRACE << "Vulkan Backend: Found " << surface_format_count << " surface formats";
+            LOG_TRACE << "Vulkan Backend: Found " << present_mode_count << " present modes";
+
+            if (surface_format_count == 0)
             {
-                m_supported_surface_formats.resize(surface_format_count);
-
-                VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &surface_format_count, m_supported_surface_formats.data()),
-                                  "Vulkan: Failed to get supported surface formats");
-
-                for (uint32_t i = 0; i < surface_format_count; i++)
-                {
-                    LOG_TRACE << "Vulkan: Found surface format " << m_supported_surface_formats[i].format;
-                }
+                LOG_ERROR << "Vulkan Backend: Physical device doesn't support any surface formats";
+                exit(EXIT_FAILURE);
             }
-            else
+            else if (present_mode_count == 0)
             {
-                LOG_ERROR << "Vulkan: Physical device doesn't support any surface formats";
+                LOG_ERROR << "Vulkan Backend: Physical device doesn't support any present modes";
                 exit(EXIT_FAILURE);
             }
 
-            uint32_t present_mode_count;
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &present_mode_count, nullptr), "Vulkan: Failed to get supported present modes");
-            LOG_TRACE << "Vulkan: Found " << present_mode_count << " present modes";
+            m_supported_surface_formats.resize(surface_format_count);
+            m_supported_present_modes.resize(present_mode_count);
 
-            if (present_mode_count != 0)
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_wrapper_ptr->Get_Physical_Device(), *m_surface_wrapper_ptr->Get_Surface(), &surface_format_count, m_supported_surface_formats.data()),
+                              "Vulkan Backend: Failed to get supported surface formats");
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_wrapper_ptr->Get_Physical_Device(), *m_surface_wrapper_ptr->Get_Surface(), &present_mode_count, m_supported_present_modes.data()),
+                              "Vulkan Backend: Failed to get supported present modes");
+
+            for (uint32_t i = 0; i < surface_format_count; i++)
             {
-                m_supported_present_modes.resize(present_mode_count);
-                VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get_Physical_Device(), *m_surface_ptr->Get_Surface(), &present_mode_count, m_supported_present_modes.data()),
-                                  "Vulkan: Failed to get supported present modes");
-
-                for (uint32_t i = 0; i < present_mode_count; i++)
-                {
-                    LOG_TRACE << "Vulkan: Found present mode " << m_supported_present_modes[i];
-                }
+                LOG_TRACE << "Vulkan Backend: Found surface format " << m_supported_surface_formats[i].format;
             }
-            else
+            for (uint32_t i = 0; i < present_mode_count; i++)
             {
-                LOG_ERROR << "Vulkan: Physical device doesn't support any present modes";
+                LOG_TRACE << "Vulkan Backend: Found present mode " << m_supported_present_modes[i];
             }
         }
 
-        void Swapchain::Select_Swapchain_Format()
+        void Swapchain_Wrapper::Select_Swapchain_Image_Format()
         {
-            LOG_TRACE << "Vulkan: Selecting surface format";
+            LOG_TRACE << "Vulkan Backend: Selecting swapchain image format";
 
             for (uint32_t i = 0; i < m_supported_surface_formats.size(); i++)
             {
@@ -106,8 +102,8 @@ namespace Cascade_Graphics
                 {
                     m_surface_format = m_supported_surface_formats[i];
 
-                    LOG_DEBUG << "Vulkan: Selected swapchain format " << m_surface_format.format;
-                    LOG_DEBUG << "Vulkan: Selected swapchain color space " << m_surface_format.colorSpace;
+                    LOG_DEBUG << "Vulkan Backend: Selected swapchain image format " << m_surface_format.format;
+                    LOG_DEBUG << "Vulkan Backend: Selected swapchain color space " << m_surface_format.colorSpace;
 
                     return;
                 }
@@ -115,13 +111,13 @@ namespace Cascade_Graphics
 
             m_surface_format = m_supported_surface_formats[0];
 
-            LOG_DEBUG << "Vulkan: Selected swapchain format " << m_surface_format.format;
-            LOG_DEBUG << "Vulkan: Selected swapchain color space " << m_surface_format.colorSpace;
+            LOG_DEBUG << "Vulkan Backend: Selected swapchain image format " << m_surface_format.format;
+            LOG_DEBUG << "Vulkan Backend: Selected swapchain color space " << m_surface_format.colorSpace;
         }
 
-        void Swapchain::Select_Present_Mode()
+        void Swapchain_Wrapper::Select_Present_Mode()
         {
-            LOG_TRACE << "Vulkan: Selecting present mode";
+            LOG_TRACE << "Vulkan Backend: Selecting present mode";
 
             for (uint32_t i = 0; i < m_supported_present_modes.size(); i++)
             {
@@ -129,7 +125,7 @@ namespace Cascade_Graphics
                 {
                     m_present_mode = m_supported_present_modes[i];
 
-                    LOG_DEBUG << "Vulkan: Selected present mode " << m_present_mode;
+                    LOG_DEBUG << "Vulkan Backend: Selected present mode " << m_present_mode;
 
                     return;
                 }
@@ -137,24 +133,24 @@ namespace Cascade_Graphics
 
             m_present_mode = m_supported_present_modes[0];
 
-            LOG_DEBUG << "Vulkan: Selected present mode " << m_present_mode;
+            LOG_DEBUG << "Vulkan Backend: Selected present mode " << m_present_mode;
         }
 
-        void Swapchain::Select_Swapchain_Extent(uint32_t width, uint32_t height)
+        void Swapchain_Wrapper::Select_Swapchain_Image_Extent(uint32_t width, uint32_t height)
         {
-            LOG_TRACE << "Vulkan: Selecting swapchain extent";
+            LOG_TRACE << "Vulkan Backend: Selecting swapchain image extent";
 
             m_swapchain_extent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
             m_swapchain_extent.width = std::clamp(m_swapchain_extent.width, m_surface_capabilities.minImageExtent.width, m_surface_capabilities.maxImageExtent.width);
             m_swapchain_extent.height = std::clamp(m_swapchain_extent.height, m_surface_capabilities.minImageExtent.height, m_surface_capabilities.maxImageExtent.height);
 
-            LOG_DEBUG << "Vulkan: Set swapchain extent to " << m_swapchain_extent.width << "x" << m_swapchain_extent.height;
+            LOG_DEBUG << "Vulkan Backend: Set swapchain image extent to " << m_swapchain_extent.width << "x" << m_swapchain_extent.height;
         }
 
-        void Swapchain::Select_Swapchain_Image_Count()
+        void Swapchain_Wrapper::Select_Swapchain_Image_Count()
         {
-            LOG_TRACE << "Vulkan: Selecting swapchain image count";
+            LOG_TRACE << "Vulkan Backend: Selecting swapchain image count";
 
             m_swapchain_image_count = m_surface_capabilities.minImageCount + 1;
 
@@ -163,12 +159,12 @@ namespace Cascade_Graphics
                 m_swapchain_image_count = m_surface_capabilities.maxImageCount;
             }
 
-            LOG_DEBUG << "Vulkan: Selected swapchain image count of " << m_swapchain_image_count;
+            LOG_DEBUG << "Vulkan Backend: Selected swapchain image count of " << m_swapchain_image_count;
         }
 
-        void Swapchain::Create_Swapchain()
+        void Swapchain_Wrapper::Create_Swapchain()
         {
-            LOG_INFO << "Vulkan: Creating swapchain";
+            LOG_INFO << "Vulkan Backend: Creating swapchain";
 
             std::vector<uint32_t> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(Queue_Manager::Queue_Types::TRANSFER_QUEUE | Queue_Manager::Queue_Types::PRESENT_QUEUE);
 
@@ -176,7 +172,7 @@ namespace Cascade_Graphics
             swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
             swapchain_create_info.pNext = nullptr;
             swapchain_create_info.flags = 0;
-            swapchain_create_info.surface = *m_surface_ptr->Get_Surface();
+            swapchain_create_info.surface = *m_surface_wrapper_ptr->Get_Surface();
             swapchain_create_info.minImageCount = m_swapchain_image_count;
             swapchain_create_info.imageFormat = m_surface_format.format;
             swapchain_create_info.imageColorSpace = m_surface_format.colorSpace;
@@ -192,21 +188,22 @@ namespace Cascade_Graphics
             swapchain_create_info.clipped = VK_TRUE;
             swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
 
-            VALIDATE_VKRESULT(vkCreateSwapchainKHR(*m_logical_device_ptr->Get_Device(), &swapchain_create_info, nullptr, &m_swapchain), "Vulkan: Failed to create swapchain");
+            VALIDATE_VKRESULT(vkCreateSwapchainKHR(*m_logical_device_wrapper_ptr->Get_Device(), &swapchain_create_info, nullptr, &m_swapchain), "Vulkan Backend: Failed to create swapchain");
         }
 
-        void Swapchain::Get_Swapchain_Images()
+        void Swapchain_Wrapper::Create_Swapchain_Images()
         {
-            LOG_TRACE << "Vulkan: Getting swapchain images";
+            LOG_TRACE << "Vulkan Backend: Getting image handles from swapchain";
 
-            VALIDATE_VKRESULT(vkGetSwapchainImagesKHR(*m_logical_device_ptr->Get_Device(), m_swapchain, &m_swapchain_image_count, nullptr), "Vulkan: Failed to get swapchain image count");
+            VALIDATE_VKRESULT(vkGetSwapchainImagesKHR(*m_logical_device_wrapper_ptr->Get_Device(), m_swapchain, &m_swapchain_image_count, nullptr), "Vulkan Backend: Failed to get swapchain image count");
+
             m_swapchain_images.resize(m_swapchain_image_count);
-            VALIDATE_VKRESULT(vkGetSwapchainImagesKHR(*m_logical_device_ptr->Get_Device(), m_swapchain, &m_swapchain_image_count, m_swapchain_images.data()), "Vulkan: Failed to get swapchain images");
+            VALIDATE_VKRESULT(vkGetSwapchainImagesKHR(*m_logical_device_wrapper_ptr->Get_Device(), m_swapchain, &m_swapchain_image_count, m_swapchain_images.data()), "Vulkan Backend: Failed to get image handles from swapchain");
         }
 
-        void Swapchain::Create_Swapchain_Image_Views()
+        void Swapchain_Wrapper::Create_Swapchain_Image_Views()
         {
-            LOG_TRACE << "Vulkan: Creating swapchain image views";
+            LOG_TRACE << "Vulkan Backend: Creating swapchain image views";
 
             m_swapchain_image_views.resize(m_swapchain_image_count);
 
@@ -229,58 +226,52 @@ namespace Cascade_Graphics
                 swapchain_image_view_create_info.subresourceRange.baseArrayLayer = 0;
                 swapchain_image_view_create_info.subresourceRange.layerCount = 1;
 
-                VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_ptr->Get_Device(), &swapchain_image_view_create_info, nullptr, &m_swapchain_image_views[i]), "Vulkan: Failed to create swapchain image view");
+                VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_wrapper_ptr->Get_Device(), &swapchain_image_view_create_info, nullptr, &m_swapchain_image_views[i]), "Vulkan Backend: Failed to create swapchain image view");
             }
         }
 
-        bool Swapchain::Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface_Wrapper> surface_ptr)
+        bool Swapchain_Wrapper::Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface_Wrapper> surface_ptr)
         {
-            LOG_INFO << "Vulkan: Checking surface support";
+            LOG_INFO << "Vulkan Backend: Checking surface support";
 
+            uint32_t surface_format_count;
+            uint32_t present_mode_count;
             std::vector<VkSurfaceFormatKHR> surface_formats;
             std::vector<VkPresentModeKHR> present_modes;
 
-            uint32_t surface_format_count;
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &surface_format_count, nullptr), "Vulkan: Failed to get supported surface formats");
-            LOG_TRACE << "Vulkan: Physical device has " << surface_format_count << " surface formats";
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &surface_format_count, nullptr), "Vulkan Backend: Failed to get supported surface formats");
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &present_mode_count, nullptr), "Vulkan Backend: Failed to get supported present modes");
 
-            if (surface_format_count != 0)
-            {
-                surface_formats.resize(surface_format_count);
-                VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &surface_format_count, surface_formats.data()), "Vulkan: Failed to get supported surface formats");
-
-                for (uint32_t i = 0; i < surface_format_count; i++)
-                {
-                    LOG_TRACE << "Vulkan: Surface format supported: " << surface_formats[i].format;
-                }
-            }
-
-            uint32_t present_mode_count;
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &present_mode_count, nullptr), "Vulkan: Failed to get supported present modes");
-            LOG_TRACE << "Vulkan: Physical device has " << present_mode_count << " present modes";
-
-            if (present_mode_count != 0)
-            {
-                present_modes.resize(present_mode_count);
-                VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &present_mode_count, present_modes.data()), "Vulkan: Failed to get supported present modes");
-
-                for (uint32_t i = 0; i < present_mode_count; i++)
-                {
-                    LOG_TRACE << "Vulkan: Present mode supported: " << present_modes[i];
-                }
-            }
+            LOG_TRACE << "Vulkan Backend: Physical device has " << surface_format_count << " surface formats";
+            LOG_TRACE << "Vulkan Backend: Physical device has " << present_mode_count << " present modes";
 
             if (surface_format_count == 0 || present_mode_count == 0)
             {
+                LOG_TRACE << "Vulkan Backend: This physical device does not have adequate swapchain support";
                 return false;
             }
 
+            surface_formats.resize(surface_format_count);
+            present_modes.resize(present_mode_count);
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &surface_format_count, surface_formats.data()), "Vulkan Backend: Failed to get supported surface formats");
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &present_mode_count, present_modes.data()), "Vulkan Backend: Failed to get supported present modes");
+
+            for (uint32_t i = 0; i < surface_format_count; i++)
+            {
+                LOG_TRACE << "Vulkan Backend: Surface format supported: " << surface_formats[i].format;
+            }
+            for (uint32_t i = 0; i < present_mode_count; i++)
+            {
+                LOG_TRACE << "Vulkan Backend: Present mode supported: " << present_modes[i];
+            }
+
+            LOG_TRACE << "Vulkan Backend: This physical device has adequate swapchain support";
             return true;
         }
 
-        std::vector<Storage_Manager::Image_Resource> Swapchain::Get_Swapchain_Image_Resources()
+        std::vector<Storage_Manager::Image_Resource> Swapchain_Wrapper::Get_Swapchain_Image_Resources()
         {
-            LOG_TRACE << "Vulkan: Making image resources for the swapchain";
+            LOG_TRACE << "Vulkan Backend: Making image resources for the swapchain";
 
             std::vector<Storage_Manager::Image_Resource> swapchain_image_resources(m_swapchain_image_count);
 
@@ -303,22 +294,22 @@ namespace Cascade_Graphics
             return swapchain_image_resources;
         }
 
-        VkSwapchainKHR* Swapchain::Get_Swapchain()
+        VkSwapchainKHR* Swapchain_Wrapper::Get_Swapchain()
         {
             return &m_swapchain;
         }
 
-        VkImage* Swapchain::Get_Swapchain_Image(uint32_t index)
+        VkImage* Swapchain_Wrapper::Get_Swapchain_Image(uint32_t index)
         {
             return &m_swapchain_images[index];
         }
 
-        uint32_t Swapchain::Get_Swapchain_Image_Count()
+        uint32_t Swapchain_Wrapper::Get_Swapchain_Image_Count()
         {
             return m_swapchain_image_count;
         }
 
-        VkExtent2D Swapchain::Get_Swapchain_Extent()
+        VkExtent2D Swapchain_Wrapper::Get_Swapchain_Extent()
         {
             return m_swapchain_extent;
         }

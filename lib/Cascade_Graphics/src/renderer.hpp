@@ -53,7 +53,7 @@ namespace Cascade_Graphics
         std::shared_ptr<Vulkan_Backend::Queue_Manager> m_queue_manager_ptr;
         std::shared_ptr<Vulkan_Backend::Physical_Device_Wrapper> m_physical_device_ptr;
         std::shared_ptr<Vulkan_Backend::Logical_Device_Wrapper> m_logical_device_ptr;
-        std::shared_ptr<Vulkan_Backend::Swapchain> m_swapchain_ptr;
+        std::shared_ptr<Vulkan_Backend::Swapchain_Wrapper> m_swapchain_ptr;
         std::shared_ptr<Vulkan_Backend::Storage_Manager> m_storage_manager_ptr;
         std::shared_ptr<Vulkan_Backend::Shader_Manager> m_shader_manager_ptr;
         std::shared_ptr<Vulkan_Backend::Descriptor_Set_Manager> m_descriptor_set_manager_ptr;

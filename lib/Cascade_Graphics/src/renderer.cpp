@@ -59,7 +59,7 @@ namespace Cascade_Graphics
         m_queue_manager_ptr = std::make_shared<Vulkan_Backend::Queue_Manager>(m_surface_ptr, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE | Vulkan_Backend::Queue_Manager::PRESENT_QUEUE);
         m_physical_device_ptr = std::make_shared<Vulkan_Backend::Physical_Device_Wrapper>(m_instance_ptr, m_queue_manager_ptr, m_surface_ptr, required_device_extensions);
         m_logical_device_ptr = std::make_shared<Vulkan_Backend::Logical_Device_Wrapper>(m_physical_device_ptr, m_queue_manager_ptr, m_validation_layer_ptr);
-        m_swapchain_ptr = std::make_shared<Vulkan_Backend::Swapchain>(m_logical_device_ptr, m_physical_device_ptr, m_surface_ptr, m_queue_manager_ptr, width, height);
+        m_swapchain_ptr = std::make_shared<Vulkan_Backend::Swapchain_Wrapper>(m_logical_device_ptr, m_physical_device_ptr, m_surface_ptr, m_queue_manager_ptr, width, height);
 
         m_storage_manager_ptr = std::make_shared<Vulkan_Backend::Storage_Manager>(m_logical_device_ptr, m_physical_device_ptr, m_queue_manager_ptr);
         m_storage_manager_ptr->Create_Image("render_target", VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, {width, height},
@@ -156,7 +156,7 @@ namespace Cascade_Graphics
             uint32_t height = *m_window_information.height_ptr;
             LOG_DEBUG << "Vulkan: New window size " << width << "x" << height;
 
-            m_swapchain_ptr = std::make_shared<Vulkan_Backend::Swapchain>(m_logical_device_ptr, m_physical_device_ptr, m_surface_ptr, m_queue_manager_ptr, width, height);
+            m_swapchain_ptr = std::make_shared<Vulkan_Backend::Swapchain_Wrapper>(m_logical_device_ptr, m_physical_device_ptr, m_surface_ptr, m_queue_manager_ptr, width, height);
             width = m_swapchain_ptr->Get_Swapchain_Extent().width;
             height = m_swapchain_ptr->Get_Swapchain_Extent().height;
 
