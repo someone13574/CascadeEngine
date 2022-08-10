@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <functional>
 #include <mutex>
+#include <queue>
 #include <stack>
 #include <string>
 #include <vector>
@@ -67,22 +68,25 @@ namespace Cascade_Graphics
         static void Voxel_Sample_Volume_Function(Vector_3<double> voxel_position, double voxel_size, double step_size, std::function<double(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting);
 
         static void Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
+                                                              std::vector<double> step_size_lookup_table,
+                                                              uint32_t worker_index,
                                                               std::function<double(Vector_3<double>)> volume_sample_function,
                                                               std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function,
                                                               std::vector<Voxel>* voxels_ptr,
+                                                              std::mutex* voxels_mutex_ptr,
+                                                              bool* work_complete_ptr,
+                                                              std::mutex* work_complete_mutex_ptr,
+                                                              uint32_t* active_workers_count_ptr,
+                                                              std::queue<uint32_t>* available_workers_queue_ptr,
+                                                              std::mutex* available_workers_queue_mutex_ptr,
+                                                              std::condition_variable* available_worker_notify_ptr,
                                                               std::stack<uint32_t>* leaf_node_stack_ptr,
-                                                              std::stack<uint32_t>* idle_thread_stack_ptr,
-                                                              std::vector<double> step_size_lookup_table,
-                                                              std::mutex* voxels_mutex,
-                                                              std::mutex* leaf_node_stack_mutex,
-                                                              std::mutex* idle_thread_stack_mutex,
-                                                              std::condition_variable* idle_thread_notify,
-                                                              uint32_t* idle_threads,
-                                                              std::vector<bool>* data_ready_ptr,
-                                                              std::vector<uint32_t>* current_voxel_index_ptr,
-                                                              uint32_t thread_index,
-                                                              std::vector<std::mutex>* mutex,
-                                                              std::vector<std::condition_variable>* work_available_notify);
+                                                              std::mutex* leaf_node_stack_mutex_ptr,
+                                                              std::condition_variable* available_leaf_node_notify_ptr,
+                                                              bool* work_available_ptr,
+                                                              uint32_t* current_voxel_ptr,
+                                                              std::mutex* data_mutex_ptr,
+                                                              std::condition_variable* work_notify_ptr);
 
     public:
         Object_Manager();
