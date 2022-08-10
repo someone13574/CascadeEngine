@@ -9,7 +9,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Queue_Manager::Queue_Manager(std::shared_ptr<Surface> surface_ptr, uint32_t required_queues) : m_surface_ptr(surface_ptr), m_required_queues(required_queues)
+        Queue_Manager::Queue_Manager(std::shared_ptr<Surface_Wrapper> surface_ptr, uint32_t required_queues) : m_surface_ptr(surface_ptr), m_required_queues(required_queues)
         {
         }
 

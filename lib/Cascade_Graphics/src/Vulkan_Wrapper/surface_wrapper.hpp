@@ -3,23 +3,23 @@
 #include "../window_information.hpp"
 #include "instance_wrapper.hpp"
 #include "vulkan_header.hpp"
-
 #include <memory>
+
 
 namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        class Surface
+        class Surface_Wrapper
         {
         private:
             VkSurfaceKHR m_surface;
 
-            std::shared_ptr<Instance_Wrapper> m_instance_ptr;
+            std::shared_ptr<Instance_Wrapper> m_instance_wrapper_ptr;
 
         public:
-            Surface(Window_Information window_data, std::shared_ptr<Instance_Wrapper> instance_ptr);
-            ~Surface();
+            Surface_Wrapper(std::shared_ptr<Instance_Wrapper> instance_wrapper_ptr, Window_Information window_data);
+            ~Surface_Wrapper();
 
         public:
             VkSurfaceKHR* Get_Surface();

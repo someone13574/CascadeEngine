@@ -20,7 +20,7 @@ namespace Cascade_Graphics
         private:
             std::shared_ptr<Device> m_logical_device_ptr;
             std::shared_ptr<Physical_Device_Wrapper> m_physical_device_ptr;
-            std::shared_ptr<Surface> m_surface_ptr;
+            std::shared_ptr<Surface_Wrapper> m_surface_ptr;
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
 
             VkSurfaceCapabilitiesKHR m_surface_capabilities;
@@ -49,11 +49,16 @@ namespace Cascade_Graphics
             void Create_Swapchain_Image_Views();
 
         public:
-            Swapchain(std::shared_ptr<Device> logical_device_ptr, std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr, std::shared_ptr<Surface> surface_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, uint32_t width, uint32_t height);
+            Swapchain(std::shared_ptr<Device> logical_device_ptr,
+                      std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr,
+                      std::shared_ptr<Surface_Wrapper> surface_ptr,
+                      std::shared_ptr<Queue_Manager> queue_manager_ptr,
+                      uint32_t width,
+                      uint32_t height);
             ~Swapchain();
 
         public:
-            static bool Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface> surface_ptr);
+            static bool Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface_Wrapper> surface_ptr);
 
             std::vector<Storage_Manager::Image_Resource> Get_Swapchain_Image_Resources();
             VkSwapchainKHR* Get_Swapchain();

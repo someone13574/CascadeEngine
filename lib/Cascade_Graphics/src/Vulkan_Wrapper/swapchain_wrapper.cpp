@@ -11,7 +11,7 @@ namespace Cascade_Graphics
     {
         Swapchain::Swapchain(std::shared_ptr<Device> logical_device_ptr,
                              std::shared_ptr<Physical_Device_Wrapper> physical_device_ptr,
-                             std::shared_ptr<Surface> surface_ptr,
+                             std::shared_ptr<Surface_Wrapper> surface_ptr,
                              std::shared_ptr<Queue_Manager> queue_manager_ptr,
                              uint32_t width,
                              uint32_t height)
@@ -233,7 +233,7 @@ namespace Cascade_Graphics
             }
         }
 
-        bool Swapchain::Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface> surface_ptr)
+        bool Swapchain::Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface_Wrapper> surface_ptr)
         {
             LOG_INFO << "Vulkan: Checking surface support";
 

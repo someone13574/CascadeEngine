@@ -49,7 +49,7 @@ namespace Cascade_Graphics
         uint32_t which_hit_buffer = 0;
 
         std::shared_ptr<Vulkan_Backend::Instance_Wrapper> m_instance_ptr;
-        std::shared_ptr<Vulkan_Backend::Surface> m_surface_ptr;
+        std::shared_ptr<Vulkan_Backend::Surface_Wrapper> m_surface_ptr;
         std::shared_ptr<Vulkan_Backend::Queue_Manager> m_queue_manager_ptr;
         std::shared_ptr<Vulkan_Backend::Physical_Device_Wrapper> m_physical_device_ptr;
         std::shared_ptr<Vulkan_Backend::Device> m_logical_device_ptr;

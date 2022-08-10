@@ -1,15 +1,17 @@
 #include "surface_wrapper.hpp"
 
-#include "cascade_logging.hpp"
+#include "debug_tools.hpp"
+
 
 namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Surface::Surface(Window_Information window_data, std::shared_ptr<Instance_Wrapper> instance_ptr) : m_instance_ptr(instance_ptr)
+        Surface_Wrapper::Surface_Wrapper(std::shared_ptr<Instance_Wrapper> instance_wrapper_ptr, Window_Information window_data) : m_instance_wrapper_ptr(instance_wrapper_ptr)
         {
 #if defined __linux__
-            LOG_INFO << "Vulkan: Creating xcb window surface";
+
+            LOG_INFO << "Vulkan Backend: Creating XCB window surface";
 
             VkXcbSurfaceCreateInfoKHR xcb_surface_create_info = {};
             xcb_surface_create_info.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
@@ -18,17 +20,11 @@ namespace Cascade_Graphics
             xcb_surface_create_info.connection = window_data.xcb_connection_ptr;
             xcb_surface_create_info.window = *window_data.xcb_window_ptr;
 
-            VkResult create_surface_result = vkCreateXcbSurfaceKHR(*m_instance_ptr->Get_Instance(), &xcb_surface_create_info, nullptr, &m_surface);
+            VALIDATE_VKRESULT(vkCreateXcbSurfaceKHR(*m_instance_wrapper_ptr->Get_Instance(), &xcb_surface_create_info, nullptr, &m_surface), "Vulkan Backend: Failed to create XCB window surface");
 
-            if (create_surface_result != VK_SUCCESS)
-            {
-                LOG_FATAL << "Vulkan: Failed to create xcb window surface";
-                exit(EXIT_FAILURE);
-            }
-
-            LOG_TRACE << "Vulkan: Finished creating surface";
 #elif defined _WIN32 || defined WIN32
-            LOG_INFO << "Vulkan: Creating WIN32 window surface";
+
+            LOG_INFO << "Vulkan Backend: Creating WIN32 window surface";
 
             VkWin32SurfaceCreateInfoKHR win32_surface_create_info = {};
             win32_surface_create_info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -37,28 +33,22 @@ namespace Cascade_Graphics
             win32_surface_create_info.hinstance = *window_data.hinstance_ptr;
             win32_surface_create_info.hwnd = *window_data.hwindow_ptr;
 
-            VkResult create_surface_result = vkCreateWin32SurfaceKHR(*m_instance_ptr->Get_Instance(), &win32_surface_create_info, nullptr, &m_surface);
+            VALIDATE_VKRESULT(vkCreateWin32SurfaceKHR(*m_instance_wrapper_ptr->Get_Instance(), &win32_surface_create_info, nullptr, &m_surface), "Vulkan Backend: Failed to create WIN32 window surface");
 
-            if (create_surface_result != VK_SUCCESS)
-            {
-                LOG_FATAL << "Vulkan: Failed to create WIN32 window surface";
-                exit(EXIT_FAILURE);
-            }
-
-            LOG_TRACE << "Vulkan: Finished creating surface";
 #endif
+            LOG_TRACE << "Vulkan Backend: Finished creating surface";
         }
 
-        Surface::~Surface()
+        Surface_Wrapper::~Surface_Wrapper()
         {
-            LOG_INFO << "Vulkan: Destroying surface";
+            LOG_INFO << "Vulkan Backend: Destroying surface";
 
-            vkDestroySurfaceKHR(*m_instance_ptr->Get_Instance(), m_surface, nullptr);
+            vkDestroySurfaceKHR(*m_instance_wrapper_ptr->Get_Instance(), m_surface, nullptr);
 
-            LOG_TRACE << "Vulkan: Finished destroying surface";
+            LOG_TRACE << "Vulkan Backend: Finished destroying surface";
         }
 
-        VkSurfaceKHR* Surface::Get_Surface()
+        VkSurfaceKHR* Surface_Wrapper::Get_Surface()
         {
             return &m_surface;
         }

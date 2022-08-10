@@ -39,14 +39,14 @@ namespace Cascade_Graphics
             };
 
         private:
-            std::shared_ptr<Surface> m_surface_ptr;
+            std::shared_ptr<Surface_Wrapper> m_surface_ptr;
 
             uint32_t m_required_queues;
             std::map<uint32_t, VkQueue> m_queues;
             Queue_Family_Indices m_queue_family_indices;
 
         public:
-            Queue_Manager(std::shared_ptr<Surface> surface_ptr, uint32_t required_queues);
+            Queue_Manager(std::shared_ptr<Surface_Wrapper> surface_ptr, uint32_t required_queues);
 
         public:
             uint32_t Get_Required_Queue_Types();

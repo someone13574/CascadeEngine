@@ -10,8 +10,11 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Physical_Device_Wrapper::Physical_Device_Wrapper(std::shared_ptr<Instance_Wrapper> instance_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface> surface_ptr, std::set<const char*> required_extensions)
-            : m_queue_manager_ptr(queue_manager_ptr), m_surface_ptr(surface_ptr), m_required_extensions(required_extensions)
+        Physical_Device_Wrapper::Physical_Device_Wrapper(std::shared_ptr<Instance_Wrapper> instance_wrapper_ptr,
+                                                         std::shared_ptr<Queue_Manager> queue_manager_ptr,
+                                                         std::shared_ptr<Surface_Wrapper> surface_wrapper_ptr,
+                                                         std::set<const char*> required_extensions)
+            : m_queue_manager_ptr(queue_manager_ptr), m_surface_wrapper_ptr(surface_wrapper_ptr), m_required_extensions(required_extensions)
         {
             LOG_INFO << "Vulkan Backend: Choosing physical device";
 
@@ -81,7 +84,7 @@ namespace Cascade_Graphics
                 return false;
             }
 
-            if (!Swapchain::Is_Swapchain_Adequate(&physical_device, m_surface_ptr))
+            if (!Swapchain::Is_Swapchain_Adequate(&physical_device, m_surface_wrapper_ptr))
             {
                 LOG_INFO << "Vulkan: Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
                 return false;
