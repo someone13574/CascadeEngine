@@ -97,7 +97,7 @@ namespace Cascade_Graphics
         m_descriptor_set_manager_ptr = std::make_shared<Vulkan_Backend::Descriptor_Set_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
         m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
 
-        m_pipeline_manager_ptr = std::make_shared<Vulkan_Backend::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
+        m_pipeline_manager_ptr = std::make_shared<Vulkan_Backend::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_shader_manager_ptr, m_storage_manager_ptr);
         m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
 
         m_command_buffer_manager_ptr = std::make_shared<Vulkan_Backend::Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
@@ -191,7 +191,7 @@ namespace Cascade_Graphics
             m_descriptor_set_manager_ptr = std::make_shared<Vulkan_Backend::Descriptor_Set_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
             m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
 
-            m_pipeline_manager_ptr = std::make_shared<Vulkan_Backend::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
+            m_pipeline_manager_ptr = std::make_shared<Vulkan_Backend::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_shader_manager_ptr, m_storage_manager_ptr);
             m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
 
             m_command_buffer_manager_ptr = std::make_shared<Vulkan_Backend::Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
@@ -234,7 +234,7 @@ namespace Cascade_Graphics
 
                 m_descriptor_set_manager_ptr = std::make_shared<Vulkan_Backend::Descriptor_Set_Manager>(m_logical_device_ptr, m_storage_manager_ptr);
                 m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
-                m_pipeline_manager_ptr = std::make_shared<Vulkan_Backend::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_storage_manager_ptr, m_shader_manager_ptr);
+                m_pipeline_manager_ptr = std::make_shared<Vulkan_Backend::Pipeline_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_shader_manager_ptr, m_storage_manager_ptr);
                 m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
                 m_command_buffer_manager_ptr = std::make_shared<Vulkan_Backend::Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
                 Record_Vulkan_Command_Buffers(*m_window_information.width_ptr, *m_window_information.height_ptr);

@@ -2,54 +2,41 @@
 
 #include "debug_tools.hpp"
 
+
 namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
         Pipeline_Manager::Pipeline_Manager(std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr,
-                                           std::shared_ptr<Logical_Device_Wrapper> logical_device_ptr,
-                                           std::shared_ptr<Storage_Manager> storage_manager_ptr,
-                                           std::shared_ptr<Shader_Manager> shader_manager_ptr)
-            : m_descriptor_set_manager_ptr(descriptor_set_manager_ptr), m_logical_device_ptr(logical_device_ptr), m_storage_manager_ptr(storage_manager_ptr), m_shader_manager_ptr(shader_manager_ptr)
+                                           std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr,
+                                           std::shared_ptr<Shader_Manager> shader_manager_ptr,
+                                           std::shared_ptr<Storage_Manager> storage_manager_ptr)
+            : m_descriptor_set_manager_ptr(descriptor_set_manager_ptr), m_logical_device_wrapper_ptr(logical_device_wrapper_ptr), m_shader_manager_ptr(shader_manager_ptr), m_storage_manager_ptr(storage_manager_ptr)
         {
         }
 
         Pipeline_Manager::~Pipeline_Manager()
         {
-            LOG_INFO << "Vulkan: Destroying pipelines";
+            LOG_INFO << "Vulkan Backend: Destroying pipelines";
 
             for (uint32_t i = 0; i < m_pipelines.size(); i++)
             {
-                vkDestroyPipeline(*m_logical_device_ptr->Get_Device(), m_pipelines[i].pipeline, nullptr);
-                vkDestroyPipelineLayout(*m_logical_device_ptr->Get_Device(), m_pipelines[i].pipeline_layout, nullptr);
+                vkDestroyPipeline(*m_logical_device_wrapper_ptr->Get_Device(), m_pipelines[i].pipeline, nullptr);
+                vkDestroyPipelineLayout(*m_logical_device_wrapper_ptr->Get_Device(), m_pipelines[i].pipeline_layout, nullptr);
             }
 
-            LOG_TRACE << "Vulkan: Finished destroying pipelines";
-        }
-
-        uint32_t Pipeline_Manager::Get_Pipeline_Index(std::string label)
-        {
-            for (uint32_t i = 0; i < m_pipelines.size(); i++)
-            {
-                if (m_pipelines[i].label == label)
-                {
-                    return i;
-                }
-            }
-
-            LOG_ERROR << "Vulkan: Pipeline with label '" << label << "' does not exist";
-            exit(EXIT_FAILURE);
+            LOG_TRACE << "Vulkan Backend: Finished destroying pipelines";
         }
 
         void Pipeline_Manager::Add_Compute_Pipeline(std::string label, std::string resource_grouping_label, std::string shader_label)
         {
-            LOG_INFO << "Vulkan: Creating compute pipeline with label " << label;
+            LOG_INFO << "Vulkan Backend: Creating compute pipeline with label " << label;
 
             for (uint32_t i = 0; i < m_pipelines.size(); i++)
             {
                 if (m_pipelines[i].label == label)
                 {
-                    LOG_ERROR << "Vulkan: Cannot use label '" << label << "' because it is already in use";
+                    LOG_ERROR << "Vulkan Backend: Cannot use label '" << label << "' because it is already in use";
                     exit(EXIT_FAILURE);
                 }
             }
@@ -69,7 +56,7 @@ namespace Cascade_Graphics
             pipeline_layout_create_info.pushConstantRangeCount = 0;
             pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
-            VALIDATE_VKRESULT(vkCreatePipelineLayout(*m_logical_device_ptr->Get_Device(), &pipeline_layout_create_info, nullptr, &m_pipelines.back().pipeline_layout), "Vulkan: Failed to create pipeline layout");
+            VALIDATE_VKRESULT(vkCreatePipelineLayout(*m_logical_device_wrapper_ptr->Get_Device(), &pipeline_layout_create_info, nullptr, &m_pipelines.back().pipeline_layout), "Vulkan Backend: Failed to create pipeline layout");
 
             VkPipelineShaderStageCreateInfo pipeline_shader_stage_create_info = {};
             pipeline_shader_stage_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -89,24 +76,23 @@ namespace Cascade_Graphics
             compute_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
             compute_pipeline_create_info.basePipelineIndex = 0;
 
-            VALIDATE_VKRESULT(vkCreateComputePipelines(*m_logical_device_ptr->Get_Device(), VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &m_pipelines.back().pipeline), "Vulkan: Failed to create compute pipeline");
+            VALIDATE_VKRESULT(vkCreateComputePipelines(*m_logical_device_wrapper_ptr->Get_Device(), VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &m_pipelines.back().pipeline), "Vulkan Backend: Failed to create compute pipeline");
 
-            LOG_TRACE << "Vulkan: Finished creating compute pipeline";
+            LOG_TRACE << "Vulkan Backend: Finished creating compute pipeline";
         }
 
-        Pipeline_Manager::Pipeline_Type Pipeline_Manager::Get_Pipeline_Type(std::string label)
+        Pipeline_Manager::Pipeline_Data* Pipeline_Manager::Get_Pipeline_Data(std::string label)
         {
-            return m_pipelines[Get_Pipeline_Index(label)].type;
-        }
+            for (uint32_t i = 0; i < m_pipelines.size(); i++)
+            {
+                if (m_pipelines[i].label == label)
+                {
+                    return &m_pipelines[i];
+                }
+            }
 
-        VkPipeline* Pipeline_Manager::Get_Pipeline(std::string label)
-        {
-            return &m_pipelines[Get_Pipeline_Index(label)].pipeline;
-        }
-
-        VkPipelineLayout* Pipeline_Manager::Get_Pipeline_Layout(std::string label)
-        {
-            return &m_pipelines[Get_Pipeline_Index(label)].pipeline_layout;
+            LOG_ERROR << "Vulkan Backend: Pipeline with label '" << label << "' does not exist";
+            exit(EXIT_FAILURE);
         }
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

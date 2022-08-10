@@ -185,11 +185,11 @@ namespace Cascade_Graphics
             {
                 LOG_TRACE << "Vulkan: Binding pipeline";
 
-                switch (m_pipeline_manager_ptr->Get_Pipeline_Type(m_command_buffers[command_buffer_index].pipeline_label))
+                switch (m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->type)
                 {
                     case Pipeline_Manager::Pipeline_Type::COMPUTE:
                     {
-                        vkCmdBindPipeline(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline(m_command_buffers[command_buffer_index].pipeline_label));
+                        vkCmdBindPipeline(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->pipeline);
                         break;
                     }
                     default:
@@ -201,7 +201,7 @@ namespace Cascade_Graphics
 
                 LOG_TRACE << "Vulkan: Binding descriptor set";
 
-                switch (m_pipeline_manager_ptr->Get_Pipeline_Type(m_command_buffers[command_buffer_index].pipeline_label))
+                switch (m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->type)
                 {
                     case Pipeline_Manager::Pipeline_Type::COMPUTE:
                     {
@@ -209,8 +209,9 @@ namespace Cascade_Graphics
                         {
                             if (m_storage_manager_ptr->Get_Resource_Grouping(m_command_buffers[command_buffer_index].resource_group_labels[i])->has_descriptor_set)
                             {
-                                vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, *m_pipeline_manager_ptr->Get_Pipeline_Layout(m_command_buffers[command_buffer_index].pipeline_label), 0,
-                                                        1, &m_descriptor_set_manager->Get_Descriptor_Set_Data(m_command_buffers[command_buffer_index].resource_group_labels[i])->descriptor_set, 0, nullptr);
+                                vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE,
+                                                        m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->pipeline_layout, 0, 1,
+                                                        &m_descriptor_set_manager->Get_Descriptor_Set_Data(m_command_buffers[command_buffer_index].resource_group_labels[i])->descriptor_set, 0, nullptr);
                             }
                         }
                         break;
