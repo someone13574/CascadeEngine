@@ -76,7 +76,7 @@ namespace Cascade_Graphics
             pipeline_shader_stage_create_info.pNext = nullptr;
             pipeline_shader_stage_create_info.flags = 0;
             pipeline_shader_stage_create_info.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-            pipeline_shader_stage_create_info.module = *m_shader_manager_ptr->Get_Shader_Module(shader_label);
+            pipeline_shader_stage_create_info.module = m_shader_manager_ptr->Get_Shader_Data(shader_label)->shader_module;
             pipeline_shader_stage_create_info.pName = "main";
             pipeline_shader_stage_create_info.pSpecializationInfo = nullptr;
 
