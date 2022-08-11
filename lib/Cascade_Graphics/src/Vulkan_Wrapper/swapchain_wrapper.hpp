@@ -59,7 +59,6 @@ namespace Cascade_Graphics
             ~Swapchain_Wrapper();
 
         public:
-            static bool Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface_Wrapper> surface_ptr);
             std::vector<Storage_Manager::Image_Resource> Get_Swapchain_Image_Resources();
 
             VkSwapchainKHR* Get_Swapchain();

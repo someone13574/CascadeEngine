@@ -1,6 +1,5 @@
 #pragma once
 
-#include "surface_wrapper.hpp"
 #include "vulkan_header.hpp"
 #include <map>
 #include <memory>
@@ -42,10 +41,8 @@ namespace Cascade_Graphics
             Queue_Family_Indices m_queue_family_indices;
             std::map<uint32_t, VkQueue> m_queues;
 
-            std::shared_ptr<Surface_Wrapper> m_surface_wrapper_ptr;
-
         public:
-            Queue_Manager(std::shared_ptr<Surface_Wrapper> surface_wrapper_ptr, uint32_t required_queues);
+            Queue_Manager(uint32_t required_queues);
 
         public:
             bool Has_Required_Queues(VkPhysicalDevice* physical_device_ptr);

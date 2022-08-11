@@ -2,7 +2,6 @@
 
 #include "instance_wrapper.hpp"
 #include "queue_manager.hpp"
-#include "surface_wrapper.hpp"
 #include "vulkan_header.hpp"
 #include <memory>
 #include <set>
@@ -21,7 +20,6 @@ namespace Cascade_Graphics
             std::set<const char*> m_required_extensions;
 
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
-            std::shared_ptr<Surface_Wrapper> m_surface_wrapper_ptr;
 
         private:
             bool Does_Device_Meet_Requirements(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features);
@@ -30,7 +28,8 @@ namespace Cascade_Graphics
             uint32_t Rate_Physical_Device(VkPhysicalDeviceProperties physical_device_properties);
 
         public:
-            Physical_Device_Wrapper(std::shared_ptr<Instance_Wrapper> instance_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Surface_Wrapper> surface_wrapper_ptr, std::set<const char*> required_extensions);
+            Physical_Device_Wrapper(std::shared_ptr<Instance_Wrapper> instance_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::set<const char*> required_extensions);
+            ~Physical_Device_Wrapper();
 
         public:
             VkPhysicalDevice* Get_Physical_Device();

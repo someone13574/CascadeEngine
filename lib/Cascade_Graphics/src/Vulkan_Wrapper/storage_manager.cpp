@@ -358,7 +358,7 @@ namespace Cascade_Graphics
 
                 for (uint32_t i = 0; i < m_image_resources.size(); i++)
                 {
-                    index_in_use |= m_buffer_resources[i].resource_id == resource_id;
+                    index_in_use |= m_image_resources[i].resource_id == resource_id;
                 }
 
                 if (!index_in_use)

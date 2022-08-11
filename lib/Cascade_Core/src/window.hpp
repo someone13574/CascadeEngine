@@ -39,7 +39,9 @@ namespace Cascade_Core
         uint32_t m_height;
 
         std::shared_ptr<Event_Manager> m_event_manager_ptr;
+
         std::shared_ptr<Cascade_Graphics::Renderer> m_renderer_ptr;
+        std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Vulkan_Graphics> m_graphics_ptr;
 
         Initialization_Stage m_initialization_stage = Initialization_Stage::NOT_STARTED;
 
@@ -74,7 +76,7 @@ namespace Cascade_Core
         static void Render_Loop(Window* window_ptr);
 
     public:
-        Window(std::string window_title, uint32_t width, uint32_t height);
+        Window(std::string window_title, uint32_t width, uint32_t height, std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Vulkan_Graphics> graphics_ptr);
 
     public:
         void Close_Window();

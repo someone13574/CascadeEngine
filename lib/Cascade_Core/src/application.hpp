@@ -1,7 +1,7 @@
 #pragma once
 
+#include "cascade_graphics.hpp"
 #include "window.hpp"
-
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -23,6 +23,9 @@ namespace Cascade_Core
     private:
         Application_Info m_application_info;
         std::chrono::high_resolution_clock::time_point m_application_start_time;
+
+        std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Vulkan_Graphics> m_graphics;
+
         std::vector<std::shared_ptr<Window>> m_window_ptrs;
 
     private:

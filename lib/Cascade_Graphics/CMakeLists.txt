@@ -33,7 +33,8 @@ add_library(Cascade_Graphics STATIC
     src/object_manager.cpp
     src/window_information.hpp
     src/camera.cpp
-    src/renderer.cpp)
+    src/renderer.cpp
+    src/Vulkan_Wrapper/vulkan_graphics.cpp)
 
 if(UNIX)
     target_include_directories(Cascade_Graphics

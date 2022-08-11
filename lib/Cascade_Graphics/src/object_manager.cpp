@@ -319,7 +319,7 @@ namespace Cascade_Graphics
         }
 
 
-        static const uint32_t WORKER_THREAD_COUNT = 64;
+        static const uint32_t WORKER_THREAD_COUNT = 32;
 
         bool work_complete = false;
         std::mutex work_complete_mutex;
@@ -344,6 +344,11 @@ namespace Cascade_Graphics
 
         for (uint32_t i = 0; i < WORKER_THREAD_COUNT; i++)
         {
+            std::lock_guard<std::mutex> worker_thread_lock(worker_thread_mutexes[i]);
+
+            worker_thread_work_available[i] = false;
+            worker_thread_current_work[i] = 0;
+
             std::thread worker_thread(Object_From_Volume_Function_Worker_Thread, max_depth, step_size_lookup_table, i, volume_sample_function, color_sample_function, &m_objects.back().voxels, &voxels_mutex, &work_complete, &work_complete_mutex,
                                       &active_workers_count, &available_workers_queue, &available_workers_queue_mutex, &available_worker_notify, &leaf_nodes_stack, &leaf_nodes_stack_mutex, &available_leaf_node_notify,
                                       &worker_thread_work_available[i], &worker_thread_current_work[i], &worker_thread_mutexes[i], &worker_threads_notifies[i]);

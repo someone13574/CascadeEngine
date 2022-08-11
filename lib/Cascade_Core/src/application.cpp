@@ -12,6 +12,8 @@ namespace Cascade_Core
         LOG_DEBUG << "Core: Started application '" << m_application_info.title << "' v" << m_application_info.major_version << "." << m_application_info.minor_version;
 
         m_application_start_time = std::chrono::high_resolution_clock::now();
+
+        m_graphics = std::make_shared<Cascade_Graphics::Vulkan_Backend::Vulkan_Graphics>();
     }
 
     Application::~Application()
@@ -53,7 +55,7 @@ namespace Cascade_Core
 
     std::shared_ptr<Window> Application::Create_Window(std::string window_title, uint32_t width, uint32_t height)
     {
-        m_window_ptrs.push_back(std::make_shared<Window>(window_title, width, height));
+        m_window_ptrs.push_back(std::make_shared<Window>(window_title, width, height, m_graphics));
 
         Wait_For_Window_Initialization();
 

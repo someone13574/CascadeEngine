@@ -14,7 +14,8 @@ namespace Cascade_Core
 
 #endif
 
-    Window::Window(std::string window_title, uint32_t width, uint32_t height) : m_window_title(window_title), m_width(width), m_height(height)
+    Window::Window(std::string window_title, uint32_t width, uint32_t height, std::shared_ptr<Cascade_Graphics::Vulkan_Backend::Vulkan_Graphics> graphics_ptr)
+        : m_window_title(window_title), m_width(width), m_height(height), m_graphics_ptr(graphics_ptr)
     {
         LOG_DEBUG << "Core: Created window '" << m_window_title << "' with dimensions " << m_width << "x" << m_height;
 
@@ -263,7 +264,7 @@ namespace Cascade_Core
         window_information.xcb_window_ptr = &m_xcb_window;
         window_information.xcb_connection_ptr = m_xcb_connection_ptr;
 
-        m_renderer_ptr = std::make_shared<Cascade_Graphics::Renderer>(window_information);
+        m_renderer_ptr = std::make_shared<Cascade_Graphics::Renderer>(m_graphics_ptr, window_information);
 
 #elif defined _WIN32 || defined WIN32
 
@@ -273,7 +274,7 @@ namespace Cascade_Core
         window_information.hwindow_ptr = &m_hwindow;
         window_information.hinstance_ptr = &m_hinstance;
 
-        m_renderer_ptr = std::make_shared<Cascade_Graphics::Renderer>(window_information);
+        m_renderer_ptr = std::make_shared<Cascade_Graphics::Renderer>(m_graphics_ptr, window_information);
 
 #endif
 

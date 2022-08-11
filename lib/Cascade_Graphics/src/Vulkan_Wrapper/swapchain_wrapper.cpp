@@ -230,45 +230,6 @@ namespace Cascade_Graphics
             }
         }
 
-        bool Swapchain_Wrapper::Is_Swapchain_Adequate(VkPhysicalDevice* physical_device_ptr, std::shared_ptr<Surface_Wrapper> surface_ptr)
-        {
-            LOG_INFO << "Vulkan Backend: Checking surface support";
-
-            uint32_t surface_format_count;
-            uint32_t present_mode_count;
-            std::vector<VkSurfaceFormatKHR> surface_formats;
-            std::vector<VkPresentModeKHR> present_modes;
-
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &surface_format_count, nullptr), "Vulkan Backend: Failed to get supported surface formats");
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &present_mode_count, nullptr), "Vulkan Backend: Failed to get supported present modes");
-
-            LOG_TRACE << "Vulkan Backend: Physical device has " << surface_format_count << " surface formats";
-            LOG_TRACE << "Vulkan Backend: Physical device has " << present_mode_count << " present modes";
-
-            if (surface_format_count == 0 || present_mode_count == 0)
-            {
-                LOG_TRACE << "Vulkan Backend: This physical device does not have adequate swapchain support";
-                return false;
-            }
-
-            surface_formats.resize(surface_format_count);
-            present_modes.resize(present_mode_count);
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceFormatsKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &surface_format_count, surface_formats.data()), "Vulkan Backend: Failed to get supported surface formats");
-            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfacePresentModesKHR(*physical_device_ptr, *surface_ptr->Get_Surface(), &present_mode_count, present_modes.data()), "Vulkan Backend: Failed to get supported present modes");
-
-            for (uint32_t i = 0; i < surface_format_count; i++)
-            {
-                LOG_TRACE << "Vulkan Backend: Surface format supported: " << surface_formats[i].format;
-            }
-            for (uint32_t i = 0; i < present_mode_count; i++)
-            {
-                LOG_TRACE << "Vulkan Backend: Present mode supported: " << present_modes[i];
-            }
-
-            LOG_TRACE << "Vulkan Backend: This physical device has adequate swapchain support";
-            return true;
-        }
-
         std::vector<Storage_Manager::Image_Resource> Swapchain_Wrapper::Get_Swapchain_Image_Resources()
         {
             LOG_TRACE << "Vulkan Backend: Making image resources for the swapchain";

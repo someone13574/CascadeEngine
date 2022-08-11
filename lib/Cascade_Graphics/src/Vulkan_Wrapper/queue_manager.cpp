@@ -8,7 +8,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Queue_Manager::Queue_Manager(std::shared_ptr<Surface_Wrapper> surface_wrapper_ptr, uint32_t required_queues) : m_surface_wrapper_ptr(surface_wrapper_ptr), m_required_queues(required_queues)
+        Queue_Manager::Queue_Manager(uint32_t required_queues) : m_required_queues(required_queues)
         {
         }
 
@@ -32,9 +32,7 @@ namespace Cascade_Graphics
                 bool is_transfer_family = queue_families[i].queueFlags & VK_QUEUE_TRANSFER_BIT;
                 bool is_sparse_binding_family = queue_families[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT;
                 bool is_protected_family = queue_families[i].queueFlags & VK_QUEUE_PROTECTED_BIT;
-
-                VkBool32 is_present_family = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(*physical_device_ptr, i, *m_surface_wrapper_ptr->Get_Surface(), &is_present_family);
+                bool is_present_family = queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT; // potentially unsafe
 
                 LOG_TRACE << "Vulkan Backend: Found queue family (Count: " << queue_families[i].queueCount << ")" << (is_graphics_family ? " (Graphics)" : "") << (is_compute_family ? " (Compute)" : "") << (is_transfer_family ? " (Transfer)" : "")
                           << (is_sparse_binding_family ? " (Sparse binding)" : "") << (is_protected_family ? " (Protected)" : "") << (is_present_family ? " (Present)" : "");
@@ -81,9 +79,7 @@ namespace Cascade_Graphics
                 bool is_transfer_family = queue_families[i].queueFlags & VK_QUEUE_TRANSFER_BIT;
                 bool is_sparse_binding_family = queue_families[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT;
                 bool is_protected_family = queue_families[i].queueFlags & VK_QUEUE_PROTECTED_BIT;
-
-                VkBool32 is_present_family = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(*physical_device_ptr, i, *m_surface_wrapper_ptr->Get_Surface(), &is_present_family);
+                bool is_present_family = queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT; // potentially unsafe
 
                 LOG_DEBUG << "Vulkan Backend: Found queue family (Count: " << queue_families[i].queueCount << ")" << (is_graphics_family ? " (Graphics)" : "") << (is_compute_family ? " (Compute)" : "") << (is_transfer_family ? " (Transfer)" : "")
                           << (is_sparse_binding_family ? " (Sparse binding)" : "") << (is_protected_family ? " (Protected)" : "") << (is_present_family ? " (Present)" : "");
