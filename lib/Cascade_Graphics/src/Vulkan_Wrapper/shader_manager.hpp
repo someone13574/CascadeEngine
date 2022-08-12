@@ -1,5 +1,6 @@
 #pragma once
 
+#include "identifier.hpp"
 #include "logical_device_wrapper.hpp"
 #include "vulkan_header.hpp"
 #include <memory>
@@ -16,7 +17,7 @@ namespace Cascade_Graphics
         public:
             struct Shader_Data
             {
-                std::string label;
+                Identifier identifier;
 
                 std::string file_path;
                 VkShaderModule shader_module;
@@ -32,9 +33,9 @@ namespace Cascade_Graphics
             ~Shader_Manager();
 
         public:
-            void Add_Shader(std::string label, std::string path);
+            Identifier Add_Shader(std::string label, std::string path);
 
-            Shader_Data* Get_Shader_Data(std::string label);
+            Shader_Data* Get_Shader_Data(Identifier identifier);
         };
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

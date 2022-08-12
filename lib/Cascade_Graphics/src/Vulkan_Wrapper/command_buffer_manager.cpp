@@ -72,7 +72,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan Backend: No command buffer with identifier '" << identifier.label << "-" << identifier.index << "' exists";
+            LOG_ERROR << "Vulkan Backend: No command buffer with identifier " << identifier.Get_Identifier_String() << " exists";
             exit(EXIT_FAILURE);
         }
 
@@ -90,13 +90,13 @@ namespace Cascade_Graphics
             return next_index;
         }
 
-        Command_Buffer_Manager::Identifier Command_Buffer_Manager::Add_Command_Buffer(std::string label, uint32_t queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label)
+        Identifier Command_Buffer_Manager::Add_Command_Buffer(std::string label, uint32_t queue_family, std::vector<Identifier> resource_group_identifiers, Identifier pipeline_identifier)
         {
             Identifier identifer = {};
             identifer.label = label;
             identifer.index = Get_Next_Index(label);
 
-            LOG_INFO << "Vulkan Backend: Adding command buffer with identifier '" << identifer.label << "-" << identifer.index << "'";
+            LOG_INFO << "Vulkan Backend: Adding command buffer with identifier " << identifer.Get_Identifier_String();
 
             uint32_t command_pool_index = -1;
             for (uint32_t i = 0; i < m_command_pools.size(); i++)
@@ -120,33 +120,31 @@ namespace Cascade_Graphics
             m_command_buffers.resize(m_command_buffers.size() + 1);
             m_command_buffers.back() = {};
             m_command_buffers.back().identifier = identifer;
-            m_command_buffers.back().pipeline_label = pipeline_label;
-            m_command_buffers.back().resource_group_labels = resource_group_labels;
+            m_command_buffers.back().pipeline_identifier = pipeline_identifier;
+            m_command_buffers.back().resource_group_identifiers = resource_group_identifiers;
 
             Allocate_Command_Buffer(static_cast<uint32_t>(m_command_buffers.size() - 1), command_pool_index);
 
-            std::vector<Resource_ID> resource_identifiers;
-            for (uint32_t i = 0; i < resource_group_labels.size(); i++)
+            std::vector<Identifier> image_identifiers;
+            for (uint32_t i = 0; i < resource_group_identifiers.size(); i++)
             {
-                std::vector<Resource_ID> resource_group_resources = m_storage_manager_ptr->Get_Resource_Grouping(resource_group_labels[i])->resource_ids;
-                resource_identifiers.insert(resource_identifiers.end(), resource_group_resources.begin(), resource_group_resources.end());
+                std::vector<Identifier> resource_group_image_identifiers = m_storage_manager_ptr->Get_Resource_Grouping(resource_group_identifiers[i])->image_identifiers;
+
+                image_identifiers.insert(image_identifiers.end(), resource_group_image_identifiers.begin(), resource_group_image_identifiers.end());
             }
 
-            for (uint32_t i = 0; i < resource_identifiers.size(); i++)
+            for (uint32_t i = 0; i < image_identifiers.size(); i++)
             {
-                if (resource_identifiers[i].resource_type == Resource_ID::Resource_Type::IMAGE_RESOURCE)
-                {
-                    m_command_buffers.back().image_resource_states.resize(m_command_buffers.back().image_resource_states.size() + 1);
+                m_command_buffers.back().image_resource_states.resize(m_command_buffers.back().image_resource_states.size() + 1);
 
-                    m_command_buffers.back().image_resource_states.back() = {};
-                    m_command_buffers.back().image_resource_states.back().resource_id = resource_identifiers[i];
-                    m_command_buffers.back().image_resource_states.back().previous_access_flags = 0;
-                    m_command_buffers.back().image_resource_states.back().current_access_flags = 0;
-                    m_command_buffers.back().image_resource_states.back().previous_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-                    m_command_buffers.back().image_resource_states.back().current_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
-                    m_command_buffers.back().image_resource_states.back().previous_pipeline_stage_flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-                    m_command_buffers.back().image_resource_states.back().current_pipeline_stage_flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-                }
+                m_command_buffers.back().image_resource_states.back() = {};
+                m_command_buffers.back().image_resource_states.back().identifier = image_identifiers[i];
+                m_command_buffers.back().image_resource_states.back().previous_access_flags = 0;
+                m_command_buffers.back().image_resource_states.back().current_access_flags = 0;
+                m_command_buffers.back().image_resource_states.back().previous_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+                m_command_buffers.back().image_resource_states.back().current_image_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+                m_command_buffers.back().image_resource_states.back().previous_pipeline_stage_flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+                m_command_buffers.back().image_resource_states.back().current_pipeline_stage_flags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
             }
 
             LOG_TRACE << "Vulkan Backend: Added command buffer";
@@ -156,6 +154,8 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::Remove_Command_Buffer(Identifier identifier)
         {
+            LOG_TRACE << "Vulkan Backend: Removing command buffer " << identifier.Get_Identifier_String();
+
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
             m_command_buffers.erase(m_command_buffers.begin() + command_buffer_index);
@@ -170,7 +170,7 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::Begin_Recording(Identifier identifier, VkCommandBufferUsageFlagBits usage_flags)
         {
-            LOG_INFO << "Vulkan Backend: Starting recording of command buffer '" << identifier.label << "-" << identifier.index << "'";
+            LOG_INFO << "Vulkan Backend: Starting recording of command buffer " << identifier.Get_Identifier_String();
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
@@ -184,15 +184,15 @@ namespace Cascade_Graphics
 
             LOG_TRACE << "Vulkan Backend: Started command buffer recording";
 
-            if (m_command_buffers[command_buffer_index].pipeline_label != "")
+            if (!(m_command_buffers[command_buffer_index].pipeline_identifier.label == "" && m_command_buffers[command_buffer_index].pipeline_identifier.index == 0))
             {
                 LOG_TRACE << "Vulkan Backend: Binding pipeline";
 
-                switch (m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->type)
+                switch (m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_identifier)->type)
                 {
                     case Pipeline_Manager::Pipeline_Type::COMPUTE:
                     {
-                        vkCmdBindPipeline(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->pipeline);
+                        vkCmdBindPipeline(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_identifier)->pipeline);
                         break;
                     }
                     default:
@@ -204,17 +204,17 @@ namespace Cascade_Graphics
 
                 LOG_TRACE << "Vulkan Backend: Binding descriptor set";
 
-                switch (m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->type)
+                switch (m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_identifier)->type)
                 {
                     case Pipeline_Manager::Pipeline_Type::COMPUTE:
                     {
-                        for (uint32_t i = 0; i < m_command_buffers[command_buffer_index].resource_group_labels.size(); i++)
+                        for (uint32_t i = 0; i < m_command_buffers[command_buffer_index].resource_group_identifiers.size(); i++)
                         {
-                            if (m_storage_manager_ptr->Get_Resource_Grouping(m_command_buffers[command_buffer_index].resource_group_labels[i])->has_descriptor_set)
+                            if (m_storage_manager_ptr->Get_Resource_Grouping(m_command_buffers[command_buffer_index].resource_group_identifiers[i])->has_descriptor_set)
                             {
                                 vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index].command_buffer, VK_PIPELINE_BIND_POINT_COMPUTE,
-                                                        m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_label)->pipeline_layout, 0, 1,
-                                                        &m_descriptor_set_manager->Get_Descriptor_Set_Data(m_command_buffers[command_buffer_index].resource_group_labels[i])->descriptor_set, 0, nullptr);
+                                                        m_pipeline_manager_ptr->Get_Pipeline_Data(m_command_buffers[command_buffer_index].pipeline_identifier)->pipeline_layout, 0, 1,
+                                                        &m_descriptor_set_manager->Get_Descriptor_Set_Data(m_command_buffers[command_buffer_index].resource_group_identifiers[i])->descriptor_set, 0, nullptr);
                             }
                         }
                         break;
@@ -230,29 +230,23 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::End_Recording(Identifier identifier)
         {
-            LOG_INFO << "Vulkan Backend: Ending recording of command buffer '" << identifier.label << "-" << identifier.index << "'";
+            LOG_INFO << "Vulkan Backend: Ending recording of command buffer " << identifier.Get_Identifier_String();
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
             vkEndCommandBuffer(m_command_buffers[command_buffer_index].command_buffer);
         }
 
-        void Command_Buffer_Manager::Image_Memory_Barrier(Identifier identifier, Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags)
+        void Command_Buffer_Manager::Image_Memory_Barrier(Identifier identifier, Identifier resource_identifier, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags)
         {
-            LOG_TRACE << "Vulkan Backend: Image memory barrier in command buffer '" << identifier.label << "-" << identifier.index << "'";
-
-            if (resource_id.resource_type != Resource_ID::IMAGE_RESOURCE)
-            {
-                LOG_ERROR << "Vulkan Backend: Resource type must be an image";
-                exit(EXIT_FAILURE);
-            }
+            LOG_TRACE << "Vulkan Backend: Image memory barrier in command buffer " << identifier.Get_Identifier_String();
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
             int32_t resource_index = -1;
             for (uint32_t i = 0; i < m_command_buffers[command_buffer_index].image_resource_states.size(); i++)
             {
-                if (m_command_buffers[command_buffer_index].image_resource_states[i].resource_id == resource_id)
+                if (m_command_buffers[command_buffer_index].image_resource_states[i].identifier == resource_identifier)
                 {
                     resource_index = i;
                 }
@@ -260,7 +254,7 @@ namespace Cascade_Graphics
 
             if (resource_index == -1)
             {
-                LOG_ERROR << "Vulkan Backend: No image resources with the id '" << resource_id.label << "-" << resource_id.index << "' exists in provided resource groupings";
+                LOG_ERROR << "Vulkan Backend: No image resources with the identifier " << resource_identifier.Get_Identifier_String() << " exists in provided resource groupings";
                 exit(EXIT_FAILURE);
             }
 
@@ -281,7 +275,7 @@ namespace Cascade_Graphics
             image_memory_barrier.newLayout = m_command_buffers[command_buffer_index].image_resource_states[resource_index].current_image_layout;
             image_memory_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             image_memory_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            image_memory_barrier.image = m_storage_manager_ptr->Get_Image_Resource(resource_id)->image;
+            image_memory_barrier.image = m_storage_manager_ptr->Get_Image_Resource(resource_identifier)->image;
             image_memory_barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             image_memory_barrier.subresourceRange.baseMipLevel = 0;
             image_memory_barrier.subresourceRange.levelCount = 1;
@@ -294,15 +288,15 @@ namespace Cascade_Graphics
 
         void Command_Buffer_Manager::Dispatch_Compute_Shader(Identifier identifier, uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z)
         {
-            LOG_TRACE << "Vulkan Backend: Dispatching compute shader in command buffer '" << identifier.label << "-" << identifier.index << "'";
+            LOG_TRACE << "Vulkan Backend: Dispatching compute shader in command buffer " << identifier.Get_Identifier_String();
 
             vkCmdDispatch(m_command_buffers[Get_Command_Buffer_Index(identifier)].command_buffer, group_count_x, group_count_y, group_count_z);
         }
 
-        void Command_Buffer_Manager::Copy_Image(Identifier identifier, Resource_ID source_resource_id, Resource_ID destination_resource_id, uint32_t width, uint32_t height)
+        void Command_Buffer_Manager::Copy_Image(Identifier identifier, Identifier source_resource_identifier, Identifier destination_resource_identifier, uint32_t width, uint32_t height)
         {
-            LOG_TRACE << "Vulkan Backend: Copying image " << source_resource_id.label << "-" << source_resource_id.index << " to " << destination_resource_id.label << "-" << destination_resource_id.index << " in command buffer '" << identifier.label
-                      << "-" << identifier.index << "'";
+            LOG_TRACE << "Vulkan Backend: Copying image " << source_resource_identifier.Get_Identifier_String() << " to " << destination_resource_identifier.Get_Identifier_String() << " in command buffer " << identifier.Get_Identifier_String();
+            ;
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
@@ -310,11 +304,11 @@ namespace Cascade_Graphics
             int32_t destination_index = -1;
             for (uint32_t i = 0; i < m_command_buffers[command_buffer_index].image_resource_states.size(); i++)
             {
-                if (m_command_buffers[command_buffer_index].image_resource_states[i].resource_id == source_resource_id)
+                if (m_command_buffers[command_buffer_index].image_resource_states[i].identifier == source_resource_identifier)
                 {
                     source_index = i;
                 }
-                if (m_command_buffers[command_buffer_index].image_resource_states[i].resource_id == destination_resource_id)
+                if (m_command_buffers[command_buffer_index].image_resource_states[i].identifier == destination_resource_identifier)
                 {
                     destination_index = i;
                 }
@@ -343,13 +337,15 @@ namespace Cascade_Graphics
             copy_region.dstOffset = region_offset;
             copy_region.extent = region_extent;
 
-            vkCmdCopyImage(m_command_buffers[command_buffer_index].command_buffer, m_storage_manager_ptr->Get_Image_Resource(source_resource_id)->image, m_command_buffers[command_buffer_index].image_resource_states[source_index].current_image_layout,
-                           m_storage_manager_ptr->Get_Image_Resource(destination_resource_id)->image, m_command_buffers[command_buffer_index].image_resource_states[destination_index].current_image_layout, 1, &copy_region);
+            vkCmdCopyImage(m_command_buffers[command_buffer_index].command_buffer, m_storage_manager_ptr->Get_Image_Resource(source_resource_identifier)->image,
+                           m_command_buffers[command_buffer_index].image_resource_states[source_index].current_image_layout, m_storage_manager_ptr->Get_Image_Resource(destination_resource_identifier)->image,
+                           m_command_buffers[command_buffer_index].image_resource_states[destination_index].current_image_layout, 1, &copy_region);
         }
 
-        void Command_Buffer_Manager::Copy_Buffer(Identifier identifier, Resource_ID source, Resource_ID destination, VkDeviceSize src_offset, VkDeviceSize dst_offset, VkDeviceSize copy_size)
+        void Command_Buffer_Manager::Copy_Buffer(Identifier identifier, Identifier source_resource_identifier, Identifier destination_resource_identifier, VkDeviceSize src_offset, VkDeviceSize dst_offset, VkDeviceSize copy_size)
         {
-            LOG_TRACE << "Vulkan Backend: Copying buffer '" << m_storage_manager_ptr->Get_Resource_String(source) << "' to '" << m_storage_manager_ptr->Get_Resource_String(destination) << "'";
+            LOG_TRACE << "Vulkan Backend: Copying buffer " << source_resource_identifier.Get_Identifier_String() << " to " << destination_resource_identifier.Get_Identifier_String() << " in command buffer " << identifier.Get_Identifier_String();
+
 
             uint32_t command_buffer_index = Get_Command_Buffer_Index(identifier);
 
@@ -358,7 +354,8 @@ namespace Cascade_Graphics
             buffer_copy_data.dstOffset = dst_offset;
             buffer_copy_data.size = copy_size;
 
-            vkCmdCopyBuffer(m_command_buffers[command_buffer_index].command_buffer, m_storage_manager_ptr->Get_Buffer_Resource(source)->buffer, m_storage_manager_ptr->Get_Buffer_Resource(destination)->buffer, 1, &buffer_copy_data);
+            vkCmdCopyBuffer(m_command_buffers[command_buffer_index].command_buffer, m_storage_manager_ptr->Get_Buffer_Resource(source_resource_identifier)->buffer, m_storage_manager_ptr->Get_Buffer_Resource(destination_resource_identifier)->buffer,
+                            1, &buffer_copy_data);
         }
 
         VkCommandBuffer* Command_Buffer_Manager::Get_Command_Buffer(Identifier identifier)

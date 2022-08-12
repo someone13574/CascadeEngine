@@ -1,5 +1,6 @@
 #pragma once
 
+#include "identifier.hpp"
 #include "logical_device_wrapper.hpp"
 #include "storage_manager.hpp"
 #include "vulkan_header.hpp"
@@ -19,7 +20,8 @@ namespace Cascade_Graphics
         public:
             struct Descriptor_Set_Data
             {
-                std::string label;
+                Identifier identifier;
+                Identifier resource_grouping_identifier;
 
                 VkDescriptorSet descriptor_set;
                 VkDescriptorPool descriptor_pool;
@@ -38,20 +40,20 @@ namespace Cascade_Graphics
             std::shared_ptr<Storage_Manager> m_storage_manager_ptr;
 
         private:
-            void Create_Descriptor_Set_Layout(std::string label);
-            void Create_Descriptor_Pool(std::string label);
-            void Allocate_Descriptor_Set(std::string label);
-            void Create_Write_Descriptor_Set(std::string label);
+            void Create_Descriptor_Set_Layout(Identifier identifier);
+            void Create_Descriptor_Pool(Identifier identifier);
+            void Allocate_Descriptor_Set(Identifier identifier);
+            void Create_Write_Descriptor_Set(Identifier identifier);
 
         public:
             Descriptor_Set_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr, std::shared_ptr<Storage_Manager> storage_manager_ptr);
             ~Descriptor_Set_Manager();
 
         public:
-            std::string Create_Descriptor_Set(std::string resource_grouping_label);
-            void Remove_Descriptor_Set(std::string resource_grouping_label);
+            Identifier Create_Descriptor_Set(Identifier resource_grouping_identifier);
+            void Remove_Descriptor_Set(Identifier identifier);
 
-            Descriptor_Set_Data* Get_Descriptor_Set_Data(std::string label);
+            Descriptor_Set_Data* Get_Descriptor_Set_Data(Identifier identifier);
         };
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

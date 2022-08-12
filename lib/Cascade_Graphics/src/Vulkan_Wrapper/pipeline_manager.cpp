@@ -28,23 +28,37 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan Backend: Finished destroying pipelines";
         }
 
-        std::string Pipeline_Manager::Add_Compute_Pipeline(std::string label, std::string resource_grouping_label, std::string shader_label)
+        Identifier Pipeline_Manager::Add_Compute_Pipeline(std::string label, Identifier descriptor_set_identifier, Identifier shader_identifier)
         {
-            LOG_INFO << "Vulkan Backend: Creating compute pipeline with label " << label;
+            Identifier identifier = {};
+            identifier.label = label;
+            identifier.index = 0;
 
-            for (uint32_t i = 0; i < m_pipelines.size(); i++)
+            while (true)
             {
-                if (m_pipelines[i].label == label)
+                bool index_in_use = false;
+
+                for (uint32_t i = 0; i < m_pipelines.size(); i++)
                 {
-                    LOG_ERROR << "Vulkan Backend: Cannot use label '" << label << "' because it is already in use";
-                    exit(EXIT_FAILURE);
+                    index_in_use |= m_pipelines[i].identifier == identifier;
+                }
+
+                if (!index_in_use)
+                {
+                    break;
+                }
+                else
+                {
+                    identifier.index++;
                 }
             }
+
+            LOG_INFO << "Vulkan Backend: Creating compute pipeline with identifier " << identifier.Get_Identifier_String();
 
             m_pipelines.resize(m_pipelines.size() + 1);
 
             m_pipelines.back() = {};
-            m_pipelines.back().label = label;
+            m_pipelines.back().identifier = identifier;
             m_pipelines.back().type = Pipeline_Type::COMPUTE;
 
             VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
@@ -52,7 +66,7 @@ namespace Cascade_Graphics
             pipeline_layout_create_info.pNext = nullptr;
             pipeline_layout_create_info.flags = 0;
             pipeline_layout_create_info.setLayoutCount = 1;
-            pipeline_layout_create_info.pSetLayouts = &m_descriptor_set_manager_ptr->Get_Descriptor_Set_Data(resource_grouping_label)->descriptor_set_layout;
+            pipeline_layout_create_info.pSetLayouts = &m_descriptor_set_manager_ptr->Get_Descriptor_Set_Data(descriptor_set_identifier)->descriptor_set_layout;
             pipeline_layout_create_info.pushConstantRangeCount = 0;
             pipeline_layout_create_info.pPushConstantRanges = nullptr;
 
@@ -63,7 +77,7 @@ namespace Cascade_Graphics
             pipeline_shader_stage_create_info.pNext = nullptr;
             pipeline_shader_stage_create_info.flags = 0;
             pipeline_shader_stage_create_info.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-            pipeline_shader_stage_create_info.module = m_shader_manager_ptr->Get_Shader_Data(shader_label)->shader_module;
+            pipeline_shader_stage_create_info.module = m_shader_manager_ptr->Get_Shader_Data(shader_identifier)->shader_module;
             pipeline_shader_stage_create_info.pName = "main";
             pipeline_shader_stage_create_info.pSpecializationInfo = nullptr;
 
@@ -79,16 +93,16 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateComputePipelines(*m_logical_device_wrapper_ptr->Get_Device(), VK_NULL_HANDLE, 1, &compute_pipeline_create_info, nullptr, &m_pipelines.back().pipeline), "Vulkan Backend: Failed to create compute pipeline");
 
             LOG_TRACE << "Vulkan Backend: Finished creating compute pipeline";
-            return label;
+            return identifier;
         }
 
-        void Pipeline_Manager::Delete_Pipeline(std::string label)
+        void Pipeline_Manager::Delete_Pipeline(Identifier identifier)
         {
-            LOG_INFO << "Vulkan Backend: Destroying pipeline '" << label << "'";
+            LOG_INFO << "Vulkan Backend: Destroying pipeline " << identifier.Get_Identifier_String();
 
             for (uint32_t i = 0; i < m_pipelines.size(); i++)
             {
-                if (m_pipelines[i].label == label)
+                if (m_pipelines[i].identifier == identifier)
                 {
                     vkDestroyPipeline(*m_logical_device_wrapper_ptr->Get_Device(), m_pipelines[i].pipeline, nullptr);
                     vkDestroyPipelineLayout(*m_logical_device_wrapper_ptr->Get_Device(), m_pipelines[i].pipeline_layout, nullptr);
@@ -98,21 +112,21 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_ERROR << "Vulkan Backend: Pipeline with label '" << label << "' does not exist";
+            LOG_ERROR << "Vulkan Backend: Pipeline with identifier " << identifier.Get_Identifier_String() << " does not exist";
             exit(EXIT_FAILURE);
         }
 
-        Pipeline_Manager::Pipeline_Data* Pipeline_Manager::Get_Pipeline_Data(std::string label)
+        Pipeline_Manager::Pipeline_Data* Pipeline_Manager::Get_Pipeline_Data(Identifier identifier)
         {
             for (uint32_t i = 0; i < m_pipelines.size(); i++)
             {
-                if (m_pipelines[i].label == label)
+                if (m_pipelines[i].identifier == identifier)
                 {
                     return &m_pipelines[i];
                 }
             }
 
-            LOG_ERROR << "Vulkan Backend: Pipeline with label '" << label << "' does not exist";
+            LOG_ERROR << "Vulkan Backend: Pipeline with identifier " << identifier.Get_Identifier_String() << " does not exist";
             exit(EXIT_FAILURE);
         }
     } // namespace Vulkan_Backend

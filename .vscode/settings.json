@@ -90,7 +90,8 @@
         "bitset": "cpp",
         "complex": "cpp",
         "span": "cpp",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "future": "cpp"
     },
     "C_Cpp.autocompleteAddParentheses": true,
     "C_Cpp.clang_format_fallbackStyle": "Mozilla",

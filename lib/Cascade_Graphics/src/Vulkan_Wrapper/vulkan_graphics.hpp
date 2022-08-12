@@ -3,6 +3,7 @@
 #include "command_buffer_manager.hpp"
 #include "debug_tools.hpp"
 #include "descriptor_set_manager.hpp"
+#include "identifier.hpp"
 #include "instance_wrapper.hpp"
 #include "logical_device_wrapper.hpp"
 #include "physical_device_wrapper.hpp"
@@ -10,9 +11,6 @@
 #include "queue_manager.hpp"
 #include "shader_manager.hpp"
 #include "storage_manager.hpp"
-#include "storage_manager_resource_id.hpp"
-#include "surface_wrapper.hpp"
-#include "swapchain_wrapper.hpp"
 #include "synchronization_manager.hpp"
 #include "validation_layer_wrapper.hpp"
 #include <condition_variable>

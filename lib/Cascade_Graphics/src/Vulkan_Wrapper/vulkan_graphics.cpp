@@ -1,5 +1,6 @@
 #include "vulkan_graphics.hpp"
 
+#include "debug_tools.hpp"
 #include <set>
 
 namespace Cascade_Graphics
@@ -41,7 +42,7 @@ namespace Cascade_Graphics
 
             if (m_is_vulkan_initialized)
             {
-                vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device());
+                VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device()), "Failed to wait for idle device");
 
                 m_synchronization_manager_ptr.reset();
                 m_command_buffer_manager_ptr.reset();

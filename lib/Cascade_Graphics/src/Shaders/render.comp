@@ -3,9 +3,9 @@
 layout(local_size_x = 32, local_size_y = 32) in;
 
 // bindings
-layout(binding = 0, rgba8) uniform image2D render_target;
+layout(binding = 3, rgba8) uniform image2D render_target;
 
-layout(binding = 1) uniform Camera_Data
+layout(binding = 0) uniform Camera_Data
 {
     float matrix_x0;
     float matrix_x1;
@@ -49,12 +49,12 @@ struct Voxel
     uint padding_b;
 };
 
-layout(std140, binding = 2) buffer voxel_buffer
+layout(std140, binding = 1) buffer voxel_buffer
 {
     Voxel voxels[];
 };
 
-layout(std140, binding = 3) buffer hit_buffer
+layout(std140, binding = 2) buffer hit_buffer
 {
     ivec4 hit_counts[];
 };

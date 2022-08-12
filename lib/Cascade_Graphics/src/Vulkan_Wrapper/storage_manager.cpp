@@ -21,7 +21,7 @@ namespace Cascade_Graphics
             {
                 Buffer_Resource* buffer_resource_ptr = &m_buffer_resources[i];
 
-                LOG_TRACE << "Vulkan Backend: Destroying buffer " << Get_Resource_String(buffer_resource_ptr->resource_id) << "'";
+                LOG_TRACE << "Vulkan Backend: Destroying buffer " << buffer_resource_ptr->identifier.Get_Identifier_String();
 
                 vkDestroyBuffer(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
                 vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
@@ -34,7 +34,7 @@ namespace Cascade_Graphics
 
                 if (!image_resource_ptr->is_swapchain_image)
                 {
-                    LOG_TRACE << "Vulkan Backend: Destorying image '" << Get_Resource_String(image_resource_ptr->resource_id) << "'";
+                    LOG_TRACE << "Vulkan Backend: Destorying image " << image_resource_ptr->identifier.Get_Identifier_String();
 
                     vkDestroyImage(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image, nullptr);
                     vkDestroyImageView(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image_view, nullptr);
@@ -47,49 +47,53 @@ namespace Cascade_Graphics
             LOG_TRACE << "Vulkan Backend: Finished cleaning up storage";
         }
 
-        uint32_t Storage_Manager::Get_Buffer_Index(Resource_ID resource_id)
+        uint32_t Storage_Manager::Get_Buffer_Index(Identifier identifier)
         {
-            if (resource_id.resource_type == Resource_ID::BUFFER_RESOURCE)
+            for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
             {
-                for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
+                if (identifier == m_buffer_resources[i].identifier)
                 {
-                    Resource_ID current_resource_id = m_buffer_resources[i].resource_id;
-
-                    if (current_resource_id == resource_id)
-                    {
-                        return i;
-                    }
+                    return i;
                 }
             }
 
-            LOG_ERROR << "Vulkan Backend: No buffers named '" << Get_Resource_String(resource_id) << "' exist";
+            LOG_ERROR << "Vulkan Backend: No buffers named " << identifier.Get_Identifier_String() << " exist";
             exit(EXIT_FAILURE);
         }
 
-        uint32_t Storage_Manager::Get_Image_Index(Resource_ID resource_id)
+        uint32_t Storage_Manager::Get_Image_Index(Identifier identifier)
         {
-            if (resource_id.resource_type == Resource_ID::IMAGE_RESOURCE)
+            for (uint32_t i = 0; i < m_image_resources.size(); i++)
             {
-                for (uint32_t i = 0; i < m_image_resources.size(); i++)
+                if (identifier == m_image_resources[i].identifier)
                 {
-                    Resource_ID current_resource_id = m_image_resources[i].resource_id;
-
-                    if (current_resource_id == resource_id)
-                    {
-                        return i;
-                    }
+                    return i;
                 }
             }
 
-            LOG_ERROR << "Vulkan Backend: No images named '" << Get_Resource_String(resource_id) << "' exist";
+            LOG_ERROR << "Vulkan Backend: No images named " << identifier.Get_Identifier_String() << " exist";
             exit(EXIT_FAILURE);
         }
 
-        void Storage_Manager::Create_VkBuffer(Resource_ID resource_id)
+        uint32_t Storage_Manager::Get_Resource_Grouping_Index(Identifier identifier)
         {
-            LOG_TRACE << "Vulkan Backend: Creating VkBuffer for " << Get_Resource_String(resource_id);
+            for (uint32_t i = 0; i < m_resource_groupings.size(); i++)
+            {
+                if (identifier == m_resource_groupings[i].identifier)
+                {
+                    return i;
+                }
+            }
 
-            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
+            LOG_ERROR << "Vulkan Backend: No resource groupings named " << identifier.Get_Identifier_String() << " exist";
+            exit(EXIT_FAILURE);
+        }
+
+        void Storage_Manager::Create_VkBuffer(Identifier identifier)
+        {
+            LOG_TRACE << "Vulkan Backend: Creating VkBuffer for " << identifier.Get_Identifier_String();
+
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(identifier);
 
             std::vector<uint32_t> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(buffer_resource_ptr->resource_queue_mask);
 
@@ -106,11 +110,11 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateBuffer(*m_logical_device_wrapper_ptr->Get_Device(), &buffer_create_info, nullptr, &buffer_resource_ptr->buffer), "Vulkan Backend: Failed to create VkBuffer");
         }
 
-        void Storage_Manager::Get_Buffer_Memory_Info(Resource_ID resource_id)
+        void Storage_Manager::Get_Buffer_Memory_Info(Identifier identifier)
         {
-            LOG_TRACE << "Vulkan Backend: Getting memory infomation for " << Get_Resource_String(resource_id);
+            LOG_TRACE << "Vulkan Backend: Getting memory infomation for " << identifier.Get_Identifier_String();
 
-            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(identifier);
 
             vkGetBufferMemoryRequirements(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, &buffer_resource_ptr->memory_requirements);
 
@@ -136,7 +140,7 @@ namespace Cascade_Graphics
 
                         if (device_memory_budget_properties.heapBudget[heap_index] < buffer_resource_ptr->memory_requirements.size)
                         {
-                            LOG_ERROR << "Vulkan Backend: Required memory for buffer '" << Get_Resource_String(resource_id) << "' (" << buffer_resource_ptr->memory_requirements.size << " bytes) exceeds the memory budget for heap " << heap_index
+                            LOG_ERROR << "Vulkan Backend: Required memory for buffer " << identifier.Get_Identifier_String() << " (" << buffer_resource_ptr->memory_requirements.size << " bytes) exceeds the memory budget for heap " << heap_index
                                       << " (" << device_memory_budget_properties.heapBudget[heap_index] << " bytes)";
                             exit(EXIT_FAILURE);
                         }
@@ -147,11 +151,11 @@ namespace Cascade_Graphics
             }
         }
 
-        void Storage_Manager::Allocate_Buffer_Memory(Resource_ID resource_id)
+        void Storage_Manager::Allocate_Buffer_Memory(Identifier identifier)
         {
-            LOG_TRACE << "Vulkan Backend: Allocating memory for buffer " << Get_Resource_String(resource_id);
+            LOG_TRACE << "Vulkan Backend: Allocating memory for buffer " << identifier.Get_Identifier_String();
 
-            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(identifier);
 
             VkMemoryAllocateInfo memory_allocate_info = {};
             memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -163,11 +167,11 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkBindBufferMemory(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, buffer_resource_ptr->device_memory, 0), "Vulkan Backend: Failed to bind buffer memory");
         }
 
-        void Storage_Manager::Create_VkImage(Resource_ID resource_id)
+        void Storage_Manager::Create_VkImage(Identifier identifier)
         {
-            LOG_TRACE << "Vulkan Backend: Creating VkImage for image " << Get_Resource_String(resource_id);
+            LOG_TRACE << "Vulkan Backend: Creating VkImage for image " << identifier.Get_Identifier_String();
 
-            Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
+            Image_Resource* image_resource_ptr = Get_Image_Resource(identifier);
 
             std::vector<uint32_t> unique_queues = m_queue_manager_ptr->Get_Unique_Queue_Families(image_resource_ptr->resource_queue_mask);
 
@@ -189,11 +193,11 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateImage(*m_logical_device_wrapper_ptr->Get_Device(), &image_create_info, nullptr, &image_resource_ptr->image), "Vulkan Backend: Failed to create VkImage");
         }
 
-        void Storage_Manager::Get_Image_Memory_Info(Resource_ID resource_id)
+        void Storage_Manager::Get_Image_Memory_Info(Identifier identifier)
         {
-            LOG_TRACE << "Vulkan Backend: Getting memory infomation for " << Get_Resource_String(resource_id);
+            LOG_TRACE << "Vulkan Backend: Getting memory infomation for " << identifier.Get_Identifier_String();
 
-            Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
+            Image_Resource* image_resource_ptr = Get_Image_Resource(identifier);
 
             vkGetImageMemoryRequirements(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image, &image_resource_ptr->memory_requirements);
 
@@ -219,7 +223,7 @@ namespace Cascade_Graphics
 
                         if (device_memory_budget_properties.heapBudget[heap_index] < image_resource_ptr->memory_requirements.size)
                         {
-                            LOG_ERROR << "Vulkan Backend: Required memory for image '" << Get_Resource_String(resource_id) << "' (" << image_resource_ptr->memory_requirements.size << " bytes) exceeds the memory budget for heap " << heap_index << " ("
+                            LOG_ERROR << "Vulkan Backend: Required memory for image " << identifier.Get_Identifier_String() << " (" << image_resource_ptr->memory_requirements.size << " bytes) exceeds the memory budget for heap " << heap_index << " ("
                                       << device_memory_budget_properties.heapBudget[heap_index] << " bytes)";
                             exit(EXIT_FAILURE);
                         }
@@ -230,11 +234,11 @@ namespace Cascade_Graphics
             }
         }
 
-        void Storage_Manager::Allocate_Image_Memory(Resource_ID resource_id)
+        void Storage_Manager::Allocate_Image_Memory(Identifier identifier)
         {
-            LOG_TRACE << "Vulkan Backend: Allocating memory for image " << Get_Resource_String(resource_id);
+            LOG_TRACE << "Vulkan Backend: Allocating memory for image " << identifier.Get_Identifier_String();
 
-            Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
+            Image_Resource* image_resource_ptr = Get_Image_Resource(identifier);
 
             VkMemoryAllocateInfo memory_allocate_info = {};
             memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -246,11 +250,11 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkBindImageMemory(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image, image_resource_ptr->device_memory, 0), "Vulkan Backend: Failed to bind image memory");
         }
 
-        void Storage_Manager::Create_Image_View(Resource_ID resource_id)
+        void Storage_Manager::Create_Image_View(Identifier identifier)
         {
-            LOG_TRACE << "Vulkan Backend: Creating image view for image " << Get_Resource_String(resource_id);
+            LOG_TRACE << "Vulkan Backend: Creating image view for image " << identifier.Get_Identifier_String();
 
-            Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
+            Image_Resource* image_resource_ptr = Get_Image_Resource(identifier);
 
             VkImageViewCreateInfo image_view_create_info = {};
             image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -272,14 +276,14 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_wrapper_ptr->Get_Device(), &image_view_create_info, nullptr, &image_resource_ptr->image_view), "Vulkan Backend: Failed to create image view");
         }
 
-        Resource_ID Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask)
+        Identifier Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask)
         {
             if (buffer_size == 0)
             {
                 LOG_DEBUG << "Vulkan Backend: Buffer size is 0. Creating temporary buffer to find maximum buffer size";
 
-                Create_Buffer(label + "-temp", 1, buffer_usage, descriptor_type, memory_property_flags, resource_queue_mask);
-                Buffer_Resource* buffer_resource_ptr = &m_buffer_resources.back();
+                Identifier temp_buffer_id = Create_Buffer(label + "-temp", 1, buffer_usage, descriptor_type, memory_property_flags, resource_queue_mask);
+                Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(temp_buffer_id);
 
                 VkPhysicalDeviceMemoryBudgetPropertiesEXT device_memory_budget_properties = {};
                 device_memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
@@ -294,18 +298,15 @@ namespace Cascade_Graphics
                 uint32_t memory_type_index = buffer_resource_ptr->memory_type_index;
                 uint32_t heap_index = device_memory_properties.memoryProperties.memoryTypes[memory_type_index].heapIndex;
 
-                LOG_INFO << "Vulkan Backend: Destroying temporary buffer " << Get_Resource_String(buffer_resource_ptr->resource_id) << "'";
-                vkDestroyBuffer(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
-                vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
-                m_buffer_resources.pop_back();
+                LOG_INFO << "Vulkan Backend: Destroying temporary buffer " << temp_buffer_id.Get_Identifier_String();
+                Destroy_Buffer(temp_buffer_id);
 
                 buffer_size = device_memory_budget_properties.heapBudget[heap_index] - device_memory_budget_properties.heapUsage[heap_index];
             }
 
-            Resource_ID resource_id = {};
-            resource_id.label = label;
-            resource_id.index = 0;
-            resource_id.resource_type = Resource_ID::Resource_Type::BUFFER_RESOURCE;
+            Identifier identifier = {};
+            identifier.label = label;
+            identifier.index = 0;
 
             while (true)
             {
@@ -313,7 +314,7 @@ namespace Cascade_Graphics
 
                 for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
                 {
-                    index_in_use |= m_buffer_resources[i].resource_id == resource_id;
+                    index_in_use |= m_buffer_resources[i].identifier == identifier;
                 }
 
                 if (!index_in_use)
@@ -322,15 +323,15 @@ namespace Cascade_Graphics
                 }
                 else
                 {
-                    resource_id.index++;
+                    identifier.index++;
                 }
             }
 
-            LOG_INFO << "Vulkan Backend: Creating buffer " << Get_Resource_String(resource_id);
+            LOG_INFO << "Vulkan Backend: Creating buffer " << identifier.Get_Identifier_String();
 
             m_buffer_resources.resize(m_buffer_resources.size() + 1);
             m_buffer_resources.back() = {};
-            m_buffer_resources.back().resource_id = resource_id;
+            m_buffer_resources.back().identifier = identifier;
             m_buffer_resources.back().buffer_size = buffer_size;
             m_buffer_resources.back().descriptor_type = descriptor_type;
             m_buffer_resources.back().buffer_usage = buffer_usage;
@@ -340,19 +341,18 @@ namespace Cascade_Graphics
             m_buffer_resources.back().device_memory = VK_NULL_HANDLE;
             m_buffer_resources.back().memory_type_index = 0;
 
-            Create_VkBuffer(resource_id);
-            Get_Buffer_Memory_Info(resource_id);
-            Allocate_Buffer_Memory(resource_id);
+            Create_VkBuffer(identifier);
+            Get_Buffer_Memory_Info(identifier);
+            Allocate_Buffer_Memory(identifier);
 
-            return resource_id;
+            return identifier;
         }
 
-        Resource_ID Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask)
+        Identifier Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask)
         {
-            Resource_ID resource_id = {};
-            resource_id.label = label;
-            resource_id.index = 0;
-            resource_id.resource_type = Resource_ID::Resource_Type::IMAGE_RESOURCE;
+            Identifier identifier = {};
+            identifier.label = label;
+            identifier.index = 0;
 
             while (true)
             {
@@ -360,7 +360,7 @@ namespace Cascade_Graphics
 
                 for (uint32_t i = 0; i < m_image_resources.size(); i++)
                 {
-                    index_in_use |= m_image_resources[i].resource_id == resource_id;
+                    index_in_use |= m_image_resources[i].identifier == identifier;
                 }
 
                 if (!index_in_use)
@@ -369,15 +369,15 @@ namespace Cascade_Graphics
                 }
                 else
                 {
-                    resource_id.index++;
+                    identifier.index++;
                 }
             }
 
-            LOG_INFO << "Vulkan Backend: Creating image " << Get_Resource_String(resource_id);
+            LOG_INFO << "Vulkan Backend: Creating image " << identifier.Get_Identifier_String();
 
             m_image_resources.resize(m_image_resources.size() + 1);
             m_image_resources.back() = {};
-            m_image_resources.back().resource_id = resource_id;
+            m_image_resources.back().identifier = identifier;
             m_image_resources.back().is_swapchain_image = false;
             m_image_resources.back().image_format = image_format;
             m_image_resources.back().image_usage = image_usage;
@@ -389,93 +389,27 @@ namespace Cascade_Graphics
             m_image_resources.back().device_memory = VK_NULL_HANDLE;
             m_image_resources.back().memory_type_index = 0;
 
-            Create_VkImage(resource_id);
-            Get_Image_Memory_Info(resource_id);
-            Allocate_Image_Memory(resource_id);
-            Create_Image_View(resource_id);
+            Create_VkImage(identifier);
+            Get_Image_Memory_Info(identifier);
+            Allocate_Image_Memory(identifier);
+            Create_Image_View(identifier);
 
-            return resource_id;
+            return identifier;
         }
 
-        std::string Storage_Manager::Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids)
+        Identifier Storage_Manager::Create_Resource_Grouping(std::string label, std::vector<Identifier> resource_identifiers)
         {
-            LOG_INFO << "Vulkan Backend: Creating resource grouping with label '" << label << "'";
-
-            for (uint32_t i = 0; i < m_resource_groupings.size(); i++)
-            {
-                if (m_resource_groupings[i].label == label)
-                {
-                    LOG_ERROR << "Vulkan Backend: A resource grouping with that label already exists";
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            uint32_t buffer_resource_count = 0;
-            uint32_t image_resource_count = 0;
-            for (uint32_t i = 0; i < resource_ids.size(); i++)
-            {
-                bool resource_exists = false;
-                if (resource_ids[i].resource_type == Resource_ID::BUFFER_RESOURCE)
-                {
-                    for (uint32_t j = 0; j < m_buffer_resources.size(); j++)
-                    {
-                        if (m_buffer_resources[j].resource_id == resource_ids[i])
-                        {
-                            resource_exists = true;
-                        }
-                    }
-
-                    if (!resource_exists)
-                    {
-                        LOG_ERROR << "Vulkan Backend: The buffer '" << Get_Resource_String(resource_ids[i]) << "' does not exist";
-                        exit(EXIT_FAILURE);
-                    }
-                    buffer_resource_count++;
-                }
-                else if (resource_ids[i].resource_type == Resource_ID::IMAGE_RESOURCE)
-                {
-                    for (uint32_t j = 0; j < m_image_resources.size(); j++)
-                    {
-                        if (m_image_resources[j].resource_id == resource_ids[i])
-                        {
-                            resource_exists = true;
-                        }
-                    }
-
-                    if (!resource_exists)
-                    {
-                        LOG_ERROR << "Vulkan Backend: The image '" << Get_Resource_String(resource_ids[i]) << "' does not exist";
-                        exit(EXIT_FAILURE);
-                    }
-                    image_resource_count++;
-                }
-            }
-
-            m_resource_groupings.resize(m_resource_groupings.size() + 1);
-            m_resource_groupings.back() = {};
-            m_resource_groupings.back().label = label;
-            m_resource_groupings.back().has_descriptor_set = false;
-            m_resource_groupings.back().buffer_resource_count = buffer_resource_count;
-            m_resource_groupings.back().image_resource_count = image_resource_count;
-            m_resource_groupings.back().resource_ids = resource_ids;
-
-            return label;
-        }
-
-        Resource_ID Storage_Manager::Add_Image(std::string label, Image_Resource image_resource)
-        {
-            Resource_ID resource_id = {};
-            resource_id.label = label;
-            resource_id.index = 0;
-            resource_id.resource_type = Resource_ID::Resource_Type::IMAGE_RESOURCE;
+            Identifier identifier = {};
+            identifier.label = label;
+            identifier.index = 0;
 
             while (true)
             {
                 bool index_in_use = false;
 
-                for (uint32_t i = 0; i < m_image_resources.size(); i++)
+                for (uint32_t i = 0; i < m_resource_groupings.size(); i++)
                 {
-                    index_in_use |= m_image_resources[i].resource_id == resource_id;
+                    index_in_use |= m_resource_groupings[i].identifier == identifier;
                 }
 
                 if (!index_in_use)
@@ -484,86 +418,123 @@ namespace Cascade_Graphics
                 }
                 else
                 {
-                    resource_id.index++;
+                    identifier.index++;
                 }
             }
 
-            LOG_INFO << "Vulkan Backend: Adding image resource to storage manager (provided resource_id was overwritten) with resource id " << Get_Resource_String(resource_id);
+            LOG_INFO << "Vulkan Backend: Creating resource grouping " << identifier.Get_Identifier_String();
 
-            image_resource.resource_id = resource_id;
+            m_resource_groupings.resize(m_resource_groupings.size() + 1);
+            m_resource_groupings.back() = {};
+            m_resource_groupings.back().identifier = identifier;
+            m_resource_groupings.back().has_descriptor_set = false;
+
+            for (uint32_t i = 0; i < resource_identifiers.size(); i++)
+            {
+                bool resource_exists = false;
+                for (uint32_t j = 0; j < m_buffer_resources.size(); j++)
+                {
+                    if (resource_identifiers[i] == m_buffer_resources[j].identifier)
+                    {
+                        resource_exists = true;
+                        m_resource_groupings.back().buffer_identifiers.push_back(resource_identifiers[i]);
+                        break;
+                    }
+                }
+                for (uint32_t j = 0; j < m_image_resources.size(); j++)
+                {
+                    if (resource_identifiers[i] == m_image_resources[j].identifier)
+                    {
+                        resource_exists = true;
+                        m_resource_groupings.back().image_identifiers.push_back(resource_identifiers[i]);
+                        break;
+                    }
+                }
+                if (!resource_exists)
+                {
+                    LOG_ERROR << "Vulkan Backend: The resource " << resource_identifiers[i].Get_Identifier_String() << " does not exist";
+                    exit(EXIT_FAILURE);
+                }
+            }
+
+            return identifier;
+        }
+
+        Identifier Storage_Manager::Add_Image(std::string label, Image_Resource image_resource)
+        {
+            Identifier identifier = {};
+            identifier.label = label;
+            identifier.index = 0;
+
+            while (true)
+            {
+                bool index_in_use = false;
+
+                for (uint32_t i = 0; i < m_image_resources.size(); i++)
+                {
+                    index_in_use |= m_image_resources[i].identifier == identifier;
+                }
+
+                if (!index_in_use)
+                {
+                    break;
+                }
+                else
+                {
+                    identifier.index++;
+                }
+            }
+
+            LOG_INFO << "Vulkan Backend: Adding image resource to storage manager (provided identifier was overwritten) with identifier" << identifier.Get_Identifier_String();
+
+            image_resource.identifier = identifier;
             m_image_resources.push_back(image_resource);
 
-            return resource_id;
+            return identifier;
         }
 
-        void Storage_Manager::Destroy_Buffer(Resource_ID resource_id)
+        void Storage_Manager::Destroy_Buffer(Identifier identifier)
         {
-            for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
+            LOG_TRACE << "Vulkan Backend: Destroying buffer " << identifier.Get_Identifier_String();
+
+            uint32_t buffer_index = Get_Buffer_Index(identifier);
+            Buffer_Resource* buffer_resource_ptr = &m_buffer_resources[buffer_index];
+
+            vkDestroyBuffer(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
+            vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
+            m_buffer_resources.erase(m_buffer_resources.begin() + buffer_index);
+        }
+
+        void Storage_Manager::Destroy_Image(Identifier identifier)
+        {
+            LOG_TRACE << "Vulkan Backend: Destroying image " << identifier.Get_Identifier_String();
+
+            uint32_t image_index = Get_Image_Index(identifier);
+            Image_Resource* image_resource_ptr = &m_image_resources[image_index];
+
+            if (!image_resource_ptr->is_swapchain_image)
             {
-                if (m_buffer_resources[i].resource_id == resource_id)
-                {
-                    Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
-
-                    LOG_TRACE << "Vulkan Backend: Destroying buffer " << Get_Resource_String(resource_id) << "'";
-
-                    vkDestroyBuffer(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
-                    vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
-
-                    m_buffer_resources.erase(m_buffer_resources.begin() + i);
-                    return;
-                }
+                vkDestroyImage(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image, nullptr);
+                vkDestroyImageView(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image_view, nullptr);
+                vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->device_memory, nullptr);
             }
 
-            LOG_ERROR << "Vulkan Backend: Buffer '" << Get_Resource_String(resource_id) << "' doesn't exist";
-            exit(EXIT_FAILURE);
+            m_image_resources.erase(m_image_resources.begin() + image_index);
         }
 
-        void Storage_Manager::Destroy_Image(Resource_ID resource_id)
+        void Storage_Manager::Remove_Resource_Grouping(Identifier identifier)
         {
-            for (uint32_t i = 0; i < m_image_resources.size(); i++)
-            {
-                if (m_image_resources[i].resource_id == resource_id)
-                {
-                    Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
+            LOG_TRACE << "Vulkan Backend: Removing resource grouping " << identifier.Get_Identifier_String();
 
-                    if (!image_resource_ptr->is_swapchain_image)
-                    {
-                        LOG_TRACE << "Vulkan Backend: Destroying image " << Get_Resource_String(resource_id) << "'";
-
-                        vkDestroyImage(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image, nullptr);
-                        vkDestroyImageView(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image_view, nullptr);
-                        vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->device_memory, nullptr);
-
-                        m_image_resources.erase(m_image_resources.begin() + i);
-                    }
-                    return;
-                }
-            }
-
-            LOG_ERROR << "Vulkan Backend: Image '" << Get_Resource_String(resource_id) << "' doesn't exist";
-            exit(EXIT_FAILURE);
+            uint32_t resource_grouping_index = Get_Resource_Grouping_Index(identifier);
+            m_resource_groupings.erase(m_resource_groupings.begin() + resource_grouping_index);
         }
 
-        void Storage_Manager::Remove_Resource_Grouping(std::string label)
+        void Storage_Manager::Resize_Buffer(Identifier identifier, VkDeviceSize buffer_size)
         {
-            for (uint32_t i = 0; i < m_resource_groupings.size(); i++)
-            {
-                if (m_resource_groupings[i].label == label)
-                {
-                    m_resource_groupings.erase(m_resource_groupings.begin() + i);
-                    return;
-                }
-            }
+            LOG_TRACE << "Vulkan Backend: Resizing buffer " << identifier.Get_Identifier_String();
 
-            LOG_ERROR << "Vulkan Backend: The resource grouping '" << label << "' does not exist";
-            exit(EXIT_FAILURE);
-        }
-
-        void Storage_Manager::Resize_Buffer(Resource_ID resource_id, VkDeviceSize buffer_size)
-        {
-            LOG_TRACE << "Vulkan Backend: Resizing buffer '" << Get_Resource_String(resource_id) << "'";
-
-            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(identifier);
 
             vkDestroyBuffer(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
             vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
@@ -573,14 +544,14 @@ namespace Cascade_Graphics
             buffer_resource_ptr->device_memory = VK_NULL_HANDLE;
             buffer_resource_ptr->memory_type_index = 0;
 
-            Create_VkBuffer(resource_id);
-            Get_Buffer_Memory_Info(resource_id);
-            Allocate_Buffer_Memory(resource_id);
+            Create_VkBuffer(identifier);
+            Get_Buffer_Memory_Info(identifier);
+            Allocate_Buffer_Memory(identifier);
         }
 
-        void Storage_Manager::Upload_To_Buffer_Direct(Resource_ID resource_id, void* data, size_t data_size)
+        void Storage_Manager::Upload_To_Buffer_Direct(Identifier identifier, void* data, size_t data_size)
         {
-            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
+            Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(identifier);
 
             if (buffer_resource_ptr->memory_property_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
             {
@@ -598,17 +569,19 @@ namespace Cascade_Graphics
             }
         }
 
-        void Storage_Manager::Upload_To_Buffer_Staging(Resource_ID resource_id,
-                                                       Resource_ID staging_buffer_id,
+        void Storage_Manager::Upload_To_Buffer_Staging(Identifier identifier,
+                                                       Identifier staging_buffer_identifier,
                                                        void* data,
                                                        size_t data_size,
                                                        std::shared_ptr<Command_Buffer_Manager> command_buffer_manager_ptr,
                                                        std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr)
         {
-            vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device());
+            VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device()), "Failed to wait for idle device");
 
-            Buffer_Resource* target_buffer = Get_Buffer_Resource(resource_id);
-            Buffer_Resource* staging_buffer = Get_Buffer_Resource(staging_buffer_id);
+            std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now(); //
+
+            Buffer_Resource* target_buffer = Get_Buffer_Resource(identifier);
+            Buffer_Resource* staging_buffer = Get_Buffer_Resource(staging_buffer_identifier);
 
             if (!(staging_buffer->memory_property_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
             {
@@ -616,14 +589,16 @@ namespace Cascade_Graphics
                 exit(EXIT_FAILURE);
             }
 
-            std::string resource_grouping = Create_Resource_Grouping("staging-buffer-upload", {resource_id, staging_buffer_id});
-            std::string descriptor_set = descriptor_set_manager_ptr->Create_Descriptor_Set("staging-buffer-upload");
+            Identifier resource_grouping_identifier = Create_Resource_Grouping("staging-buffer-upload", {identifier, staging_buffer_identifier});
+            Identifier descriptor_set_identifier = descriptor_set_manager_ptr->Create_Descriptor_Set(resource_grouping_identifier);
+
+            Identifier empty_pipeline_identifier = {"", 0};
 
             size_t uploaded = 0;
             size_t max_upload_size = staging_buffer->buffer_size;
 
-            Command_Buffer_Manager::Identifier command_buffer_identifier
-                = command_buffer_manager_ptr->Add_Command_Buffer("staging-buffer-upload", m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE), {resource_grouping}, "");
+            Identifier command_buffer_identifier
+                = command_buffer_manager_ptr->Add_Command_Buffer("staging-buffer-upload", m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE), {resource_grouping_identifier}, empty_pipeline_identifier);
 
             while (uploaded < data_size)
             {
@@ -637,7 +612,7 @@ namespace Cascade_Graphics
                 command_buffer_manager_ptr->Reset_Command_Buffer(command_buffer_identifier);
 
                 command_buffer_manager_ptr->Begin_Recording(command_buffer_identifier, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-                command_buffer_manager_ptr->Copy_Buffer(command_buffer_identifier, staging_buffer_id, resource_id, 0, uploaded, upload_size);
+                command_buffer_manager_ptr->Copy_Buffer(command_buffer_identifier, staging_buffer_identifier, identifier, 0, uploaded, upload_size);
                 command_buffer_manager_ptr->End_Recording(command_buffer_identifier);
 
                 VkSubmitInfo submit_info = {};
@@ -657,60 +632,30 @@ namespace Cascade_Graphics
                 uploaded += upload_size;
             }
 
-            Remove_Resource_Grouping("staging-buffer-upload");
-            descriptor_set_manager_ptr->Remove_Descriptor_Set("staging-buffer-upload");
+            descriptor_set_manager_ptr->Remove_Descriptor_Set(descriptor_set_identifier);
+            Remove_Resource_Grouping(resource_grouping_identifier);
             command_buffer_manager_ptr->Remove_Command_Buffer(command_buffer_identifier);
 
-            vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device());
+            VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device()), "Failed to wait for idle device");
+
+            LOG_DEBUG << "Time to upload: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count() / 1000.0 << " seconds";
 
             LOG_INFO << "Vulkan Backend: Finished staging buffer upload";
         }
 
-        std::string Storage_Manager::Get_Resource_String(Resource_ID resource_id)
+        Storage_Manager::Buffer_Resource* Storage_Manager::Get_Buffer_Resource(Identifier identifier)
         {
-            return resource_id.label.append("-").append(std::to_string(resource_id.index));
+            return &m_buffer_resources[Get_Buffer_Index(identifier)];
         }
 
-        Storage_Manager::Buffer_Resource* Storage_Manager::Get_Buffer_Resource(Resource_ID resource_id)
+        Storage_Manager::Image_Resource* Storage_Manager::Get_Image_Resource(Identifier identifier)
         {
-            for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
-            {
-                if (m_buffer_resources[i].resource_id == resource_id)
-                {
-                    return &m_buffer_resources[i];
-                }
-            }
-
-            LOG_ERROR << "Vulkan Backend: Buffer '" << Get_Resource_String(resource_id) << "' doesn't exist";
-            exit(EXIT_FAILURE);
+            return &m_image_resources[Get_Image_Index(identifier)];
         }
 
-        Storage_Manager::Image_Resource* Storage_Manager::Get_Image_Resource(Resource_ID resource_id)
+        Storage_Manager::Resource_Grouping* Storage_Manager::Get_Resource_Grouping(Identifier identifier)
         {
-            for (uint32_t i = 0; i < m_image_resources.size(); i++)
-            {
-                if (m_image_resources[i].resource_id == resource_id)
-                {
-                    return &m_image_resources[i];
-                }
-            }
-
-            LOG_ERROR << "Vulkan Backend: Image " << Get_Resource_String(resource_id) << " doesn't exist";
-            exit(EXIT_FAILURE);
-        }
-
-        Storage_Manager::Resource_Grouping* Storage_Manager::Get_Resource_Grouping(std::string label)
-        {
-            for (uint32_t i = 0; i < m_resource_groupings.size(); i++)
-            {
-                if (m_resource_groupings[i].label == label)
-                {
-                    return &m_resource_groupings[i];
-                }
-            }
-
-            LOG_ERROR << "Vulkan Backend: The resource grouping '" << label << "' does not exist";
-            exit(EXIT_FAILURE);
+            return &m_resource_groupings[Get_Resource_Grouping_Index(identifier)];
         }
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

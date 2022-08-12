@@ -239,7 +239,7 @@ namespace Cascade_Graphics
             for (uint32_t i = 0; i < m_swapchain_image_count; i++)
             {
                 swapchain_image_resources[i] = {};
-                swapchain_image_resources[i].resource_id = {"swapchain", i, Resource_ID::IMAGE_RESOURCE};
+                swapchain_image_resources[i].identifier = {"swapchain", 0};
                 swapchain_image_resources[i].is_swapchain_image = true;
                 swapchain_image_resources[i].image_format = m_surface_format.format;
                 swapchain_image_resources[i].image_usage = SWAPCHAIN_USAGE;

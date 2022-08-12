@@ -1,10 +1,10 @@
 #pragma once
 
 #include "descriptor_set_manager.hpp"
+#include "identifier.hpp"
 #include "logical_device_wrapper.hpp"
 #include "pipeline_manager.hpp"
 #include "storage_manager.hpp"
-#include "storage_manager_resource_id.hpp"
 #include "vulkan_header.hpp"
 #include <memory>
 #include <string>
@@ -21,22 +21,10 @@ namespace Cascade_Graphics
 
         class Command_Buffer_Manager
         {
-        public:
-            struct Identifier
-            {
-                std::string label;
-                uint32_t index;
-
-                bool operator==(Identifier other_identifier)
-                {
-                    return label == other_identifier.label && index == other_identifier.index;
-                }
-            };
-
         private:
             struct Image_Resource_State
             {
-                Resource_ID resource_id;
+                Identifier identifier;
 
                 VkAccessFlags previous_access_flags;
                 VkAccessFlags current_access_flags;
@@ -56,8 +44,8 @@ namespace Cascade_Graphics
             {
                 Identifier identifier;
 
-                std::string pipeline_label;
-                std::vector<std::string> resource_group_labels;
+                Identifier pipeline_identifier;
+                std::vector<Identifier> resource_group_identifiers;
 
                 VkCommandBuffer command_buffer;
                 std::vector<Image_Resource_State> image_resource_states;
@@ -87,16 +75,16 @@ namespace Cascade_Graphics
             ~Command_Buffer_Manager();
 
         public:
-            Identifier Add_Command_Buffer(std::string label, uint32_t queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label);
+            Identifier Add_Command_Buffer(std::string label, uint32_t queue_family, std::vector<Identifier> resource_group_identifiers, Identifier pipeline_identifier);
             void Remove_Command_Buffer(Identifier identifier);
             void Reset_Command_Buffer(Identifier identifier);
 
             void Begin_Recording(Identifier identifier, VkCommandBufferUsageFlagBits usage_flags);
             void End_Recording(Identifier identifier);
-            void Image_Memory_Barrier(Identifier identifier, Resource_ID resource_id, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
+            void Image_Memory_Barrier(Identifier identifier, Identifier resource_identifier, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
             void Dispatch_Compute_Shader(Identifier identifier, uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
-            void Copy_Image(Identifier identifier, Resource_ID source_resource_id, Resource_ID destination_resource_id, uint32_t width, uint32_t height);
-            void Copy_Buffer(Identifier identifier, Resource_ID source, Resource_ID destination, VkDeviceSize src_offset, VkDeviceSize dst_offset, VkDeviceSize copy_size);
+            void Copy_Image(Identifier identifier, Identifier source_resource_identifier, Identifier destination_resource_identifier, uint32_t width, uint32_t height);
+            void Copy_Buffer(Identifier identifier, Identifier source_resource_identifier, Identifier destination_resource_identifier, VkDeviceSize src_offset, VkDeviceSize dst_offset, VkDeviceSize copy_size);
 
             VkCommandBuffer* Get_Command_Buffer(Identifier identifier);
         };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "descriptor_set_manager.hpp"
+#include "identifier.hpp"
 #include "logical_device_wrapper.hpp"
 #include "shader_manager.hpp"
 #include "storage_manager.hpp"
@@ -27,7 +28,8 @@ namespace Cascade_Graphics
 
             struct Pipeline_Data
             {
-                std::string label;
+                Identifier identifier;
+
                 Pipeline_Type type;
 
                 VkPipeline pipeline;
@@ -50,10 +52,10 @@ namespace Cascade_Graphics
             ~Pipeline_Manager();
 
         public:
-            std::string Add_Compute_Pipeline(std::string label, std::string resource_grouping_label, std::string shader_label);
-            void Delete_Pipeline(std::string label);
+            Identifier Add_Compute_Pipeline(std::string label, Identifier descriptor_set_identifier, Identifier shader_identifier);
+            void Delete_Pipeline(Identifier identifier);
 
-            Pipeline_Data* Get_Pipeline_Data(std::string label);
+            Pipeline_Data* Get_Pipeline_Data(Identifier identifier);
         };
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

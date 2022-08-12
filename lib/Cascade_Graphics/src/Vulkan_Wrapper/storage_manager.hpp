@@ -4,10 +4,10 @@
 
 #include "command_buffer_manager.hpp"
 #include "descriptor_set_manager.hpp"
+#include "identifier.hpp"
 #include "logical_device_wrapper.hpp"
 #include "physical_device_wrapper.hpp"
 #include "queue_manager.hpp"
-#include "storage_manager_resource_id.hpp"
 #include <string>
 #include <vector>
 
@@ -24,7 +24,7 @@ namespace Cascade_Graphics
         public:
             struct Buffer_Resource
             {
-                Resource_ID resource_id;
+                Identifier identifier;
 
                 VkDeviceSize buffer_size;
                 VkDescriptorType descriptor_type;
@@ -40,7 +40,7 @@ namespace Cascade_Graphics
 
             struct Image_Resource
             {
-                Resource_ID resource_id;
+                Identifier identifier;
 
                 bool is_swapchain_image;
                 VkFormat image_format;
@@ -58,12 +58,11 @@ namespace Cascade_Graphics
 
             struct Resource_Grouping
             {
-                std::string label;
+                Identifier identifier;
 
                 bool has_descriptor_set;
-                uint32_t buffer_resource_count;
-                uint32_t image_resource_count;
-                std::vector<Resource_ID> resource_ids;
+                std::vector<Identifier> buffer_identifiers;
+                std::vector<Identifier> image_identifiers;
             };
 
         private:
@@ -76,45 +75,45 @@ namespace Cascade_Graphics
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
 
         private:
-            uint32_t Get_Buffer_Index(Resource_ID resource_id);
-            uint32_t Get_Image_Index(Resource_ID resource_id);
+            uint32_t Get_Buffer_Index(Identifier identifier);
+            uint32_t Get_Image_Index(Identifier identifier);
+            uint32_t Get_Resource_Grouping_Index(Identifier identifier);
 
-            void Create_VkBuffer(Resource_ID resource_id);
-            void Get_Buffer_Memory_Info(Resource_ID resource_id);
-            void Allocate_Buffer_Memory(Resource_ID resource_id);
+            void Create_VkBuffer(Identifier identifier);
+            void Get_Buffer_Memory_Info(Identifier identifier);
+            void Allocate_Buffer_Memory(Identifier identifier);
 
-            void Create_VkImage(Resource_ID resource_id);
-            void Get_Image_Memory_Info(Resource_ID resource_id);
-            void Allocate_Image_Memory(Resource_ID resource_id);
-            void Create_Image_View(Resource_ID resource_id);
+            void Create_VkImage(Identifier identifier);
+            void Get_Image_Memory_Info(Identifier identifier);
+            void Allocate_Image_Memory(Identifier identifier);
+            void Create_Image_View(Identifier identifier);
 
         public:
             Storage_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr, std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr);
             ~Storage_Manager();
 
         public:
-            Resource_ID Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask);
-            Resource_ID Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask);
-            std::string Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids);
-            Resource_ID Add_Image(std::string label, Image_Resource image_resource);
+            Identifier Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask);
+            Identifier Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask);
+            Identifier Create_Resource_Grouping(std::string label, std::vector<Identifier> resource_identifiers);
+            Identifier Add_Image(std::string label, Image_Resource image_resource);
 
-            void Destroy_Buffer(Resource_ID resource_id);
-            void Destroy_Image(Resource_ID resource_id);
-            void Remove_Resource_Grouping(std::string label);
+            void Destroy_Buffer(Identifier identifier);
+            void Destroy_Image(Identifier identifier);
+            void Remove_Resource_Grouping(Identifier identifier);
 
-            void Resize_Buffer(Resource_ID resource_id, VkDeviceSize buffer_size);
-            void Upload_To_Buffer_Direct(Resource_ID resource_id, void* data, size_t data_size);
-            void Upload_To_Buffer_Staging(Resource_ID resource_id,
-                                          Resource_ID staging_buffer,
+            void Resize_Buffer(Identifier identifier, VkDeviceSize buffer_size);
+            void Upload_To_Buffer_Direct(Identifier identifier, void* data, size_t data_size);
+            void Upload_To_Buffer_Staging(Identifier identifier,
+                                          Identifier staging_buffer_identifier,
                                           void* data,
                                           size_t data_size,
                                           std::shared_ptr<Command_Buffer_Manager> command_buffer_manager_ptr,
                                           std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr);
 
-            std::string Get_Resource_String(Resource_ID resource_id);
-            Buffer_Resource* Get_Buffer_Resource(Resource_ID resource_id);
-            Image_Resource* Get_Image_Resource(Resource_ID resource_id);
-            Resource_Grouping* Get_Resource_Grouping(std::string label);
+            Buffer_Resource* Get_Buffer_Resource(Identifier identifier);
+            Image_Resource* Get_Image_Resource(Identifier identifier);
+            Resource_Grouping* Get_Resource_Grouping(Identifier identifier);
         };
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics
