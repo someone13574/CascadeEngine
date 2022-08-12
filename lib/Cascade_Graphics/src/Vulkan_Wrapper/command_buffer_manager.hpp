@@ -87,7 +87,7 @@ namespace Cascade_Graphics
             ~Command_Buffer_Manager();
 
         public:
-            void Add_Command_Buffer(std::string label, uint32_t queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label);
+            Identifier Add_Command_Buffer(std::string label, uint32_t queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label);
             void Remove_Command_Buffer(Identifier identifier);
             void Reset_Command_Buffer(Identifier identifier);
 

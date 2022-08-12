@@ -93,11 +93,13 @@ namespace Cascade_Graphics
             ~Storage_Manager();
 
         public:
-            void Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask);
-            void Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask);
-            void Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids);
-            void Add_Image(std::string label, Image_Resource image_resource);
+            Resource_ID Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask);
+            Resource_ID Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask);
+            std::string Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids);
+            Resource_ID Add_Image(std::string label, Image_Resource image_resource);
 
+            void Destroy_Buffer(Resource_ID resource_id);
+            void Destroy_Image(Resource_ID resource_id);
             void Remove_Resource_Grouping(std::string label);
 
             void Resize_Buffer(Resource_ID resource_id, VkDeviceSize buffer_size);

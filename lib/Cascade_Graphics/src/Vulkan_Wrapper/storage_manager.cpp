@@ -272,7 +272,7 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_wrapper_ptr->Get_Device(), &image_view_create_info, nullptr, &image_resource_ptr->image_view), "Vulkan Backend: Failed to create image view");
         }
 
-        void Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask)
+        Resource_ID Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask)
         {
             if (buffer_size == 0)
             {
@@ -343,9 +343,11 @@ namespace Cascade_Graphics
             Create_VkBuffer(resource_id);
             Get_Buffer_Memory_Info(resource_id);
             Allocate_Buffer_Memory(resource_id);
+
+            return resource_id;
         }
 
-        void Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask)
+        Resource_ID Storage_Manager::Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask)
         {
             Resource_ID resource_id = {};
             resource_id.label = label;
@@ -391,9 +393,11 @@ namespace Cascade_Graphics
             Get_Image_Memory_Info(resource_id);
             Allocate_Image_Memory(resource_id);
             Create_Image_View(resource_id);
+
+            return resource_id;
         }
 
-        void Storage_Manager::Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids)
+        std::string Storage_Manager::Create_Resource_Grouping(std::string label, std::vector<Resource_ID> resource_ids)
         {
             LOG_INFO << "Vulkan Backend: Creating resource grouping with label '" << label << "'";
 
@@ -454,9 +458,11 @@ namespace Cascade_Graphics
             m_resource_groupings.back().buffer_resource_count = buffer_resource_count;
             m_resource_groupings.back().image_resource_count = image_resource_count;
             m_resource_groupings.back().resource_ids = resource_ids;
+
+            return label;
         }
 
-        void Storage_Manager::Add_Image(std::string label, Image_Resource image_resource)
+        Resource_ID Storage_Manager::Add_Image(std::string label, Image_Resource image_resource)
         {
             Resource_ID resource_id = {};
             resource_id.label = label;
@@ -486,6 +492,56 @@ namespace Cascade_Graphics
 
             image_resource.resource_id = resource_id;
             m_image_resources.push_back(image_resource);
+
+            return resource_id;
+        }
+
+        void Storage_Manager::Destroy_Buffer(Resource_ID resource_id)
+        {
+            for (uint32_t i = 0; i < m_buffer_resources.size(); i++)
+            {
+                if (m_buffer_resources[i].resource_id == resource_id)
+                {
+                    Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(resource_id);
+
+                    LOG_TRACE << "Vulkan Backend: Destroying buffer " << Get_Resource_String(resource_id) << "'";
+
+                    vkDestroyBuffer(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, nullptr);
+                    vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->device_memory, nullptr);
+
+                    m_buffer_resources.erase(m_buffer_resources.begin() + i);
+                    return;
+                }
+            }
+
+            LOG_ERROR << "Vulkan Backend: Buffer '" << Get_Resource_String(resource_id) << "' doesn't exist";
+            exit(EXIT_FAILURE);
+        }
+
+        void Storage_Manager::Destroy_Image(Resource_ID resource_id)
+        {
+            for (uint32_t i = 0; i < m_image_resources.size(); i++)
+            {
+                if (m_image_resources[i].resource_id == resource_id)
+                {
+                    Image_Resource* image_resource_ptr = Get_Image_Resource(resource_id);
+
+                    if (!image_resource_ptr->is_swapchain_image)
+                    {
+                        LOG_TRACE << "Vulkan Backend: Destroying image " << Get_Resource_String(resource_id) << "'";
+
+                        vkDestroyImage(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image, nullptr);
+                        vkDestroyImageView(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image_view, nullptr);
+                        vkFreeMemory(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->device_memory, nullptr);
+
+                        m_image_resources.erase(m_image_resources.begin() + i);
+                    }
+                    return;
+                }
+            }
+
+            LOG_ERROR << "Vulkan Backend: Image '" << Get_Resource_String(resource_id) << "' doesn't exist";
+            exit(EXIT_FAILURE);
         }
 
         void Storage_Manager::Remove_Resource_Grouping(std::string label)
@@ -560,13 +616,14 @@ namespace Cascade_Graphics
                 exit(EXIT_FAILURE);
             }
 
-            Create_Resource_Grouping("staging-buffer-upload", {resource_id, staging_buffer_id});
-            descriptor_set_manager_ptr->Create_Descriptor_Set("staging-buffer-upload");
+            std::string resource_grouping = Create_Resource_Grouping("staging-buffer-upload", {resource_id, staging_buffer_id});
+            std::string descriptor_set = descriptor_set_manager_ptr->Create_Descriptor_Set("staging-buffer-upload");
 
             size_t uploaded = 0;
             size_t max_upload_size = staging_buffer->buffer_size;
 
-            command_buffer_manager_ptr->Add_Command_Buffer("staging-buffer-upload", m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE), {"staging-buffer-upload"}, "");
+            Command_Buffer_Manager::Identifier command_buffer_identifier
+                = command_buffer_manager_ptr->Add_Command_Buffer("staging-buffer-upload", m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE), {resource_grouping}, "");
 
             while (uploaded < data_size)
             {
@@ -577,11 +634,11 @@ namespace Cascade_Graphics
                 memcpy(((uint8_t*)mapped_memory), ((uint8_t*)data) + uploaded, upload_size);
                 vkUnmapMemory(*m_logical_device_wrapper_ptr->Get_Device(), staging_buffer->device_memory);
 
-                command_buffer_manager_ptr->Reset_Command_Buffer({"staging-buffer-upload", 0});
+                command_buffer_manager_ptr->Reset_Command_Buffer(command_buffer_identifier);
 
-                command_buffer_manager_ptr->Begin_Recording({"staging-buffer-upload", 0}, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-                command_buffer_manager_ptr->Copy_Buffer({"staging-buffer-upload", 0}, staging_buffer_id, resource_id, 0, uploaded, upload_size);
-                command_buffer_manager_ptr->End_Recording({"staging-buffer-upload", 0});
+                command_buffer_manager_ptr->Begin_Recording(command_buffer_identifier, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+                command_buffer_manager_ptr->Copy_Buffer(command_buffer_identifier, staging_buffer_id, resource_id, 0, uploaded, upload_size);
+                command_buffer_manager_ptr->End_Recording(command_buffer_identifier);
 
                 VkSubmitInfo submit_info = {};
                 submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -590,7 +647,7 @@ namespace Cascade_Graphics
                 submit_info.pWaitSemaphores = nullptr;
                 submit_info.pWaitDstStageMask = nullptr;
                 submit_info.commandBufferCount = 1;
-                submit_info.pCommandBuffers = command_buffer_manager_ptr->Get_Command_Buffer({"staging-buffer-upload", 0});
+                submit_info.pCommandBuffers = command_buffer_manager_ptr->Get_Command_Buffer(command_buffer_identifier);
                 submit_info.signalSemaphoreCount = 0;
                 submit_info.pSignalSemaphores = nullptr;
 
@@ -602,7 +659,7 @@ namespace Cascade_Graphics
 
             Remove_Resource_Grouping("staging-buffer-upload");
             descriptor_set_manager_ptr->Remove_Descriptor_Set("staging-buffer-upload");
-            command_buffer_manager_ptr->Remove_Command_Buffer({"staging-buffer-upload", 0});
+            command_buffer_manager_ptr->Remove_Command_Buffer(command_buffer_identifier);
 
             vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device());
 

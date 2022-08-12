@@ -105,24 +105,24 @@ void main()
             {
                 if (camera_data.which_hit_buffer == 0)
                 {
-                    atomicAdd(hit_counts[current_index].x, 20);
+                    atomicAdd(hit_counts[current_index].x, 50);
                     atomicAnd(hit_counts[current_index].y, 0);
                 }
                 else if (camera_data.which_hit_buffer == 1)
                 {
-                    atomicAdd(hit_counts[current_index].y, 20);
+                    atomicAdd(hit_counts[current_index].y, 50);
                     atomicAnd(hit_counts[current_index].z, 0);
                     hit_counts[current_index].w = 0;
                 }
                 else if (camera_data.which_hit_buffer == 2)
                 {
-                    atomicAdd(hit_counts[current_index].z, 20);
+                    atomicAdd(hit_counts[current_index].z, 50);
                     atomicAnd(hit_counts[current_index].w, 0);
                     hit_counts[current_index].x = 0;
                 }
                 else if (camera_data.which_hit_buffer == 3)
                 {
-                    atomicAdd(hit_counts[current_index].w, 20);
+                    atomicAdd(hit_counts[current_index].w, 50);
                     atomicAnd(hit_counts[current_index].x, 0);
                 }
             }
@@ -174,7 +174,7 @@ void main()
                 hits = hit_counts[current_index].z;
             }
 
-            if (temp == -1 || hits < 10)
+            if (temp == -1 || hits < 8)
             {
                 normal = vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z);
                 color = vec3(current_voxel.color_r, current_voxel.color_g, current_voxel.color_b);

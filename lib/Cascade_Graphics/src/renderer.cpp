@@ -23,22 +23,24 @@ namespace Cascade_Graphics
         std::vector<Vulkan_Backend::Storage_Manager::Image_Resource> swapchain_image_resources = m_swapchain_wrapper_ptr->Get_Swapchain_Image_Resources();
         for (uint32_t i = 0; i < swapchain_image_resources.size(); i++)
         {
-            m_vulkan_graphics_ptr->m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]);
+            m_swapchain_resource_ids.push_back(m_vulkan_graphics_ptr->m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]));
         }
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Image("render_target", m_vulkan_graphics_ptr->m_storage_manager_ptr->Get_Image_Resource({"swapchain", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE})->image_format,
-                                                                   VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                                                   m_vulkan_graphics_ptr->m_storage_manager_ptr->Get_Image_Resource({"swapchain", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE})->image_size,
-                                                                   Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                                                    Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                                                    Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("staging_buffer", 0, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_render_target_resource_id = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Image(
+            "render_target", m_vulkan_graphics_ptr->m_storage_manager_ptr->Get_Image_Resource({"swapchain", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE})->image_format, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
+            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, m_vulkan_graphics_ptr->m_storage_manager_ptr->Get_Image_Resource({"swapchain", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE})->image_size,
+            Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_camera_buffer_resource_id = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                                                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                                                                                  Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_voxel_buffer_resource_id
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                                                                          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_hit_buffer_resource_id = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                                                                               Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE);
+        m_staging_buffer_resource_id
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("staging_buffer", 0, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
 
 #ifdef __linux__
         m_vulkan_graphics_ptr->m_shader_manager_ptr->Add_Shader("render_shader", "/home/owen/Documents/Code/C++/CascadeEngine/build/build/build/Cascade_Graphics/src/Shaders/render.comp.spv");
@@ -46,36 +48,15 @@ namespace Cascade_Graphics
         m_vulkan_graphics_ptr->m_shader_manager_ptr->Add_Shader("render_shader", "C:/Users/owenl/Documents/Code/C++/CascadeEngine/build/src/Shaders/render.comp.spv");
 #endif
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("per_frame_descriptors", {{"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE},
-                                                                                                         {"camera_data", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE},
-                                                                                                         {"voxel_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE},
-                                                                                                         {"hit_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}});
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping(
+        m_per_frame_descriptors_resource_grouping_label
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("per_frame_descriptors", {m_render_target_resource_id, m_camera_buffer_resource_id, m_voxel_buffer_resource_id, m_hit_buffer_resource_id});
+        m_swapchain_resource_grouping_label = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping(
             "swapchain_images", {{"swapchain", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 1, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 2, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}});
 
-        m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
-        m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
+        m_descriptor_set_label = m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
+        m_pipeline_label = m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
 
-        for (uint32_t i = 0; i < m_swapchain_wrapper_ptr->Get_Swapchain_Image_Count(); i++)
-        {
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Add_Command_Buffer("render_frame", m_vulkan_graphics_ptr->m_queue_manager_ptr->Get_Queue_Family_Index(Vulkan_Backend::Queue_Manager::Queue_Types::COMPUTE_QUEUE),
-                                                                                    {"per_frame_descriptors", "swapchain_images"}, "rendering_pipeline");
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Begin_Recording({"render_frame", i}, (VkCommandBufferUsageFlagBits)0);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                                                      VK_PIPELINE_STAGE_TRANSFER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
-                                                                                      VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", i}, static_cast<uint32_t>(std::ceil(m_swapchain_wrapper_ptr->Get_Swapchain_Extent().width / 32.0)),
-                                                                                         static_cast<uint32_t>(std::ceil(m_swapchain_wrapper_ptr->Get_Swapchain_Extent().height / 32.0)), 1);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                                                                      VK_PIPELINE_STAGE_TRANSFER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Copy_Image({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE},
-                                                                            m_swapchain_wrapper_ptr->Get_Swapchain_Extent().width, m_swapchain_wrapper_ptr->Get_Swapchain_Extent().height);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                                                                                      VK_PIPELINE_STAGE_TRANSFER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->End_Recording({"render_frame", i});
-        }
+        Record_Command_Buffers();
 
         m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Create_Semaphore("image_available_semaphore");
         m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Create_Semaphore("render_finished_semaphore");
@@ -98,16 +79,61 @@ namespace Cascade_Graphics
         LOG_DEBUG << "Graphics: Finished destroying renderer";
     }
 
+    void Renderer::Record_Command_Buffers()
+    {
+        m_command_buffer_identifiers.clear();
+
+        for (uint32_t i = 0; i < m_swapchain_wrapper_ptr->Get_Swapchain_Image_Count(); i++)
+        {
+            m_command_buffer_identifiers.push_back(m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Add_Command_Buffer("render_frame",
+                                                                                                                           m_vulkan_graphics_ptr->m_queue_manager_ptr->Get_Queue_Family_Index(Vulkan_Backend::Queue_Manager::Queue_Types::COMPUTE_QUEUE),
+                                                                                                                           {m_per_frame_descriptors_resource_grouping_label, m_swapchain_resource_grouping_label}, m_pipeline_label));
+
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Begin_Recording(m_command_buffer_identifiers.back(), (VkCommandBufferUsageFlagBits)0);
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier(m_command_buffer_identifiers.back(), m_swapchain_resource_ids[i], VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                                                                                      VK_PIPELINE_STAGE_TRANSFER_BIT);
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier(m_command_buffer_identifiers.back(), m_render_target_resource_id, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Dispatch_Compute_Shader(m_command_buffer_identifiers.back(), static_cast<uint32_t>(std::ceil(m_swapchain_wrapper_ptr->Get_Swapchain_Extent().width / 32.0)),
+                                                                                         static_cast<uint32_t>(std::ceil(m_swapchain_wrapper_ptr->Get_Swapchain_Extent().height / 32.0)), 1);
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier(m_command_buffer_identifiers.back(), m_render_target_resource_id, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                                                                                      VK_PIPELINE_STAGE_TRANSFER_BIT);
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Copy_Image(m_command_buffer_identifiers.back(), m_render_target_resource_id, m_swapchain_resource_ids[i], m_swapchain_wrapper_ptr->Get_Swapchain_Extent().width,
+                                                                            m_swapchain_wrapper_ptr->Get_Swapchain_Extent().height);
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier(m_command_buffer_identifiers.back(), m_render_target_resource_id, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier(m_command_buffer_identifiers.back(), m_swapchain_resource_ids[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->End_Recording(m_command_buffer_identifiers.back());
+        }
+    }
+
     void Renderer::Recreate_Swapchain()
     {
         LOG_DEBUG << "Vulkan: Recreating swapchain";
 
         vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device());
 
-        m_vulkan_graphics_ptr->m_command_buffer_manager_ptr.reset();
-        m_vulkan_graphics_ptr->m_pipeline_manager_ptr.reset();
-        m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr.reset();
-        m_vulkan_graphics_ptr->m_storage_manager_ptr.reset();
+        for (uint32_t i = 0; i < m_command_buffer_identifiers.size(); i++)
+        {
+            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Remove_Command_Buffer(m_command_buffer_identifiers[i]);
+        }
+        m_command_buffer_identifiers.clear();
+
+        m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Delete_Pipeline(m_pipeline_label);
+        m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Remove_Descriptor_Set(m_descriptor_set_label);
+
+        for (uint32_t i = 0; i < m_swapchain_resource_ids.size(); i++)
+        {
+            m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Image(m_swapchain_resource_ids[i]);
+        }
+        m_swapchain_resource_ids.clear();
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Image(m_render_target_resource_id);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Buffer(m_camera_buffer_resource_id);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Buffer(m_voxel_buffer_resource_id);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Buffer(m_hit_buffer_resource_id);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Buffer(m_staging_buffer_resource_id);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Remove_Resource_Grouping(m_swapchain_resource_grouping_label);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Remove_Resource_Grouping(m_per_frame_descriptors_resource_grouping_label);
+
+
         m_swapchain_wrapper_ptr.reset();
         m_vulkan_graphics_ptr->m_synchronization_manager_ptr.reset();
 
@@ -122,69 +148,40 @@ namespace Cascade_Graphics
 
         std::vector<Object_Manager::GPU_Voxel> gpu_voxels = m_object_manager_ptr->Get_GPU_Voxels();
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr
-            = std::make_shared<Vulkan_Backend::Storage_Manager>(m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr, m_vulkan_graphics_ptr->m_physical_device_wrapper_ptr, m_vulkan_graphics_ptr->m_queue_manager_ptr);
-
         std::vector<Vulkan_Backend::Storage_Manager::Image_Resource> swapchain_image_resources = m_swapchain_wrapper_ptr->Get_Swapchain_Image_Resources();
         for (uint32_t i = 0; i < swapchain_image_resources.size(); i++)
         {
-            m_vulkan_graphics_ptr->m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]);
+            m_swapchain_resource_ids.push_back(m_vulkan_graphics_ptr->m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]));
         }
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Image("render_target", m_vulkan_graphics_ptr->m_storage_manager_ptr->Get_Image_Resource({"swapchain", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE})->image_format,
-                                                                   VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, {width, height},
-                                                                   Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Cascade_Graphics::Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                                                    Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-                                                                    VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4 * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                                                    Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("staging_buffer", 0, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_render_target_resource_id = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Image(
+            "render_target", m_vulkan_graphics_ptr->m_storage_manager_ptr->Get_Image_Resource({"swapchain", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE})->image_format, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT,
+            VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, {width, height}, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_camera_buffer_resource_id = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Cascade_Graphics::Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                                                                                  VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                                                                                  Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_voxel_buffer_resource_id
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                                                                          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_hit_buffer_resource_id = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4 * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                                                                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE);
+        m_staging_buffer_resource_id
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("staging_buffer", 0, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("per_frame_descriptors", {{"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE},
-                                                                                                         {"camera_data", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE},
-                                                                                                         {"voxel_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE},
-                                                                                                         {"hit_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}});
+        m_per_frame_descriptors_resource_grouping_label
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("per_frame_descriptors", {m_render_target_resource_id, m_camera_buffer_resource_id, m_voxel_buffer_resource_id, m_hit_buffer_resource_id});
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping(
-            "swapchain_images", {{"swapchain", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 1, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, {"swapchain", 2, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}});
+        m_swapchain_resource_grouping_label = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("swapchain_images", m_swapchain_resource_ids);
 
-        m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr = std::make_shared<Vulkan_Backend::Descriptor_Set_Manager>(m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr, m_vulkan_graphics_ptr->m_storage_manager_ptr);
-        m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
+        m_descriptor_set_label = m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
 
-        m_vulkan_graphics_ptr->m_pipeline_manager_ptr = std::make_shared<Vulkan_Backend::Pipeline_Manager>(m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr, m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr,
-                                                                                                           m_vulkan_graphics_ptr->m_shader_manager_ptr, m_vulkan_graphics_ptr->m_storage_manager_ptr);
-        m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
+        m_pipeline_label = m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
 
-        m_vulkan_graphics_ptr->m_command_buffer_manager_ptr = std::make_shared<Vulkan_Backend::Command_Buffer_Manager>(m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr, m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr,
-                                                                                                                       m_vulkan_graphics_ptr->m_pipeline_manager_ptr, m_vulkan_graphics_ptr->m_storage_manager_ptr);
-        for (uint32_t i = 0; i < m_swapchain_wrapper_ptr->Get_Swapchain_Image_Count(); i++)
-        {
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Add_Command_Buffer("render_frame", m_vulkan_graphics_ptr->m_queue_manager_ptr->Get_Queue_Family_Index(Vulkan_Backend::Queue_Manager::Queue_Types::COMPUTE_QUEUE),
-                                                                                    {"per_frame_descriptors", "swapchain_images"}, "rendering_pipeline");
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Begin_Recording({"render_frame", i}, (VkCommandBufferUsageFlagBits)0);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                                                      VK_PIPELINE_STAGE_TRANSFER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
-                                                                                      VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", i}, static_cast<uint32_t>(std::ceil(m_swapchain_wrapper_ptr->Get_Swapchain_Extent().width / 32.0)),
-                                                                                         static_cast<uint32_t>(std::ceil(m_swapchain_wrapper_ptr->Get_Swapchain_Extent().height / 32.0)), 1);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                                                                      VK_PIPELINE_STAGE_TRANSFER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Copy_Image({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE},
-                                                                            m_swapchain_wrapper_ptr->Get_Swapchain_Extent().width, m_swapchain_wrapper_ptr->Get_Swapchain_Extent().height);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                                                                                      VK_PIPELINE_STAGE_TRANSFER_BIT);
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->End_Recording({"render_frame", i});
-        }
+        Record_Command_Buffers();
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging({"voxel_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}, {"staging_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}, gpu_voxels.data(),
-                                                                               sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), m_vulkan_graphics_ptr->m_command_buffer_manager_ptr,
-                                                                               m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_resource_id, m_staging_buffer_resource_id, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(),
+                                                                               m_vulkan_graphics_ptr->m_command_buffer_manager_ptr, m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr);
 
         m_vulkan_graphics_ptr->m_synchronization_manager_ptr = std::make_shared<Vulkan_Backend::Synchronization_Manager>(m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr);
         m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Create_Semaphore("image_available_semaphore");
@@ -217,23 +214,8 @@ namespace Cascade_Graphics
         }
 
         Cascade_Graphics::Camera::GPU_Camera_Data camera_data = m_camera_ptr->Get_GPU_Camera_Data(which_hit_buffer);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Direct({"camera_data", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}, &camera_data, sizeof(Cascade_Graphics::Camera::GPU_Camera_Data));
-        if (which_hit_buffer == 0)
-        {
-            which_hit_buffer = 1;
-        }
-        else if (which_hit_buffer == 1)
-        {
-            which_hit_buffer = 2;
-        }
-        else if (which_hit_buffer == 2)
-        {
-            which_hit_buffer = 3;
-        }
-        else if (which_hit_buffer == 3)
-        {
-            which_hit_buffer = 0;
-        }
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Direct(m_camera_buffer_resource_id, &camera_data, sizeof(Cascade_Graphics::Camera::GPU_Camera_Data));
+        which_hit_buffer = (which_hit_buffer + 1) % 4;
 
         VkPipelineStageFlags pipeline_wait_stage_mask = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
 
@@ -244,7 +226,7 @@ namespace Cascade_Graphics
         submit_info.pWaitSemaphores = m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Get_Semaphore({"image_available_semaphore", 0});
         submit_info.pWaitDstStageMask = &pipeline_wait_stage_mask;
         submit_info.commandBufferCount = 1;
-        submit_info.pCommandBuffers = m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Get_Command_Buffer({"render_frame", image_index});
+        submit_info.pCommandBuffers = m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Get_Command_Buffer(m_command_buffer_identifiers[image_index]);
         submit_info.signalSemaphoreCount = 1;
         submit_info.pSignalSemaphores = m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Get_Semaphore({"render_finished_semaphore", 0});
 
@@ -288,49 +270,26 @@ namespace Cascade_Graphics
 
         std::vector<Object_Manager::GPU_Voxel> gpu_voxels = m_object_manager_ptr->Get_GPU_Voxels();
 
-        if (m_vulkan_graphics_ptr->m_storage_manager_ptr->Get_Buffer_Resource({"voxel_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE})->buffer_size < sizeof(Object_Manager::GPU_Voxel) * gpu_voxels.size())
+        if (m_vulkan_graphics_ptr->m_storage_manager_ptr->Get_Buffer_Resource(m_voxel_buffer_resource_id)->buffer_size < sizeof(Object_Manager::GPU_Voxel) * gpu_voxels.size())
         {
-            m_vulkan_graphics_ptr->m_storage_manager_ptr->Resize_Buffer({"voxel_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}, sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size());
-            m_vulkan_graphics_ptr->m_storage_manager_ptr->Resize_Buffer({"hit_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}, sizeof(uint32_t) * 4 * gpu_voxels.size());
+            m_vulkan_graphics_ptr->m_storage_manager_ptr->Resize_Buffer(m_voxel_buffer_resource_id, sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size());
+            m_vulkan_graphics_ptr->m_storage_manager_ptr->Resize_Buffer(m_hit_buffer_resource_id, sizeof(uint32_t) * 4 * gpu_voxels.size());
 
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr.reset();
-            m_vulkan_graphics_ptr->m_pipeline_manager_ptr.reset();
-            m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr.reset();
-
-            m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr = std::make_shared<Vulkan_Backend::Descriptor_Set_Manager>(m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr, m_vulkan_graphics_ptr->m_storage_manager_ptr);
-            m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
-            m_vulkan_graphics_ptr->m_pipeline_manager_ptr = std::make_shared<Vulkan_Backend::Pipeline_Manager>(m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr, m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr,
-                                                                                                               m_vulkan_graphics_ptr->m_shader_manager_ptr, m_vulkan_graphics_ptr->m_storage_manager_ptr);
-            m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
-            m_vulkan_graphics_ptr->m_command_buffer_manager_ptr = std::make_shared<Vulkan_Backend::Command_Buffer_Manager>(m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr, m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr,
-                                                                                                                           m_vulkan_graphics_ptr->m_pipeline_manager_ptr, m_vulkan_graphics_ptr->m_storage_manager_ptr);
-
-            for (uint32_t i = 0; i < m_swapchain_wrapper_ptr->Get_Swapchain_Image_Count(); i++)
+            for (uint32_t i = 0; i < m_command_buffer_identifiers.size(); i++)
             {
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Add_Command_Buffer("render_frame", m_vulkan_graphics_ptr->m_queue_manager_ptr->Get_Queue_Family_Index(Vulkan_Backend::Queue_Manager::Queue_Types::COMPUTE_QUEUE),
-                                                                                        {"per_frame_descriptors", "swapchain_images"}, "rendering_pipeline");
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Begin_Recording({"render_frame", i}, (VkCommandBufferUsageFlagBits)0);
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                                                                          VK_PIPELINE_STAGE_TRANSFER_BIT);
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL,
-                                                                                          VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Dispatch_Compute_Shader({"render_frame", i}, static_cast<uint32_t>(std::ceil(m_swapchain_wrapper_ptr->Get_Swapchain_Extent().width / 32.0)),
-                                                                                             static_cast<uint32_t>(std::ceil(m_swapchain_wrapper_ptr->Get_Swapchain_Extent().height / 32.0)), 1);
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                                                                          VK_PIPELINE_STAGE_TRANSFER_BIT);
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Copy_Image({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE},
-                                                                                m_swapchain_wrapper_ptr->Get_Swapchain_Extent().width, m_swapchain_wrapper_ptr->Get_Swapchain_Extent().height);
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"render_target", 0, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL,
-                                                                                          VK_PIPELINE_STAGE_TRANSFER_BIT);
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Image_Memory_Barrier({"render_frame", i}, {"swapchain", i, Vulkan_Backend::Resource_ID::IMAGE_RESOURCE}, VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                                                                                          VK_PIPELINE_STAGE_TRANSFER_BIT);
-                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->End_Recording({"render_frame", i});
+                m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Remove_Command_Buffer(m_command_buffer_identifiers[i]);
             }
+            m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Delete_Pipeline(m_pipeline_label);
+            m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Remove_Descriptor_Set(m_descriptor_set_label);
+
+            m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Create_Descriptor_Set("per_frame_descriptors");
+            m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("rendering_pipeline", "per_frame_descriptors", "render_shader");
+
+            Record_Command_Buffers();
         }
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging({"voxel_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}, {"staging_buffer", 0, Vulkan_Backend::Resource_ID::BUFFER_RESOURCE}, gpu_voxels.data(),
-                                                                               sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), m_vulkan_graphics_ptr->m_command_buffer_manager_ptr,
-                                                                               m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_resource_id, m_staging_buffer_resource_id, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(),
+                                                                               m_vulkan_graphics_ptr->m_command_buffer_manager_ptr, m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr);
 
         m_rendering_active = true;
     }

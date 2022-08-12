@@ -186,7 +186,7 @@ namespace Cascade_Graphics
             vkUpdateDescriptorSets(*m_logical_device_wrapper_ptr->Get_Device(), static_cast<uint32_t>(descriptor_set_data_ptr->write_descriptor_sets.size()), descriptor_set_data_ptr->write_descriptor_sets.data(), 0, nullptr);
         }
 
-        void Descriptor_Set_Manager::Create_Descriptor_Set(std::string resource_grouping_label)
+        std::string Descriptor_Set_Manager::Create_Descriptor_Set(std::string resource_grouping_label)
         {
             LOG_INFO << "Vulkan Backend: Creating descriptor set for resource grouping '" << resource_grouping_label << "'";
 
@@ -206,6 +206,8 @@ namespace Cascade_Graphics
             Create_Descriptor_Pool(resource_grouping_label);
             Allocate_Descriptor_Set(resource_grouping_label);
             Create_Write_Descriptor_Set(resource_grouping_label);
+
+            return resource_grouping_label;
         }
 
         void Descriptor_Set_Manager::Remove_Descriptor_Set(std::string resource_grouping_label)

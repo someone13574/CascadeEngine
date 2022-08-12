@@ -90,7 +90,7 @@ namespace Cascade_Graphics
             return next_index;
         }
 
-        void Command_Buffer_Manager::Add_Command_Buffer(std::string label, uint32_t queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label)
+        Command_Buffer_Manager::Identifier Command_Buffer_Manager::Add_Command_Buffer(std::string label, uint32_t queue_family, std::vector<std::string> resource_group_labels, std::string pipeline_label)
         {
             Identifier identifer = {};
             identifer.label = label;
@@ -150,6 +150,8 @@ namespace Cascade_Graphics
             }
 
             LOG_TRACE << "Vulkan Backend: Added command buffer";
+
+            return identifer;
         }
 
         void Command_Buffer_Manager::Remove_Command_Buffer(Identifier identifier)

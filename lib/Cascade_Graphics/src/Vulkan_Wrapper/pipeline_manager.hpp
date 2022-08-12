@@ -50,7 +50,8 @@ namespace Cascade_Graphics
             ~Pipeline_Manager();
 
         public:
-            void Add_Compute_Pipeline(std::string label, std::string resource_grouping_label, std::string shader_label);
+            std::string Add_Compute_Pipeline(std::string label, std::string resource_grouping_label, std::string shader_label);
+            void Delete_Pipeline(std::string label);
 
             Pipeline_Data* Get_Pipeline_Data(std::string label);
         };

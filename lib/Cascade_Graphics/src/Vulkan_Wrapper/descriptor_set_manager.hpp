@@ -48,7 +48,7 @@ namespace Cascade_Graphics
             ~Descriptor_Set_Manager();
 
         public:
-            void Create_Descriptor_Set(std::string resource_grouping_label);
+            std::string Create_Descriptor_Set(std::string resource_grouping_label);
             void Remove_Descriptor_Set(std::string resource_grouping_label);
 
             Descriptor_Set_Data* Get_Descriptor_Set_Data(std::string label);
