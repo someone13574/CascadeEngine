@@ -569,14 +569,9 @@ namespace Cascade_Graphics
             }
         }
 
-        void Storage_Manager::Upload_To_Buffer_Staging(Identifier identifier,
-                                                       Identifier staging_buffer_identifier,
-                                                       void* data,
-                                                       size_t data_size,
-                                                       std::shared_ptr<Command_Buffer_Manager> command_buffer_manager_ptr,
-                                                       std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr)
+        void Storage_Manager::Upload_To_Buffer_Staging(Identifier identifier, Identifier staging_buffer_identifier, void* data, size_t data_size, std::shared_ptr<Vulkan_Graphics> vulkan_graphics)
         {
-            VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device()), "Failed to wait for idle device");
+            VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device()), "Vulkan Backend: Failed to wait for idle device");
 
             std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now(); //
 
@@ -590,30 +585,35 @@ namespace Cascade_Graphics
             }
 
             Identifier resource_grouping_identifier = Create_Resource_Grouping("staging-buffer-upload", {identifier, staging_buffer_identifier});
-            Identifier descriptor_set_identifier = descriptor_set_manager_ptr->Create_Descriptor_Set(resource_grouping_identifier);
+            Identifier descriptor_set_identifier = vulkan_graphics->m_descriptor_set_manager_ptr->Create_Descriptor_Set(resource_grouping_identifier);
+            Identifier uploading_fence_identifier = vulkan_graphics->m_synchronization_manager_ptr->Create_Fence("currently_uploading_fence");
 
             Identifier empty_pipeline_identifier = {"", 0};
 
             size_t uploaded = 0;
             size_t max_upload_size = staging_buffer->buffer_size;
 
-            Identifier command_buffer_identifier
-                = command_buffer_manager_ptr->Add_Command_Buffer("staging-buffer-upload", m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE), {resource_grouping_identifier}, empty_pipeline_identifier);
+            Identifier command_buffer_identifier = vulkan_graphics->m_command_buffer_manager_ptr->Add_Command_Buffer("staging-buffer-upload", m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE),
+                                                                                                                     {resource_grouping_identifier}, empty_pipeline_identifier);
 
             while (uploaded < data_size)
             {
                 size_t upload_size = std::min<size_t>(data_size - uploaded, max_upload_size);
+
+                VALIDATE_VKRESULT(vkWaitForFences(*vulkan_graphics->m_logical_device_wrapper_ptr->Get_Device(), 1, vulkan_graphics->m_synchronization_manager_ptr->Get_Fence(uploading_fence_identifier), VK_TRUE, UINT64_MAX),
+                                  "Vulkan Backend: Failed to wait for fence");
+                VALIDATE_VKRESULT(vkResetFences(*vulkan_graphics->m_logical_device_wrapper_ptr->Get_Device(), 1, vulkan_graphics->m_synchronization_manager_ptr->Get_Fence(uploading_fence_identifier)), "Vulkan Backend: Failed to reset fence");
 
                 void* mapped_memory;
                 VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_wrapper_ptr->Get_Device(), staging_buffer->device_memory, 0, upload_size, 0, &mapped_memory), "Vulkan Backend: Failed to map memory");
                 memcpy(((uint8_t*)mapped_memory), ((uint8_t*)data) + uploaded, upload_size);
                 vkUnmapMemory(*m_logical_device_wrapper_ptr->Get_Device(), staging_buffer->device_memory);
 
-                command_buffer_manager_ptr->Reset_Command_Buffer(command_buffer_identifier);
+                vulkan_graphics->m_command_buffer_manager_ptr->Reset_Command_Buffer(command_buffer_identifier);
 
-                command_buffer_manager_ptr->Begin_Recording(command_buffer_identifier, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-                command_buffer_manager_ptr->Copy_Buffer(command_buffer_identifier, staging_buffer_identifier, identifier, 0, uploaded, upload_size);
-                command_buffer_manager_ptr->End_Recording(command_buffer_identifier);
+                vulkan_graphics->m_command_buffer_manager_ptr->Begin_Recording(command_buffer_identifier, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+                vulkan_graphics->m_command_buffer_manager_ptr->Copy_Buffer(command_buffer_identifier, staging_buffer_identifier, identifier, 0, uploaded, upload_size);
+                vulkan_graphics->m_command_buffer_manager_ptr->End_Recording(command_buffer_identifier);
 
                 VkSubmitInfo submit_info = {};
                 submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -622,19 +622,19 @@ namespace Cascade_Graphics
                 submit_info.pWaitSemaphores = nullptr;
                 submit_info.pWaitDstStageMask = nullptr;
                 submit_info.commandBufferCount = 1;
-                submit_info.pCommandBuffers = command_buffer_manager_ptr->Get_Command_Buffer(command_buffer_identifier);
+                submit_info.pCommandBuffers = vulkan_graphics->m_command_buffer_manager_ptr->Get_Command_Buffer(command_buffer_identifier);
                 submit_info.signalSemaphoreCount = 0;
                 submit_info.pSignalSemaphores = nullptr;
 
-                VALIDATE_VKRESULT(vkQueueSubmit(*m_queue_manager_ptr->Get_Queue(Queue_Manager::Queue_Types::TRANSFER_QUEUE), 1, &submit_info, VK_NULL_HANDLE), "Vulkan Backend: Failed to submit staging buffer upload command buffer");
-                VALIDATE_VKRESULT(vkQueueWaitIdle(*m_queue_manager_ptr->Get_Queue(Queue_Manager::Queue_Types::TRANSFER_QUEUE)), "Vulkan Backend: Failed to wait for idle transfer queue");
+                VALIDATE_VKRESULT(vkQueueSubmit(*m_queue_manager_ptr->Get_Queue(Queue_Manager::Queue_Types::TRANSFER_QUEUE), 1, &submit_info, *vulkan_graphics->m_synchronization_manager_ptr->Get_Fence(uploading_fence_identifier)),
+                                  "Vulkan Backend: Failed to submit staging buffer upload command buffer");
 
                 uploaded += upload_size;
             }
 
-            descriptor_set_manager_ptr->Remove_Descriptor_Set(descriptor_set_identifier);
+            vulkan_graphics->m_descriptor_set_manager_ptr->Remove_Descriptor_Set(descriptor_set_identifier);
             Remove_Resource_Grouping(resource_grouping_identifier);
-            command_buffer_manager_ptr->Remove_Command_Buffer(command_buffer_identifier);
+            vulkan_graphics->m_command_buffer_manager_ptr->Remove_Command_Buffer(command_buffer_identifier);
 
             VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device()), "Failed to wait for idle device");
 

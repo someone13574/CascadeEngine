@@ -102,7 +102,7 @@ namespace Cascade_Graphics
     {
         LOG_DEBUG << "Vulkan: Recreating swapchain";
 
-        VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device()), "Failed to wait for device idle");
+        VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device()), "Graphics: Failed to wait for device idle");
 
         for (uint32_t i = 0; i < m_command_buffer_identifiers.size(); i++)
         {
@@ -172,8 +172,7 @@ namespace Cascade_Graphics
         m_render_pipeline_identifier = m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("render_pipeline", m_render_compute_descriptor_set_identifier, m_render_shader_identifier);
         Record_Command_Buffers();
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_identifier, m_staging_buffer_identifier, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(),
-                                                                               m_vulkan_graphics_ptr->m_command_buffer_manager_ptr, m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_identifier, m_staging_buffer_identifier, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), m_vulkan_graphics_ptr);
 
         m_image_available_semaphore_identifier = m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Create_Semaphore("image_available_semaphore");
         m_render_finished_semaphore_identifier = m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Create_Semaphore("render_finished_semaphore");
@@ -255,7 +254,7 @@ namespace Cascade_Graphics
         std::unique_lock<std::mutex> vulkan_object_access_lock(m_vulkan_graphics_ptr->m_vulkan_objects_access_mutex);
         m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_renderer_initialized; });
 
-        VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device()), "Failed to wait for device idle");
+        VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device()), "Graphics: Failed to wait for device idle");
 
         std::vector<Object_Manager::GPU_Voxel> gpu_voxels = m_object_manager_ptr->Get_GPU_Voxels();
 
@@ -280,8 +279,7 @@ namespace Cascade_Graphics
             Record_Command_Buffers();
         }
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_identifier, m_staging_buffer_identifier, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(),
-                                                                               m_vulkan_graphics_ptr->m_command_buffer_manager_ptr, m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_identifier, m_staging_buffer_identifier, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), m_vulkan_graphics_ptr);
     }
 
     void Renderer::Start_Rendering()

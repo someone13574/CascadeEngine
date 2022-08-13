@@ -22,6 +22,8 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
+        class Command_Buffer_Manager;
+
         class Vulkan_Graphics
         {
         private:

@@ -2,12 +2,11 @@
 
 #include "vulkan_header.hpp"
 
-#include "command_buffer_manager.hpp"
-#include "descriptor_set_manager.hpp"
 #include "identifier.hpp"
 #include "logical_device_wrapper.hpp"
 #include "physical_device_wrapper.hpp"
 #include "queue_manager.hpp"
+#include "vulkan_graphics.hpp"
 #include <string>
 #include <vector>
 
@@ -16,8 +15,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        class Command_Buffer_Manager;
-        class Descriptor_Set_Manager;
+        class Vulkan_Graphics;
 
         class Storage_Manager
         {
@@ -104,12 +102,7 @@ namespace Cascade_Graphics
 
             void Resize_Buffer(Identifier identifier, VkDeviceSize buffer_size);
             void Upload_To_Buffer_Direct(Identifier identifier, void* data, size_t data_size);
-            void Upload_To_Buffer_Staging(Identifier identifier,
-                                          Identifier staging_buffer_identifier,
-                                          void* data,
-                                          size_t data_size,
-                                          std::shared_ptr<Command_Buffer_Manager> command_buffer_manager_ptr,
-                                          std::shared_ptr<Descriptor_Set_Manager> descriptor_set_manager_ptr);
+            void Upload_To_Buffer_Staging(Identifier identifier, Identifier staging_buffer_identifier, void* data, size_t data_size, std::shared_ptr<Vulkan_Graphics> vulkan_graphics);
 
             Buffer_Resource* Get_Buffer_Resource(Identifier identifier);
             Image_Resource* Get_Image_Resource(Identifier identifier);
