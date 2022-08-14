@@ -11,22 +11,26 @@ namespace Cascade_Graphics
     {
     }
 
-    void Object_Manager::Voxel_Sample_Volume_Function(Vector_3<double> voxel_position, double voxel_size, double step_size, std::function<double(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting)
+    void Object_Manager::Voxel_Sample_Volume_Function(Vector_3<double> voxel_position,
+                                                      double voxel_size,
+                                                      double step_size,
+                                                      uint32_t step_count,
+                                                      std::function<double(Vector_3<double>)> volume_sample_function,
+                                                      bool& is_fully_contained,
+                                                      bool& is_intersecting)
     {
         is_fully_contained = true;
         is_intersecting = false;
 
-        Vector_3<double> start_position = voxel_position - Vector_3<double>(voxel_size, voxel_size, voxel_size);
-        Vector_3<double> end_position = voxel_position + Vector_3<double>(voxel_size, voxel_size, voxel_size);
-        Vector_3<double> sample_position;
+        Vector_3<double> start_position = voxel_position - voxel_size;
+        Vector_3<double> sample_position = start_position;
 
         bool sample;
-
-        for (sample_position.m_x = start_position.m_x; sample_position.m_x <= end_position.m_x; sample_position.m_x += step_size)
+        for (uint32_t i = 0; i < step_count; i++)
         {
-            for (sample_position.m_y = start_position.m_y; sample_position.m_y <= end_position.m_y; sample_position.m_y += step_size)
+            for (uint32_t j = 0; j < step_count; j++)
             {
-                for (sample_position.m_z = start_position.m_z; sample_position.m_z <= end_position.m_z; sample_position.m_z += step_size)
+                for (uint32_t k = 0; k < step_count; k++)
                 {
                     sample = volume_sample_function(sample_position) < 0.0;
 
@@ -37,13 +41,44 @@ namespace Cascade_Graphics
                     {
                         return;
                     }
+                    sample_position.m_z += step_size;
                 }
+                sample_position.m_y += step_size;
+                sample_position.m_z = start_position.m_z;
             }
+            sample_position.m_x += step_size;
+            sample_position.m_y = start_position.m_y;
         }
+
+        // Vector_3<double> start_position = voxel_position - Vector_3<double>(voxel_size, voxel_size, voxel_size);
+        // Vector_3<double> end_position = voxel_position + Vector_3<double>(voxel_size, voxel_size, voxel_size);
+        // Vector_3<double> sample_position;
+
+        // bool sample;
+
+        // for (sample_position.m_x = start_position.m_x; sample_position.m_x <= end_position.m_x; sample_position.m_x += step_size)
+        // {
+        //     for (sample_position.m_y = start_position.m_y; sample_position.m_y <= end_position.m_y; sample_position.m_y += step_size)
+        //     {
+        //         for (sample_position.m_z = start_position.m_z; sample_position.m_z <= end_position.m_z; sample_position.m_z += step_size)
+        //         {
+        //             sample = volume_sample_function(sample_position) < 0.0;
+
+        //             is_fully_contained = is_fully_contained && sample;
+        //             is_intersecting = is_intersecting || sample;
+
+        //             if ((!is_fully_contained) && is_intersecting)
+        //             {
+        //                 return;
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     void Object_Manager::Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
-                                                                   std::vector<double> step_size_lookup_table,
+                                                                   std::vector<uint32_t> step_count_lookup_table,
+                                                                   double step_size,
                                                                    uint32_t worker_index,
                                                                    std::function<double(Vector_3<double>)> volume_sample_function,
                                                                    std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function,
@@ -104,10 +139,11 @@ namespace Cascade_Graphics
                     Voxel child_voxel = {};
                     child_voxel.size = current_voxel.size * 0.5;
                     child_voxel.position = current_voxel.position + Vector_3<double>((i & 1) * current_voxel.size - child_voxel.size, ((i & 2) >> 1) * current_voxel.size - child_voxel.size, ((i & 4) >> 2) * current_voxel.size - child_voxel.size);
+                    child_voxel.depth = current_voxel.depth + 1;
 
                     bool is_fully_contained;
                     bool is_intersecting;
-                    Voxel_Sample_Volume_Function(child_voxel.position, child_voxel.size, step_size_lookup_table[child_voxel.depth], volume_sample_function, is_fully_contained, is_intersecting);
+                    Voxel_Sample_Volume_Function(child_voxel.position, child_voxel.size, step_size, step_count_lookup_table[child_voxel.depth], volume_sample_function, is_fully_contained, is_intersecting);
 
                     if (is_intersecting && !is_fully_contained)
                     {
@@ -137,7 +173,6 @@ namespace Cascade_Graphics
                         child_voxel.miss_links[5] = current_voxel.miss_links[5];
                         child_voxel.miss_links[6] = current_voxel.miss_links[6];
                         child_voxel.miss_links[7] = current_voxel.miss_links[7];
-                        child_voxel.depth = current_voxel.depth + 1;
 
                         double center_density = volume_sample_function(child_voxel.position);
                         double x_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.00001, 0.0, 0.0));
@@ -312,12 +347,12 @@ namespace Cascade_Graphics
 
         m_objects.back().voxels.push_back(root_voxel);
 
-        std::vector<double> step_size_lookup_table;
+        double step_size = (sample_region_size * 2.0) / (1 << max_depth);
+        std::vector<uint32_t> step_count_lookup_table;
         for (uint32_t i = 0; i <= max_depth; i++)
         {
-            step_size_lookup_table.push_back((1.0 / (std::pow(2, (max_depth - i)))) * (root_voxel.size / std::pow(2, i)) * 2.0);
+            step_count_lookup_table.push_back((1 << (max_depth - i)) + 1);
         }
-
 
         static const uint32_t WORKER_THREAD_COUNT = 32;
 
@@ -349,8 +384,8 @@ namespace Cascade_Graphics
             worker_thread_work_available[i] = false;
             worker_thread_current_work[i] = 0;
 
-            std::thread worker_thread(Object_From_Volume_Function_Worker_Thread, max_depth, step_size_lookup_table, i, volume_sample_function, color_sample_function, &m_objects.back().voxels, &voxels_mutex, &work_complete, &work_complete_mutex,
-                                      &active_workers_count, &available_workers_queue, &available_workers_queue_mutex, &available_worker_notify, &leaf_nodes_stack, &leaf_nodes_stack_mutex, &available_leaf_node_notify,
+            std::thread worker_thread(Object_From_Volume_Function_Worker_Thread, max_depth, step_count_lookup_table, step_size, i, volume_sample_function, color_sample_function, &m_objects.back().voxels, &voxels_mutex, &work_complete,
+                                      &work_complete_mutex, &active_workers_count, &available_workers_queue, &available_workers_queue_mutex, &available_worker_notify, &leaf_nodes_stack, &leaf_nodes_stack_mutex, &available_leaf_node_notify,
                                       &worker_thread_work_available[i], &worker_thread_current_work[i], &worker_thread_mutexes[i], &worker_threads_notifies[i]);
 
             worker_threads[i] = std::move(worker_thread);
