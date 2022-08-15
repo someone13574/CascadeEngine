@@ -11,28 +11,19 @@ namespace Cascade_Graphics
     {
     }
 
-    void Object_Manager::Voxel_Sample_Volume_Function(Vector_3<double> voxel_position,
-                                                      double voxel_size,
-                                                      double step_size,
-                                                      uint32_t step_count,
-                                                      std::function<double(Vector_3<double>)> volume_sample_function,
-                                                      bool& is_fully_contained,
-                                                      bool& is_intersecting)
+    void Object_Manager::Voxel_Sample_Volume_Function(Vector_3<uint32_t> start_position, uint32_t step_count, std::vector<std::vector<std::vector<double>>>* densities_ptr, bool& is_fully_contained, bool& is_intersecting)
     {
         is_fully_contained = true;
         is_intersecting = false;
 
-        Vector_3<double> start_position = voxel_position - voxel_size;
-        Vector_3<double> sample_position = start_position;
-
         bool sample;
-        for (uint32_t i = 0; i < step_count; i++)
+        for (uint32_t i = start_position.m_x; i <= step_count + start_position.m_x; i++)
         {
-            for (uint32_t j = 0; j < step_count; j++)
+            for (uint32_t j = start_position.m_y; j <= step_count + start_position.m_y; j++)
             {
-                for (uint32_t k = 0; k < step_count; k++)
+                for (uint32_t k = start_position.m_z; k <= step_count + start_position.m_z; k++)
                 {
-                    sample = volume_sample_function(sample_position) < 0.0;
+                    sample = (*densities_ptr)[i][j][k] < 0.0;
 
                     is_fully_contained = is_fully_contained && sample;
                     is_intersecting = is_intersecting || sample;
@@ -41,43 +32,14 @@ namespace Cascade_Graphics
                     {
                         return;
                     }
-                    sample_position.m_z += step_size;
                 }
-                sample_position.m_y += step_size;
-                sample_position.m_z = start_position.m_z;
             }
-            sample_position.m_x += step_size;
-            sample_position.m_y = start_position.m_y;
         }
-
-        // Vector_3<double> start_position = voxel_position - Vector_3<double>(voxel_size, voxel_size, voxel_size);
-        // Vector_3<double> end_position = voxel_position + Vector_3<double>(voxel_size, voxel_size, voxel_size);
-        // Vector_3<double> sample_position;
-
-        // bool sample;
-
-        // for (sample_position.m_x = start_position.m_x; sample_position.m_x <= end_position.m_x; sample_position.m_x += step_size)
-        // {
-        //     for (sample_position.m_y = start_position.m_y; sample_position.m_y <= end_position.m_y; sample_position.m_y += step_size)
-        //     {
-        //         for (sample_position.m_z = start_position.m_z; sample_position.m_z <= end_position.m_z; sample_position.m_z += step_size)
-        //         {
-        //             sample = volume_sample_function(sample_position) < 0.0;
-
-        //             is_fully_contained = is_fully_contained && sample;
-        //             is_intersecting = is_intersecting || sample;
-
-        //             if ((!is_fully_contained) && is_intersecting)
-        //             {
-        //                 return;
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     void Object_Manager::Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
                                                                    std::vector<uint32_t> step_count_lookup_table,
+                                                                   std::vector<std::vector<std::vector<double>>>* densities_ptr,
                                                                    double step_size,
                                                                    uint32_t worker_index,
                                                                    std::function<double(Vector_3<double>)> volume_sample_function,
@@ -138,12 +100,14 @@ namespace Cascade_Graphics
                 {
                     Voxel child_voxel = {};
                     child_voxel.size = current_voxel.size * 0.5;
-                    child_voxel.position = current_voxel.position + Vector_3<double>((i & 1) * current_voxel.size - child_voxel.size, ((i & 2) >> 1) * current_voxel.size - child_voxel.size, ((i & 4) >> 2) * current_voxel.size - child_voxel.size);
                     child_voxel.depth = current_voxel.depth + 1;
+                    child_voxel.start_index = Vector_3<uint32_t>(current_voxel.start_index.m_x + (i & 1) * step_count_lookup_table[child_voxel.depth], current_voxel.start_index.m_y + ((i & 2) >> 1) * step_count_lookup_table[child_voxel.depth],
+                                                                 current_voxel.start_index.m_z + ((i & 4) >> 2) * step_count_lookup_table[child_voxel.depth]);
+                    child_voxel.position = current_voxel.position + Vector_3<double>((i & 1) * current_voxel.size - child_voxel.size, ((i & 2) >> 1) * current_voxel.size - child_voxel.size, ((i & 4) >> 2) * current_voxel.size - child_voxel.size);
 
                     bool is_fully_contained;
                     bool is_intersecting;
-                    Voxel_Sample_Volume_Function(child_voxel.position, child_voxel.size, step_size, step_count_lookup_table[child_voxel.depth], volume_sample_function, is_fully_contained, is_intersecting);
+                    Voxel_Sample_Volume_Function(child_voxel.start_index, step_count_lookup_table[child_voxel.depth], densities_ptr, is_fully_contained, is_intersecting);
 
                     if (is_intersecting && !is_fully_contained)
                     {
@@ -315,6 +279,7 @@ namespace Cascade_Graphics
         Voxel root_voxel = {};
         root_voxel.size = sample_region_size;
         root_voxel.position = sample_region_center;
+        root_voxel.start_index = Vector_3<uint32_t>(0, 0, 0);
         root_voxel.normal = Vector_3<double>(0.0, 1.0, 0.0);
         root_voxel.parent_index = -1;
         root_voxel.child_indices[0] = 0;
@@ -351,8 +316,32 @@ namespace Cascade_Graphics
         std::vector<uint32_t> step_count_lookup_table;
         for (uint32_t i = 0; i <= max_depth; i++)
         {
-            step_count_lookup_table.push_back((1 << (max_depth - i)) + 1);
+            step_count_lookup_table.push_back((1 << (max_depth - i)));
         }
+
+        Vector_3<double> start_position = sample_region_center - sample_region_size;
+        Vector_3<double> sample_position = start_position;
+
+        std::vector<std::vector<std::vector<double>>> densities(step_count_lookup_table[0] + 1, std::vector<std::vector<double>>(step_count_lookup_table[0] + 1, std::vector<double>(step_count_lookup_table[0] + 1, 0.0)));
+        for (uint32_t i = 0; i <= step_count_lookup_table[0]; i++)
+        {
+            for (uint32_t j = 0; j <= step_count_lookup_table[0]; j++)
+            {
+                for (uint32_t k = 0; k <= step_count_lookup_table[0]; k++)
+                {
+                    densities[i][j][k] = volume_sample_function(sample_position);
+
+                    sample_position.m_z += step_size;
+                }
+                sample_position.m_y += step_size;
+                sample_position.m_z = start_position.m_z;
+            }
+            sample_position.m_x += step_size;
+            sample_position.m_y = start_position.m_y;
+        }
+
+        LOG_DEBUG << "Generated densities";
+
 
         static const uint32_t WORKER_THREAD_COUNT = 32;
 
@@ -384,7 +373,7 @@ namespace Cascade_Graphics
             worker_thread_work_available[i] = false;
             worker_thread_current_work[i] = 0;
 
-            std::thread worker_thread(Object_From_Volume_Function_Worker_Thread, max_depth, step_count_lookup_table, step_size, i, volume_sample_function, color_sample_function, &m_objects.back().voxels, &voxels_mutex, &work_complete,
+            std::thread worker_thread(Object_From_Volume_Function_Worker_Thread, max_depth, step_count_lookup_table, &densities, step_size, i, volume_sample_function, color_sample_function, &m_objects.back().voxels, &voxels_mutex, &work_complete,
                                       &work_complete_mutex, &active_workers_count, &available_workers_queue, &available_workers_queue_mutex, &available_worker_notify, &leaf_nodes_stack, &leaf_nodes_stack_mutex, &available_leaf_node_notify,
                                       &worker_thread_work_available[i], &worker_thread_current_work[i], &worker_thread_mutexes[i], &worker_threads_notifies[i]);
 
@@ -451,7 +440,6 @@ namespace Cascade_Graphics
                 worker_threads_notifies[selected_worker].notify_all();
             }
         }
-
 
         LOG_TRACE << "Graphics: It took " << (float)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count() / 1000.0 << " seconds to generate " << label;
     }

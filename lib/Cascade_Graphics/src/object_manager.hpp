@@ -42,6 +42,7 @@ namespace Cascade_Graphics
         {
             double size;
             Vector_3<double> position;
+            Vector_3<uint32_t> start_index;
             Vector_3<double> normal;
             Vector_3<double> color;
 
@@ -65,11 +66,11 @@ namespace Cascade_Graphics
         std::vector<Object> m_objects;
 
     private:
-        static void
-        Voxel_Sample_Volume_Function(Vector_3<double> voxel_position, double voxel_size, double step_size, uint32_t step_count, std::function<double(Vector_3<double>)> volume_sample_function, bool& is_fully_contained, bool& is_intersecting);
+        static void Voxel_Sample_Volume_Function(Vector_3<uint32_t> start_position, uint32_t step_count, std::vector<std::vector<std::vector<double>>>* densities_ptr, bool& is_fully_contained, bool& is_intersecting);
 
         static void Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
                                                               std::vector<uint32_t> step_count_lookup_table,
+                                                              std::vector<std::vector<std::vector<double>>>* densities_ptr,
                                                               double step_size,
                                                               uint32_t worker_index,
                                                               std::function<double(Vector_3<double>)> volume_sample_function,
