@@ -7,39 +7,96 @@
 
 namespace Cascade_Graphics
 {
-    Object_Manager::Object_Manager()
+    Object_Manager::Object_Manager(std::shared_ptr<Vulkan_Backend::Vulkan_Graphics> vulkan_graphics_ptr) : m_vulkan_graphics_ptr(vulkan_graphics_ptr)
     {
     }
 
-    void Object_Manager::Voxel_Sample_Volume_Function(Vector_3<uint32_t> start_position, uint32_t step_count, std::vector<std::vector<std::vector<double>>>* densities_ptr, bool& is_fully_contained, bool& is_intersecting)
+    void Object_Manager::Generate_Density_Field(uint32_t max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::vector<Sample_Data>* density_field)
     {
-        is_fully_contained = true;
-        is_intersecting = false;
+        std::unique_lock<std::mutex> vulkan_object_access_lock(m_vulkan_graphics_ptr->m_vulkan_objects_access_mutex);
+        m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_vulkan_graphics_ptr->Is_Vulkan_Initialized() && m_vulkan_graphics_ptr->m_vulkan_objects_access; });
+        m_vulkan_graphics_ptr->m_vulkan_objects_access = false;
 
-        bool sample;
-        for (uint32_t i = start_position.m_x; i <= step_count + start_position.m_x; i++)
+
+        Vector_3<double> start_position = sample_region_center - sample_region_size;
+        struct Density_Field_Data
         {
-            for (uint32_t j = start_position.m_y; j <= step_count + start_position.m_y; j++)
-            {
-                for (uint32_t k = start_position.m_z; k <= step_count + start_position.m_z; k++)
-                {
-                    sample = (*densities_ptr)[i][j][k] < 0.0;
+            float step_size;
 
-                    is_fully_contained = is_fully_contained && sample;
-                    is_intersecting = is_intersecting || sample;
+            float start_x;
+            float start_y;
+            float start_z;
 
-                    if ((!is_fully_contained) && is_intersecting)
-                    {
-                        return;
-                    }
-                }
-            }
-        }
+            uint sample_count;
+
+            uint padding_a;
+            uint padding_b;
+            uint padding_c;
+        } density_field_data;
+
+        density_field_data = {};
+        density_field_data.step_size = (sample_region_size * 2.0) / (1 << max_depth);
+        density_field_data.start_x = sample_region_center.m_x - sample_region_size;
+        density_field_data.start_y = sample_region_center.m_y - sample_region_size;
+        density_field_data.start_z = sample_region_center.m_z - sample_region_size;
+        density_field_data.sample_count = (1 << max_depth) + 1;
+
+        m_vulkan_graphics_ptr->Destroy_Staging_Buffer();
+        Vulkan_Backend::Identifier density_field_data_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer(
+            "density_field_data_buffer", sizeof(Density_Field_Data), true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        Vulkan_Backend::Identifier density_field_buffer_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer(
+            "density_field_buffer", sizeof(Sample_Data) * density_field_data.sample_count * density_field_data.sample_count * density_field_data.sample_count, true, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_vulkan_graphics_ptr->Create_Staging_Buffer();
+
+        Vulkan_Backend::Identifier resource_grouping_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("density_field_resource_grouping", {density_field_data_identifier, density_field_buffer_identifier});
+        Vulkan_Backend::Identifier descriptor_set_identifier = m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Create_Descriptor_Set(resource_grouping_identifier);
+
+#ifdef __linux__
+        Vulkan_Backend::Identifier compute_shader_identifier
+            = m_vulkan_graphics_ptr->m_shader_manager_ptr->Add_Shader("density_field_sample_shader", "/home/owen/Documents/Code/C++/CascadeEngine/build/build/build/Cascade_Graphics/src/Shaders/object_generate.comp.spv");
+#elif defined __WIN32 || defined WIN32
+        Vulkan_Backend::Identifier compute_shader_identifier = m_vulkan_graphics_ptr->m_shader_manager_ptr->Add_Shader("density_field_sample_shader", "C:/Users/owenl/Documents/Code/C++/CascadeEngine/build/src/Shaders/object_generate.comp.spv");
+#endif
+
+        Vulkan_Backend::Identifier compute_pipeline_identifier = m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("density_field_pipeline", descriptor_set_identifier, compute_shader_identifier);
+
+        Vulkan_Backend::Identifier command_buffer_identifier = m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Add_Command_Buffer(
+            "density_sample_command_buffer", m_vulkan_graphics_ptr->m_queue_manager_ptr->Get_Queue_Family_Index(Vulkan_Backend::Queue_Manager::Queue_Types::COMPUTE_QUEUE), {resource_grouping_identifier}, compute_pipeline_identifier);
+        m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Begin_Recording(command_buffer_identifier, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+        m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Dispatch_Compute_Shader(command_buffer_identifier, static_cast<uint32_t>(std::ceil(density_field_data.sample_count / 8.0)),
+                                                                                     static_cast<uint32_t>(std::ceil(density_field_data.sample_count / 8.0)), static_cast<uint32_t>(std::ceil(density_field_data.sample_count / 8.0)));
+        m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->End_Recording(command_buffer_identifier);
+
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Direct(density_field_data_identifier, &density_field_data, sizeof(density_field_data));
+
+        VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device()), "Graphics: Failed to wait for device idle");
+        VkSubmitInfo submit_info = {};
+        submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submit_info.pNext = nullptr;
+        submit_info.waitSemaphoreCount = 0;
+        submit_info.pWaitSemaphores = nullptr;
+        submit_info.pWaitDstStageMask = nullptr;
+        submit_info.commandBufferCount = 1;
+        submit_info.pCommandBuffers = m_vulkan_graphics_ptr->m_command_buffer_manager_ptr->Get_Command_Buffer(command_buffer_identifier);
+        submit_info.signalSemaphoreCount = 0;
+        submit_info.pSignalSemaphores = nullptr;
+        VALIDATE_VKRESULT(vkQueueSubmit(*m_vulkan_graphics_ptr->m_queue_manager_ptr->Get_Queue(Vulkan_Backend::Queue_Manager::Queue_Types::COMPUTE_QUEUE), 1, &submit_info, nullptr),
+                          "Graphics: Failed to submit density sample command buffer to queue");
+        VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device()), "Graphics: Failed to wait for device idle");
+
+        density_field->resize(density_field_data.sample_count * density_field_data.sample_count * density_field_data.sample_count);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Download_From_Buffer_Staging(density_field_buffer_identifier, m_vulkan_graphics_ptr->m_staging_buffer_identifier, density_field->data(), sizeof(Sample_Data) * density_field->size(),
+                                                                                   m_vulkan_graphics_ptr);
+
+
+        m_vulkan_graphics_ptr->m_vulkan_objects_access = true;
     }
 
     void Object_Manager::Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
                                                                    std::vector<uint32_t> step_count_lookup_table,
-                                                                   std::vector<std::vector<std::vector<double>>>* densities_ptr,
+                                                                   std::vector<Sample_Data>* densities_ptr,
                                                                    double step_size,
                                                                    uint32_t worker_index,
                                                                    std::function<double(Vector_3<double>)> volume_sample_function,
@@ -105,9 +162,29 @@ namespace Cascade_Graphics
                                                                  current_voxel.start_index.m_z + ((i & 4) >> 2) * step_count_lookup_table[child_voxel.depth]);
                     child_voxel.position = current_voxel.position + Vector_3<double>((i & 1) * current_voxel.size - child_voxel.size, ((i & 2) >> 1) * current_voxel.size - child_voxel.size, ((i & 4) >> 2) * current_voxel.size - child_voxel.size);
 
-                    bool is_fully_contained;
-                    bool is_intersecting;
-                    Voxel_Sample_Volume_Function(child_voxel.start_index, step_count_lookup_table[child_voxel.depth], densities_ptr, is_fully_contained, is_intersecting);
+                    bool is_fully_contained = true;
+                    bool is_intersecting = false;
+
+                    bool sample;
+                    for (uint32_t i = child_voxel.start_index.m_x; i <= step_count_lookup_table[child_voxel.depth] + child_voxel.start_index.m_x; i++)
+                    {
+                        for (uint32_t j = child_voxel.start_index.m_y; j <= step_count_lookup_table[child_voxel.depth] + child_voxel.start_index.m_y; j++)
+                        {
+                            for (uint32_t k = child_voxel.start_index.m_z; k <= step_count_lookup_table[child_voxel.depth] + child_voxel.start_index.m_z; k++)
+                            {
+                                sample = (*densities_ptr)[i + ((step_count_lookup_table[0] + 1) * j) + ((step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1) * k)].density < 0.0;
+
+                                is_fully_contained = is_fully_contained && sample;
+                                is_intersecting = is_intersecting || sample;
+
+                                if ((!is_fully_contained) && is_intersecting)
+                                {
+                                    goto early_intersection_test_exit;
+                                }
+                            }
+                        }
+                    }
+                early_intersection_test_exit:
 
                     if (is_intersecting && !is_fully_contained)
                     {
@@ -138,11 +215,18 @@ namespace Cascade_Graphics
                         child_voxel.miss_links[6] = current_voxel.miss_links[6];
                         child_voxel.miss_links[7] = current_voxel.miss_links[7];
 
-                        double center_density = volume_sample_function(child_voxel.position);
-                        double x_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.00001, 0.0, 0.0));
-                        double y_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.00001, 0.0));
-                        double z_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.0, 0.00001));
-                        child_voxel.normal = (Vector_3<double>(center_density, center_density, center_density) - Vector_3<double>(x_density, y_density, z_density)).Normalized();
+                        // double center_density = volume_sample_function(child_voxel.position);
+                        // double x_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.00001, 0.0, 0.0));
+                        // double y_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.00001, 0.0));
+                        // double z_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.0, 0.00001));
+                        // child_voxel.normal = (Vector_3<double>(center_density, center_density, center_density) - Vector_3<double>(x_density, y_density, z_density)).Normalized();
+                        Sample_Data sample_data
+                            = (*densities_ptr)[(child_voxel.start_index.m_x + step_count_lookup_table[child_voxel.depth] / 2) + ((child_voxel.start_index.m_y + step_count_lookup_table[child_voxel.depth] / 2) * (step_count_lookup_table[0] + 1))
+                                               + ((child_voxel.start_index.m_z + step_count_lookup_table[child_voxel.depth] / 2) * (step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1))];
+
+                        child_voxel.normal.m_x = sample_data.normal_x;
+                        child_voxel.normal.m_y = sample_data.normal_y;
+                        child_voxel.normal.m_z = sample_data.normal_z;
 
                         child_voxel.color = color_sample_function(child_voxel.position, child_voxel.normal);
                         child_voxel.is_leaf = child_voxel.depth == max_depth;
@@ -322,26 +406,45 @@ namespace Cascade_Graphics
         Vector_3<double> start_position = sample_region_center - sample_region_size;
         Vector_3<double> sample_position = start_position;
 
-        std::vector<std::vector<std::vector<double>>> densities(step_count_lookup_table[0] + 1, std::vector<std::vector<double>>(step_count_lookup_table[0] + 1, std::vector<double>(step_count_lookup_table[0] + 1, 0.0)));
-        for (uint32_t i = 0; i <= step_count_lookup_table[0]; i++)
-        {
-            for (uint32_t j = 0; j <= step_count_lookup_table[0]; j++)
-            {
-                for (uint32_t k = 0; k <= step_count_lookup_table[0]; k++)
-                {
-                    densities[i][j][k] = volume_sample_function(sample_position);
+        // std::vector<std::vector<std::vector<double>>> densities(step_count_lookup_table[0] + 1, std::vector<std::vector<double>>(step_count_lookup_table[0] + 1, std::vector<double>(step_count_lookup_table[0] + 1, 0.0)));
+        // for (uint32_t i = 0; i <= step_count_lookup_table[0]; i++)
+        // {
+        //     for (uint32_t j = 0; j <= step_count_lookup_table[0]; j++)
+        //     {
+        //         for (uint32_t k = 0; k <= step_count_lookup_table[0]; k++)
+        //         {
+        //             densities[i][j][k] = volume_sample_function(sample_position);
 
-                    sample_position.m_z += step_size;
-                }
-                sample_position.m_y += step_size;
-                sample_position.m_z = start_position.m_z;
-            }
-            sample_position.m_x += step_size;
-            sample_position.m_y = start_position.m_y;
-        }
+        //             sample_position.m_z += step_size;
+        //         }
+        //         sample_position.m_y += step_size;
+        //         sample_position.m_z = start_position.m_z;
+        //     }
+        //     sample_position.m_x += step_size;
+        //     sample_position.m_y = start_position.m_y;
+        // }
+        // std::vector<double> densities((step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1), 0.0);
+        // for (uint32_t i = 0; i <= step_count_lookup_table[0]; i++)
+        // {
+        //     for (uint32_t j = 0; j <= step_count_lookup_table[0]; j++)
+        //     {
+        //         for (uint32_t k = 0; k <= step_count_lookup_table[0]; k++)
+        //         {
+        //             densities[i + ((step_count_lookup_table[0] + 1) * j) + ((step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1) * k)] = volume_sample_function(sample_position);
 
-        LOG_DEBUG << "Generated densities";
+        //             sample_position.m_z += step_size;
+        //         }
+        //         sample_position.m_y += step_size;
+        //         sample_position.m_z = start_position.m_z;
+        //     }
+        //     sample_position.m_x += step_size;
+        //     sample_position.m_y = start_position.m_y;
+        // }
 
+        // LOG_DEBUG << "Generated densities";
+
+        std::vector<Sample_Data> densities;
+        Generate_Density_Field(max_depth, sample_region_center, sample_region_size, &densities);
 
         static const uint32_t WORKER_THREAD_COUNT = 32;
 

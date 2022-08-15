@@ -149,6 +149,9 @@ namespace Cascade_Graphics
                     }
                 }
             }
+
+            LOG_ERROR << "Vulkan Backend: The requested memory properties could not be found";
+            exit(EXIT_FAILURE);
         }
 
         void Storage_Manager::Allocate_Buffer_Memory(Identifier identifier)
@@ -276,13 +279,14 @@ namespace Cascade_Graphics
             VALIDATE_VKRESULT(vkCreateImageView(*m_logical_device_wrapper_ptr->Get_Device(), &image_view_create_info, nullptr, &image_resource_ptr->image_view), "Vulkan Backend: Failed to create image view");
         }
 
-        Identifier Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask)
+        Identifier
+        Storage_Manager::Create_Buffer(std::string label, VkDeviceSize buffer_size, bool strict_buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask)
         {
-            if (buffer_size == 0)
+            if (!strict_buffer_size)
             {
                 LOG_DEBUG << "Vulkan Backend: Buffer size is 0. Creating temporary buffer to find maximum buffer size";
 
-                Identifier temp_buffer_id = Create_Buffer(label + "-temp", 1, buffer_usage, descriptor_type, memory_property_flags, resource_queue_mask);
+                Identifier temp_buffer_id = Create_Buffer(label + "-temp", 1, true, buffer_usage, descriptor_type, memory_property_flags, resource_queue_mask);
                 Buffer_Resource* buffer_resource_ptr = Get_Buffer_Resource(temp_buffer_id);
 
                 VkPhysicalDeviceMemoryBudgetPropertiesEXT device_memory_budget_properties = {};
@@ -301,7 +305,7 @@ namespace Cascade_Graphics
                 LOG_INFO << "Vulkan Backend: Destroying temporary buffer " << temp_buffer_id.Get_Identifier_String();
                 Destroy_Buffer(temp_buffer_id);
 
-                buffer_size = device_memory_budget_properties.heapBudget[heap_index] - device_memory_budget_properties.heapUsage[heap_index];
+                buffer_size = std::min(device_memory_budget_properties.heapBudget[heap_index] - device_memory_budget_properties.heapUsage[heap_index], buffer_size);
             }
 
             Identifier identifier = {};
@@ -585,7 +589,7 @@ namespace Cascade_Graphics
             }
 
             Identifier resource_grouping_identifier = Create_Resource_Grouping("staging-buffer-upload", {identifier, staging_buffer_identifier});
-            Identifier descriptor_set_identifier = vulkan_graphics->m_descriptor_set_manager_ptr->Create_Descriptor_Set(resource_grouping_identifier);
+            // Identifier descriptor_set_identifier = vulkan_graphics->m_descriptor_set_manager_ptr->Create_Descriptor_Set(resource_grouping_identifier);
             Identifier uploading_fence_identifier = vulkan_graphics->m_synchronization_manager_ptr->Create_Fence("currently_uploading_fence");
 
             Identifier empty_pipeline_identifier = {"", 0};
@@ -630,9 +634,10 @@ namespace Cascade_Graphics
                                   "Vulkan Backend: Failed to submit staging buffer upload command buffer");
 
                 uploaded += upload_size;
+                LOG_TRACE << "Vulkan Backend: Uploaded " << uploaded << " / " << data_size;
             }
 
-            vulkan_graphics->m_descriptor_set_manager_ptr->Remove_Descriptor_Set(descriptor_set_identifier);
+            // vulkan_graphics->m_descriptor_set_manager_ptr->Remove_Descriptor_Set(descriptor_set_identifier);
             Remove_Resource_Grouping(resource_grouping_identifier);
             vulkan_graphics->m_command_buffer_manager_ptr->Remove_Command_Buffer(command_buffer_identifier);
 
@@ -641,6 +646,88 @@ namespace Cascade_Graphics
             LOG_DEBUG << "Time to upload: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count() / 1000.0 << " seconds";
 
             LOG_INFO << "Vulkan Backend: Finished staging buffer upload";
+        }
+
+        void Storage_Manager::Download_From_Buffer_Staging(Identifier identifier, Identifier staging_buffer_identifier, void* data, size_t data_size, std::shared_ptr<Vulkan_Graphics> vulkan_graphics)
+        {
+            VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device()), "Vulkan Backend: Failed to wait for idle device");
+
+            std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
+
+            Buffer_Resource* target_buffer = Get_Buffer_Resource(identifier);
+            Buffer_Resource* staging_buffer = Get_Buffer_Resource(staging_buffer_identifier);
+
+            if (!(staging_buffer->memory_property_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+            {
+                LOG_ERROR << "Vulkan Backend: Staging buffer must have memory property VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT";
+                exit(EXIT_FAILURE);
+            }
+
+            Identifier resource_grouping_identifier = Create_Resource_Grouping("staging-buffer-download", {identifier, staging_buffer_identifier});
+            // Identifier descriptor_set_identifier = vulkan_graphics->m_descriptor_set_manager_ptr->Create_Descriptor_Set(resource_grouping_identifier);
+            Identifier downloading_fence_identifier = vulkan_graphics->m_synchronization_manager_ptr->Create_Fence("currently_downloading_fence");
+
+            Identifier empty_pipeline_identifier = {"", 0};
+
+            size_t downloaded = 0;
+            size_t max_download_size = staging_buffer->buffer_size;
+
+            Identifier command_buffer_identifier = vulkan_graphics->m_command_buffer_manager_ptr->Add_Command_Buffer("staging-buffer-download", m_queue_manager_ptr->Get_Queue_Family_Index(Queue_Manager::Queue_Types::TRANSFER_QUEUE),
+                                                                                                                     {resource_grouping_identifier}, empty_pipeline_identifier);
+
+            VALIDATE_VKRESULT(vkResetFences(*vulkan_graphics->m_logical_device_wrapper_ptr->Get_Device(), 1, vulkan_graphics->m_synchronization_manager_ptr->Get_Fence(downloading_fence_identifier)), "Vulkan Backend: Failed to reset fence");
+
+            while (downloaded < data_size)
+            {
+                size_t download_size = std::min<size_t>(data_size - downloaded, max_download_size);
+
+                vulkan_graphics->m_command_buffer_manager_ptr->Reset_Command_Buffer(command_buffer_identifier);
+
+                vulkan_graphics->m_command_buffer_manager_ptr->Begin_Recording(command_buffer_identifier, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+                vulkan_graphics->m_command_buffer_manager_ptr->Copy_Buffer(command_buffer_identifier, identifier, staging_buffer_identifier, downloaded, 0, download_size);
+                vulkan_graphics->m_command_buffer_manager_ptr->End_Recording(command_buffer_identifier);
+
+                VkSubmitInfo submit_info = {};
+                submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+                submit_info.pNext = nullptr;
+                submit_info.waitSemaphoreCount = 0;
+                submit_info.pWaitSemaphores = nullptr;
+                submit_info.pWaitDstStageMask = nullptr;
+                submit_info.commandBufferCount = 1;
+                submit_info.pCommandBuffers = vulkan_graphics->m_command_buffer_manager_ptr->Get_Command_Buffer(command_buffer_identifier);
+                submit_info.signalSemaphoreCount = 0;
+                submit_info.pSignalSemaphores = nullptr;
+
+                LOG_TRACE << "Submiting";
+
+                VALIDATE_VKRESULT(vkQueueSubmit(*m_queue_manager_ptr->Get_Queue(Queue_Manager::Queue_Types::TRANSFER_QUEUE), 1, &submit_info, *vulkan_graphics->m_synchronization_manager_ptr->Get_Fence(downloading_fence_identifier)),
+                                  "Vulkan Backend: Failed to submit staging buffer upload command buffer");
+
+                VALIDATE_VKRESULT(vkWaitForFences(*vulkan_graphics->m_logical_device_wrapper_ptr->Get_Device(), 1, vulkan_graphics->m_synchronization_manager_ptr->Get_Fence(downloading_fence_identifier), VK_TRUE, UINT64_MAX),
+                                  "Vulkan Backend: Failed to wait for fence");
+                VALIDATE_VKRESULT(vkResetFences(*vulkan_graphics->m_logical_device_wrapper_ptr->Get_Device(), 1, vulkan_graphics->m_synchronization_manager_ptr->Get_Fence(downloading_fence_identifier)), "Vulkan Backend: Failed to reset fence");
+
+                LOG_TRACE << "Copying";
+
+                void* mapped_memory;
+                VALIDATE_VKRESULT(vkMapMemory(*m_logical_device_wrapper_ptr->Get_Device(), staging_buffer->device_memory, 0, download_size, 0, &mapped_memory), "Vulkan Backend: Failed to map memory");
+                memcpy(((uint8_t*)data) + downloaded, ((uint8_t*)mapped_memory), download_size);
+                vkUnmapMemory(*m_logical_device_wrapper_ptr->Get_Device(), staging_buffer->device_memory);
+
+                downloaded += download_size;
+
+                LOG_TRACE << "Vulkan Backend: Downloaded " << downloaded << " / " << data_size;
+            }
+
+            // vulkan_graphics->m_descriptor_set_manager_ptr->Remove_Descriptor_Set(descriptor_set_identifier);
+            Remove_Resource_Grouping(resource_grouping_identifier);
+            vulkan_graphics->m_command_buffer_manager_ptr->Remove_Command_Buffer(command_buffer_identifier);
+
+            VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_logical_device_wrapper_ptr->Get_Device()), "Failed to wait for idle device");
+
+            LOG_DEBUG << "Time to download: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count() / 1000.0 << " seconds";
+
+            LOG_INFO << "Vulkan Backend: Finished staging buffer download";
         }
 
         Storage_Manager::Buffer_Resource* Storage_Manager::Get_Buffer_Resource(Identifier identifier)

@@ -8,12 +8,14 @@ namespace Cascade_Graphics
     Renderer::Renderer(std::shared_ptr<Vulkan_Backend::Vulkan_Graphics> vulkan_graphics_ptr, Window_Information window_information) : m_vulkan_graphics_ptr(vulkan_graphics_ptr), m_window_information(window_information)
     {
         std::unique_lock<std::mutex> vulkan_object_access_lock(m_vulkan_graphics_ptr->m_vulkan_objects_access_mutex);
-        m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_vulkan_graphics_ptr->Is_Vulkan_Initialized(); });
+        m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_vulkan_graphics_ptr->Is_Vulkan_Initialized() && m_vulkan_graphics_ptr->m_vulkan_objects_access; });
+
+        m_vulkan_graphics_ptr->m_vulkan_objects_access = false;
 
         LOG_DEBUG << "Graphics: Creating renderer";
 
         m_camera_ptr = std::make_shared<Camera>(Vector_3<double>(-3.0, 0.0, 0.0), Vector_3<double>(1.0, 0.0, 0.0));
-        m_object_manager_ptr = std::make_shared<Object_Manager>();
+        m_object_manager_ptr = std::make_shared<Object_Manager>(m_vulkan_graphics_ptr);
 
         m_surface_wrapper_ptr = std::make_shared<Vulkan_Backend::Surface_Wrapper>(m_vulkan_graphics_ptr->m_instance_wrapper_ptr, m_window_information);
         m_swapchain_wrapper_ptr = std::make_shared<Vulkan_Backend::Swapchain_Wrapper>(m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr, m_vulkan_graphics_ptr->m_physical_device_wrapper_ptr, m_surface_wrapper_ptr,
@@ -25,20 +27,21 @@ namespace Cascade_Graphics
             m_swapchain_image_identifiers.push_back(m_vulkan_graphics_ptr->m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]));
         }
 
+        m_vulkan_graphics_ptr->Destroy_Staging_Buffer();
+
         m_render_target_image_identifier
             = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Image("render_target", swapchain_image_resources.front().image_format, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                                          m_swapchain_wrapper_ptr->Get_Swapchain_Extent(), Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_camera_data_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        m_camera_data_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Camera::GPU_Camera_Data), true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                                                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                                                                                Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
         m_voxel_buffer_identifier
-            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Object_Manager::GPU_Voxel), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Object_Manager::GPU_Voxel), true, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_hit_buffer_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        m_hit_buffer_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4, true, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                                                                               Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE);
-        m_staging_buffer_identifier
-            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("staging_buffer", 0, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+
+        m_vulkan_graphics_ptr->Create_Staging_Buffer();
 
         m_swapchain_resource_grouping_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("swapchain_resource_grouping", m_swapchain_image_identifiers);
         m_render_compute_resource_grouping_identifier
@@ -60,6 +63,7 @@ namespace Cascade_Graphics
 
         LOG_DEBUG << "Graphics: Finished creating renderer";
 
+        m_vulkan_graphics_ptr->m_vulkan_objects_access = true;
         m_renderer_initialized = true;
         m_vulkan_graphics_ptr->m_vulkan_object_access_notify.notify_all();
     }
@@ -122,7 +126,6 @@ namespace Cascade_Graphics
         m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Buffer(m_camera_data_identifier);
         m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Buffer(m_voxel_buffer_identifier);
         m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Buffer(m_hit_buffer_identifier);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Destroy_Buffer(m_staging_buffer_identifier);
         m_vulkan_graphics_ptr->m_storage_manager_ptr->Remove_Resource_Grouping(m_swapchain_resource_grouping_identifier);
         m_vulkan_graphics_ptr->m_storage_manager_ptr->Remove_Resource_Grouping(m_render_compute_resource_grouping_identifier);
 
@@ -149,20 +152,21 @@ namespace Cascade_Graphics
             m_swapchain_image_identifiers.push_back(m_vulkan_graphics_ptr->m_storage_manager_ptr->Add_Image("swapchain", swapchain_image_resources[i]));
         }
 
+        m_vulkan_graphics_ptr->Destroy_Staging_Buffer();
+
         m_render_target_image_identifier
             = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Image("render_target", swapchain_image_resources.front().image_format, VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                                          m_swapchain_wrapper_ptr->Get_Swapchain_Extent(), Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_camera_data_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Camera::GPU_Camera_Data), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        m_camera_data_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("camera_data", sizeof(Camera::GPU_Camera_Data), true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                                                                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                                                                                Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
         m_voxel_buffer_identifier
-            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Object_Manager::GPU_Voxel) * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        m_hit_buffer_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4 * gpu_voxels.size(), VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("voxel_buffer", sizeof(Object_Manager::GPU_Voxel) * gpu_voxels.size(), true, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+                                                                          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        m_hit_buffer_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("hit_buffer", sizeof(uint32_t) * 4 * gpu_voxels.size(), true, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                                                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE);
-        m_staging_buffer_identifier
-            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("staging_buffer", 0, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+
+        m_vulkan_graphics_ptr->Create_Staging_Buffer();
 
         m_swapchain_resource_grouping_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("swapchain_resource_grouping", m_swapchain_image_identifiers);
         m_render_compute_resource_grouping_identifier
@@ -172,7 +176,8 @@ namespace Cascade_Graphics
         m_render_pipeline_identifier = m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("render_pipeline", m_render_compute_descriptor_set_identifier, m_render_shader_identifier);
         Record_Command_Buffers();
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_identifier, m_staging_buffer_identifier, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), m_vulkan_graphics_ptr);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_identifier, m_vulkan_graphics_ptr->m_staging_buffer_identifier, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(),
+                                                                               m_vulkan_graphics_ptr);
 
         m_image_available_semaphore_identifier = m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Create_Semaphore("image_available_semaphore");
         m_render_finished_semaphore_identifier = m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Create_Semaphore("render_finished_semaphore");
@@ -182,7 +187,9 @@ namespace Cascade_Graphics
     void Renderer::Render_Frame()
     {
         std::unique_lock<std::mutex> vulkan_object_access_lock(m_vulkan_graphics_ptr->m_vulkan_objects_access_mutex);
-        m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_rendering_active; });
+        m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_rendering_active && m_vulkan_graphics_ptr->m_vulkan_objects_access; });
+
+        m_vulkan_graphics_ptr->m_vulkan_objects_access = false;
 
         vkWaitForFences(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device(), 1, m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Get_Fence(m_in_flight_fence_identifier), VK_TRUE, UINT64_MAX);
         vkResetFences(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device(), 1, m_vulkan_graphics_ptr->m_synchronization_manager_ptr->Get_Fence(m_in_flight_fence_identifier));
@@ -196,6 +203,7 @@ namespace Cascade_Graphics
             LOG_DEBUG << "Vulkan: Swapchain out of date";
             Recreate_Swapchain();
 
+            m_vulkan_graphics_ptr->m_vulkan_objects_access = true;
             return;
         }
         else
@@ -241,18 +249,23 @@ namespace Cascade_Graphics
             LOG_DEBUG << "Vulkan: Swapchain out of date or suboptimal";
             Recreate_Swapchain();
 
+            m_vulkan_graphics_ptr->m_vulkan_objects_access = true;
             return;
         }
         else
         {
             VALIDATE_VKRESULT(acquire_next_image_result, "Vulkan: Failed to present swapchain image");
         }
+
+        m_vulkan_graphics_ptr->m_vulkan_objects_access = true;
     }
 
     void Renderer::Update_Voxels()
     {
         std::unique_lock<std::mutex> vulkan_object_access_lock(m_vulkan_graphics_ptr->m_vulkan_objects_access_mutex);
-        m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_renderer_initialized; });
+        m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_renderer_initialized && m_vulkan_graphics_ptr->m_vulkan_objects_access; });
+
+        m_vulkan_graphics_ptr->m_vulkan_objects_access = false;
 
         VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device()), "Graphics: Failed to wait for device idle");
 
@@ -279,7 +292,10 @@ namespace Cascade_Graphics
             Record_Command_Buffers();
         }
 
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_identifier, m_staging_buffer_identifier, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(), m_vulkan_graphics_ptr);
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Upload_To_Buffer_Staging(m_voxel_buffer_identifier, m_vulkan_graphics_ptr->m_staging_buffer_identifier, gpu_voxels.data(), sizeof(Cascade_Graphics::Object_Manager::GPU_Voxel) * gpu_voxels.size(),
+                                                                               m_vulkan_graphics_ptr);
+
+        m_vulkan_graphics_ptr->m_vulkan_objects_access = true;
     }
 
     void Renderer::Start_Rendering()

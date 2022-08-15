@@ -34,8 +34,11 @@ namespace Cascade_Graphics
             ~Vulkan_Graphics();
 
         public:
+            bool m_vulkan_objects_access = false;
             std::mutex m_vulkan_objects_access_mutex;
             std::condition_variable m_vulkan_object_access_notify;
+
+            Identifier m_staging_buffer_identifier;
 
             std::shared_ptr<Command_Buffer_Manager> m_command_buffer_manager_ptr;
             std::shared_ptr<Descriptor_Set_Manager> m_descriptor_set_manager_ptr;
@@ -50,6 +53,9 @@ namespace Cascade_Graphics
             std::shared_ptr<Validation_Layer_Wrapper> m_validation_layer_manager_ptr;
 
         public:
+            void Create_Staging_Buffer();
+            void Destroy_Staging_Buffer();
+
             bool Is_Vulkan_Initialized();
         };
     } // namespace Vulkan_Backend
