@@ -11,7 +11,7 @@ namespace Cascade_Graphics
     {
     }
 
-    void Object_Manager::Generate_Density_Field(uint32_t max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::vector<Sample_Data>* density_field)
+    void Object_Manager::Generate_Density_Field(uint32_t max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::vector<Density_Data>* density_field)
     {
         std::unique_lock<std::mutex> vulkan_object_access_lock(m_vulkan_graphics_ptr->m_vulkan_objects_access_mutex);
         m_vulkan_graphics_ptr->m_vulkan_object_access_notify.wait(vulkan_object_access_lock, [&] { return m_vulkan_graphics_ptr->Is_Vulkan_Initialized() && m_vulkan_graphics_ptr->m_vulkan_objects_access; });
@@ -41,13 +41,15 @@ namespace Cascade_Graphics
         density_field_data.start_z = sample_region_center.m_z - sample_region_size;
         density_field_data.sample_count = (1 << max_depth) + 1;
 
+        density_field->resize((uint32_t)(std::ceil(density_field_data.sample_count * density_field_data.sample_count * density_field_data.sample_count / 4.0)));
+
         m_vulkan_graphics_ptr->Destroy_Staging_Buffer();
         Vulkan_Backend::Identifier density_field_data_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer(
             "density_field_data_buffer", sizeof(Density_Field_Data), true, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
-        Vulkan_Backend::Identifier density_field_buffer_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer(
-            "density_field_buffer", sizeof(Sample_Data) * density_field_data.sample_count * density_field_data.sample_count * density_field_data.sample_count, true, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-            VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
+        Vulkan_Backend::Identifier density_field_buffer_identifier
+            = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Buffer("density_field_buffer", sizeof(float) * 4 * density_field->size(), true, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                                                          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, Vulkan_Backend::Queue_Manager::COMPUTE_QUEUE | Vulkan_Backend::Queue_Manager::TRANSFER_QUEUE);
         m_vulkan_graphics_ptr->Create_Staging_Buffer();
 
         Vulkan_Backend::Identifier resource_grouping_identifier = m_vulkan_graphics_ptr->m_storage_manager_ptr->Create_Resource_Grouping("density_field_resource_grouping", {density_field_data_identifier, density_field_buffer_identifier});
@@ -86,8 +88,7 @@ namespace Cascade_Graphics
                           "Graphics: Failed to submit density sample command buffer to queue");
         VALIDATE_VKRESULT(vkDeviceWaitIdle(*m_vulkan_graphics_ptr->m_logical_device_wrapper_ptr->Get_Device()), "Graphics: Failed to wait for device idle");
 
-        density_field->resize(density_field_data.sample_count * density_field_data.sample_count * density_field_data.sample_count);
-        m_vulkan_graphics_ptr->m_storage_manager_ptr->Download_From_Buffer_Staging(density_field_buffer_identifier, m_vulkan_graphics_ptr->m_staging_buffer_identifier, density_field->data(), sizeof(Sample_Data) * density_field->size(),
+        m_vulkan_graphics_ptr->m_storage_manager_ptr->Download_From_Buffer_Staging(density_field_buffer_identifier, m_vulkan_graphics_ptr->m_staging_buffer_identifier, density_field->data(), sizeof(Density_Data) * density_field->size(),
                                                                                    m_vulkan_graphics_ptr);
 
 
@@ -96,7 +97,7 @@ namespace Cascade_Graphics
 
     void Object_Manager::Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
                                                                    std::vector<uint32_t> step_count_lookup_table,
-                                                                   std::vector<Sample_Data>* densities_ptr,
+                                                                   std::vector<Density_Data>* densities_ptr,
                                                                    double step_size,
                                                                    uint32_t worker_index,
                                                                    std::function<double(Vector_3<double>)> volume_sample_function,
@@ -172,7 +173,22 @@ namespace Cascade_Graphics
                         {
                             for (uint32_t k = child_voxel.start_index.m_z; k <= step_count_lookup_table[child_voxel.depth] + child_voxel.start_index.m_z; k++)
                             {
-                                sample = (*densities_ptr)[i + ((step_count_lookup_table[0] + 1) * j) + ((step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1) * k)].density < 0.0;
+                                if (k % 4 == 0)
+                                {
+                                    sample = (*densities_ptr)[i + ((step_count_lookup_table[0] + 1) * j) + ((step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1) * std::floor(k / 4.0))].density_a < 0.0;
+                                }
+                                else if (k % 4 == 1)
+                                {
+                                    sample = (*densities_ptr)[i + ((step_count_lookup_table[0] + 1) * j) + ((step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1) * std::floor(k / 4.0))].density_b < 0.0;
+                                }
+                                else if (k % 4 == 2)
+                                {
+                                    sample = (*densities_ptr)[i + ((step_count_lookup_table[0] + 1) * j) + ((step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1) * std::floor(k / 4.0))].density_c < 0.0;
+                                }
+                                else if (k % 4 == 3)
+                                {
+                                    sample = (*densities_ptr)[i + ((step_count_lookup_table[0] + 1) * j) + ((step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1) * std::floor(k / 4.0))].density_d < 0.0;
+                                }
 
                                 is_fully_contained = is_fully_contained && sample;
                                 is_intersecting = is_intersecting || sample;
@@ -215,18 +231,11 @@ namespace Cascade_Graphics
                         child_voxel.miss_links[6] = current_voxel.miss_links[6];
                         child_voxel.miss_links[7] = current_voxel.miss_links[7];
 
-                        // double center_density = volume_sample_function(child_voxel.position);
-                        // double x_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.00001, 0.0, 0.0));
-                        // double y_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.00001, 0.0));
-                        // double z_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.0, 0.00001));
-                        // child_voxel.normal = (Vector_3<double>(center_density, center_density, center_density) - Vector_3<double>(x_density, y_density, z_density)).Normalized();
-                        Sample_Data sample_data
-                            = (*densities_ptr)[(child_voxel.start_index.m_x + step_count_lookup_table[child_voxel.depth] / 2) + ((child_voxel.start_index.m_y + step_count_lookup_table[child_voxel.depth] / 2) * (step_count_lookup_table[0] + 1))
-                                               + ((child_voxel.start_index.m_z + step_count_lookup_table[child_voxel.depth] / 2) * (step_count_lookup_table[0] + 1) * (step_count_lookup_table[0] + 1))];
-
-                        child_voxel.normal.m_x = sample_data.normal_x;
-                        child_voxel.normal.m_y = sample_data.normal_y;
-                        child_voxel.normal.m_z = sample_data.normal_z;
+                        double center_density = volume_sample_function(child_voxel.position);
+                        double x_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.00001, 0.0, 0.0));
+                        double y_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.00001, 0.0));
+                        double z_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.0, 0.00001));
+                        child_voxel.normal = (Vector_3<double>(center_density, center_density, center_density) - Vector_3<double>(x_density, y_density, z_density)).Normalized();
 
                         child_voxel.color = color_sample_function(child_voxel.position, child_voxel.normal);
                         child_voxel.is_leaf = child_voxel.depth == max_depth;
@@ -443,8 +452,10 @@ namespace Cascade_Graphics
 
         // LOG_DEBUG << "Generated densities";
 
-        std::vector<Sample_Data> densities;
+        std::vector<Density_Data> densities;
         Generate_Density_Field(max_depth, sample_region_center, sample_region_size, &densities);
+
+        LOG_DEBUG << "Graphics: Generated density field";
 
         static const uint32_t WORKER_THREAD_COUNT = 32;
 

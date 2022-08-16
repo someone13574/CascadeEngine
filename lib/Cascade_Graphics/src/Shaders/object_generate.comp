@@ -19,18 +19,9 @@ layout (binding = 0) uniform Field_Data
     uint padding_c;
 } field_data;
 
-struct Density_Data
-{
-    float density;
-
-    float normal_x;
-    float normal_y;
-    float normal_z;
-};
-
 layout(std140, binding = 1) buffer density_field
 {
-    Density_Data densities[];
+    vec4 densities[];
 };
 
 // functions
@@ -45,12 +36,12 @@ float Sample_Density(vec3 sample_position)
     return position_length - 1.8 + noise_a + noise_b;
 }
 
-uint Get_Output_Indices(ivec3 sample_index)
+ivec2 Get_Output_Indices(ivec3 sample_index)
 {
-    uint major_index = gl_GlobalInvocationID.x + (gl_GlobalInvocationID.y * field_data.sample_count) + (gl_GlobalInvocationID.z * field_data.sample_count * field_data.sample_count);
-    //uint minor_index = sample_index.z % 4;
+    uint major_index = gl_GlobalInvocationID.x + (gl_GlobalInvocationID.y * field_data.sample_count) + (uint(floor(gl_GlobalInvocationID.z / 4.0)) * field_data.sample_count * field_data.sample_count);
+    uint minor_index = gl_GlobalInvocationID.z % 4;
 
-    return major_index;
+    return ivec2(major_index, minor_index);
 }
 
 // kernel
@@ -59,16 +50,7 @@ void main()
     vec3 sample_position = vec3(field_data.start_x, field_data.start_y, field_data.start_z) + (vec3(gl_GlobalInvocationID.xyz) * field_data.step_size);
 
     float center_density = Sample_Density(sample_position);
-    float x_density = Sample_Density(sample_position - vec3(0.00001, 0.0, 0.0));
-    float y_density = Sample_Density(sample_position - vec3(0.0, 0.00001, 0.0));
-    float z_density = Sample_Density(sample_position - vec3(0.0, 0.0, 0.00001));
 
-    vec3 normal = normalize(vec3(center_density) - vec3(x_density, y_density, z_density));
-
-    uint index = Get_Output_Indices(ivec3(gl_GlobalInvocationID.xyz));
-
-    densities[index].density = center_density;
-    densities[index].normal_x = normal.x;
-    densities[index].normal_y = normal.y;
-    densities[index].normal_z = normal.z;
+    ivec2 index = Get_Output_Indices(ivec3(gl_GlobalInvocationID.xyz));
+    densities[index.x][index.y] = center_density;
 }

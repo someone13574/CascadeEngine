@@ -58,18 +58,18 @@ namespace Cascade_Graphics
             bool is_leaf;
         };
 
-        struct Sample_Data
-        {
-            float density;
-            float normal_x;
-            float normal_y;
-            float normal_z;
-        };
-
         struct Object
         {
             std::string label;
             std::vector<Voxel> voxels;
+        };
+
+        struct Density_Data
+        {
+            float density_a;
+            float density_b;
+            float density_c;
+            float density_d;
         };
 
     private:
@@ -78,11 +78,11 @@ namespace Cascade_Graphics
         std::shared_ptr<Vulkan_Backend::Vulkan_Graphics> m_vulkan_graphics_ptr;
 
     private:
-        void Generate_Density_Field(uint32_t max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::vector<Sample_Data>* density_field);
+        void Generate_Density_Field(uint32_t max_depth, Vector_3<double> sample_region_center, double sample_region_size, std::vector<Density_Data>* density_field);
 
         static void Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
                                                               std::vector<uint32_t> step_count_lookup_table,
-                                                              std::vector<Sample_Data>* densities_ptr,
+                                                              std::vector<Density_Data>* densities_ptr,
                                                               double step_size,
                                                               uint32_t worker_index,
                                                               std::function<double(Vector_3<double>)> volume_sample_function,
