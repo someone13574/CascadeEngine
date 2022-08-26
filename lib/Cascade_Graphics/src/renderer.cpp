@@ -247,6 +247,12 @@ namespace Cascade_Graphics
         {
             VALIDATE_VKRESULT(acquire_next_image_result, "Vulkan: Failed to present swapchain image");
         }
+
+#ifdef CSD_LOG_FPS
+        std::chrono::time_point<std::chrono::high_resolution_clock> now = std::chrono::high_resolution_clock::now();
+        LOG_TRACE << "Graphics: FPS    " << 1000000000.0 / (now - m_previous_present).count();
+        m_previous_present = now;
+#endif
     }
 
     void Renderer::Update_Voxels()

@@ -7,6 +7,7 @@
 #include "camera.hpp"
 #include "object_manager.hpp"
 #include "window_information.hpp"
+#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -16,6 +17,10 @@ namespace Cascade_Graphics
     class Renderer
     {
     private:
+#ifdef CSD_LOG_FPS
+        std::chrono::time_point<std::chrono::high_resolution_clock> m_previous_present;
+#endif
+
         uint32_t which_hit_buffer = 0;
 
         bool m_renderer_initialized = false;
