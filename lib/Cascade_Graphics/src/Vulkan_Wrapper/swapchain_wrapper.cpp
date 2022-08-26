@@ -22,8 +22,8 @@ namespace Cascade_Graphics
 
             Select_Swapchain_Image_Format();
             Select_Present_Mode();
-            Select_Swapchain_Image_Extent(width, height);
             Select_Swapchain_Image_Count();
+            Select_Swapchain_Image_Extent(width, height);
 
             Create_Swapchain();
             Create_Swapchain_Images();
@@ -139,6 +139,9 @@ namespace Cascade_Graphics
         void Swapchain_Wrapper::Select_Swapchain_Image_Extent(uint32_t width, uint32_t height)
         {
             LOG_TRACE << "Vulkan Backend: Selecting swapchain image extent";
+
+            VALIDATE_VKRESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*m_physical_device_wrapper_ptr->Get_Physical_Device(), *m_surface_wrapper_ptr->Get_Surface(), &m_surface_capabilities),
+                              "Vulkan Backend: Failed to get physical device surface capabilities");
 
             m_swapchain_extent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
