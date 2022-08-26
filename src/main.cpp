@@ -11,8 +11,8 @@ void Update(Cascade_Core::Application* instance_ptr)
 
     std::shared_ptr<Cascade_Graphics::Camera> camera_ptr = main_window_ptr->Get_Renderer()->m_camera_ptr;
 
-    camera_ptr->Set_Position({std::sin(elapsed_seconds) * 3.9, std::sin(elapsed_seconds * 2.0) * 3.9, std::cos(elapsed_seconds) * 3.9});
-    camera_ptr->Look_At(Cascade_Graphics::Vector_3<double>(std::sin(elapsed_seconds + 0.1) * 3.9, std::sin(elapsed_seconds * 2.0 + 0.1) * 3.9, std::cos(elapsed_seconds + 0.1) * 3.9) / (camera_ptr->Get_Camera_Position().Length()) * 1.8);
+    camera_ptr->Set_Position({std::sin(elapsed_seconds) * 1.9, std::sin(elapsed_seconds * 2.0) * 1.9, std::cos(elapsed_seconds) * 1.9});
+    camera_ptr->Look_At(Cascade_Graphics::Vector_3<double>(std::sin(elapsed_seconds + 0.1) * 1.9, std::sin(elapsed_seconds * 2.0 + 0.1) * 1.9, std::cos(elapsed_seconds + 0.1) * 1.9) / (camera_ptr->Get_Camera_Position().Length()) * 1.8);
     camera_ptr->Set_Up_Direction(camera_ptr->Get_Camera_Position().Normalized());
 }
 
@@ -42,7 +42,7 @@ int main()
     Cascade_Core::Application application({"Test Cascade Application", 0, 5});
     main_window_ptr = application.Create_Window("Main Window", 1920, 1080);
 
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("test", 7, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function);
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("test", 10, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function);
     main_window_ptr->Get_Renderer()->Update_Voxels();
     main_window_ptr->Get_Renderer()->Start_Rendering();
 

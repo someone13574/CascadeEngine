@@ -40,6 +40,7 @@ namespace Cascade_Graphics
         Vulkan_Backend::Identifier m_camera_data_identifier;
         Vulkan_Backend::Identifier m_voxel_buffer_identifier;
         Vulkan_Backend::Identifier m_hit_buffer_identifier;
+        Vulkan_Backend::Identifier m_staging_buffer_identifier;
         std::vector<Vulkan_Backend::Identifier> m_swapchain_image_identifiers;
 
         Window_Information m_window_information;

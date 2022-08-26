@@ -91,7 +91,7 @@ namespace Cascade_Graphics
             ~Storage_Manager();
 
         public:
-            Identifier Create_Buffer(std::string label, VkDeviceSize buffer_size, bool strict_buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask);
+            Identifier Create_Buffer(std::string label, VkDeviceSize buffer_size, VkBufferUsageFlags buffer_usage, VkDescriptorType descriptor_type, VkMemoryPropertyFlags memory_property_flags, uint32_t resource_queue_mask);
             Identifier Create_Image(std::string label, VkFormat image_format, VkImageUsageFlags image_usage, VkDescriptorType descriptor_type, VkExtent2D image_size, uint32_t resource_queue_mask);
             Identifier Create_Resource_Grouping(std::string label, std::vector<Identifier> resource_identifiers);
             Identifier Add_Image(std::string label, Image_Resource image_resource);
@@ -103,7 +103,6 @@ namespace Cascade_Graphics
             void Resize_Buffer(Identifier identifier, VkDeviceSize buffer_size);
             void Upload_To_Buffer_Direct(Identifier identifier, void* data, size_t data_size);
             void Upload_To_Buffer_Staging(Identifier identifier, Identifier staging_buffer_identifier, void* data, size_t data_size, std::shared_ptr<Vulkan_Graphics> vulkan_graphics);
-            void Download_From_Buffer_Staging(Identifier identifier, Identifier staging_buffer_identifier, void* data, size_t data_size, std::shared_ptr<Vulkan_Graphics> vulkan_graphics);
 
             Buffer_Resource* Get_Buffer_Resource(Identifier identifier);
             Image_Resource* Get_Image_Resource(Identifier identifier);

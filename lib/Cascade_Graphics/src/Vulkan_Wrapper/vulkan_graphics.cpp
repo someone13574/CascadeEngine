@@ -28,9 +28,6 @@ namespace Cascade_Graphics
             m_command_buffer_manager_ptr = std::make_shared<Command_Buffer_Manager>(m_descriptor_set_manager_ptr, m_logical_device_wrapper_ptr, m_pipeline_manager_ptr, m_storage_manager_ptr);
             m_synchronization_manager_ptr = std::make_shared<Synchronization_Manager>(m_logical_device_wrapper_ptr);
 
-            Create_Staging_Buffer();
-
-            m_vulkan_objects_access = true;
             m_is_vulkan_initialized = true;
             m_vulkan_object_access_notify.notify_all();
 
@@ -59,17 +56,6 @@ namespace Cascade_Graphics
                 m_validation_layer_manager_ptr.reset();
                 m_instance_wrapper_ptr.reset();
             }
-        }
-
-        void Vulkan_Graphics::Create_Staging_Buffer()
-        {
-            m_staging_buffer_identifier = m_storage_manager_ptr->Create_Buffer("staging_buffer", -1, false, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT, Queue_Manager::TRANSFER_QUEUE);
-        }
-
-        void Vulkan_Graphics::Destroy_Staging_Buffer()
-        {
-            m_storage_manager_ptr->Destroy_Buffer(m_staging_buffer_identifier);
         }
 
         bool Vulkan_Graphics::Is_Vulkan_Initialized()
