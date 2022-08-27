@@ -311,6 +311,8 @@ namespace Cascade_Graphics
         m_objects.emplace_back();
         m_objects.back() = {};
         m_objects.back().label = label;
+        m_objects.back().position = Vector_3<double>(0.0, 0.0, 0.0);
+        m_objects.back().scale = Vector_3<double>(1.0, 1.0, 1.0);
 
         Voxel root_voxel = {};
         root_voxel.size = sample_region_size;
@@ -452,52 +454,87 @@ namespace Cascade_Graphics
             }
         }
 
+        uint32_t root_voxel_index = m_gpu_voxels.size();
+
+        m_gpu_objects.resize(m_gpu_objects.size() + 1);
+
+        m_gpu_objects.back().position_x = m_objects.back().position.m_x;
+        m_gpu_objects.back().position_y = m_objects.back().position.m_y;
+        m_gpu_objects.back().position_z = m_objects.back().position.m_z;
+        m_gpu_objects.back().scale_x = m_objects.back().scale.m_x;
+        m_gpu_objects.back().scale_y = m_objects.back().scale.m_y;
+        m_gpu_objects.back().scale_z = m_objects.back().scale.m_z;
+        m_gpu_objects.back().root_voxel_index = root_voxel_index;
+
+        for (uint32_t i = 0; i < m_objects.back().voxels.size(); i++)
+        {
+            Voxel* current_voxel = &m_objects.back().voxels[i];
+
+            GPU_Voxel gpu_voxel = {};
+            gpu_voxel.position_x = static_cast<float>(current_voxel->position.m_x);
+            gpu_voxel.position_y = static_cast<float>(current_voxel->position.m_y);
+            gpu_voxel.position_z = static_cast<float>(current_voxel->position.m_z);
+            gpu_voxel.size = static_cast<float>(current_voxel->size);
+            gpu_voxel.hit_links[0] = (current_voxel->hit_links[0] == -1) ? -1 : current_voxel->hit_links[0] + root_voxel_index;
+            gpu_voxel.hit_links[1] = (current_voxel->hit_links[1] == -1) ? -1 : current_voxel->hit_links[1] + root_voxel_index;
+            gpu_voxel.hit_links[2] = (current_voxel->hit_links[2] == -1) ? -1 : current_voxel->hit_links[2] + root_voxel_index;
+            gpu_voxel.hit_links[3] = (current_voxel->hit_links[3] == -1) ? -1 : current_voxel->hit_links[3] + root_voxel_index;
+            gpu_voxel.hit_links[4] = (current_voxel->hit_links[4] == -1) ? -1 : current_voxel->hit_links[4] + root_voxel_index;
+            gpu_voxel.hit_links[5] = (current_voxel->hit_links[5] == -1) ? -1 : current_voxel->hit_links[5] + root_voxel_index;
+            gpu_voxel.hit_links[6] = (current_voxel->hit_links[6] == -1) ? -1 : current_voxel->hit_links[6] + root_voxel_index;
+            gpu_voxel.hit_links[7] = (current_voxel->hit_links[7] == -1) ? -1 : current_voxel->hit_links[7] + root_voxel_index;
+            gpu_voxel.miss_links[0] = (current_voxel->miss_links[0] == -1) ? -1 : current_voxel->miss_links[0] + root_voxel_index;
+            gpu_voxel.miss_links[1] = (current_voxel->miss_links[1] == -1) ? -1 : current_voxel->miss_links[1] + root_voxel_index;
+            gpu_voxel.miss_links[2] = (current_voxel->miss_links[2] == -1) ? -1 : current_voxel->miss_links[2] + root_voxel_index;
+            gpu_voxel.miss_links[3] = (current_voxel->miss_links[3] == -1) ? -1 : current_voxel->miss_links[3] + root_voxel_index;
+            gpu_voxel.miss_links[4] = (current_voxel->miss_links[4] == -1) ? -1 : current_voxel->miss_links[4] + root_voxel_index;
+            gpu_voxel.miss_links[5] = (current_voxel->miss_links[5] == -1) ? -1 : current_voxel->miss_links[5] + root_voxel_index;
+            gpu_voxel.miss_links[6] = (current_voxel->miss_links[6] == -1) ? -1 : current_voxel->miss_links[6] + root_voxel_index;
+            gpu_voxel.miss_links[7] = (current_voxel->miss_links[7] == -1) ? -1 : current_voxel->miss_links[7] + root_voxel_index;
+            gpu_voxel.normal_x = static_cast<float>(current_voxel->normal.m_x);
+            gpu_voxel.normal_y = static_cast<float>(current_voxel->normal.m_y);
+            gpu_voxel.normal_z = static_cast<float>(current_voxel->normal.m_z);
+            gpu_voxel.color_r = static_cast<float>(current_voxel->color.m_x);
+            gpu_voxel.color_g = static_cast<float>(current_voxel->color.m_y);
+            gpu_voxel.color_b = static_cast<float>(current_voxel->color.m_z);
+
+            m_gpu_voxels.push_back(gpu_voxel);
+        }
 
         LOG_TRACE << "Graphics: It took " << (float)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count() / 1000.0 << " seconds to generate " << label;
     }
 
-    std::vector<Object_Manager::GPU_Voxel> Object_Manager::Get_GPU_Voxels()
+    Object_Manager::Object* Object_Manager::Get_Object(std::string label)
     {
-        std::vector<GPU_Voxel> gpu_voxels;
-
         for (uint32_t i = 0; i < m_objects.size(); i++)
         {
-            for (uint32_t j = 0; j < m_objects[i].voxels.size(); j++)
+            if (m_objects[i].label == label)
             {
-                Voxel* current_voxel = &m_objects[i].voxels[j];
-
-                GPU_Voxel gpu_voxel = {};
-                gpu_voxel.position_x = static_cast<float>(current_voxel->position.m_x);
-                gpu_voxel.position_y = static_cast<float>(current_voxel->position.m_y);
-                gpu_voxel.position_z = static_cast<float>(current_voxel->position.m_z);
-                gpu_voxel.size = static_cast<float>(current_voxel->size);
-                gpu_voxel.hit_links[0] = current_voxel->hit_links[0];
-                gpu_voxel.hit_links[1] = current_voxel->hit_links[1];
-                gpu_voxel.hit_links[2] = current_voxel->hit_links[2];
-                gpu_voxel.hit_links[3] = current_voxel->hit_links[3];
-                gpu_voxel.hit_links[4] = current_voxel->hit_links[4];
-                gpu_voxel.hit_links[5] = current_voxel->hit_links[5];
-                gpu_voxel.hit_links[6] = current_voxel->hit_links[6];
-                gpu_voxel.hit_links[7] = current_voxel->hit_links[7];
-                gpu_voxel.miss_links[0] = current_voxel->miss_links[0];
-                gpu_voxel.miss_links[1] = current_voxel->miss_links[1];
-                gpu_voxel.miss_links[2] = current_voxel->miss_links[2];
-                gpu_voxel.miss_links[3] = current_voxel->miss_links[3];
-                gpu_voxel.miss_links[4] = current_voxel->miss_links[4];
-                gpu_voxel.miss_links[5] = current_voxel->miss_links[5];
-                gpu_voxel.miss_links[6] = current_voxel->miss_links[6];
-                gpu_voxel.miss_links[7] = current_voxel->miss_links[7];
-                gpu_voxel.normal_x = static_cast<float>(current_voxel->normal.m_x);
-                gpu_voxel.normal_y = static_cast<float>(current_voxel->normal.m_y);
-                gpu_voxel.normal_z = static_cast<float>(current_voxel->normal.m_z);
-                gpu_voxel.color_r = static_cast<float>(current_voxel->color.m_x);
-                gpu_voxel.color_g = static_cast<float>(current_voxel->color.m_y);
-                gpu_voxel.color_b = static_cast<float>(current_voxel->color.m_z);
-
-                gpu_voxels.push_back(gpu_voxel);
+                return &m_objects[i];
             }
         }
 
-        return gpu_voxels;
+        LOG_ERROR << "Graphics: No object with the label " << label << " exists";
+        exit(EXIT_FAILURE);
+    }
+
+    std::vector<Object_Manager::GPU_Object> Object_Manager::Get_GPU_Objects()
+    {
+        for (uint32_t i = 0; i < m_objects.size(); i++)
+        {
+            m_gpu_objects[i].position_x = m_objects[i].position.m_x;
+            m_gpu_objects[i].position_y = m_objects[i].position.m_y;
+            m_gpu_objects[i].position_z = m_objects[i].position.m_z;
+            m_gpu_objects[i].scale_x = m_objects[i].scale.m_x;
+            m_gpu_objects[i].scale_y = m_objects[i].scale.m_y;
+            m_gpu_objects[i].scale_z = m_objects[i].scale.m_z;
+        }
+
+        return m_gpu_objects;
+    }
+
+    std::vector<Object_Manager::GPU_Voxel> Object_Manager::Get_GPU_Voxels()
+    {
+        return m_gpu_voxels;
     }
 } // namespace Cascade_Graphics

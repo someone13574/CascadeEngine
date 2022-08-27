@@ -7,6 +7,7 @@
 #include <queue>
 #include <stack>
 #include <string>
+#include <utility>
 #include <vector>
 
 
@@ -37,6 +38,21 @@ namespace Cascade_Graphics
             uint32_t padding_b;
         };
 
+        struct GPU_Object
+        {
+            float position_x;
+            float position_y;
+            float position_z;
+
+            float scale_x;
+            float scale_y;
+            float scale_z;
+
+            uint32_t root_voxel_index;
+
+            uint32_t padding;
+        };
+
     private:
         struct Voxel
         {
@@ -58,11 +74,16 @@ namespace Cascade_Graphics
         struct Object
         {
             std::string label;
+
+            Vector_3<double> position;
+            Vector_3<double> scale;
             std::vector<Voxel> voxels;
         };
 
     private:
         std::vector<Object> m_objects;
+        std::vector<GPU_Object> m_gpu_objects;
+        std::vector<GPU_Voxel> m_gpu_voxels;
 
     private:
         static void
@@ -101,6 +122,8 @@ namespace Cascade_Graphics
                                                 std::function<double(Vector_3<double>)> volume_sample_function,
                                                 std::function<Vector_3<double>(Vector_3<double>, Vector_3<double>)> color_sample_function);
 
+        Object* Get_Object(std::string label);
+        std::vector<GPU_Object> Get_GPU_Objects();
         std::vector<GPU_Voxel> Get_GPU_Voxels();
     };
 } // namespace Cascade_Graphics

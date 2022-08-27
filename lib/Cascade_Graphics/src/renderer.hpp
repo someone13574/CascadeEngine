@@ -43,6 +43,7 @@ namespace Cascade_Graphics
 
         Vulkan_Backend::Identifier m_render_target_image_identifier;
         Vulkan_Backend::Identifier m_camera_data_identifier;
+        Vulkan_Backend::Identifier m_object_buffer_identifier;
         Vulkan_Backend::Identifier m_voxel_buffer_identifier;
         Vulkan_Backend::Identifier m_hit_buffer_identifier;
         Vulkan_Backend::Identifier m_staging_buffer_identifier;
@@ -65,6 +66,7 @@ namespace Cascade_Graphics
 
     public:
         void Render_Frame();
+        void Update_Objects();
         void Update_Voxels();
         void Start_Rendering();
     };

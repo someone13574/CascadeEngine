@@ -3,7 +3,7 @@
 layout(local_size_x = 32, local_size_y = 32) in;
 
 // bindings
-layout(binding = 3, rgba8) uniform image2D render_target;
+layout(binding = 4, rgba8) uniform image2D render_target;
 
 layout(binding = 0) uniform Camera_Data
 {
@@ -28,6 +28,26 @@ layout(binding = 0) uniform Camera_Data
     uint pc;
 } camera_data;
 
+struct Object
+{
+    float position_x;
+    float position_y;
+    float position_z;
+
+    float scale_x;
+    float scale_y;
+    float scale_z;
+
+    uint root_voxel_index;
+
+    uint padding;
+};
+
+layout(std140, binding = 1) buffer object_buffer
+{
+    Object objects[];
+};
+
 struct Voxel
 {
     float x;
@@ -49,17 +69,17 @@ struct Voxel
     uint padding_b;
 };
 
-layout(std140, binding = 1) buffer voxel_buffer
+layout(std140, binding = 2) buffer voxel_buffer
 {
     Voxel voxels[];
 };
 
-layout(std140, binding = 2) buffer hit_buffer
+layout(std140, binding = 3) buffer hit_buffer
 {
     ivec4 hit_counts[];
 };
 
-bool Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, vec3 box_size)
+float Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, vec3 box_size)
 {
     vec3 t0 = (-box_size - ray_origin) * fractional_ray_direction;
     vec3 t1 = (box_size - ray_origin) * fractional_ray_direction;
@@ -70,7 +90,148 @@ bool Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, vec3 b
     float min_component = min(min(tmax.x, tmax.y), tmax.z);
     float max_component = max(max(tmin.x, tmin.y), tmin.z);
 
-    return max_component <= min_component && min_component >= 0.0;
+    if (max_component > min_component || min_component < 0.0)
+    {
+        return -1.0;
+    }
+    else
+    {
+        return min_component;
+    }
+
+    // return max_component <= min_component && min_component >= 0.0;
+}
+
+void Intersect_Scene(vec3 ray_origin, vec3 ray_direction, out vec3 color, out vec3 normal, out float hit_distance)
+{
+    uint iteration = 0;
+
+    color = vec3(0.0, 0.0, 0.0);
+    normal = vec3(0.0, 0.0, 0.0);
+    hit_distance = 1.0 / 0.0;
+
+    for (uint object_index = 0; object_index < objects.length(); object_index++)
+    {
+        vec3 transformed_ray_origin = ray_origin - vec3(objects[object_index].position_x, objects[object_index].position_y, objects[object_index].position_z);
+        transformed_ray_origin /= vec3(objects[object_index].scale_x, objects[object_index].scale_y, objects[object_index].scale_z);
+        vec3 transformed_ray_direction = ray_direction / vec3(objects[object_index].scale_x, objects[object_index].scale_y, objects[object_index].scale_z);
+
+        vec3 fractional_ray_direction = 1.0 / transformed_ray_direction;
+
+        uint direction_index_low = uint(transformed_ray_direction.x < 0.0) | (uint(transformed_ray_direction.y < 0.0) << 1);
+        uint direction_index_high = uint(transformed_ray_direction.z < 0.0);
+
+        uint current_index = objects[object_index].root_voxel_index;
+        while (iteration < 1000000)
+        {
+            iteration++;
+
+            Voxel current_voxel = voxels[current_index];
+
+            float dst = Ray_Box_Intersection(transformed_ray_origin - vec3(current_voxel.x, current_voxel.y, current_voxel.z), fractional_ray_direction, vec3(current_voxel.size));
+
+            if (dst > 0.0)
+            {
+                //
+                if (dot(vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), transformed_ray_direction) > -0.3)
+                {
+                    if (camera_data.which_hit_buffer == 0)
+                    {
+                        atomicAdd(hit_counts[current_index].x, 50);
+                        atomicAnd(hit_counts[current_index].y, 0);
+                    }
+                    else if (camera_data.which_hit_buffer == 1)
+                    {
+                        atomicAdd(hit_counts[current_index].y, 50);
+                        atomicAnd(hit_counts[current_index].z, 0);
+                        hit_counts[current_index].w = 0;
+                    }
+                    else if (camera_data.which_hit_buffer == 2)
+                    {
+                        atomicAdd(hit_counts[current_index].z, 50);
+                        atomicAnd(hit_counts[current_index].w, 0);
+                        hit_counts[current_index].x = 0;
+                    }
+                    else if (camera_data.which_hit_buffer == 3)
+                    {
+                        atomicAdd(hit_counts[current_index].w, 50);
+                        atomicAnd(hit_counts[current_index].x, 0);
+                    }
+                }
+                else
+                {
+                    if (camera_data.which_hit_buffer == 0)
+                    {
+                        atomicAdd(hit_counts[current_index].x, 1);
+                        atomicAnd(hit_counts[current_index].y, 0);
+                    }
+                    else if (camera_data.which_hit_buffer == 1)
+                    {
+                        atomicAdd(hit_counts[current_index].y, 1);
+                        atomicAnd(hit_counts[current_index].z, 0);
+                        hit_counts[current_index].w = 0;
+                    }
+                    else if (camera_data.which_hit_buffer == 2)
+                    {
+                        atomicAdd(hit_counts[current_index].z, 1);
+                        atomicAnd(hit_counts[current_index].w, 0);
+                        hit_counts[current_index].x = 0;
+                    }
+                    else if (camera_data.which_hit_buffer == 3)
+                    {
+                        atomicAdd(hit_counts[current_index].w, 1);
+                        atomicAnd(hit_counts[current_index].x, 0);
+                    }
+                }
+                //
+
+                uint temp = floatBitsToUint(current_voxel.links[direction_index_high][direction_index_low]);
+
+                uint hits = 0;
+
+                if (camera_data.which_hit_buffer == 0)
+                {
+                    hits = hit_counts[current_index].w;
+                }
+                else if (camera_data.which_hit_buffer == 1)
+                {
+                    hits = hit_counts[current_index].x;
+                }
+                else if (camera_data.which_hit_buffer == 2)
+                {
+                    hits = hit_counts[current_index].y;
+                }
+                else if (camera_data.which_hit_buffer == 3)
+                {
+                    hits = hit_counts[current_index].z;
+                }
+
+                if (temp == -1 || hits < 8)
+                {
+                    if (dst < hit_distance)
+                    {
+                        normal = vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z);
+                        color = vec3(current_voxel.color_r, current_voxel.color_g, current_voxel.color_b);
+                        hit_distance = dst;
+                    }
+                    break;
+                }
+                else
+                {
+                    current_index = temp;
+                }
+            }
+            else
+            {
+                current_index = floatBitsToUint(current_voxel.links[2 + direction_index_high][direction_index_low]);
+
+                if (current_index == -1)
+                {
+                    break;
+                }
+            }
+        }
+    }
 }
 
 // code
@@ -81,121 +242,12 @@ void main()
 
     vec3 ray_origin = vec3(camera_data.origin_x, camera_data.origin_y, camera_data.origin_z);
     vec3 ray_direction = normalize(vec3(uv.x, -uv.y, 1.0) * mat3x3(camera_data.matrix_x0, camera_data.matrix_x1, camera_data.matrix_x2, camera_data.matrix_y0, camera_data.matrix_y1, camera_data.matrix_y2, camera_data.matrix_z0, camera_data.matrix_z1, camera_data.matrix_z2));
-    vec3 fractional_ray_direction = 1.0 / ray_direction;
 
-    uint direction_index_low = uint(ray_direction.x < 0.0) | (uint(ray_direction.y < 0.0) << 1);
-    uint direction_index_high = uint(ray_direction.z < 0.0);
-
-    vec3 normal = vec3(0);
-    vec3 color = vec3(0);
-
-    uint current_index = 0;
-
-    uint iteration = 0;
-    while (iteration < 1000000000)
-    {
-        iteration++;
-
-        Voxel current_voxel = voxels[current_index];
-
-        if (Ray_Box_Intersection(ray_origin - vec3(current_voxel.x, current_voxel.y, current_voxel.z), fractional_ray_direction, vec3(current_voxel.size)))
-        {
-            //
-            if (dot(vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), ray_direction) > -0.3)
-            {
-                if (camera_data.which_hit_buffer == 0)
-                {
-                    atomicAdd(hit_counts[current_index].x, 50);
-                    atomicAnd(hit_counts[current_index].y, 0);
-                }
-                else if (camera_data.which_hit_buffer == 1)
-                {
-                    atomicAdd(hit_counts[current_index].y, 50);
-                    atomicAnd(hit_counts[current_index].z, 0);
-                    hit_counts[current_index].w = 0;
-                }
-                else if (camera_data.which_hit_buffer == 2)
-                {
-                    atomicAdd(hit_counts[current_index].z, 50);
-                    atomicAnd(hit_counts[current_index].w, 0);
-                    hit_counts[current_index].x = 0;
-                }
-                else if (camera_data.which_hit_buffer == 3)
-                {
-                    atomicAdd(hit_counts[current_index].w, 50);
-                    atomicAnd(hit_counts[current_index].x, 0);
-                }
-            }
-            else
-            {
-                if (camera_data.which_hit_buffer == 0)
-                {
-                    atomicAdd(hit_counts[current_index].x, 1);
-                    atomicAnd(hit_counts[current_index].y, 0);
-                }
-                else if (camera_data.which_hit_buffer == 1)
-                {
-                    atomicAdd(hit_counts[current_index].y, 1);
-                    atomicAnd(hit_counts[current_index].z, 0);
-                    hit_counts[current_index].w = 0;
-                }
-                else if (camera_data.which_hit_buffer == 2)
-                {
-                    atomicAdd(hit_counts[current_index].z, 1);
-                    atomicAnd(hit_counts[current_index].w, 0);
-                    hit_counts[current_index].x = 0;
-                }
-                else if (camera_data.which_hit_buffer == 3)
-                {
-                    atomicAdd(hit_counts[current_index].w, 1);
-                    atomicAnd(hit_counts[current_index].x, 0);
-                }
-            }
-            //
-
-            uint temp = floatBitsToUint(current_voxel.links[direction_index_high][direction_index_low]);
-
-            uint hits = 0;
-
-            if (camera_data.which_hit_buffer == 0)
-            {
-                hits = hit_counts[current_index].w;
-            }
-            else if (camera_data.which_hit_buffer == 1)
-            {
-                hits = hit_counts[current_index].x;
-            }
-            else if (camera_data.which_hit_buffer == 2)
-            {
-                hits = hit_counts[current_index].y;
-            }
-            else if (camera_data.which_hit_buffer == 3)
-            {
-                hits = hit_counts[current_index].z;
-            }
-
-            if (temp == -1 || hits < 8)
-            {
-                normal = vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z);
-                color = vec3(current_voxel.color_r, current_voxel.color_g, current_voxel.color_b);
-                break;
-            }
-            else
-            {
-                current_index = temp;
-            }
-        }
-        else
-        {
-            current_index = floatBitsToUint(current_voxel.links[2 + direction_index_high][direction_index_low]);
-
-            if (current_index == -1)
-            {
-                imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(0.0, 0.0, 0.0, 1.0));
-                return;
-            }
-        }
-    }
+    vec3 normal = vec3(0.0, 0.0, 0.0);
+    vec3 color = vec3(0.0, 0.0, 0.0);
+    float hit_distance = 0.0;
+    Intersect_Scene(ray_origin, ray_direction, color, normal, hit_distance);
 
     imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(color * max(dot(normal, normalize(vec3(1.0, 1.0, 0.0))), 0.25), 1.0));
+    //imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(hit_distance / 5.0, 0.0, 0.0, 1.0));
 }
