@@ -464,6 +464,9 @@ namespace Cascade_Graphics
         m_gpu_objects.back().scale_x = m_objects.back().scale.m_x;
         m_gpu_objects.back().scale_y = m_objects.back().scale.m_y;
         m_gpu_objects.back().scale_z = m_objects.back().scale.m_z;
+        m_gpu_objects.back().rotation_x = m_objects.back().rotation.m_x;
+        m_gpu_objects.back().rotation_y = m_objects.back().rotation.m_y;
+        m_gpu_objects.back().rotation_z = m_objects.back().rotation.m_z;
         m_gpu_objects.back().root_voxel_index = root_voxel_index;
 
         for (uint32_t i = 0; i < m_objects.back().voxels.size(); i++)
@@ -528,6 +531,9 @@ namespace Cascade_Graphics
             m_gpu_objects[i].scale_x = m_objects[i].scale.m_x;
             m_gpu_objects[i].scale_y = m_objects[i].scale.m_y;
             m_gpu_objects[i].scale_z = m_objects[i].scale.m_z;
+            m_gpu_objects[i].rotation_x = m_objects[i].rotation.m_x;
+            m_gpu_objects[i].rotation_y = m_objects[i].rotation.m_y;
+            m_gpu_objects[i].rotation_z = m_objects[i].rotation.m_z;
         }
 
         return m_gpu_objects;

@@ -29,6 +29,11 @@ double Volume_Sample_Function(Cascade_Graphics::Vector_3<double> position)
     return position_length - 1.8 + (std::sin(position.m_x * 20.0) * std::sin(position.m_y * 20.0) * std::sin(position.m_z * 20.0) * 0.1) + (std::sin(position.m_x * 40.0) * std::sin(position.m_y * 40.0) * std::sin(position.m_z * 40.0) * 0.05);
 }
 
+double Volume_Sample_Function_Cube(Cascade_Graphics::Vector_3<double> position)
+{
+    return position.m_x;
+}
+
 Cascade_Graphics::Vector_3<double> Color_Sample_Function(Cascade_Graphics::Vector_3<double> position, Cascade_Graphics::Vector_3<double> normal)
 {
     if (Cascade_Graphics::Vector_3<double>::Dot(normal, position.Normalized()) > 0.75)
@@ -53,11 +58,13 @@ int main()
 
     main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("planet", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function);
     main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("moon", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function_Moon);
+    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("plane", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 1.0, Volume_Sample_Function_Cube, Color_Sample_Function_Moon);
     main_window_ptr->Get_Renderer()->Update_Voxels();
     main_window_ptr->Get_Renderer()->Start_Rendering();
 
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->position = {2.0, 1.0, 0.0};
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->scale = {0.5, 0.5, 0.25};
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->position = {2.0, 0.0, 0.0};
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->scale = {0.25, 0.25, 0.25};
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->rotation = {0.0, 0.0, 0.78};
     main_window_ptr->Get_Renderer()->Update_Objects();
 
     application.Run_Program_Loop(Update, 60);

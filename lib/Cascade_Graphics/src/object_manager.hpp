@@ -48,9 +48,14 @@ namespace Cascade_Graphics
             float scale_y;
             float scale_z;
 
+            float rotation_x;
+            float rotation_y;
+            float rotation_z;
+
             uint32_t root_voxel_index;
 
-            uint32_t padding;
+            uint32_t padding_a;
+            uint32_t padding_b;
         };
 
     private:
@@ -77,6 +82,8 @@ namespace Cascade_Graphics
 
             Vector_3<double> position;
             Vector_3<double> scale;
+            Vector_3<double> rotation;
+
             std::vector<Voxel> voxels;
         };
 
