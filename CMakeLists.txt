@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(UNIX)
-    set(CMAKE_CXX_FLAGS "-lxcb -lvulkan -pthread -O3 -g")
+    set(CMAKE_CXX_FLAGS "-lxcb -lvulkan -pthread -O0 -g")
 endif(UNIX)
 
 add_compile_definitions(LOG_LEVEL_ALL CSD_VULKAN_ENABLE_DEBUG_LAYERS CSD_LOG_FPS)

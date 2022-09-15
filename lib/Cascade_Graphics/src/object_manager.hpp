@@ -40,22 +40,26 @@ namespace Cascade_Graphics
 
         struct GPU_Object
         {
-            float position_x;
-            float position_y;
-            float position_z;
+            float object_to_world_matrix_x0;
+            float object_to_world_matrix_x1;
+            float object_to_world_matrix_x2;
+            float object_to_world_matrix_x3;
 
-            float scale_x;
-            float scale_y;
-            float scale_z;
+            float object_to_world_matrix_y0;
+            float object_to_world_matrix_y1;
+            float object_to_world_matrix_y2;
+            float object_to_world_matrix_y3;
 
-            float rotation_x;
-            float rotation_y;
-            float rotation_z;
+            float object_to_world_matrix_z0;
+            float object_to_world_matrix_z1;
+            float object_to_world_matrix_z2;
+            float object_to_world_matrix_z3;
 
             uint32_t root_voxel_index;
 
             uint32_t padding_a;
             uint32_t padding_b;
+            uint32_t padding_c;
         };
 
     private:

@@ -49,31 +49,6 @@ namespace Cascade_Graphics
             sample_position.m_x += step_size;
             sample_position.m_y = start_position.m_y;
         }
-
-        // Vector_3<double> start_position = voxel_position - Vector_3<double>(voxel_size, voxel_size, voxel_size);
-        // Vector_3<double> end_position = voxel_position + Vector_3<double>(voxel_size, voxel_size, voxel_size);
-        // Vector_3<double> sample_position;
-
-        // bool sample;
-
-        // for (sample_position.m_x = start_position.m_x; sample_position.m_x <= end_position.m_x; sample_position.m_x += step_size)
-        // {
-        //     for (sample_position.m_y = start_position.m_y; sample_position.m_y <= end_position.m_y; sample_position.m_y += step_size)
-        //     {
-        //         for (sample_position.m_z = start_position.m_z; sample_position.m_z <= end_position.m_z; sample_position.m_z += step_size)
-        //         {
-        //             sample = volume_sample_function(sample_position) < 0.0;
-
-        //             is_fully_contained = is_fully_contained && sample;
-        //             is_intersecting = is_intersecting || sample;
-
-        //             if ((!is_fully_contained) && is_intersecting)
-        //             {
-        //                 return;
-        //             }
-        //         }
-        //     }
-        // }
     }
 
     void Object_Manager::Object_From_Volume_Function_Worker_Thread(uint32_t max_depth,
@@ -458,15 +433,7 @@ namespace Cascade_Graphics
 
         m_gpu_objects.resize(m_gpu_objects.size() + 1);
 
-        m_gpu_objects.back().position_x = m_objects.back().position.m_x;
-        m_gpu_objects.back().position_y = m_objects.back().position.m_y;
-        m_gpu_objects.back().position_z = m_objects.back().position.m_z;
-        m_gpu_objects.back().scale_x = m_objects.back().scale.m_x;
-        m_gpu_objects.back().scale_y = m_objects.back().scale.m_y;
-        m_gpu_objects.back().scale_z = m_objects.back().scale.m_z;
-        m_gpu_objects.back().rotation_x = m_objects.back().rotation.m_x;
-        m_gpu_objects.back().rotation_y = m_objects.back().rotation.m_y;
-        m_gpu_objects.back().rotation_z = m_objects.back().rotation.m_z;
+        m_gpu_objects.back() = {};
         m_gpu_objects.back().root_voxel_index = root_voxel_index;
 
         for (uint32_t i = 0; i < m_objects.back().voxels.size(); i++)
@@ -525,15 +492,25 @@ namespace Cascade_Graphics
     {
         for (uint32_t i = 0; i < m_objects.size(); i++)
         {
-            m_gpu_objects[i].position_x = m_objects[i].position.m_x;
-            m_gpu_objects[i].position_y = m_objects[i].position.m_y;
-            m_gpu_objects[i].position_z = m_objects[i].position.m_z;
-            m_gpu_objects[i].scale_x = m_objects[i].scale.m_x;
-            m_gpu_objects[i].scale_y = m_objects[i].scale.m_y;
-            m_gpu_objects[i].scale_z = m_objects[i].scale.m_z;
-            m_gpu_objects[i].rotation_x = m_objects[i].rotation.m_x;
-            m_gpu_objects[i].rotation_y = m_objects[i].rotation.m_y;
-            m_gpu_objects[i].rotation_z = m_objects[i].rotation.m_z;
+            float sin_yaw = sin(m_objects[i].rotation.m_x);
+            float cos_yaw = cos(m_objects[i].rotation.m_x);
+            float sin_pitch = sin(m_objects[i].rotation.m_y);
+            float cos_pitch = cos(m_objects[i].rotation.m_y);
+            float sin_roll = sin(m_objects[i].rotation.m_z);
+            float cos_roll = cos(m_objects[i].rotation.m_z);
+
+            m_gpu_objects[i].object_to_world_matrix_x0 = m_objects[i].scale.m_x * (cos_pitch * cos_roll);
+            m_gpu_objects[i].object_to_world_matrix_x1 = m_objects[i].scale.m_x * (sin_yaw * sin_pitch * cos_roll - cos_yaw * sin_roll);
+            m_gpu_objects[i].object_to_world_matrix_x2 = m_objects[i].scale.m_x * (cos_yaw * sin_pitch * cos_roll + sin_yaw * sin_roll);
+            m_gpu_objects[i].object_to_world_matrix_x3 = m_objects[i].position.m_x;
+            m_gpu_objects[i].object_to_world_matrix_y0 = m_objects[i].scale.m_y * (cos_pitch * sin_roll);
+            m_gpu_objects[i].object_to_world_matrix_y1 = m_objects[i].scale.m_y * (sin_yaw * sin_pitch * sin_roll + cos_yaw * cos_roll);
+            m_gpu_objects[i].object_to_world_matrix_y2 = m_objects[i].scale.m_y * (cos_yaw * sin_pitch * sin_roll - sin_yaw * cos_roll);
+            m_gpu_objects[i].object_to_world_matrix_y3 = m_objects[i].position.m_y;
+            m_gpu_objects[i].object_to_world_matrix_z0 = m_objects[i].scale.m_z * (-sin_pitch);
+            m_gpu_objects[i].object_to_world_matrix_z1 = m_objects[i].scale.m_z * (sin_yaw * cos_pitch);
+            m_gpu_objects[i].object_to_world_matrix_z2 = m_objects[i].scale.m_z * (cos_yaw * cos_pitch);
+            m_gpu_objects[i].object_to_world_matrix_z3 = m_objects[i].position.m_z;
         }
 
         return m_gpu_objects;

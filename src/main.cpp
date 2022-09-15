@@ -58,7 +58,6 @@ int main()
 
     main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("planet", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function);
     main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("moon", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function_Moon);
-    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("plane", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 1.0, Volume_Sample_Function_Cube, Color_Sample_Function_Moon);
     main_window_ptr->Get_Renderer()->Update_Voxels();
     main_window_ptr->Get_Renderer()->Start_Rendering();
 

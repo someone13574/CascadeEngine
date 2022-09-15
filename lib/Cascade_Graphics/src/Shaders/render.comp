@@ -30,22 +30,26 @@ layout(binding = 0) uniform Camera_Data
 
 struct Object
 {
-    float position_x;
-    float position_y;
-    float position_z;
+    float object_to_world_matrix_x0;
+    float object_to_world_matrix_x1;
+    float object_to_world_matrix_x2;
+    float object_to_world_matrix_x3;
 
-    float scale_x;
-    float scale_y;
-    float scale_z;
+    float object_to_world_matrix_y0;
+    float object_to_world_matrix_y1;
+    float object_to_world_matrix_y2;
+    float object_to_world_matrix_y3;
 
-    float rotation_x;
-    float rotation_y;
-    float rotation_z;
+    float object_to_world_matrix_z0;
+    float object_to_world_matrix_z1;
+    float object_to_world_matrix_z2;
+    float object_to_world_matrix_z3;
 
     uint root_voxel_index;
 
     uint padding_a;
     uint padding_b;
+    uint padding_c;
 };
 
 layout(std140, binding = 1) buffer object_buffer
@@ -103,42 +107,6 @@ float Ray_Box_Intersection(vec3 ray_origin, vec3 fractional_ray_direction, vec3 
     {
         return min_component;
     }
-
-    // return max_component <= min_component && min_component >= 0.0;
-}
-
-// vec3 Rotate_Point_Around_Origin(vec3 point, float yaw, float pitch, float roll)
-// {
-//     float sin_yaw = sin(yaw);
-//     float cos_yaw = cos(yaw);
-
-//     point = vec3(point.x,
-//                  point.y * cos_yaw - point.z * sin_yaw,
-//                  point.y * sin_yaw + point.z * cos_yaw);
-    
-//     return point;
-// }
-
-mat4x4 Generate_World_To_Object_Matrix(vec3 translation, vec3 scale, vec3 rotation)
-{
-    mat4x4 translation_scale_matrix = mat4x4(scale.x, 0.0, 0.0, translation.x,
-                                             0.0, scale.y, 0.0, translation.y,
-                                             0.0, 0.0, scale.z, translation.z,
-                                             0.0, 0.0, 0.0, 1.0);
-
-    float sin_yaw = sin(rotation.x);
-    float cos_yaw = cos(rotation.x);
-    float sin_pitch = sin(rotation.y);
-    float cos_pitch = cos(rotation.y);
-    float sin_roll = sin(rotation.z);
-    float cos_roll = cos(rotation.z);
-
-    mat4x4 rotation_matrix = mat4x4(cos_pitch * cos_roll, sin_yaw * sin_pitch * cos_roll - cos_yaw * sin_roll, cos_yaw * sin_pitch * cos_roll + sin_yaw * sin_roll, 0.0,
-                                    cos_pitch * sin_roll, sin_yaw * sin_pitch * sin_roll + cos_yaw * cos_roll, cos_yaw * sin_pitch * sin_roll - sin_yaw * cos_roll, 0.0,
-                                    -sin_pitch, sin_yaw * cos_pitch, cos_yaw * cos_pitch, 0.0,
-                                    0.0, 0.0, 0.0, 1.0);
-
-    return rotation_matrix * translation_scale_matrix;
 }
 
 void Intersect_Scene(vec3 ray_origin, vec3 ray_direction, out vec3 color, out vec3 normal, out vec3 hit_position, out float hit_distance)
@@ -151,12 +119,7 @@ void Intersect_Scene(vec3 ray_origin, vec3 ray_direction, out vec3 color, out ve
 
     for (uint object_index = 0; object_index < objects.length(); object_index++)
     {
-        // vec3 transformed_ray_origin = ray_origin - vec3(objects[object_index].position_x, objects[object_index].position_y, objects[object_index].position_z);
-        // transformed_ray_origin /= vec3(objects[object_index].scale_x, objects[object_index].scale_y, objects[object_index].scale_z);
-
-        // vec3 transformed_ray_direction = ray_direction / vec3(objects[object_index].scale_x, objects[object_index].scale_y, objects[object_index].scale_z);
-
-        mat4x4 object_to_world_matrix = Generate_World_To_Object_Matrix(vec3(objects[object_index].position_x, objects[object_index].position_y, objects[object_index].position_z), vec3(objects[object_index].scale_x, objects[object_index].scale_y, objects[object_index].scale_z), vec3(objects[object_index].rotation_x, objects[object_index].rotation_y, objects[object_index].rotation_z));
+        mat4x4 object_to_world_matrix = mat4x4(objects[object_index].object_to_world_matrix_x0, objects[object_index].object_to_world_matrix_x1, objects[object_index].object_to_world_matrix_x2, objects[object_index].object_to_world_matrix_x3, objects[object_index].object_to_world_matrix_y0, objects[object_index].object_to_world_matrix_y1, objects[object_index].object_to_world_matrix_y2, objects[object_index].object_to_world_matrix_y3, objects[object_index].object_to_world_matrix_z0, objects[object_index].object_to_world_matrix_z1, objects[object_index].object_to_world_matrix_z2, objects[object_index].object_to_world_matrix_z3, 0.0, 0.0, 0.0, 1.0);
         mat4x4 world_to_object_matrix = inverse(object_to_world_matrix);
 
         vec3 transformed_ray_origin = (vec4(ray_origin, 1.0) * world_to_object_matrix).xyz;
