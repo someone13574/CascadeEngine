@@ -74,8 +74,9 @@ struct Voxel
     float color_g;
     float color_b;
 
-    uint padding_a;
-    uint padding_b;
+    float plane_offset;
+
+    uint enable_plane;
 };
 
 layout(std140, binding = 2) buffer voxel_buffer
@@ -161,7 +162,7 @@ void Intersect_Scene(vec3 ray_origin, vec3 ray_direction, out vec3 color, out ve
 
             if (hit_index == -1)
             {
-                float plane_dst = Ray_Bounded_Plane_Intersection(ray_origin, ray_direction, transformed_ray_origin + transformed_ray_direction * dst, dst, vec3(current_voxel.x, current_voxel.y, current_voxel.z), vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), vec3(current_voxel.x, current_voxel.y, current_voxel.z), vec3(current_voxel.size));
+                float plane_dst = (current_voxel.enable_plane == 0) ? dst : Ray_Bounded_Plane_Intersection(ray_origin, ray_direction, transformed_ray_origin + transformed_ray_direction * dst, dst, vec3(current_voxel.x, current_voxel.y, current_voxel.z) + vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z) * current_voxel.plane_offset, vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), vec3(current_voxel.x, current_voxel.y, current_voxel.z), vec3(current_voxel.size));
 
                 if (dst > 0.0 && plane_dst > 0.0)
                 {

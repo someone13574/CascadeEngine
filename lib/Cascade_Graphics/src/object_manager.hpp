@@ -34,8 +34,9 @@ namespace Cascade_Graphics
             float color_g;
             float color_b;
 
-            uint32_t padding_a;
-            uint32_t padding_b;
+            float plane_offset;
+
+            uint32_t enable_plane;
         };
 
         struct GPU_Object
@@ -66,6 +67,7 @@ namespace Cascade_Graphics
         struct Voxel
         {
             double size;
+            double plane_offset;
             Vector_3<double> position;
             Vector_3<double> normal;
             Vector_3<double> color;
@@ -78,6 +80,7 @@ namespace Cascade_Graphics
 
             uint32_t depth;
             bool is_leaf;
+            bool enable_plane;
         };
 
         struct Object
