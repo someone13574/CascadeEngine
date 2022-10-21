@@ -15,7 +15,9 @@ void Update(Cascade_Core::Application* instance_ptr)
     // camera_ptr->Look_At(Cascade_Graphics::Vector_3<double>(std::sin(elapsed_seconds + 0.1) * 1.9, std::sin(elapsed_seconds * 2.0 + 0.1) * 1.9, std::cos(elapsed_seconds + 0.1) * 1.9) / (camera_ptr->Get_Camera_Position().Length()) * 1.8);
     // camera_ptr->Set_Up_Direction(camera_ptr->Get_Camera_Position().Normalized());
 
-    camera_ptr->Set_Position({std::sin(elapsed_seconds / 10.0) * 3.0, 0.0, std::cos(elapsed_seconds / 10.0) * 3.0});
+    camera_ptr->Set_Position({std::sin(elapsed_seconds / 10.0) * 2.0, 0.0, std::cos(elapsed_seconds / 10.0) * 3.0});
+    elapsed_seconds += 0.01;
+    // camera_ptr->Look_At({std::sin(elapsed_seconds / 10.0) * 2.0, 0.0, std::cos(elapsed_seconds / 10.0) * 3.0});
     camera_ptr->Look_At({0.0, 0.0, 0.0});
     camera_ptr->Set_Up_Direction({0.0, 1.0, 0.0});
 }
@@ -27,6 +29,8 @@ double Volume_Sample_Function(Cascade_Graphics::Vector_3<double> position)
     position /= position_length;
 
     return position_length - 1.8 + (std::sin(position.m_x * 20.0) * std::sin(position.m_y * 20.0) * std::sin(position.m_z * 20.0) * 0.1) + (std::sin(position.m_x * 40.0) * std::sin(position.m_y * 40.0) * std::sin(position.m_z * 40.0) * 0.05);
+
+    return position.Length() - 1.8;
 }
 
 double Volume_Sample_Function_Cube(Cascade_Graphics::Vector_3<double> position)

@@ -120,7 +120,7 @@ namespace Cascade_Graphics
                     bool is_intersecting;
                     Voxel_Sample_Volume_Function(child_voxel.position, child_voxel.size, step_size, step_count_lookup_table[child_voxel.depth], volume_sample_function, is_fully_contained, is_intersecting);
 
-                    if ((is_intersecting && !is_fully_contained) || (is_intersecting && is_fully_contained && child_voxel.depth >= max_depth - 1))
+                    if (is_intersecting && !is_fully_contained)
                     {
                         child_voxel.parent_index = *current_voxel_ptr;
                         child_voxel.child_indices[0] = 0;
@@ -155,11 +155,11 @@ namespace Cascade_Graphics
                         double z_density = volume_sample_function(child_voxel.position - Vector_3<double>(0.0, 0.0, 0.00001));
                         child_voxel.normal = (Vector_3<double>(center_density, center_density, center_density) - Vector_3<double>(x_density, y_density, z_density)).Normalized();
 
-                        child_voxel.plane_offset = (center_density - volume_sample_function(child_voxel.position - child_voxel.normal * 0.00001)) * 0.00001;
+                        child_voxel.plane_offset = (center_density - volume_sample_function(child_voxel.position + child_voxel.normal * 0.001)) / 0.001;
+                        child_voxel.plane_offset = center_density / child_voxel.plane_offset;
 
                         child_voxel.color = color_sample_function(child_voxel.position, child_voxel.normal);
                         child_voxel.is_leaf = child_voxel.depth == max_depth || is_fully_contained;
-                        child_voxel.enable_plane = !is_fully_contained;
 
                         {
                             std::lock_guard<std::mutex> voxels_lock(*voxels_mutex_ptr);
@@ -470,8 +470,9 @@ namespace Cascade_Graphics
             gpu_voxel.color_r = static_cast<float>(current_voxel->color.m_x);
             gpu_voxel.color_g = static_cast<float>(current_voxel->color.m_y);
             gpu_voxel.color_b = static_cast<float>(current_voxel->color.m_z);
-            gpu_voxel.plane_offset = current_voxel->plane_offset;
-            gpu_voxel.enable_plane = current_voxel->enable_plane;
+            gpu_voxel.plane_pos_x = current_voxel->position.m_x + current_voxel->normal.m_x * current_voxel->plane_offset;
+            gpu_voxel.plane_pos_y = current_voxel->position.m_y + current_voxel->normal.m_y * current_voxel->plane_offset;
+            gpu_voxel.plane_pos_z = current_voxel->position.m_z + current_voxel->normal.m_z * current_voxel->plane_offset;
 
             m_gpu_voxels.push_back(gpu_voxel);
         }

@@ -34,9 +34,13 @@ namespace Cascade_Graphics
             float color_g;
             float color_b;
 
-            float plane_offset;
+            float plane_pos_x;
+            float plane_pos_y;
+            float plane_pos_z;
 
-            uint32_t enable_plane;
+            uint32_t padding_a;
+            uint32_t padding_b;
+            uint32_t padding_c;
         };
 
         struct GPU_Object
@@ -80,7 +84,6 @@ namespace Cascade_Graphics
 
             uint32_t depth;
             bool is_leaf;
-            bool enable_plane;
         };
 
         struct Object

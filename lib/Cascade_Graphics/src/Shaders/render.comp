@@ -74,9 +74,13 @@ struct Voxel
     float color_g;
     float color_b;
 
-    float plane_offset;
+    float plane_pos_x;
+    float plane_pos_y;
+    float plane_pos_z;
 
-    uint enable_plane;
+    uint padding_a;
+    uint padding_b;
+    uint padding_c;
 };
 
 layout(std140, binding = 2) buffer voxel_buffer
@@ -162,9 +166,9 @@ void Intersect_Scene(vec3 ray_origin, vec3 ray_direction, out vec3 color, out ve
 
             if (hit_index == -1)
             {
-                float plane_dst = (current_voxel.enable_plane == 0) ? dst : Ray_Bounded_Plane_Intersection(ray_origin, ray_direction, transformed_ray_origin + transformed_ray_direction * dst, dst, vec3(current_voxel.x, current_voxel.y, current_voxel.z) + vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z) * current_voxel.plane_offset, vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), vec3(current_voxel.x, current_voxel.y, current_voxel.z), vec3(current_voxel.size));
+                float plane_dst = Ray_Bounded_Plane_Intersection(ray_origin, ray_direction, transformed_ray_origin + transformed_ray_direction * dst, dst, vec3(current_voxel.plane_pos_x, current_voxel.plane_pos_y, current_voxel.plane_pos_z), vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), vec3(current_voxel.x, current_voxel.y, current_voxel.z), vec3(current_voxel.size));
 
-                if (dst > 0.0 && plane_dst > 0.0)
+                if (plane_dst != -1.0)
                 {
                     vec3 this_hit_position = (vec4(transformed_ray_origin + transformed_ray_direction * plane_dst, 1.0) * object_to_world_matrix).xyz;
                     float this_hit_distance = length(this_hit_position - ray_origin);
@@ -186,7 +190,7 @@ void Intersect_Scene(vec3 ray_origin, vec3 ray_direction, out vec3 color, out ve
             }
             else
             {
-                if (dst > 0.0)
+                if (dst != -1.0)
                 {
                     current_index = hit_index;
                 }
