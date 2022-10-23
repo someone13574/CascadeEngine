@@ -166,7 +166,7 @@ void Intersect_Scene(vec3 ray_origin, vec3 ray_direction, out vec3 color, out ve
 
             if (hit_index == -1)
             {
-                float plane_dst = Ray_Bounded_Plane_Intersection(ray_origin, ray_direction, transformed_ray_origin + transformed_ray_direction * dst, dst, vec3(current_voxel.plane_pos_x, current_voxel.plane_pos_y, current_voxel.plane_pos_z), vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), vec3(current_voxel.x, current_voxel.y, current_voxel.z), vec3(current_voxel.size));
+                float plane_dst = Ray_Bounded_Plane_Intersection(transformed_ray_origin, transformed_ray_direction, transformed_ray_origin + transformed_ray_direction * dst, dst, vec3(current_voxel.plane_pos_x, current_voxel.plane_pos_y, current_voxel.plane_pos_z), vec3(current_voxel.normal_x, current_voxel.normal_y, current_voxel.normal_z), vec3(current_voxel.x, current_voxel.y, current_voxel.z), vec3(current_voxel.size));
 
                 if (plane_dst != -1.0)
                 {

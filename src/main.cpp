@@ -7,19 +7,13 @@ std::shared_ptr<Cascade_Core::Window> main_window_ptr;
 
 void Update(Cascade_Core::Application* instance_ptr)
 {
-    double elapsed_seconds = instance_ptr->Get_Elapsed_Time().count() / 1000.0;
+    double elapsed_seconds = instance_ptr->Get_Elapsed_Time().count() / 10000.0;
 
     std::shared_ptr<Cascade_Graphics::Camera> camera_ptr = main_window_ptr->Get_Renderer()->m_camera_ptr;
 
-    // camera_ptr->Set_Position({std::sin(elapsed_seconds) * 1.9, std::sin(elapsed_seconds * 2.0) * 1.9, std::cos(elapsed_seconds) * 1.9});
-    // camera_ptr->Look_At(Cascade_Graphics::Vector_3<double>(std::sin(elapsed_seconds + 0.1) * 1.9, std::sin(elapsed_seconds * 2.0 + 0.1) * 1.9, std::cos(elapsed_seconds + 0.1) * 1.9) / (camera_ptr->Get_Camera_Position().Length()) * 1.8);
-    // camera_ptr->Set_Up_Direction(camera_ptr->Get_Camera_Position().Normalized());
-
-    camera_ptr->Set_Position({std::sin(elapsed_seconds / 10.0) * 2.0, 0.0, std::cos(elapsed_seconds / 10.0) * 3.0});
-    elapsed_seconds += 0.01;
-    // camera_ptr->Look_At({std::sin(elapsed_seconds / 10.0) * 2.0, 0.0, std::cos(elapsed_seconds / 10.0) * 3.0});
-    camera_ptr->Look_At({0.0, 0.0, 0.0});
-    camera_ptr->Set_Up_Direction({0.0, 1.0, 0.0});
+    camera_ptr->Set_Position({std::sin(elapsed_seconds) * 1.9, std::sin(elapsed_seconds * 2.0) * 1.9, std::cos(elapsed_seconds) * 1.9});
+    camera_ptr->Look_At(Cascade_Graphics::Vector_3<double>(std::sin(elapsed_seconds + 0.1) * 1.9, std::sin(elapsed_seconds * 2.0 + 0.1) * 1.9, std::cos(elapsed_seconds + 0.1) * 1.9) / (camera_ptr->Get_Camera_Position().Length()) * 1.8);
+    camera_ptr->Set_Up_Direction(camera_ptr->Get_Camera_Position().Normalized());
 }
 
 double Volume_Sample_Function(Cascade_Graphics::Vector_3<double> position)
@@ -60,14 +54,14 @@ int main()
     Cascade_Core::Application application({"Test Cascade Application", 0, 5});
     main_window_ptr = application.Create_Window("Main Window", 1920, 1080);
 
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("planet", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function);
-    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("moon", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function_Moon);
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("planet", 9, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function);
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("moon", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function_Moon);
     main_window_ptr->Get_Renderer()->Update_Voxels();
     main_window_ptr->Get_Renderer()->Start_Rendering();
 
-    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->position = {2.0, 0.0, 0.0};
-    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->scale = {0.25, 0.25, 0.25};
-    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->rotation = {0.0, 0.0, 0.78};
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->position = {2.0, 0.0, 0.0};
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->scale = {0.25, 0.25, 0.25};
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->rotation = {0.0, 0.0, 0.78};
     main_window_ptr->Get_Renderer()->Update_Objects();
 
     application.Run_Program_Loop(Update, 60);
