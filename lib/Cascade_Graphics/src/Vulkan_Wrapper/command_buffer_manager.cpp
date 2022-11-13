@@ -11,7 +11,7 @@ namespace Cascade_Graphics
                                                        std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr,
                                                        std::shared_ptr<Pipeline_Manager> pipeline_manager_ptr,
                                                        std::shared_ptr<Storage_Manager> storage_manager_ptr)
-            : m_descriptor_set_manager(descriptor_set_manager), m_logical_device_wrapper_ptr(logical_device_wrapper_ptr), m_storage_manager_ptr(storage_manager_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr)
+            : m_descriptor_set_manager(descriptor_set_manager), m_logical_device_wrapper_ptr(logical_device_wrapper_ptr), m_pipeline_manager_ptr(pipeline_manager_ptr), m_storage_manager_ptr(storage_manager_ptr)
         {
         }
 
@@ -98,7 +98,7 @@ namespace Cascade_Graphics
 
             LOG_INFO << "Vulkan Backend: Adding command buffer with identifier " << identifer.Get_Identifier_String();
 
-            uint32_t command_pool_index = -1;
+            int32_t command_pool_index = -1;
             for (uint32_t i = 0; i < m_command_pools.size(); i++)
             {
                 if (m_command_pools[i].queue_family == queue_family)

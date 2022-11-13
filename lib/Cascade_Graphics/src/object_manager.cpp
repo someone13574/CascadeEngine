@@ -180,7 +180,7 @@ namespace Cascade_Graphics
                     {
                         uint32_t link = current_voxel.child_indices[link_order_lookup[direction_index][link_index]];
 
-                        if (link != -1)
+                        if (link != (uint32_t)-1)
                         {
                             current_voxel.hit_links[direction_index] = link;
                             break;
@@ -203,7 +203,7 @@ namespace Cascade_Graphics
                 bool added_leaf_node = false;
                 for (uint32_t i = 0; i < 8; i++)
                 {
-                    if (current_voxel.child_indices[i] != -1)
+                    if (current_voxel.child_indices[i] != (uint32_t)-1)
                     {
                         for (uint32_t direction_index = 0; direction_index < 8; direction_index++)
                         {
@@ -211,7 +211,7 @@ namespace Cascade_Graphics
                             {
                                 uint32_t link = current_voxel.child_indices[link_order_lookup[direction_index][link_index]];
 
-                                if (link != -1)
+                                if (link != (uint32_t)-1)
                                 {
                                     (*voxels_ptr)[current_voxel.child_indices[i]].miss_links[direction_index] = link;
                                     break;
@@ -270,12 +270,6 @@ namespace Cascade_Graphics
         std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now();
 
         LOG_INFO << "Graphics: Creating object with label '" << label << "'";
-
-        static const uint32_t link_order_lookup[8][8]
-            = {{0, 1, 4, 2, 5, 3, 6, 7}, {1, 5, 0, 3, 4, 7, 2, 6}, {2, 3, 6, 7, 0, 1, 4, 5}, {3, 7, 2, 6, 1, 5, 0, 4}, {4, 0, 5, 6, 1, 2, 7, 3}, {5, 4, 1, 7, 0, 6, 3, 2}, {6, 2, 7, 3, 4, 0, 5, 1}, {7, 6, 3, 2, 5, 4, 1, 0}};
-
-        static const uint32_t inverse_link_order_lookup[8][8]
-            = {{0, 1, 3, 5, 2, 4, 6, 7}, {2, 0, 6, 3, 4, 1, 7, 5}, {4, 5, 0, 1, 6, 7, 2, 3}, {6, 4, 2, 0, 7, 5, 3, 1}, {1, 4, 5, 7, 0, 2, 3, 6}, {4, 2, 7, 6, 1, 0, 5, 3}, {5, 7, 1, 3, 4, 6, 0, 2}, {7, 6, 3, 2, 5, 4, 1, 0}};
 
         for (uint32_t i = 0; i < m_objects.size(); i++)
         {
@@ -448,22 +442,22 @@ namespace Cascade_Graphics
             gpu_voxel.position_y = static_cast<float>(current_voxel->position.m_y);
             gpu_voxel.position_z = static_cast<float>(current_voxel->position.m_z);
             gpu_voxel.size = static_cast<float>(current_voxel->size);
-            gpu_voxel.hit_links[0] = (current_voxel->hit_links[0] == -1) ? -1 : current_voxel->hit_links[0] + root_voxel_index;
-            gpu_voxel.hit_links[1] = (current_voxel->hit_links[1] == -1) ? -1 : current_voxel->hit_links[1] + root_voxel_index;
-            gpu_voxel.hit_links[2] = (current_voxel->hit_links[2] == -1) ? -1 : current_voxel->hit_links[2] + root_voxel_index;
-            gpu_voxel.hit_links[3] = (current_voxel->hit_links[3] == -1) ? -1 : current_voxel->hit_links[3] + root_voxel_index;
-            gpu_voxel.hit_links[4] = (current_voxel->hit_links[4] == -1) ? -1 : current_voxel->hit_links[4] + root_voxel_index;
-            gpu_voxel.hit_links[5] = (current_voxel->hit_links[5] == -1) ? -1 : current_voxel->hit_links[5] + root_voxel_index;
-            gpu_voxel.hit_links[6] = (current_voxel->hit_links[6] == -1) ? -1 : current_voxel->hit_links[6] + root_voxel_index;
-            gpu_voxel.hit_links[7] = (current_voxel->hit_links[7] == -1) ? -1 : current_voxel->hit_links[7] + root_voxel_index;
-            gpu_voxel.miss_links[0] = (current_voxel->miss_links[0] == -1) ? -1 : current_voxel->miss_links[0] + root_voxel_index;
-            gpu_voxel.miss_links[1] = (current_voxel->miss_links[1] == -1) ? -1 : current_voxel->miss_links[1] + root_voxel_index;
-            gpu_voxel.miss_links[2] = (current_voxel->miss_links[2] == -1) ? -1 : current_voxel->miss_links[2] + root_voxel_index;
-            gpu_voxel.miss_links[3] = (current_voxel->miss_links[3] == -1) ? -1 : current_voxel->miss_links[3] + root_voxel_index;
-            gpu_voxel.miss_links[4] = (current_voxel->miss_links[4] == -1) ? -1 : current_voxel->miss_links[4] + root_voxel_index;
-            gpu_voxel.miss_links[5] = (current_voxel->miss_links[5] == -1) ? -1 : current_voxel->miss_links[5] + root_voxel_index;
-            gpu_voxel.miss_links[6] = (current_voxel->miss_links[6] == -1) ? -1 : current_voxel->miss_links[6] + root_voxel_index;
-            gpu_voxel.miss_links[7] = (current_voxel->miss_links[7] == -1) ? -1 : current_voxel->miss_links[7] + root_voxel_index;
+            gpu_voxel.hit_links[0] = (current_voxel->hit_links[0] == (uint32_t)-1) ? -1 : current_voxel->hit_links[0] + root_voxel_index;
+            gpu_voxel.hit_links[1] = (current_voxel->hit_links[1] == (uint32_t)-1) ? -1 : current_voxel->hit_links[1] + root_voxel_index;
+            gpu_voxel.hit_links[2] = (current_voxel->hit_links[2] == (uint32_t)-1) ? -1 : current_voxel->hit_links[2] + root_voxel_index;
+            gpu_voxel.hit_links[3] = (current_voxel->hit_links[3] == (uint32_t)-1) ? -1 : current_voxel->hit_links[3] + root_voxel_index;
+            gpu_voxel.hit_links[4] = (current_voxel->hit_links[4] == (uint32_t)-1) ? -1 : current_voxel->hit_links[4] + root_voxel_index;
+            gpu_voxel.hit_links[5] = (current_voxel->hit_links[5] == (uint32_t)-1) ? -1 : current_voxel->hit_links[5] + root_voxel_index;
+            gpu_voxel.hit_links[6] = (current_voxel->hit_links[6] == (uint32_t)-1) ? -1 : current_voxel->hit_links[6] + root_voxel_index;
+            gpu_voxel.hit_links[7] = (current_voxel->hit_links[7] == (uint32_t)-1) ? -1 : current_voxel->hit_links[7] + root_voxel_index;
+            gpu_voxel.miss_links[0] = (current_voxel->miss_links[0] == (uint32_t)-1) ? (uint32_t)-1 : current_voxel->miss_links[0] + root_voxel_index;
+            gpu_voxel.miss_links[1] = (current_voxel->miss_links[1] == (uint32_t)-1) ? (uint32_t)-1 : current_voxel->miss_links[1] + root_voxel_index;
+            gpu_voxel.miss_links[2] = (current_voxel->miss_links[2] == (uint32_t)-1) ? (uint32_t)-1 : current_voxel->miss_links[2] + root_voxel_index;
+            gpu_voxel.miss_links[3] = (current_voxel->miss_links[3] == (uint32_t)-1) ? (uint32_t)-1 : current_voxel->miss_links[3] + root_voxel_index;
+            gpu_voxel.miss_links[4] = (current_voxel->miss_links[4] == (uint32_t)-1) ? (uint32_t)-1 : current_voxel->miss_links[4] + root_voxel_index;
+            gpu_voxel.miss_links[5] = (current_voxel->miss_links[5] == (uint32_t)-1) ? (uint32_t)-1 : current_voxel->miss_links[5] + root_voxel_index;
+            gpu_voxel.miss_links[6] = (current_voxel->miss_links[6] == (uint32_t)-1) ? (uint32_t)-1 : current_voxel->miss_links[6] + root_voxel_index;
+            gpu_voxel.miss_links[7] = (current_voxel->miss_links[7] == (uint32_t)-1) ? (uint32_t)-1 : current_voxel->miss_links[7] + root_voxel_index;
             gpu_voxel.normal_x = static_cast<float>(current_voxel->normal.m_x);
             gpu_voxel.normal_y = static_cast<float>(current_voxel->normal.m_y);
             gpu_voxel.normal_z = static_cast<float>(current_voxel->normal.m_z);

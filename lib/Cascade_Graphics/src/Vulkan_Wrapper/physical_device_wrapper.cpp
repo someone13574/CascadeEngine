@@ -11,7 +11,7 @@ namespace Cascade_Graphics
     namespace Vulkan_Backend
     {
         Physical_Device_Wrapper::Physical_Device_Wrapper(std::shared_ptr<Instance_Wrapper> instance_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::set<const char*> required_extensions)
-            : m_queue_manager_ptr(queue_manager_ptr), m_required_extensions(required_extensions)
+            : m_required_extensions(required_extensions), m_queue_manager_ptr(queue_manager_ptr)
         {
             LOG_INFO << "Vulkan Backend: Choosing physical device";
 
@@ -37,11 +37,9 @@ namespace Cascade_Graphics
             for (uint32_t i = 0; i < physical_devices.size(); i++)
             {
                 VkPhysicalDeviceProperties physical_device_properties;
-                VkPhysicalDeviceFeatures physical_device_features;
                 vkGetPhysicalDeviceProperties(physical_devices[i], &physical_device_properties);
-                vkGetPhysicalDeviceFeatures(physical_devices[i], &physical_device_features);
 
-                if (Does_Device_Meet_Requirements(physical_devices[i], physical_device_properties, physical_device_features))
+                if (Does_Device_Meet_Requirements(physical_devices[i], physical_device_properties))
                 {
                     uint32_t device_rating = Rate_Physical_Device(physical_device_properties);
 
@@ -70,7 +68,7 @@ namespace Cascade_Graphics
             LOG_INFO << "Vulkan Backend: Destroying physical device wrapper";
         }
 
-        bool Physical_Device_Wrapper::Does_Device_Meet_Requirements(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features)
+        bool Physical_Device_Wrapper::Does_Device_Meet_Requirements(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties)
         {
             LOG_INFO << "Vulkan Backend: Checking whether physical device '" << physical_device_properties.deviceName << "' meets feature requirements";
 

@@ -22,7 +22,7 @@ namespace Cascade_Graphics
             std::shared_ptr<Queue_Manager> m_queue_manager_ptr;
 
         private:
-            bool Does_Device_Meet_Requirements(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features);
+            bool Does_Device_Meet_Requirements(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties);
             bool Check_Device_Extension_Support(VkPhysicalDevice physical_device);
             bool Check_Device_Subgroup_Support(VkPhysicalDevice physical_device);
 

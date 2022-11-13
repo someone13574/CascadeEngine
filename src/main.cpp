@@ -46,6 +46,9 @@ Cascade_Graphics::Vector_3<double> Color_Sample_Function(Cascade_Graphics::Vecto
 
 Cascade_Graphics::Vector_3<double> Color_Sample_Function_Moon(Cascade_Graphics::Vector_3<double> position, Cascade_Graphics::Vector_3<double> normal)
 {
+    (void)position;
+    (void)normal;
+
     return {0.75, 0.75, 0.75};
 }
 

@@ -20,7 +20,7 @@ namespace Cascade_Graphics
             m_validation_layer_manager_ptr = std::make_shared<Validation_Layer_Wrapper>(m_instance_wrapper_ptr);
             m_queue_manager_ptr = std::make_shared<Queue_Manager>(Queue_Manager::COMPUTE_QUEUE | Queue_Manager::TRANSFER_QUEUE | Queue_Manager::PRESENT_QUEUE);
             m_physical_device_wrapper_ptr = std::make_shared<Physical_Device_Wrapper>(m_instance_wrapper_ptr, m_queue_manager_ptr, required_device_extensions);
-            m_logical_device_wrapper_ptr = std::make_shared<Logical_Device_Wrapper>(m_physical_device_wrapper_ptr, m_queue_manager_ptr, m_validation_layer_manager_ptr);
+            m_logical_device_wrapper_ptr = std::make_shared<Logical_Device_Wrapper>(m_physical_device_wrapper_ptr, m_queue_manager_ptr);
             m_storage_manager_ptr = std::make_shared<Storage_Manager>(m_logical_device_wrapper_ptr, m_physical_device_wrapper_ptr, m_queue_manager_ptr);
             m_shader_manager_ptr = std::make_shared<Shader_Manager>(m_logical_device_wrapper_ptr);
             m_descriptor_set_manager_ptr = std::make_shared<Descriptor_Set_Manager>(m_logical_device_wrapper_ptr, m_storage_manager_ptr);

@@ -238,7 +238,7 @@ namespace Cascade_Graphics
                 device_queue_create_infos.back() = {};
                 device_queue_create_infos.back().sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
                 device_queue_create_infos.back().pNext = nullptr;
-                device_queue_create_infos.back().flags = (unique_queue_families[i] == protected_queue_family_index) ? VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT : 0;
+                device_queue_create_infos.back().flags = ((int32_t)unique_queue_families[i] == protected_queue_family_index) ? VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT : 0;
                 device_queue_create_infos.back().queueFamilyIndex = unique_queue_families[i];
                 device_queue_create_infos.back().queueCount = 1;
                 device_queue_create_infos.back().pQueuePriorities = &queue_priority;
