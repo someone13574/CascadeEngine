@@ -54,15 +54,15 @@ int main()
     Cascade_Core::Application application({"Test Cascade Application", 0, 5});
     main_window_ptr = application.Create_Window("Main Window", 1920, 1080);
 
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("planet", 9, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function);
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("moon", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function_Moon);
+    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("planet", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function);
+    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Create_Object_From_Volume_Function("moon", 8, Cascade_Graphics::Vector_3<double>(0, 0, 0), 2.0, Volume_Sample_Function, Color_Sample_Function_Moon);
     main_window_ptr->Get_Renderer()->Update_Voxels();
     main_window_ptr->Get_Renderer()->Start_Rendering();
 
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->position = {2.0, 0.0, 0.0};
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->scale = {0.25, 0.25, 0.25};
-    main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->rotation = {0.0, 0.0, 0.78};
-    main_window_ptr->Get_Renderer()->Update_Objects();
+    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->position = {2.0, 0.0, 0.0};
+    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->scale = {0.25, 0.25, 0.25};
+    // main_window_ptr->Get_Renderer()->m_object_manager_ptr->Get_Object("moon")->rotation = {0.0, 0.0, 0.78};
+    // main_window_ptr->Get_Renderer()->Update_Objects();
 
     application.Run_Program_Loop(Update, 60);
 }

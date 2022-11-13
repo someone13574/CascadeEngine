@@ -86,6 +86,12 @@ namespace Cascade_Graphics
                 return false;
             }
 
+            if (!Check_Device_Subgroup_Support(physical_device))
+            {
+                LOG_INFO << "Vulkan Backend: Physical device '" << physical_device_properties.deviceName << "' is missing a required feature";
+                return false;
+            }
+
             LOG_INFO << "Vulkan Backend: Physical device '" << physical_device_properties.deviceName << "' has all required features";
             return true;
         }
@@ -137,6 +143,41 @@ namespace Cascade_Graphics
             }
 
             return device_supports_extensions;
+        }
+
+        bool Physical_Device_Wrapper::Check_Device_Subgroup_Support(VkPhysicalDevice physical_device)
+        {
+            LOG_TRACE << "Vulkan Backend: Checking physical device subgroup support";
+
+            bool device_supports_subgroups = true;
+
+            VkPhysicalDeviceSubgroupProperties device_subgroup_properties = {};
+            device_subgroup_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES;
+            device_subgroup_properties.pNext = nullptr;
+
+            VkPhysicalDeviceProperties2 physical_device_properties = {};
+            physical_device_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+            physical_device_properties.pNext = &device_subgroup_properties;
+
+            // Get physical device subgroup properties
+            vkGetPhysicalDeviceProperties2(physical_device, &physical_device_properties);
+
+            // Check that required stages support subgroups
+            if (!(device_subgroup_properties.supportedStages & VK_SHADER_STAGE_COMPUTE_BIT))
+            {
+                LOG_TRACE << "Vulkan Backend: Physical device is missing support for subgroups in computer shaders";
+                device_supports_subgroups = false;
+            }
+
+            // Check that required subgroup features are present
+            VkSubgroupFeatureFlags required_subgroup_features = VK_SUBGROUP_FEATURE_BASIC_BIT | VK_SUBGROUP_FEATURE_VOTE_BIT | VK_SUBGROUP_FEATURE_ARITHMETIC_BIT | VK_SUBGROUP_FEATURE_BALLOT_BIT;
+            if ((device_subgroup_properties.supportedOperations & required_subgroup_features) != required_subgroup_features)
+            {
+                LOG_TRACE << "Vulkan Backend: Physical device is missing support for a needed subgroup operation";
+                device_supports_subgroups = false;
+            }
+
+            return device_supports_subgroups;
         }
 
         uint32_t Physical_Device_Wrapper::Rate_Physical_Device(VkPhysicalDeviceProperties physical_device_properties)

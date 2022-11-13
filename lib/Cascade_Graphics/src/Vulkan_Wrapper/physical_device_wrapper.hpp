@@ -24,6 +24,7 @@ namespace Cascade_Graphics
         private:
             bool Does_Device_Meet_Requirements(VkPhysicalDevice physical_device, VkPhysicalDeviceProperties physical_device_properties, VkPhysicalDeviceFeatures physical_device_features);
             bool Check_Device_Extension_Support(VkPhysicalDevice physical_device);
+            bool Check_Device_Subgroup_Support(VkPhysicalDevice physical_device);
 
             uint32_t Rate_Physical_Device(VkPhysicalDeviceProperties physical_device_properties);
 

@@ -14,7 +14,7 @@ namespace Cascade_Graphics
             LOG_DEBUG << "Vulkan Backend: Initializing Vulkan objects";
 
             std::set<const char*> required_instance_extensions = {VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME};
-            std::set<const char*> required_device_extensions = {VK_EXT_MEMORY_BUDGET_EXTENSION_NAME};
+            std::set<const char*> required_device_extensions = {VK_EXT_MEMORY_BUDGET_EXTENSION_NAME, VK_EXT_SHADER_SUBGROUP_VOTE_EXTENSION_NAME, VK_EXT_SHADER_SUBGROUP_BALLOT_EXTENSION_NAME};
 
             m_instance_wrapper_ptr = std::make_shared<Instance_Wrapper>("Application name", 0, required_instance_extensions);
             m_validation_layer_manager_ptr = std::make_shared<Validation_Layer_Wrapper>(m_instance_wrapper_ptr);
