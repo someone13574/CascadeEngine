@@ -48,11 +48,7 @@ namespace Cascade_Graphics
             "render_compute_resource_grouping", {m_render_target_image_identifier, m_camera_data_identifier, m_object_buffer_identifier, m_voxel_buffer_identifier, m_hit_buffer_identifier});
         m_render_compute_descriptor_set_identifier = m_vulkan_graphics_ptr->m_descriptor_set_manager_ptr->Create_Descriptor_Set(m_render_compute_resource_grouping_identifier);
 
-#ifdef __linux__
-        m_render_shader_identifier = m_vulkan_graphics_ptr->m_shader_manager_ptr->Add_Shader("render_shader", "/home/owen/Documents/Code/C++/CascadeEngine/build/build/build/Cascade_Graphics/src/Shaders/render.comp.spv");
-#elif defined __WIN32 || defined WIN32
-        m_render_shader_identifier = m_vulkan_graphics_ptr->m_shader_manager_ptr->Add_Shader("render_shader", "C:/Users/owenl/Documents/Code/C++/CascadeEngine/build/src/Shaders/render.comp.spv");
-#endif
+        m_render_shader_identifier = m_vulkan_graphics_ptr->m_shader_manager_ptr->Add_Shader("render_shader", "../lib/Cascade_Graphics/src/Shaders/render.comp");
 
         m_render_pipeline_identifier = m_vulkan_graphics_ptr->m_pipeline_manager_ptr->Add_Compute_Pipeline("render_pipeline", m_render_compute_descriptor_set_identifier, m_render_shader_identifier);
         Record_Command_Buffers();

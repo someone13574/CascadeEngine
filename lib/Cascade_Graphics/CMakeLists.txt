@@ -49,34 +49,3 @@ else()
 endif(UNIX)
 
 target_link_libraries(Cascade_Graphics Cascade_Logging)
-
-if(UNIX)
-    set(GLSL_COMMAND "/usr/bin/glslangValidator")
-else()
-    set(GLSL_COMMAND "$ENV{VK_SDK_PATH}/Bin/glslangValidator.exe")
-endif(UNIX)
-
-file(GLOB_RECURSE GLSL_SOURCE_FILES
-    "src/Shaders/*.comp")
-
-foreach(GLSL_FILE ${GLSL_SOURCE_FILES})
-    get_filename_component(FILE_NAME ${GLSL_FILE} NAME)
-    set(SPIRV_FILE "${PROJECT_BINARY_DIR}/src/Shaders/${FILE_NAME}.spv")
-    add_custom_command(
-        OUTPUT ${SPIRV_FILE}
-        COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_BINARY_DIR}/src/Shaders/"
-        COMMAND ${GLSL_COMMAND} -V ${GLSL_FILE} -o ${SPIRV_FILE}
-        DEPENDS ${GLSL_FILE}
-    )
-    list(APPEND SPIRV_BINARY_FILES ${SPIRV_FILE})
-endforeach(GLSL_FILE ${GLSL_SOURCE_FILES})
-
-add_custom_target(Shaders
-    DEPENDS ${SPIRV_BINARY_FILES})
-
-add_dependencies(Cascade_Graphics Shaders)
-add_custom_command(TARGET Cascade_Graphics POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:Cascade_Graphics>/src/Shaders"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    "${PROJECT_BINARY_DIR}/src/Shaders"
-    "$<TARGET_FILE_DIR:Cascade_Graphics>/src/Shaders")
