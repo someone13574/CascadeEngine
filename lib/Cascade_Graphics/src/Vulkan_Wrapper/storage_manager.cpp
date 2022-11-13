@@ -118,36 +118,20 @@ namespace Cascade_Graphics
 
             vkGetBufferMemoryRequirements(*m_logical_device_wrapper_ptr->Get_Device(), buffer_resource_ptr->buffer, &buffer_resource_ptr->memory_requirements);
 
-            VkPhysicalDeviceMemoryBudgetPropertiesEXT device_memory_budget_properties = {};
-            device_memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
-            device_memory_budget_properties.pNext = nullptr;
-
-            VkPhysicalDeviceMemoryProperties2 device_memory_properties_2 = {};
-            device_memory_properties_2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
-            device_memory_properties_2.pNext = &device_memory_budget_properties;
-
-            vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_wrapper_ptr->Get_Physical_Device(), &device_memory_properties_2);
-
-            VkMemoryPropertyFlags required_memory_properties = buffer_resource_ptr->memory_property_flags;
-            for (uint32_t i = 0; i < device_memory_properties_2.memoryProperties.memoryTypeCount; i++)
+            int32_t memory_type_index = Physical_Device_Wrapper::Find_Memory(m_physical_device_wrapper_ptr->Get_Physical_Device(), &buffer_resource_ptr->memory_requirements, buffer_resource_ptr->memory_property_flags, true);
+            if (memory_type_index == -1)
             {
-                if (buffer_resource_ptr->memory_requirements.memoryTypeBits & (1 << i))
-                {
-                    if ((device_memory_properties_2.memoryProperties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
-                    {
-                        buffer_resource_ptr->memory_type_index = i;
-                        uint32_t heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
-
-                        if (device_memory_budget_properties.heapBudget[heap_index] < buffer_resource_ptr->memory_requirements.size)
-                        {
-                            LOG_ERROR << "Vulkan Backend: Required memory for buffer " << identifier.Get_Identifier_String() << " (" << buffer_resource_ptr->memory_requirements.size << " bytes) exceeds the memory budget for heap " << heap_index
-                                      << " (" << device_memory_budget_properties.heapBudget[heap_index] << " bytes)";
-                            exit(EXIT_FAILURE);
-                        }
-
-                        return;
-                    }
-                }
+                LOG_ERROR << "Vulkan Backend: No memory heaps meet memory requirements for buffer " << identifier.Get_Identifier_String();
+                exit(EXIT_FAILURE);
+            }
+            else if (memory_type_index == -2)
+            {
+                LOG_ERROR << "Vulkan Backend: Required memory for buffer " << identifier.Get_Identifier_String() << "(" << buffer_resource_ptr->memory_requirements.size << " bytes) exeeds the memory budget for all valid heaps";
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                buffer_resource_ptr->memory_type_index = memory_type_index;
             }
         }
 
@@ -201,36 +185,20 @@ namespace Cascade_Graphics
 
             vkGetImageMemoryRequirements(*m_logical_device_wrapper_ptr->Get_Device(), image_resource_ptr->image, &image_resource_ptr->memory_requirements);
 
-            VkPhysicalDeviceMemoryBudgetPropertiesEXT device_memory_budget_properties = {};
-            device_memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
-            device_memory_budget_properties.pNext = nullptr;
-
-            VkPhysicalDeviceMemoryProperties2 device_memory_properties_2 = {};
-            device_memory_properties_2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
-            device_memory_properties_2.pNext = &device_memory_budget_properties;
-
-            vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_wrapper_ptr->Get_Physical_Device(), &device_memory_properties_2);
-
-            VkMemoryPropertyFlags required_memory_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-            for (uint32_t i = 0; i < device_memory_properties_2.memoryProperties.memoryTypeCount; i++)
+            int32_t memory_type_index = Physical_Device_Wrapper::Find_Memory(m_physical_device_wrapper_ptr->Get_Physical_Device(), &image_resource_ptr->memory_requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, true);
+            if (memory_type_index == -1)
             {
-                if (image_resource_ptr->memory_requirements.memoryTypeBits & (1 << i))
-                {
-                    if ((device_memory_properties_2.memoryProperties.memoryTypes[i].propertyFlags & required_memory_properties) == required_memory_properties)
-                    {
-                        image_resource_ptr->memory_type_index = i;
-                        uint32_t heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
-
-                        if (device_memory_budget_properties.heapBudget[heap_index] < image_resource_ptr->memory_requirements.size)
-                        {
-                            LOG_ERROR << "Vulkan Backend: Required memory for image " << identifier.Get_Identifier_String() << " (" << image_resource_ptr->memory_requirements.size << " bytes) exceeds the memory budget for heap " << heap_index << " ("
-                                      << device_memory_budget_properties.heapBudget[heap_index] << " bytes)";
-                            exit(EXIT_FAILURE);
-                        }
-
-                        return;
-                    }
-                }
+                LOG_ERROR << "Vulkan Backend: No memory heaps meet memory requirements for image " << identifier.Get_Identifier_String();
+                exit(EXIT_FAILURE);
+            }
+            else if (memory_type_index == -2)
+            {
+                LOG_ERROR << "Vulkan Backend: Required memory for image " << identifier.Get_Identifier_String() << "(" << image_resource_ptr->memory_requirements.size << " bytes) exeeds the memory budget for all valid heaps";
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                image_resource_ptr->memory_type_index = memory_type_index;
             }
         }
 
@@ -301,7 +269,7 @@ namespace Cascade_Graphics
                 LOG_INFO << "Vulkan Backend: Destroying temporary buffer " << temp_buffer_id.Get_Identifier_String();
                 Destroy_Buffer(temp_buffer_id);
 
-                buffer_size = device_memory_budget_properties.heapBudget[heap_index] - device_memory_budget_properties.heapUsage[heap_index];
+                buffer_size = device_memory_budget_properties.heapBudget[heap_index];
             }
 
             Identifier identifier = {};
@@ -485,7 +453,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            LOG_INFO << "Vulkan Backend: Adding image resource to storage manager (provided identifier was overwritten) with identifier" << identifier.Get_Identifier_String();
+            LOG_INFO << "Vulkan Backend: Adding image resource to storage manager (provided identifier was overwritten) with identifier " << identifier.Get_Identifier_String();
 
             image_resource.identifier = identifier;
             m_image_resources.push_back(image_resource);

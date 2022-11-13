@@ -34,6 +34,7 @@ namespace Cascade_Graphics
         public:
             VkPhysicalDevice* Get_Physical_Device();
             std::set<const char*> Get_Required_Extensions();
+            static int32_t Find_Memory(VkPhysicalDevice* physical_device_ptr, VkMemoryRequirements* memory_requirements_ptr, VkMemoryPropertyFlags memory_property_requirements, bool test_available_size);
         };
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics

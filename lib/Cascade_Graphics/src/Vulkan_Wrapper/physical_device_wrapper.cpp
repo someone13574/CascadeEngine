@@ -164,5 +164,53 @@ namespace Cascade_Graphics
         {
             return m_required_extensions;
         }
+
+        int32_t Physical_Device_Wrapper::Find_Memory(VkPhysicalDevice* physical_device_ptr, VkMemoryRequirements* memory_requirements_ptr, VkMemoryPropertyFlags memory_property_requirements, bool test_available_size)
+        {
+            VkPhysicalDeviceMemoryBudgetPropertiesEXT device_memory_budget_properties = {};
+            device_memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+            device_memory_budget_properties.pNext = nullptr;
+
+            VkPhysicalDeviceMemoryProperties2 device_memory_properties_2 = {};
+            device_memory_properties_2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+            device_memory_properties_2.pNext = &device_memory_budget_properties;
+            vkGetPhysicalDeviceMemoryProperties2(*physical_device_ptr, &device_memory_properties_2);
+
+            uint32_t memory_count = device_memory_properties_2.memoryProperties.memoryTypeCount;
+
+            int32_t memory_type_index = -1;
+            uint32_t previous_best_size = 0;
+            for (uint32_t i = 0; i < memory_count; i++)
+            {
+                uint32_t memory_type_bit_mask = 1 << i;
+
+                if (memory_requirements_ptr->memoryTypeBits & memory_type_bit_mask) // Memory type 'i' is the required type
+                {
+                    if ((device_memory_properties_2.memoryProperties.memoryTypes[i].propertyFlags & memory_property_requirements) == memory_property_requirements) // Test if all memory property requirements are satisfied
+                    {
+                        uint32_t memory_heap_index = device_memory_properties_2.memoryProperties.memoryTypes[i].heapIndex;
+
+                        if (device_memory_budget_properties.heapBudget[memory_heap_index] > previous_best_size)
+                        {
+                            memory_type_index = i;
+                            previous_best_size = device_memory_budget_properties.heapBudget[memory_heap_index];
+                        }
+                    }
+                }
+            }
+
+            if (memory_type_index == -1)
+            {
+                return -1;
+            }
+            else if (test_available_size && previous_best_size < memory_requirements_ptr->size)
+            {
+                return -2;
+            }
+            else
+            {
+                return memory_type_index;
+            }
+        }
     } // namespace Vulkan_Backend
 } // namespace Cascade_Graphics
