@@ -63,6 +63,19 @@ namespace Cascade_Graphics
             shaderc::Compiler compiler;
             shaderc::CompileOptions compile_options;
 
+#ifndef NDEBUG
+            LOG_TRACE << "Vulkan Backend: Debug build detected, adding shader debug symbols";
+
+            compile_options.SetOptimizationLevel(shaderc_optimization_level_zero);
+            compile_options.SetGenerateDebugInfo();
+            compile_options.SetSourceLanguage(shaderc_source_language_glsl);
+            compile_options.SetTargetEnvironment(shaderc_target_env_vulkan, 3);
+#else
+            LOG_TRACE << "Vulkan Backend: Release build detected, enabling shader optimization";
+
+            compile_options.SetOptimizationLevel(shaderc_optimization_level_performance);
+#endif
+
             shader_data_ptr->compilation_result = compiler.CompileGlslToSpv(shader_data_ptr->shader_source, shaderc_shader_kind::shaderc_compute_shader, shader_data_ptr->file_path.c_str(), compile_options);
 
             if (shader_data_ptr->compilation_result.GetCompilationStatus() != shaderc_compilation_status_success)
@@ -92,6 +105,7 @@ namespace Cascade_Graphics
             shader_module_create_info.codeSize = compiled_shader.size() * sizeof(uint32_t);
             shader_module_create_info.pCode = compiled_shader.data();
 
+            // Create shader module
             VALIDATE_VKRESULT(vkCreateShaderModule(*m_logical_device_wrapper_ptr->Get_Device(), &shader_module_create_info, nullptr, &shader_data_ptr->shader_module), "Vulkan Backend: Failed to create shader module");
         }
 
