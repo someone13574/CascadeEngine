@@ -63,6 +63,8 @@ namespace Cascade_Graphics
                                                                         const VkDebugUtilsMessengerCallbackDataEXT* p_callback_data,
                                                                         void* p_user_data)
         {
+            (void)p_user_data;
+
             switch (message_severity)
             {
                 case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:

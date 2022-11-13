@@ -543,7 +543,6 @@ namespace Cascade_Graphics
 
             std::chrono::time_point<std::chrono::high_resolution_clock> start_time = std::chrono::high_resolution_clock::now(); //
 
-            Buffer_Resource* target_buffer = Get_Buffer_Resource(identifier);
             Buffer_Resource* staging_buffer = Get_Buffer_Resource(staging_buffer_identifier);
 
             if (!(staging_buffer->memory_property_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))

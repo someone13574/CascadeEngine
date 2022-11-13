@@ -483,6 +483,8 @@ namespace Cascade_Core
                 m_initialization_stage = Initialization_Stage::CLEANED_UP;
                 break;
             }
+            default:
+                break;
         }
 #elif defined _WIN32 || defined WIN32
 

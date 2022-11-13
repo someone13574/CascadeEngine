@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <shaderc/shaderc.hpp>
 
 namespace Cascade_Graphics
 {
@@ -59,6 +60,21 @@ namespace Cascade_Graphics
             Shader_Manager::Shader_Data* shader_data_ptr = Get_Shader_Data(identifier);
 
             LOG_INFO << "Vulkan Backend: Compiling shader " << identifier.Get_Identifier_String();
+
+            shaderc::Compiler compiler;
+            shaderc::CompileOptions compile_options;
+
+            shaderc::SpvCompilationResult compilation_result = compiler.CompileGlslToSpv(shader_data_ptr->shader_source, shaderc_shader_kind::shaderc_compute_shader, shader_data_ptr->file_path.c_str(), compile_options);
+
+            if (compilation_result.GetCompilationStatus() != shaderc_compilation_status_success)
+            {
+                LOG_ERROR << "Vulkan Backend: Failed to compile shader " << identifier.Get_Identifier_String() << " with error " << compilation_result.GetErrorMessage();
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                LOG_TRACE << "Successfully compiled shader " << identifier.Get_Identifier_String();
+            }
         }
 
         Identifier Shader_Manager::Add_Shader(std::string label, std::string path)
@@ -95,6 +111,7 @@ namespace Cascade_Graphics
             m_shaders.back().shader_module = VK_NULL_HANDLE;
 
             Load_Shader_Source(identifier);
+            Compile_Shader(identifier);
 
             return identifier;
         }

@@ -19,6 +19,8 @@ namespace Cascade_Logging
         template <class T>
         Redirect operator<<(T type)
         {
+            (void)type;
+
             return *this;
         };
     };

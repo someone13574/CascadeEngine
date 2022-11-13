@@ -8,11 +8,9 @@ namespace Cascade_Graphics
 {
     namespace Vulkan_Backend
     {
-        Logical_Device_Wrapper::Logical_Device_Wrapper(std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr, std::shared_ptr<Validation_Layer_Wrapper> validation_layer_wrapper_ptr)
+        Logical_Device_Wrapper::Logical_Device_Wrapper(std::shared_ptr<Physical_Device_Wrapper> physical_device_wrapper_ptr, std::shared_ptr<Queue_Manager> queue_manager_ptr)
         {
             LOG_INFO << "Vulkan Backend: Creating logical device";
-
-            VkPhysicalDeviceFeatures physical_device_features = {};
 
             std::set<const char*> required_extensions_set = physical_device_wrapper_ptr->Get_Required_Extensions();
             std::vector<const char*> required_extensions(required_extensions_set.begin(), required_extensions_set.end());

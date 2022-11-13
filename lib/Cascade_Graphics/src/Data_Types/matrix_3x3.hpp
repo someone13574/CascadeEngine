@@ -21,7 +21,7 @@ namespace Cascade_Graphics
         Matrix_T m_z2;
 
     public:
-        Matrix_3x3(Matrix_T x0, Matrix_T y0, Matrix_T z0, Matrix_T x1, Matrix_T y1, Matrix_T z1, Matrix_T x2, Matrix_T y2, Matrix_T z2) : m_x0(x0), m_y0(y0), m_z0(z0), m_x1(x1), m_y1(y1), m_z1(z1), m_x2(x2), m_y2(y2), m_z2(x2){};
+        Matrix_3x3(Matrix_T x0, Matrix_T y0, Matrix_T z0, Matrix_T x1, Matrix_T y1, Matrix_T z1, Matrix_T x2, Matrix_T y2, Matrix_T z2) : m_x0(x0), m_y0(y0), m_z0(z0), m_x1(x1), m_y1(y1), m_z1(z1), m_x2(x2), m_y2(y2), m_z2(z2){};
 
         template <typename T>
         Matrix_3x3(Vector_3<T> v0, Vector_3<T> v1, Vector_3<T> v2) : m_x0(v0.m_x), m_y0(v0.m_y), m_z0(v0.m_z), m_x1(v1.m_x), m_y1(v1.m_y), m_z1(v1.m_z), m_x2(v2.m_x), m_y2(v2.m_y), m_z2(v2.m_z){};

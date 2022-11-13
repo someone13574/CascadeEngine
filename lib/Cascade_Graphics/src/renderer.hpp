@@ -49,8 +49,8 @@ namespace Cascade_Graphics
         Vulkan_Backend::Identifier m_staging_buffer_identifier;
         std::vector<Vulkan_Backend::Identifier> m_swapchain_image_identifiers;
 
-        Window_Information m_window_information;
         std::shared_ptr<Vulkan_Backend::Vulkan_Graphics> m_vulkan_graphics_ptr;
+        Window_Information m_window_information;
 
     private:
         void Record_Command_Buffers();
