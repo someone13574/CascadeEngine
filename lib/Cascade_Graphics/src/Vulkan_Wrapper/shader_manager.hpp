@@ -4,6 +4,7 @@
 #include "logical_device_wrapper.hpp"
 #include "vulkan_header.hpp"
 #include <memory>
+#include <shaderc/shaderc.hpp>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,7 @@ namespace Cascade_Graphics
 
                 std::string file_path;
                 std::string shader_source;
+                shaderc::SpvCompilationResult compilation_result;
                 VkShaderModule shader_module;
             };
 
@@ -31,6 +33,7 @@ namespace Cascade_Graphics
         private:
             void Load_Shader_Source(Identifier identifier);
             void Compile_Shader(Identifier identifier);
+            void Create_Shader_Module(Identifier identifier);
 
         public:
             Shader_Manager(std::shared_ptr<Logical_Device_Wrapper> logical_device_wrapper_ptr);

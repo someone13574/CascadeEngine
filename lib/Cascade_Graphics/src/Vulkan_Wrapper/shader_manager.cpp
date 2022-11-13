@@ -4,7 +4,6 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <shaderc/shaderc.hpp>
 
 namespace Cascade_Graphics
 {
@@ -64,17 +63,36 @@ namespace Cascade_Graphics
             shaderc::Compiler compiler;
             shaderc::CompileOptions compile_options;
 
-            shaderc::SpvCompilationResult compilation_result = compiler.CompileGlslToSpv(shader_data_ptr->shader_source, shaderc_shader_kind::shaderc_compute_shader, shader_data_ptr->file_path.c_str(), compile_options);
+            shader_data_ptr->compilation_result = compiler.CompileGlslToSpv(shader_data_ptr->shader_source, shaderc_shader_kind::shaderc_compute_shader, shader_data_ptr->file_path.c_str(), compile_options);
 
-            if (compilation_result.GetCompilationStatus() != shaderc_compilation_status_success)
+            if (shader_data_ptr->compilation_result.GetCompilationStatus() != shaderc_compilation_status_success)
             {
-                LOG_ERROR << "Vulkan Backend: Failed to compile shader " << identifier.Get_Identifier_String() << " with error " << compilation_result.GetErrorMessage();
+                LOG_ERROR << "Vulkan Backend: Failed to compile shader " << identifier.Get_Identifier_String() << " with error " << shader_data_ptr->compilation_result.GetErrorMessage();
                 exit(EXIT_FAILURE);
             }
             else
             {
                 LOG_TRACE << "Successfully compiled shader " << identifier.Get_Identifier_String();
             }
+        }
+
+        void Shader_Manager::Create_Shader_Module(Identifier identifier)
+        {
+            Shader_Manager::Shader_Data* shader_data_ptr = Get_Shader_Data(identifier);
+
+            LOG_INFO << "Vulkan Backend: Creating shader module for " << identifier.Get_Identifier_String();
+
+            std::vector<uint32_t> compiled_shader = {shader_data_ptr->compilation_result.cbegin(), shader_data_ptr->compilation_result.cend()};
+
+            // Shader module create info
+            VkShaderModuleCreateInfo shader_module_create_info = {};
+            shader_module_create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+            shader_module_create_info.pNext = nullptr;
+            shader_module_create_info.flags = 0;
+            shader_module_create_info.codeSize = compiled_shader.size() * sizeof(uint32_t);
+            shader_module_create_info.pCode = compiled_shader.data();
+
+            VALIDATE_VKRESULT(vkCreateShaderModule(*m_logical_device_wrapper_ptr->Get_Device(), &shader_module_create_info, nullptr, &shader_data_ptr->shader_module), "Vulkan Backend: Failed to create shader module");
         }
 
         Identifier Shader_Manager::Add_Shader(std::string label, std::string path)
@@ -112,6 +130,9 @@ namespace Cascade_Graphics
 
             Load_Shader_Source(identifier);
             Compile_Shader(identifier);
+            Create_Shader_Module(identifier);
+
+            LOG_TRACE << "Vulkan Backend: Finished adding shader " << identifier.Get_Identifier_String();
 
             return identifier;
         }
