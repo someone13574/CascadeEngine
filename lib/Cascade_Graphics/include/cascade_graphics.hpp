@@ -1,8 +1,0 @@
-#include "../src/Data_Types/matrix_2x2.hpp"
-#include "../src/Data_Types/matrix_3x3.hpp"
-#include "../src/Data_Types/vector_2.hpp"
-#include "../src/Data_Types/vector_3.hpp"
-#include "../src/Data_Types/vector_4.hpp"
-#include "../src/Vulkan_Wrapper/vulkan_graphics.hpp"
-#include "../src/renderer.hpp"
-#include "../src/window_information.hpp"
