@@ -86,7 +86,11 @@ namespace Acorn_Logging
             std::cout << "." << std::setw(2) << std::setfill('0')
                       << std::chrono::duration_cast<std::chrono::microseconds>(log_message_ptr->occurrence_time - std::chrono::time_point_cast<std::chrono::seconds>(log_message_ptr->occurrence_time)).count() << "] ";
 
+#if defined __linux__
             log_message_ptr->occurrence_file_name.erase(0, log_message_ptr->occurrence_file_name.find_last_of("/") + 1);
+#elif defined _WIN32 || defined WIN32
+            log_message_ptr->occurrence_file_name.erase(0, log_message_ptr->occurrence_file_name.find_last_of("\\") + 1);
+#endif
             log_message_ptr->occurrence_file_name.append(":");
             log_message_ptr->occurrence_file_name.append(std::to_string(log_message_ptr->occurrence_line));
 
