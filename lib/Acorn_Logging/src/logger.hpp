@@ -51,7 +51,6 @@ namespace Acorn_Logging
         static void Dump_Queue(Logger* logger_ptr);
         static void Processing_Loop(Logger* logger_ptr);
 
-    public:
         Logger();
         ~Logger();
 

@@ -12,6 +12,6 @@ add_executable(cascade_application src/main.cpp)
 target_compile_features(cascade_application PRIVATE cxx_std_17)
 set_target_properties(cascade_application PROPERTIES CXX_EXTENSIONS OFF)
 
-# Link logging library
-add_subdirectory(lib/Acorn_Logging)
-target_link_libraries(cascade_application PUBLIC acorn_logging)
+# Link core library
+add_subdirectory(lib/Cascade_Core)
+target_link_libraries(cascade_application PUBLIC cascade_core)
