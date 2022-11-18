@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine_thread_manager.hpp"
 #include <string>
 
 namespace Cascade_Core
@@ -14,9 +15,14 @@ namespace Cascade_Core
         uint32_t m_application_minor_version;
         uint32_t m_application_patch_version;
 
+        Engine_Thread_Manager m_engine_thread_manager;
+
     private:
         friend class Application_Factory;
         Application();
         ~Application();
+
+    public:
+        void Set_Application_Details(std::string application_name, uint32_t application_major_version, uint32_t application_minor_version, uint32_t application_patch_version);
     };
 } // namespace Cascade_Core
