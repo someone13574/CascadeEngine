@@ -7,6 +7,7 @@ add_library(cascade_core STATIC src/application_factory.cpp
                                 src/engine_thread_manager.cpp
                                 src/engine_thread.cpp
                                 src/entry.cpp
+                                src/win32_window.cpp
                                 src/window.hpp
                                 src/xcb_window.cpp)
 

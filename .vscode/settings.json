@@ -92,7 +92,9 @@
         "span": "cpp",
         "source_location": "cpp",
         "future": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "stack": "cpp",
+        "xhash": "cpp"
     },
     "C_Cpp.autocompleteAddParentheses": true,
     "C_Cpp.clang_format_fallbackStyle": "Mozilla",

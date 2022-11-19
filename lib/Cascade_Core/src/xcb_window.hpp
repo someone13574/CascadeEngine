@@ -1,8 +1,9 @@
+#ifdef __linux__
+
 #pragma once
 
 #include "engine_thread_manager.hpp"
 #include "window.hpp"
-#include <acorn_logging.hpp>
 #include <xcb/xcb.h>
 
 namespace Cascade_Core
@@ -33,3 +34,5 @@ namespace Cascade_Core
         Window* Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) const override;
     };
 } // namespace Cascade_Core
+
+#endif

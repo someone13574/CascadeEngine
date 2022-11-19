@@ -1,5 +1,6 @@
 #include "application.hpp"
 
+#include "win32_window.hpp"
 #include "xcb_window.hpp"
 #include <acorn_logging.hpp>
 
@@ -42,13 +43,14 @@ namespace Cascade_Core
     Window* Application::Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height)
     {
 #ifdef __linux__
-        XCB_Window_Factory xcb_window_factory = XCB_Window_Factory();
-        Window* window_ptr = xcb_window_factory.Create_Window(window_title, window_width, window_height, &m_engine_thread_manager);
+        XCB_Window_Factory window_factory = XCB_Window_Factory();
+#elif defined _WIN32
+        Win32_Window_Factory window_factory = Win32_Window_Factory();
+#endif
+
+        Window* window_ptr = window_factory.Create_Window(window_title, window_width, window_height, &m_engine_thread_manager);
         m_window_ptrs.push_back(window_ptr);
 
         return window_ptr;
-#else
-        return nullptr;
-#endif
     }
 } // namespace Cascade_Core

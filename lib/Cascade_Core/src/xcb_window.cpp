@@ -1,3 +1,5 @@
+#ifdef __linux__
+
 #include "xcb_window.hpp"
 #include <acorn_logging.hpp>
 
@@ -5,7 +7,7 @@ namespace Cascade_Core
 {
     XCB_Window::XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) : Window::Window(window_title, window_width, window_height, thread_manager_ptr)
     {
-        LOG_INFO << "Core: Creating an XCB window with title '" << m_window_title << "' and dimensions " << m_window_width << "x" << m_window_height;
+        LOG_INFO << "Core: Creating a XCB window with title '" << m_window_title << "' and dimensions " << m_window_width << "x" << m_window_height;
 
         m_xcb_connection_ptr = xcb_connect(nullptr, nullptr);
         m_xcb_screen_ptr = xcb_setup_roots_iterator(xcb_get_setup(m_xcb_connection_ptr)).data;
@@ -21,14 +23,14 @@ namespace Cascade_Core
         m_xcb_error_ptr = xcb_request_check(m_xcb_connection_ptr, m_xcb_request_check_cookie);
         if (m_xcb_error_ptr != NULL)
         {
-            LOG_ERROR << "Core: XCB request check failed with error code " << m_xcb_error_ptr->error_code;
+            LOG_FATAL << "Core: XCB request check failed with error code " << m_xcb_error_ptr->error_code;
             exit(EXIT_FAILURE);
         }
 
         int xcb_flush_result = xcb_flush(m_xcb_connection_ptr);
         if (xcb_flush_result <= 0)
         {
-            LOG_ERROR << "Core: XCB flush failed with error code " << xcb_flush_result;
+            LOG_FATAL << "Core: XCB flush failed with error code " << xcb_flush_result;
         }
     }
 
@@ -45,3 +47,5 @@ namespace Cascade_Core
         return new XCB_Window(window_title, window_width, window_height, thread_manager_ptr);
     }
 } // namespace Cascade_Core
+
+#endif
