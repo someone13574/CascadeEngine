@@ -13,6 +13,7 @@ namespace Cascade_Core
         uint32_t m_window_width;
         uint32_t m_window_height;
 
+        bool m_initialized_window = false;
 
         Engine_Thread* m_event_thread_ptr;
         Engine_Thread_Manager* m_thread_manager_ptr;
@@ -24,20 +25,20 @@ namespace Cascade_Core
             std::string event_thread_name = "window-event-thread-" + window_title;
 
             m_event_thread_ptr = m_thread_manager_ptr->Create_Engine_Thread(event_thread_name, (void*)this);
-            m_event_thread_ptr->Attach_Loop_Function(Event_Processing_Loop_Function, 1.0);
+            m_event_thread_ptr->Attach_Loop_Function(Event_Processing_Loop_Function, 0.0);
             m_event_thread_ptr->Start_Thread();
         }
 
         virtual ~Window(){};
 
     public:
-        static void Event_Processing_Loop_Function(Cascade_Core::Engine_Thread* engine_thread_ptr, void* user_data_ptr)
+        static void Event_Processing_Loop_Function(Engine_Thread* event_thread_ptr, void* user_data_ptr)
         {
             Window* window_instance = (Window*)user_data_ptr;
-            window_instance->Process_Events();
+            window_instance->Process_Events(event_thread_ptr);
         }
 
-        virtual void Process_Events() const = 0;
+        virtual void Process_Events(Engine_Thread* event_thread_ptr) const = 0;
     };
 
     class Window_Factory

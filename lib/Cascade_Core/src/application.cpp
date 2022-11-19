@@ -28,6 +28,8 @@ namespace Cascade_Core
             delete m_window_ptrs[i];
             m_window_ptrs.erase(m_window_ptrs.begin() + i);
         }
+
+        LOG_TRACE << "Core: Finished destroying application";
     }
 
     void Application::Set_Application_Details(std::string application_name, uint32_t application_major_version, uint32_t application_minor_version, uint32_t application_patch_version)
