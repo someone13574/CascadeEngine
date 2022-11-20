@@ -6,9 +6,21 @@
 namespace Cascade_Core
 {
     const static char window_class_name[] = "window_class";
-    LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+    LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
+    {
+        return DefWindowProc(hwnd, message, wparam, lparam);
+    }
 
     Win32_Window::Win32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) : Window::Window(window_title, window_width, window_height, thread_manager_ptr)
+    {
+    }
+
+    Win32_Window::~Win32_Window()
+    {
+    }
+
+    void Win32_Window::Create_Window()
     {
         LOG_INFO << "Core: Create a Win32 window with title '" << m_window_title << "' and dimensions " << m_window_width << "x" << m_window_height;
 
@@ -21,10 +33,10 @@ namespace Cascade_Core
             window_class_registered = true;
         }
 
-        RECT window_rect = {0, 0, (LONG)window_width, (LONG)window_height};
+        RECT window_rect = {0, 0, (LONG)m_window_width, (LONG)m_window_height};
         AdjustWindowRect(&window_rect, m_window_style, false);
 
-        m_window = CreateWindow(window_class_name, window_title.c_str(), m_window_style, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, m_instance, this);
+        m_window = CreateWindow(window_class_name, m_window_title.c_str(), m_window_style, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, nullptr, nullptr, m_instance, this);
         if (m_window == NULL)
         {
             LOG_FATAL << "Core: Failed to create Win32 window with error " << GetLastError();
@@ -32,7 +44,11 @@ namespace Cascade_Core
         }
     }
 
-    Win32_Window::~Win32_Window()
+    void Win32_Window::Process_Events()
+    {
+    }
+
+    void Win32_Window::Destroy_Window()
     {
     }
 
@@ -59,16 +75,6 @@ namespace Cascade_Core
             LOG_FATAL << "Core: Failed to register Win32 window class with error " << GetLastError();
             exit(EXIT_FAILURE);
         }
-    }
-
-    LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)
-    {
-        return DefWindowProc(hwnd, message, wparam, lparam);
-        ;
-    }
-
-    void Win32_Window::Process_Events() const
-    {
     }
 
     Window* Win32_Window_Factory::Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) const

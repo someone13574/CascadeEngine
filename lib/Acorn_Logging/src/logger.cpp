@@ -46,22 +46,22 @@ namespace Acorn_Logging
 
             switch (log_message_ptr->severity_level)
             {
-                case Severity_Level::SEVERITY_TRACE:
+                case Severity_Level::ACORN_SEVERITY_TRACE:
                     std::cout << "\033[2m[TRACE] ";
                     break;
-                case Severity_Level::SEVERITY_DEBUG:
+                case Severity_Level::ACORN_SEVERITY_DEBUG:
                     std::cout << "[DEBUG] ";
                     break;
-                case Severity_Level::SEVERITY_INFO:
+                case Severity_Level::ACORN_SEVERITY_INFO:
                     std::cout << "\033[34m[INFO]  ";
                     break;
-                case Severity_Level::SEVERITY_WARN:
+                case Severity_Level::ACORN_SEVERITY_WARN:
                     std::cout << "\033[33m[WARN]  ";
                     break;
-                case Severity_Level::SEVERITY_ERROR:
+                case Severity_Level::ACORN_SEVERITY_ERROR:
                     std::cout << "\033[31m[ERROR] ";
                     break;
-                case Severity_Level::SEVERITY_FATAL:
+                case Severity_Level::ACORN_SEVERITY_FATAL:
                     std::cout << "\033[31;1m[FATAL] ";
                     break;
                 default:

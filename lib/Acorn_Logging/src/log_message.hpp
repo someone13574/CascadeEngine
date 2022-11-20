@@ -7,12 +7,12 @@ namespace Acorn_Logging
 {
     enum Severity_Level
     {
-        SEVERITY_TRACE,
-        SEVERITY_DEBUG,
-        SEVERITY_INFO,
-        SEVERITY_WARN,
-        SEVERITY_ERROR,
-        SEVERITY_FATAL
+        ACORN_SEVERITY_TRACE,
+        ACORN_SEVERITY_DEBUG,
+        ACORN_SEVERITY_INFO,
+        ACORN_SEVERITY_WARN,
+        ACORN_SEVERITY_ERROR,
+        ACORN_SEVERITY_FATAL
     };
 
     struct Log_Message

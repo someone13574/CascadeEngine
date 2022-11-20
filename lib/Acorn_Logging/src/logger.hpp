@@ -61,39 +61,39 @@ namespace Acorn_Logging
 
 #if defined LOG_LEVEL_ALL || defined LOG_LEVEL_TRACE
 
-#define LOG_TRACE Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_TRACE, __LINE__, __FILE__)
-#define LOG_DEBUG Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_DEBUG, __LINE__, __FILE__)
-#define LOG_INFO Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_INFO, __LINE__, __FILE__)
-#define LOG_WARN Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_WARN, __LINE__, __FILE__)
-#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_ERROR, __LINE__, __FILE__)
-#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_FATAL, __LINE__, __FILE__)
+#define LOG_TRACE Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_TRACE, __LINE__, __FILE__)
+#define LOG_DEBUG Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_DEBUG, __LINE__, __FILE__)
+#define LOG_INFO Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_INFO, __LINE__, __FILE__)
+#define LOG_WARN Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_WARN, __LINE__, __FILE__)
+#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_ERROR, __LINE__, __FILE__)
+#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_FATAL, __LINE__, __FILE__)
 
 #elif defined LOG_LEVEL_DEBUG
 
 #define LOG_TRACE Acorn_Logging::Disable()
-#define LOG_DEBUG Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_DEBUG, __LINE__, __FILE__)
-#define LOG_INFO Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_INFO, __LINE__, __FILE__)
-#define LOG_WARN Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_WARN, __LINE__, __FILE__)
-#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_ERROR, __LINE__, __FILE__)
-#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_FATAL, __LINE__, __FILE__)
+#define LOG_DEBUG Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_DEBUG, __LINE__, __FILE__)
+#define LOG_INFO Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_INFO, __LINE__, __FILE__)
+#define LOG_WARN Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_WARN, __LINE__, __FILE__)
+#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_ERROR, __LINE__, __FILE__)
+#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_FATAL, __LINE__, __FILE__)
 
 #elif defined LOG_LEVEL_INFO
 
 #define LOG_TRACE Acorn_Logging::Disable()
 #define LOG_DEBUG Acorn_Logging::Disable()
-#define LOG_INFO Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_INFO, __LINE__, __FILE__)
-#define LOG_WARN Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_WARN, __LINE__, __FILE__)
-#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_ERROR, __LINE__, __FILE__)
-#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_FATAL, __LINE__, __FILE__)
+#define LOG_INFO Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_INFO, __LINE__, __FILE__)
+#define LOG_WARN Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_WARN, __LINE__, __FILE__)
+#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_ERROR, __LINE__, __FILE__)
+#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_FATAL, __LINE__, __FILE__)
 
 #elif defined LOG_LEVEL_WARN
 
 #define LOG_TRACE Acorn_Logging::Disable()
 #define LOG_DEBUG Acorn_Logging::Disable()
 #define LOG_INFO Acorn_Logging::Disable()
-#define LOG_WARN Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_WARN, __LINE__, __FILE__)
-#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_ERROR, __LINE__, __FILE__)
-#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_FATAL, __LINE__, __FILE__)
+#define LOG_WARN Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_WARN, __LINE__, __FILE__)
+#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_ERROR, __LINE__, __FILE__)
+#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_FATAL, __LINE__, __FILE__)
 
 #elif defined LOG_LEVEL_ERROR
 
@@ -101,8 +101,8 @@ namespace Acorn_Logging
 #define LOG_DEBUG Acorn_Logging::Disable()
 #define LOG_INFO Acorn_Logging::Disable()
 #define LOG_WARN Acorn_Logging::Disable()
-#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_ERROR, __LINE__, __FILE__)
-#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_FATAL, __LINE__, __FILE__)
+#define LOG_ERROR Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_ERROR, __LINE__, __FILE__)
+#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_FATAL, __LINE__, __FILE__)
 
 #elif defined LOG_LEVEL_FATAL
 
@@ -111,7 +111,7 @@ namespace Acorn_Logging
 #define LOG_INFO Acorn_Logging::Disable()
 #define LOG_WARN Acorn_Logging::Disable()
 #define LOG_ERROR Acorn_Logging::Disable()
-#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::SEVERITY_FATAL, __LINE__, __FILE__)
+#define LOG_FATAL Acorn_Logging::Logger::Log(Acorn_Logging::Severity_Level::ACORN_SEVERITY_FATAL, __LINE__, __FILE__)
 
 #else
 
