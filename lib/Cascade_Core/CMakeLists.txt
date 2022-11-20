@@ -8,7 +8,7 @@ add_library(cascade_core STATIC src/application_factory.cpp
                                 src/engine_thread.cpp
                                 src/entry.cpp
                                 src/win32_window.cpp
-                                src/window.hpp
+                                src/window.cpp
                                 src/xcb_window.cpp)
 
 # Set 'include' as a include directory

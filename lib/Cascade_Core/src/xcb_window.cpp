@@ -7,6 +7,15 @@ namespace Cascade_Core
 {
     XCB_Window::XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) : Window::Window(window_title, window_width, window_height, thread_manager_ptr)
     {
+    }
+
+    XCB_Window::~XCB_Window()
+    {
+        LOG_INFO << "Core: Destroying XCB window '" << m_window_title << "'";
+    }
+
+    void XCB_Window::Create_Window()
+    {
         LOG_INFO << "Core: Creating a XCB window with title '" << m_window_title << "' and dimensions " << m_window_width << "x" << m_window_height;
 
         m_xcb_connection_ptr = xcb_connect(nullptr, nullptr);
@@ -39,34 +48,33 @@ namespace Cascade_Core
         {
             LOG_FATAL << "Core: XCB flush failed with error code " << xcb_flush_result;
         }
-
-        m_initialized_window = true;
     }
 
-    XCB_Window::~XCB_Window()
+    void XCB_Window::Process_Events()
     {
-        LOG_INFO << "Core: Destroying XCB window '" << m_window_title << "'";
-    }
+        m_event_ptr = xcb_wait_for_event(m_xcb_connection_ptr);
 
-    void XCB_Window::Process_Events(Engine_Thread* event_thread_ptr) const
-    {
-        if (m_initialized_window)
+        switch (m_event_ptr->response_type & (~0x80))
         {
-            xcb_generic_event_t* event_ptr = xcb_wait_for_event(m_xcb_connection_ptr);
-
-            switch (event_ptr->response_type & (~0x80))
-            {
-                case XCB_CLIENT_MESSAGE:
-                    if ((*(xcb_client_message_event_t*)event_ptr).data.data32[0] == (*m_xcb_close_window_reply_ptr).atom)
-                    {
-                        LOG_INFO << "Core: Received close window event in window '" << m_window_title << "'";
-                        event_thread_ptr->Exit_Thread();
-                    }
-                    break;
-                default:
-                    break;
-            }
+            case XCB_CLIENT_MESSAGE:
+                if ((*(xcb_client_message_event_t*)m_event_ptr).data.data32[0] == (*m_xcb_close_window_reply_ptr).atom)
+                {
+                    LOG_INFO << "Core: Received close window event in window '" << m_window_title << "'";
+                    m_window_thread_ptr->Exit_Thread();
+                }
+                break;
+            default:
+                break;
         }
+    }
+
+    void XCB_Window::Destroy_Window()
+    {
+        LOG_DEBUG << "Core: Destroying window '" << m_window_title << "' and disconnecting XCB";
+
+        free(m_event_ptr);
+        xcb_destroy_window(m_xcb_connection_ptr, m_xcb_window);
+        xcb_disconnect(m_xcb_connection_ptr);
     }
 
     Window* XCB_Window_Factory::Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) const

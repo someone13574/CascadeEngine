@@ -1,7 +1,6 @@
 #pragma once
 
 #include "engine_thread_manager.hpp"
-#include <acorn_logging.hpp>
 #include <string>
 
 namespace Cascade_Core
@@ -13,38 +12,27 @@ namespace Cascade_Core
         uint32_t m_window_width;
         uint32_t m_window_height;
 
-        bool m_initialized_window = false;
-
-        Engine_Thread* m_event_thread_ptr;
+        Engine_Thread* m_window_thread_ptr;
         Engine_Thread_Manager* m_thread_manager_ptr;
 
-    public:
-        Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr)
-            : m_window_title(window_title), m_window_width(window_width), m_window_height(window_height), m_thread_manager_ptr(thread_manager_ptr)
-        {
-            std::string event_thread_name = "window-event-thread-" + window_title;
+    protected:
+        static void Thread_Start_Function(Engine_Thread* window_thread_ptr, void* window_void_ptr);
+        static void Thread_Loop_Function(Engine_Thread* window_thread_ptr, void* window_void_ptr);
+        static void Thread_Exit_Function(Engine_Thread* window_thread_ptr, void* window_void_ptr);
 
-            m_event_thread_ptr = m_thread_manager_ptr->Create_Engine_Thread(event_thread_name, (void*)this);
-            m_event_thread_ptr->Attach_Loop_Function(Event_Processing_Loop_Function, 0.0);
-            m_event_thread_ptr->Start_Thread();
-        }
-
-        virtual ~Window(){};
+        virtual void Create_Window() = 0;
+        virtual void Process_Events() = 0;
+        virtual void Destroy_Window() = 0;
 
     public:
-        static void Event_Processing_Loop_Function(Engine_Thread* event_thread_ptr, void* user_data_ptr)
-        {
-            Window* window_instance = (Window*)user_data_ptr;
-            window_instance->Process_Events(event_thread_ptr);
-        }
-
-        virtual void Process_Events(Engine_Thread* event_thread_ptr) const = 0;
+        Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr);
+        virtual ~Window();
     };
 
     class Window_Factory
     {
     public:
-        virtual ~Window_Factory(){};
+        virtual ~Window_Factory();
         virtual Window* Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) const = 0;
     };
 } // namespace Cascade_Core

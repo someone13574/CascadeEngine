@@ -22,14 +22,18 @@ namespace Cascade_Core
         xcb_void_cookie_t m_xcb_request_check_cookie;
         xcb_intern_atom_cookie_t m_xcb_close_window_cookie;
         xcb_intern_atom_reply_t* m_xcb_close_window_reply_ptr;
+        xcb_generic_event_t* m_event_ptr;
+
+    protected:
+        void Create_Window() override;
+        void Process_Events() override;
+        void Destroy_Window() override;
 
     private:
         XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr);
 
     public:
         ~XCB_Window();
-
-        void Process_Events(Engine_Thread* event_thread_ptr) const override;
     };
 
     class XCB_Window_Factory : public Window_Factory
