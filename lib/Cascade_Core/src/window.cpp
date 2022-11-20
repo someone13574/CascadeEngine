@@ -9,7 +9,7 @@ namespace Cascade_Core
 
         m_window_thread_ptr = m_thread_manager_ptr->Create_Engine_Thread(window_thread_name, (void*)this);
         m_window_thread_ptr->Attach_Start_Function(Thread_Start_Function);
-        m_window_thread_ptr->Attach_Loop_Function(Thread_Loop_Function, 0.0);
+        m_window_thread_ptr->Attach_Loop_Function(Thread_Loop_Function, -1.0);
         m_window_thread_ptr->Attach_Exit_Function(Thread_Exit_Function);
         m_window_thread_ptr->Start_Thread();
     }

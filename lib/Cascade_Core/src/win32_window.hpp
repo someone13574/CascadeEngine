@@ -4,7 +4,8 @@
 
 #include "engine_thread_manager.hpp"
 #include "window.hpp"
-#include <Windows.h>
+#include <windows.h>
+#include <windowsx.h>
 
 namespace Cascade_Core
 {
