@@ -7,7 +7,11 @@ add_library(cascade_graphics STATIC src/graphics_factory.hpp
                                     src/renderer.cpp
                                     src/vulkan_graphics_factory.cpp
                                     src/vulkan_graphics.cpp
-                                    src/vulkan_renderer.cpp)
+                                    src/vulkan_renderer.cpp
+                                    src/Vulkan_Backend/instance.cpp
+                                    src/Vulkan_Backend/instance_builder.cpp
+                                    src/Vulkan_Backend/vkresult_translator.hpp
+                                    src/Vulkan_Backend/vulkan_header.hpp)
 
 # Set 'include' as a include directory
 target_include_directories(cascade_graphics PUBLIC include)
@@ -19,3 +23,7 @@ set_target_properties(cascade_graphics PROPERTIES CXX_EXTENSIONS OFF)
 # Link logging library
 add_subdirectory(../Acorn_Logging ../../build/lib/Acorn_Logging)
 target_link_libraries(cascade_graphics PUBLIC acorn_logging)
+
+# Link Vulkan
+find_package(Vulkan REQUIRED)
+target_link_libraries(cascade_graphics PRIVATE Vulkan::Vulkan)
