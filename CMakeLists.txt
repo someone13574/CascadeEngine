@@ -1,5 +1,5 @@
 # Define the minimum required version of cmake to build the test application
-cmake_minimum_required(VERSION 3.12...3.24)
+cmake_minimum_required(VERSION 3.16...3.24)
 
 # Create the top level project
 project(Cascade VERSION 0.7.0

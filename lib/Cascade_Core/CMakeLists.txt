@@ -22,9 +22,9 @@ set_target_properties(cascade_core PROPERTIES CXX_EXTENSIONS OFF)
 find_package(Threads REQUIRED)
 target_link_libraries(cascade_core PRIVATE Threads::Threads)
 
-# Link logging library
-add_subdirectory(../Acorn_Logging ../../build/lib/Acorn_Logging)
-target_link_libraries(cascade_core PUBLIC acorn_logging)
+# Link graphics library
+add_subdirectory(../Cascade_Graphics ../../build/lib/Cascade_Graphics)
+target_link_libraries(cascade_core PUBLIC cascade_graphics)
 
 # Link XCB
 if (UNIX AND NOT APPLE)

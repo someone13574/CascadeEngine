@@ -1,0 +1,20 @@
+# Define the minimum required version of cmake to build the graphics library
+cmake_minimum_required(VERSION 3.16...3.24)
+
+# Creaet a static library for cascade graphics
+add_library(cascade_graphics STATIC src/graphics_factory.hpp
+                                    src/graphics.cpp
+                                    src/renderer.cpp
+                                    src/vulkan_graphics.cpp
+                                    src/vulkan_renderer.cpp)
+
+# Set 'include' as a include directory
+target_include_directories(cascade_graphics PUBLIC include)
+
+# Enable C++17
+target_compile_features(cascade_graphics PRIVATE cxx_std_17)
+set_target_properties(cascade_graphics PROPERTIES CXX_EXTENSIONS OFF)
+
+# Link logging library
+add_subdirectory(../Acorn_Logging ../../build/lib/Acorn_Logging)
+target_link_libraries(cascade_graphics PUBLIC acorn_logging)
