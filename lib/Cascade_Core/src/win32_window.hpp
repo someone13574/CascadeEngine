@@ -27,7 +27,7 @@ namespace Cascade_Core
         void Register_Window_Class();
 
     private:
-        Win32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr);
+        Win32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr);
 
     public:
         ~Win32_Window();
@@ -36,7 +36,7 @@ namespace Cascade_Core
     class Win32_Window_Factory : public Window_Factory
     {
     public:
-        Window* Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) const override;
+        Window* Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr) const override;
     };
 } // namespace Cascade_Core
 

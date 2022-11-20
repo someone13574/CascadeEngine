@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.16...3.24)
 add_library(cascade_graphics STATIC src/graphics_factory.hpp
                                     src/graphics.cpp
                                     src/renderer.cpp
+                                    src/vulkan_graphics_factory.cpp
                                     src/vulkan_graphics.cpp
                                     src/vulkan_renderer.cpp)
 

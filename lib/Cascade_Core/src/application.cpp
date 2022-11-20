@@ -16,6 +16,9 @@ namespace Cascade_Core
         application_thread_ptr->Attach_Start_Function(Cascade_Main);
         application_thread_ptr->Start_Thread();
 
+        Cascade_Graphics::Vulkan_Graphics_Factory graphics_factory = Cascade_Graphics::Vulkan_Graphics_Factory();
+        m_graphics_ptr = graphics_factory.Create_Graphics();
+
         m_engine_thread_manager.Wait_For_Threads_To_Finish();
     }
 
@@ -28,6 +31,8 @@ namespace Cascade_Core
             delete m_window_ptrs[i];
             m_window_ptrs.erase(m_window_ptrs.begin() + i);
         }
+
+        delete m_graphics_ptr;
 
         LOG_TRACE << "Core: Finished destroying application";
     }
@@ -50,7 +55,7 @@ namespace Cascade_Core
         Win32_Window_Factory window_factory = Win32_Window_Factory();
 #endif
 
-        Window* window_ptr = window_factory.Create_Window(window_title, window_width, window_height, &m_engine_thread_manager);
+        Window* window_ptr = window_factory.Create_Window(window_title, window_width, window_height, &m_engine_thread_manager, m_graphics_ptr);
         m_window_ptrs.push_back(window_ptr);
 
         return window_ptr;

@@ -2,6 +2,7 @@
 
 #include "engine_thread_manager.hpp"
 #include "window.hpp"
+#include <cascade_graphics.hpp>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,8 @@ namespace Cascade_Core
         uint32_t m_application_patch_version;
 
         Engine_Thread_Manager m_engine_thread_manager;
+        Cascade_Graphics::Graphics* m_graphics_ptr;
+
         std::vector<Window*> m_window_ptrs;
 
     private:

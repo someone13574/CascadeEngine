@@ -4,6 +4,7 @@ namespace Cascade_Graphics
 {
     Graphics* Vulkan_Graphics_Factory::Create_Graphics() const
     {
+        return new Vulkan_Graphics();
     }
 
     Renderer* Vulkan_Graphics_Factory::Create_Renderer(Graphics* graphics_ptr) const

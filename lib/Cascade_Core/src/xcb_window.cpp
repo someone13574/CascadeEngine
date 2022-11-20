@@ -5,7 +5,8 @@
 
 namespace Cascade_Core
 {
-    XCB_Window::XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) : Window::Window(window_title, window_width, window_height, thread_manager_ptr)
+    XCB_Window::XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr)
+        : Window::Window(window_title, window_width, window_height, thread_manager_ptr, graphics_ptr)
     {
     }
 
@@ -77,9 +78,9 @@ namespace Cascade_Core
         xcb_disconnect(m_xcb_connection_ptr);
     }
 
-    Window* XCB_Window_Factory::Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) const
+    Window* XCB_Window_Factory::Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr) const
     {
-        return new XCB_Window(window_title, window_width, window_height, thread_manager_ptr);
+        return new XCB_Window(window_title, window_width, window_height, thread_manager_ptr, graphics_ptr);
     }
 } // namespace Cascade_Core
 

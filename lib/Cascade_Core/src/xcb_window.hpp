@@ -30,7 +30,7 @@ namespace Cascade_Core
         void Destroy_Window() override;
 
     private:
-        XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr);
+        XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr);
 
     public:
         ~XCB_Window();
@@ -39,7 +39,7 @@ namespace Cascade_Core
     class XCB_Window_Factory : public Window_Factory
     {
     public:
-        Window* Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr) const override;
+        Window* Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr) const override;
     };
 } // namespace Cascade_Core
 
