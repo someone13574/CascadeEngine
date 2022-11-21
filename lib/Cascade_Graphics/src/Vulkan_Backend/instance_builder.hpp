@@ -18,6 +18,10 @@ namespace Cascade_Graphics
             std::vector<const char*> m_enabled_layers;
             std::vector<const char*> m_enabled_extensions;
 
+        private:
+            void Ensure_All_Required_Layers_Are_Present();
+            void Ensure_All_Required_Extensions_Are_Present();
+
         public:
             Instance_Builder();
             Instance_Builder& Set_Application_Details(std::string application_name, uint32_t application_version);
