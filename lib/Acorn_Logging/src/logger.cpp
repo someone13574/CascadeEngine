@@ -83,7 +83,7 @@ namespace Acorn_Logging
             std::cout << " [" << std::setw(2) << std::setfill('0') << local_time.tm_hour;
             std::cout << ":" << std::setw(2) << std::setfill('0') << local_time.tm_min;
             std::cout << ":" << std::setw(2) << std::setfill('0') << local_time.tm_sec;
-            std::cout << "." << std::setw(2) << std::setfill('0')
+            std::cout << "." << std::setw(6) << std::setfill('0')
                       << std::chrono::duration_cast<std::chrono::microseconds>(log_message_ptr->occurrence_time - std::chrono::time_point_cast<std::chrono::seconds>(log_message_ptr->occurrence_time)).count() << "] ";
 
 #if defined __linux__
