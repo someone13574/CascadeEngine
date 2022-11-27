@@ -1,7 +1,7 @@
 #include "vulkan_graphics.hpp"
 
-#include "Vulkan_Backend/instance.hpp"
 #include "Vulkan_Backend/instance_builder.hpp"
+#include "Vulkan_Backend/physical_device_selector.hpp"
 
 namespace Cascade_Graphics
 {
@@ -15,6 +15,14 @@ namespace Cascade_Graphics
                              .Add_Extension(VK_KHR_SURFACE_EXTENSION_NAME)
                              .Add_Extension(VK_KHR_XCB_SURFACE_EXTENSION_NAME)
                              .Build();
+
+        m_physical_device_ptr = Vulkan::Physical_Device_Selector(m_instance_ptr)
+                                    .Require_Queue_Type(VK_QUEUE_COMPUTE_BIT)
+                                    .Require_Queue_Type(VK_QUEUE_TRANSFER_BIT)
+                                    .Require_Extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+                                    .Require_Extension(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME)
+                                    .Prefer_Dedicated(1000.0)
+                                    .Best();
     }
 
     Vulkan_Graphics::~Vulkan_Graphics()
