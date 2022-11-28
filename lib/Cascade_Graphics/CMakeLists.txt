@@ -29,4 +29,5 @@ target_link_libraries(cascade_graphics PUBLIC acorn_logging)
 
 # Link Vulkan
 find_package(Vulkan REQUIRED)
-target_link_libraries(cascade_graphics PRIVATE Vulkan::Vulkan)
+target_link_libraries(cascade_graphics PUBLIC ${Vulkan_LIBRARIES})
+target_include_directories(cascade_graphics PUBLIC ${Vulkan_INCLUDE_DIRS})

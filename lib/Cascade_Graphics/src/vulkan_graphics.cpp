@@ -7,6 +7,7 @@ namespace Cascade_Graphics
 {
     Vulkan_Graphics::Vulkan_Graphics()
     {
+#ifdef __linux__
         m_instance_ptr = Vulkan::Instance_Builder()
                              .Set_Application_Details("test-application", 0)
                              .Set_Engine_Details("Cascade", 0)
@@ -15,6 +16,16 @@ namespace Cascade_Graphics
                              .Add_Extension(VK_KHR_SURFACE_EXTENSION_NAME)
                              .Add_Extension(VK_KHR_XCB_SURFACE_EXTENSION_NAME)
                              .Build();
+#elif defined _WIN32
+        m_instance_ptr = Vulkan::Instance_Builder()
+                             .Set_Application_Details("test-application", 0)
+                             .Set_Engine_Details("Cascade", 0)
+                             .Set_Minimum_Vulkan_Version(VK_API_VERSION_1_0)
+                             .Add_Layer("VK_LAYER_KHRONOS_validation")
+                             .Add_Extension(VK_KHR_SURFACE_EXTENSION_NAME)
+                             .Add_Extension(VK_KHR_WIN32_SURFACE_EXTENSION_NAME)
+                             .Build();
+#endif
 
         m_physical_device_ptr = Vulkan::Physical_Device_Selector(m_instance_ptr)
                                     .Require_Queue_Type(VK_QUEUE_COMPUTE_BIT)

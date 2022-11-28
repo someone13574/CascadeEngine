@@ -97,7 +97,7 @@ namespace Cascade_Graphics
 
             for (uint32_t layer_index = 0; layer_index <= m_enabled_layers.size(); layer_index++)
             {
-                const char* layer_name = (layer_index == m_enabled_extensions.size()) ? NULL : m_enabled_layers[layer_index];
+                const char* layer_name = (layer_index == m_enabled_layers.size()) ? NULL : m_enabled_layers[layer_index];
 
                 uint32_t available_extensions_in_layer_count;
                 VkResult get_extension_count_in_layer_result = vkEnumerateInstanceExtensionProperties(layer_name, &available_extensions_in_layer_count, nullptr);
