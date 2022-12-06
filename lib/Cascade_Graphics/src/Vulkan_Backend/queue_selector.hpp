@@ -1,6 +1,7 @@
 #pragma once
 
 #include "physical_device.hpp"
+#include "queue_data.hpp"
 #include "vulkan_header.hpp"
 #include <string>
 #include <vector>
@@ -11,21 +12,6 @@ namespace Cascade_Graphics
     {
         class Queue_Selector
         {
-        private:
-            struct Queue_Requirement
-            {
-                std::string requirement_label;
-
-                VkQueueFlagBits queue_type;
-                uint32_t required_queue_count;
-            };
-
-            struct Queue_Set
-            {
-                std::vector<uint32_t> queue_family_usage;
-                std::vector<std::vector<std::pair<uint32_t, uint32_t>>> queue_providers;
-            };
-
         private:
             std::vector<VkQueueFamilyProperties> m_queue_families;
             std::vector<Queue_Requirement> m_queue_requirements;
