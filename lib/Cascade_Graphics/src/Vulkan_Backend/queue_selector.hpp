@@ -2,6 +2,7 @@
 
 #include "physical_device.hpp"
 #include "vulkan_header.hpp"
+#include <string>
 #include <vector>
 
 namespace Cascade_Graphics
@@ -11,22 +12,33 @@ namespace Cascade_Graphics
         class Queue_Selector
         {
         private:
-            struct Queue_Family_Filter_Info
+            struct Queue_Requirement
             {
-                uint32_t queue_family_index;
-                VkQueueFamilyProperties queue_family_properties;
+                std::string requirement_label;
+
+                VkQueueFlagBits queue_type;
+                uint32_t required_queue_count;
+            };
+
+            struct Queue_Set
+            {
+                std::vector<uint32_t> queue_family_usage;
+                std::vector<std::vector<std::pair<uint32_t, uint32_t>>> queue_providers;
             };
 
         private:
-            std::vector<Queue_Family_Filter_Info> m_queue_filter_infos;
+            std::vector<VkQueueFamilyProperties> m_queue_families;
+            std::vector<Queue_Requirement> m_queue_requirements;
+            std::vector<Queue_Set> m_valid_queue_sets;
 
-            Physical_Device* m_physical_device_ptr;
+        private:
+            void Generate_Sets();
 
         public:
             Queue_Selector(Physical_Device* physical_device_ptr);
 
         public:
-            Queue_Selector& Require_Queue_Type(VkQueueFlagBits queue_type);
+            Queue_Selector& Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count);
             bool Meets_Requirements();
         };
     } // namespace Vulkan

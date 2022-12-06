@@ -30,7 +30,8 @@ namespace Cascade_Graphics
             Physical_Device_Selector(Instance* instance_ptr);
 
         public:
-            Physical_Device_Selector& Require_Queue_Type(VkQueueFlagBits queue_type);
+            Physical_Device_Selector& Require_Queue_Type(std::string requirement_label, VkQueueFlagBits queue_type, uint32_t required_queue_count);
+
             Physical_Device_Selector& Require_Extension(const char* extension_name);
             Physical_Device_Selector& Prefer_Dedicated(double add_score);
             Physical_Device* Best();

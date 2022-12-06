@@ -114,5 +114,7 @@
     "doxdocgen.generic.authorName": "",
     "doxdocgen.generic.authorEmail": "",
     "doxdocgen.generic.dateFormat": "DD-MM-YYYY",
-    "doxdocgen.file.copyrightTag": []
+    "doxdocgen.file.copyrightTag": [],
+    "terminal.integrated.gpuAcceleration": "auto",
+    "terminal.integrated.scrollback": 500
 }
