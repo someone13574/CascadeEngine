@@ -16,22 +16,26 @@ namespace Cascade_Graphics
         m_instance_ptr = Vulkan::Instance_Builder()
                              .Set_Application_Details("test-application", 0)
                              .Set_Engine_Details("Cascade", 0)
-                             .Set_Minimum_Vulkan_Version(VK_API_VERSION_1_0)
+                             .Set_Minimum_Vulkan_Version(VK_API_VERSION_1_3)
                              .Add_Layer("VK_LAYER_KHRONOS_validation")
                              .Add_Extension(VK_KHR_SURFACE_EXTENSION_NAME)
+                             .Add_Extension(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME)
                              .Add_Extension(platform_surface_extension)
                              .Build();
 
         m_physical_device_ptr = Vulkan::Physical_Device_Selector(m_instance_ptr)
-                                    .Require_Queue_Type("render_queue", VK_QUEUE_COMPUTE_BIT, 1)
+                                    .Require_Queue_Type("render_queue", VK_QUEUE_COMPUTE_BIT, 1, 0.5)
                                     .Require_Extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
                                     .Require_Extension(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME)
                                     .Prefer_Dedicated(1000.0)
                                     .Best();
+
+        m_device_ptr = new Vulkan::Device(m_physical_device_ptr);
     }
 
     Vulkan_Graphics::~Vulkan_Graphics()
     {
+        delete m_device_ptr;
         delete m_physical_device_ptr;
         delete m_instance_ptr;
     }

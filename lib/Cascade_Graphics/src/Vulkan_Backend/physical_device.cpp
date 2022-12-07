@@ -29,5 +29,15 @@ namespace Cascade_Graphics
         {
             return &m_physical_device_features;
         }
+
+        Queue_Set Physical_Device::Get_Queue_Set()
+        {
+            return m_queue_set;
+        }
+
+        std::vector<const char*> Physical_Device::Get_Device_Extensions()
+        {
+            return m_enabled_device_extensions;
+        }
     } // namespace Vulkan
 } // namespace Cascade_Graphics

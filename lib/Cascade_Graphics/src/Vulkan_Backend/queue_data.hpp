@@ -13,6 +13,7 @@ namespace Cascade_Graphics
             std::string requirement_label;       // Label used to identify this requirement in logs
             uint32_t required_queue_count;       // Number of queues required
             VkQueueFlagBits required_queue_type; // Type of queue required
+            float queue_priority;                // Priority of the queues created to meet this requirement
         };
 
         struct Queue_Usage

@@ -24,8 +24,10 @@ namespace Cascade_Graphics
             Queue_Selector(Physical_Device* physical_device_ptr);
 
         public:
-            Queue_Selector& Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count);
+            Queue_Selector& Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority);
+
             bool Meets_Requirements();
+            Queue_Set Best();
         };
     } // namespace Vulkan
 } // namespace Cascade_Graphics

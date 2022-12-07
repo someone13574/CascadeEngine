@@ -170,7 +170,7 @@ namespace Cascade_Graphics
             }
         }
 
-        Queue_Selector& Queue_Selector::Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count)
+        Queue_Selector& Queue_Selector::Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority)
         {
             m_queue_requirements.resize(m_queue_requirements.size() + 1);
 
@@ -178,6 +178,7 @@ namespace Cascade_Graphics
             m_queue_requirements.back().requirement_label = label;
             m_queue_requirements.back().required_queue_type = queue_type;
             m_queue_requirements.back().required_queue_count = required_queue_count;
+            m_queue_requirements.back().queue_priority = queue_priority;
 
             return *this;
         }
@@ -187,6 +188,11 @@ namespace Cascade_Graphics
             Generate_Sets();
 
             return !m_valid_queue_sets.empty();
+        }
+
+        Queue_Set Queue_Selector::Best()
+        {
+            return m_valid_queue_sets.front();
         }
     } // namespace Vulkan
 } // namespace Cascade_Graphics

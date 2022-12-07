@@ -10,9 +10,10 @@ add_library(cascade_graphics STATIC src/graphics_factory.hpp
                                     src/vulkan_renderer.cpp
                                     src/Vulkan_Backend/instance.cpp
                                     src/Vulkan_Backend/instance_builder.cpp
+                                    src/Vulkan_Backend/queue_selector.cpp
                                     src/Vulkan_Backend/physical_device.cpp
                                     src/Vulkan_Backend/physical_device_selector.cpp
-                                    src/Vulkan_Backend/queue_selector.cpp
+                                    src/Vulkan_Backend/device.cpp
                                     src/Vulkan_Backend/vkresult_translator.cpp
                                     src/Vulkan_Backend/vulkan_header.hpp)
 

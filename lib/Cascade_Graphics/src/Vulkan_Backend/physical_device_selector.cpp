@@ -65,7 +65,7 @@ namespace Cascade_Graphics
             }
         }
 
-        Physical_Device_Selector& Physical_Device_Selector::Require_Queue_Type(std::string requirement_label, VkQueueFlagBits queue_type, uint32_t required_queue_count)
+        Physical_Device_Selector& Physical_Device_Selector::Require_Queue_Type(std::string requirement_label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority)
         {
             for (int32_t physical_device_index = m_physical_device_filter_infos.size() - 1; physical_device_index >= 0; physical_device_index--)
             {
@@ -74,10 +74,14 @@ namespace Cascade_Graphics
                     m_physical_device_filter_infos[physical_device_index].queue_selector_ptr = new Queue_Selector(m_physical_device_filter_infos[physical_device_index].physical_device_ptr);
                 }
 
-                if (!m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Add_Queue_Requirement(requirement_label, queue_type, required_queue_count).Meets_Requirements())
+                if (!m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Add_Queue_Requirement(requirement_label, queue_type, required_queue_count, queue_priority).Meets_Requirements())
                 {
                     LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' cannot meet queue requirements";
                     m_physical_device_filter_infos.erase(m_physical_device_filter_infos.begin() + physical_device_index);
+                }
+                else
+                {
+                    m_physical_device_filter_infos[physical_device_index].physical_device_ptr->m_queue_set = m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Best();
                 }
             }
 
@@ -107,6 +111,7 @@ namespace Cascade_Graphics
                 else
                 {
                     LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' supports required extension '" << extension_name << "'";
+                    m_physical_device_filter_infos[physical_device_index].physical_device_ptr->m_enabled_device_extensions.push_back(extension_name);
                 }
             }
 
