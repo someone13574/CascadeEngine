@@ -11,6 +11,11 @@ target_include_directories(acorn_logging PUBLIC include)
 target_compile_features(acorn_logging PRIVATE cxx_std_17)
 set_target_properties(acorn_logging PROPERTIES CXX_EXTENSIONS OFF)
 
+# Enable warnings
+if (UNIX AND NOT APPLE)
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif ()
+
 # Link required thread library
 find_package(Threads REQUIRED)
 target_link_libraries(acorn_logging PRIVATE Threads::Threads)

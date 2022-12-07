@@ -18,6 +18,11 @@ target_include_directories(cascade_core PUBLIC include)
 target_compile_features(cascade_core PRIVATE cxx_std_17)
 set_target_properties(cascade_core PROPERTIES CXX_EXTENSIONS OFF)
 
+# Enable warnings
+if (UNIX AND NOT APPLE)
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif ()
+
 # Link required thread library
 find_package(Threads REQUIRED)
 target_link_libraries(cascade_core PRIVATE Threads::Threads)

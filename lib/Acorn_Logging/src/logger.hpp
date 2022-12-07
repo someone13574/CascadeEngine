@@ -18,7 +18,7 @@ namespace Acorn_Logging
         Disable operator<<(T type)
         {
             return *this;
-        };
+        }
     };
 
     class Logger;

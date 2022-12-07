@@ -24,6 +24,11 @@ target_include_directories(cascade_graphics PUBLIC include)
 target_compile_features(cascade_graphics PRIVATE cxx_std_17)
 set_target_properties(cascade_graphics PROPERTIES CXX_EXTENSIONS OFF)
 
+# Enable warnings
+if (UNIX AND NOT APPLE)
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif ()
+
 # Link logging library
 add_subdirectory(../Acorn_Logging ../../build/lib/Acorn_Logging)
 target_link_libraries(cascade_graphics PUBLIC acorn_logging)
