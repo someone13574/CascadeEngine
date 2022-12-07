@@ -8,6 +8,11 @@ namespace Cascade_Core
     XCB_Window::XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr)
         : Window::Window(window_title, window_width, window_height, thread_manager_ptr, graphics_ptr)
     {
+        m_window_thread_ptr->Start_Thread();
+        m_window_thread_ptr->Await_State(Engine_Thread::Thread_State::LOOP_FUNC);
+
+        Cascade_Graphics::Vulkan_Graphics_Factory graphics_factory = Cascade_Graphics::Vulkan_Graphics_Factory();
+        m_renderer_ptr = graphics_factory.Create_Renderer(m_graphics_ptr);
     }
 
     XCB_Window::~XCB_Window()

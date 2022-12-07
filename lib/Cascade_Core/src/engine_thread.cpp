@@ -28,7 +28,12 @@ namespace Cascade_Core
         {
             LOG_DEBUG << "Core: Calling start function of thread '" << instance->m_thread_label << "'";
 
-            instance->m_thread_state = Thread_State::START_FUNC;
+            {
+                std::scoped_lock<std::mutex> state_change_lock(instance->m_state_change_mutex);
+                instance->m_thread_state = Thread_State::START_FUNC;
+                instance->m_state_change_notify.notify_all();
+            }
+
             instance->m_start_function(instance, instance->m_user_data_ptr);
         }
 
@@ -36,7 +41,11 @@ namespace Cascade_Core
         {
             LOG_INFO << "Core: Starting loop on thread '" << instance->m_thread_label << "'";
 
-            instance->m_thread_state = Thread_State::LOOP_FUNC;
+            {
+                std::scoped_lock<std::mutex> state_change_lock(instance->m_state_change_mutex);
+                instance->m_thread_state = Thread_State::LOOP_FUNC;
+                instance->m_state_change_notify.notify_all();
+            }
 
             while (instance->m_thread_state != Thread_State::AWAITING_LOOP_EXIT)
             {
@@ -52,7 +61,12 @@ namespace Cascade_Core
 
         if (instance->m_exit_function_enabled)
         {
-            instance->m_thread_state = Thread_State::EXIT_FUNC;
+            {
+                std::scoped_lock<std::mutex> state_change_lock(instance->m_state_change_mutex);
+                instance->m_thread_state = Thread_State::EXIT_FUNC;
+                instance->m_state_change_notify.notify_all();
+            }
+
             instance->m_exit_function(instance, instance->m_user_data_ptr);
         }
 
@@ -60,11 +74,13 @@ namespace Cascade_Core
 
         {
             std::scoped_lock<std::mutex> thread_finished_notify_lock(*instance->m_thread_finished_notify_mutex_ptr);
+            std::scoped_lock<std::mutex> state_change_lock(instance->m_state_change_mutex);
             instance->m_thread_state = Thread_State::FINISHED;
             (*instance->m_finished_thread_count_ptr)++;
         }
 
         instance->m_thread_finished_notify_ptr->notify_all();
+        instance->m_state_change_notify.notify_all();
     }
 
     bool Engine_Thread::Attach_Start_Function(std::function<void(Engine_Thread*, void*)> start_function)
@@ -203,5 +219,15 @@ namespace Cascade_Core
 
             return;
         }
+    }
+
+    void Engine_Thread::Await_State(Thread_State target_state)
+    {
+        LOG_TRACE << "Core: Waiting for '" << m_thread_label << "' to reach state " << target_state;
+
+        std::unique_lock<std::mutex> thread_await_state_lock(m_state_change_mutex);
+        m_state_change_notify.wait(thread_await_state_lock, [this, target_state] { return m_thread_state == target_state; });
+
+        LOG_TRACE << "Core: '" << m_thread_label << "' has reached state " << target_state;
     }
 } // namespace Cascade_Core

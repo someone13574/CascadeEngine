@@ -12,12 +12,12 @@ namespace Cascade_Core
     {
         LOG_INFO << "Core: Initializing Cascade";
 
+        Cascade_Graphics::Vulkan_Graphics_Factory graphics_factory = Cascade_Graphics::Vulkan_Graphics_Factory();
+        m_graphics_ptr = graphics_factory.Create_Graphics();
+
         Engine_Thread* application_thread_ptr = m_engine_thread_manager.Create_Engine_Thread("application_cascade_main", (void*)this);
         application_thread_ptr->Attach_Start_Function(Cascade_Main);
         application_thread_ptr->Start_Thread();
-
-        Cascade_Graphics::Vulkan_Graphics_Factory graphics_factory = Cascade_Graphics::Vulkan_Graphics_Factory();
-        m_graphics_ptr = graphics_factory.Create_Graphics();
 
         m_engine_thread_manager.Wait_For_Threads_To_Finish();
     }

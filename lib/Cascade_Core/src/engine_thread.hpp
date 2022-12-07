@@ -13,7 +13,7 @@ namespace Cascade_Core
     {
         friend class Engine_Thread_Manager;
 
-    private:
+    public:
         enum Thread_State
         {
             NOT_STARTED,
@@ -34,6 +34,9 @@ namespace Cascade_Core
         double m_max_loop_frequency;
         std::mutex m_exit_loop_mutex;
         std::condition_variable m_exit_loop_notify;
+
+        std::mutex m_state_change_mutex;
+        std::condition_variable m_state_change_notify;
 
         uint32_t* m_finished_thread_count_ptr;
         std::mutex* m_thread_finished_notify_mutex_ptr;
@@ -60,5 +63,7 @@ namespace Cascade_Core
         void Start_Thread();
         void Exit_Thread();
         void Exit_Thread_Immediate();
+
+        void Await_State(Thread_State target_state);
     };
 } // namespace Cascade_Core

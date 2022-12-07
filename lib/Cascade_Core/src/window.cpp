@@ -12,10 +12,6 @@ namespace Cascade_Core
         m_window_thread_ptr->Attach_Start_Function(Thread_Start_Function);
         m_window_thread_ptr->Attach_Loop_Function(Thread_Loop_Function, -1.0);
         m_window_thread_ptr->Attach_Exit_Function(Thread_Exit_Function);
-        m_window_thread_ptr->Start_Thread();
-
-        Cascade_Graphics::Vulkan_Graphics_Factory graphics_factory = Cascade_Graphics::Vulkan_Graphics_Factory();
-        m_renderer_ptr = graphics_factory.Create_Renderer(m_graphics_ptr);
     }
 
     Window::~Window()
