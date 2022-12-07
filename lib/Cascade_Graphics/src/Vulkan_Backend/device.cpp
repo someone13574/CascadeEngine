@@ -19,11 +19,11 @@ namespace Cascade_Graphics
             device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
             device_create_info.pNext = nullptr;
             device_create_info.flags = 0;
+            device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_informations.size());
             device_create_info.pQueueCreateInfos = device_queue_create_informations.data();
-            device_create_info.queueCreateInfoCount = device_queue_create_informations.size();
             device_create_info.enabledLayerCount = 0;
             device_create_info.ppEnabledLayerNames = nullptr;
-            device_create_info.enabledExtensionCount = enabled_device_extensions.size();
+            device_create_info.enabledExtensionCount = static_cast<uint32_t>(enabled_device_extensions.size());
             device_create_info.ppEnabledExtensionNames = enabled_device_extensions.data();
             device_create_info.pEnabledFeatures = nullptr;
 

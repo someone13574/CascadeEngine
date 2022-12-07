@@ -30,7 +30,7 @@ namespace Cascade_Graphics
             for (uint32_t requirement_index = 0; requirement_index < m_queue_requirements.size(); requirement_index++)
             {
                 // Generate combinations of possible providers
-                uint32_t provider_set_count = std::pow(2, m_queue_families.size());
+                uint32_t provider_set_count = static_cast<uint32_t>(std::pow(2, m_queue_families.size()));
                 std::vector<std::vector<uint32_t>> provider_sets; // Array of possible provider queue family sets
 
                 for (uint32_t set_index = 1; set_index < provider_set_count; set_index++)
@@ -47,10 +47,10 @@ namespace Cascade_Graphics
                             provider_sets.back().push_back(queue_family_index);
 
                             // Check if set contains an unnessessary queue family
-                            if ((m_queue_families[queue_family_index].queueFlags & m_queue_requirements[requirement_index].required_queue_type) != m_queue_requirements[requirement_index].required_queue_type)
+                            if ((m_queue_families[queue_family_index].queueFlags & m_queue_requirements[requirement_index].required_queue_type) != static_cast<VkQueueFlags>(m_queue_requirements[requirement_index].required_queue_type))
                             {
                                 // Delete current set
-                                provider_sets.erase(provider_sets.end());
+                                provider_sets.pop_back();
                                 break;
                             }
                         }
@@ -65,7 +65,7 @@ namespace Cascade_Graphics
                     uint32_t number_of_possible_combinations = 1;
                     for (uint32_t provider_index = 0; provider_index < provider_sets[provider_set_index].size(); provider_index++)
                     {
-                        number_of_possible_combinations *= std::min(m_queue_requirements[requirement_index].required_queue_count + 1, m_queue_families[provider_sets[provider_set_index][provider_index]].queueCount + 1);
+                        number_of_possible_combinations *= (std::min)(m_queue_requirements[requirement_index].required_queue_count + 1, m_queue_families[provider_sets[provider_set_index][provider_index]].queueCount + 1);
                     }
 
                     // Generate possible combinations
@@ -80,9 +80,9 @@ namespace Cascade_Graphics
 
                         for (uint32_t provider_index = 0; provider_index < provider_sets[provider_set_index].size(); provider_index++)
                         {
-                            uint32_t provided_queue_count = std::fmod((uint32_t)((combination_index + 0.5) / period),
-                                                                      (uint32_t)std::min(m_queue_requirements[requirement_index].required_queue_count + 1, m_queue_families[provider_sets[provider_set_index][provider_index]].queueCount + 1));
-                            period *= std::min(m_queue_requirements[requirement_index].required_queue_count + 1, m_queue_families[provider_sets[provider_set_index][provider_index]].queueCount + 1);
+                            uint32_t provided_queue_count = static_cast<uint32_t>(std::fmod((uint32_t)((combination_index + 0.5) / period), (uint32_t)(std::min)(m_queue_requirements[requirement_index].required_queue_count + 1,
+                                                                                                                                                                 m_queue_families[provider_sets[provider_set_index][provider_index]].queueCount + 1)));
+                            period *= (std::min)(m_queue_requirements[requirement_index].required_queue_count + 1, m_queue_families[provider_sets[provider_set_index][provider_index]].queueCount + 1);
 
                             if (provided_queue_count == 0)
                             {
@@ -140,7 +140,7 @@ namespace Cascade_Graphics
             uint32_t combination_count = 1;
             for (uint32_t requirement_index = 0; requirement_index < m_queue_requirements.size(); requirement_index++)
             {
-                combination_count *= queue_sets_by_requirement[requirement_index].size();
+                combination_count *= static_cast<uint32_t>(queue_sets_by_requirement[requirement_index].size());
             }
 
             for (int32_t combination_index = combination_count - 1; combination_index >= 0; combination_index--)
@@ -153,7 +153,7 @@ namespace Cascade_Graphics
                 double period = 1.0;
                 for (uint32_t requirement_index = 0; requirement_index < m_queue_requirements.size(); requirement_index++)
                 {
-                    uint32_t selected_set = std::fmod((uint32_t)((combination_index + 0.5) / period), (uint32_t)queue_sets_by_requirement[requirement_index].size());
+                    uint32_t selected_set = static_cast<uint32_t>(std::fmod((uint32_t)((combination_index + 0.5) / period), (uint32_t)queue_sets_by_requirement[requirement_index].size()));
                     period *= queue_sets_by_requirement[requirement_index].size();
 
                     m_valid_queue_sets.back() += queue_sets_by_requirement[requirement_index][selected_set];

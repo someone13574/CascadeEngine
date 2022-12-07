@@ -212,9 +212,9 @@ namespace Cascade_Graphics
             instance_create_info.pNext = nullptr;
             instance_create_info.flags = 0;
             instance_create_info.pApplicationInfo = &m_application_info;
-            instance_create_info.enabledLayerCount = m_enabled_layers.size();
+            instance_create_info.enabledLayerCount = static_cast<uint32_t>(m_enabled_layers.size());
             instance_create_info.ppEnabledLayerNames = m_enabled_layers.data();
-            instance_create_info.enabledExtensionCount = m_enabled_extensions.size();
+            instance_create_info.enabledExtensionCount = static_cast<uint32_t>(m_enabled_extensions.size());
             instance_create_info.ppEnabledExtensionNames = m_enabled_extensions.data();
 
             VkResult create_instance_result = vkCreateInstance(&instance_create_info, nullptr, m_instance_ptr->Get());

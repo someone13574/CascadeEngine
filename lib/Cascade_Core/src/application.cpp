@@ -26,7 +26,7 @@ namespace Cascade_Core
     {
         LOG_INFO << "Core: Destroying application";
 
-        for (int32_t i = m_window_ptrs.size() - 1; i >= 0; i--)
+        for (int32_t i = static_cast<int32_t>(m_window_ptrs.size()) - 1; i >= 0; i--)
         {
             delete m_window_ptrs[i];
             m_window_ptrs.erase(m_window_ptrs.begin() + i);

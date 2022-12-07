@@ -26,8 +26,10 @@ set_target_properties(cascade_graphics PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable warnings
 if (UNIX AND NOT APPLE)
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif ()
+    target_compile_options(cascade_graphics PRIVATE -Wall -Wextra -Wpedantic -Werror)
+elseif (MSVC)
+    target_compile_options(cascade_graphics PRIVATE /W4 /WX)
+endif()
 
 # Link logging library
 add_subdirectory(../Acorn_Logging ../../build/lib/Acorn_Logging)

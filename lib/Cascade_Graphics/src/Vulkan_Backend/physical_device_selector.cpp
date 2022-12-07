@@ -69,7 +69,7 @@ namespace Cascade_Graphics
 
         Physical_Device_Selector& Physical_Device_Selector::Require_Queue_Type(std::string requirement_label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority)
         {
-            for (int32_t physical_device_index = m_physical_device_filter_infos.size() - 1; physical_device_index >= 0; physical_device_index--)
+            for (int32_t physical_device_index = static_cast<int32_t>(m_physical_device_filter_infos.size()) - 1; physical_device_index >= 0; physical_device_index--)
             {
                 if (m_physical_device_filter_infos[physical_device_index].queue_selector_ptr == nullptr)
                 {
@@ -94,7 +94,7 @@ namespace Cascade_Graphics
         {
             LOG_DEBUG << "Graphics (Vulkan): Filtering physical devices for support of device extension '" << extension_name << "'";
 
-            for (int32_t physical_device_index = m_physical_device_filter_infos.size() - 1; physical_device_index >= 0; physical_device_index--)
+            for (int32_t physical_device_index = static_cast<int32_t>(m_physical_device_filter_infos.size()) - 1; physical_device_index >= 0; physical_device_index--)
             {
                 bool found_extension = false;
                 for (uint32_t extension_index = 0; extension_index < m_physical_device_filter_infos[physical_device_index].available_extensions.size(); extension_index++)

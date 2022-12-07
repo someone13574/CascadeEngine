@@ -14,8 +14,10 @@ set_target_properties(cascade_application PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable warnings
 if (UNIX AND NOT APPLE)
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif ()
+    target_compile_options(cascade_application PRIVATE -Wall -Wextra -Wpedantic -Werror)
+elseif (MSVC)
+    target_compile_options(cascade_application PRIVATE /W4 /WX)
+endif()
 
 # Link core library
 add_subdirectory(lib/Cascade_Core)

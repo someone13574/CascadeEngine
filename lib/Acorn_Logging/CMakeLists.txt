@@ -13,8 +13,10 @@ set_target_properties(acorn_logging PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable warnings
 if (UNIX AND NOT APPLE)
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif ()
+    target_compile_options(acorn_logging PRIVATE -Wall -Wextra -Wpedantic -Werror)
+elseif (MSVC)
+    target_compile_options(acorn_logging PRIVATE /W4 /WX)
+endif()
 
 # Link required thread library
 find_package(Threads REQUIRED)

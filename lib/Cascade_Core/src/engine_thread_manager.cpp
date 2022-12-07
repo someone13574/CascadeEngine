@@ -10,7 +10,7 @@ namespace Cascade_Core
 
     Engine_Thread_Manager::~Engine_Thread_Manager()
     {
-        for (int32_t i = m_engine_thread_ptrs.size() - 1; i >= 0; i--)
+        for (int32_t i = static_cast<int32_t>(m_engine_thread_ptrs.size()) - 1; i >= 0; i--)
         {
             Engine_Thread* current_thread_ptr = m_engine_thread_ptrs[i];
             m_engine_thread_ptrs.erase(m_engine_thread_ptrs.begin() + i);
@@ -35,7 +35,7 @@ namespace Cascade_Core
 
         LOG_INFO << "Core: All threads have finished";
 
-        for (int32_t i = m_engine_thread_ptrs.size() - 1; i >= 0; i--)
+        for (int32_t i = static_cast<int32_t>(m_engine_thread_ptrs.size()) - 1; i >= 0; i--)
         {
             Engine_Thread* current_thread_ptr = m_engine_thread_ptrs[i];
             m_engine_thread_ptrs.erase(m_engine_thread_ptrs.begin() + i);

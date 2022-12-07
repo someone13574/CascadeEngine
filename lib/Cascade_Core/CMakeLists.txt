@@ -20,8 +20,10 @@ set_target_properties(cascade_core PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable warnings
 if (UNIX AND NOT APPLE)
-    add_compile_options(-Wall -Wextra -Wpedantic)
-endif ()
+    target_compile_options(cascade_core PRIVATE -Wall -Wextra -Wpedantic -Werror)
+elseif (MSVC)
+    target_compile_options(cascade_core PRIVATE /W4 /WX)
+endif()
 
 # Link required thread library
 find_package(Threads REQUIRED)
