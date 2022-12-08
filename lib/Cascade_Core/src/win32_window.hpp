@@ -9,9 +9,9 @@
 
 namespace Cascade_Core
 {
-    class Win32_Window : public Window
+    class WIN32_Window : public Window
     {
-        friend class Win32_Window_Factory;
+        friend class WIN32_Window_Factory;
 
     private:
         const DWORD m_window_style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
@@ -27,16 +27,10 @@ namespace Cascade_Core
         void Register_Window_Class();
 
     private:
-        Win32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr);
+        WIN32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr);
 
     public:
-        ~Win32_Window();
-    };
-
-    class Win32_Window_Factory : public Window_Factory
-    {
-    public:
-        Window* Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr) const override;
+        ~WIN32_Window();
     };
 } // namespace Cascade_Core
 

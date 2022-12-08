@@ -8,6 +8,8 @@ namespace Cascade_Graphics
     class Graphics_Factory
     {
     public:
+        virtual ~Graphics_Factory() = default;
+
         virtual Graphics* Create_Graphics() const = 0;
         virtual Renderer* Create_Renderer(Graphics* graphics_ptr) const = 0;
     };

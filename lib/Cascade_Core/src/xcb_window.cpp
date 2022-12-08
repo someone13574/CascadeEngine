@@ -5,19 +5,17 @@
 
 namespace Cascade_Core
 {
-    XCB_Window::XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr)
-        : Window::Window(window_title, window_width, window_height, thread_manager_ptr, graphics_ptr)
+    XCB_Window::XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr)
+        : Window::Window(window_title, window_width, window_height, graphics_ptr, thread_manager_ptr, m_graphics_factory_ptr)
     {
         m_window_thread_ptr->Start_Thread();
         m_window_thread_ptr->Await_State(Engine_Thread::Thread_State::LOOP_FUNC);
 
-        Cascade_Graphics::Vulkan_Graphics_Factory graphics_factory = Cascade_Graphics::Vulkan_Graphics_Factory();
-        m_renderer_ptr = graphics_factory.Create_Renderer(m_graphics_ptr);
+        m_renderer_ptr = m_graphics_factory_ptr->Create_Renderer(m_graphics_ptr);
     }
 
     XCB_Window::~XCB_Window()
     {
-        LOG_INFO << "Core: Destroying XCB window '" << m_window_title << "'";
     }
 
     void XCB_Window::Create_Window()
@@ -81,11 +79,6 @@ namespace Cascade_Core
         free(m_event_ptr);
         xcb_destroy_window(m_xcb_connection_ptr, m_xcb_window);
         xcb_disconnect(m_xcb_connection_ptr);
-    }
-
-    Window* XCB_Window_Factory::Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr) const
-    {
-        return new XCB_Window(window_title, window_width, window_height, thread_manager_ptr, graphics_ptr);
     }
 } // namespace Cascade_Core
 

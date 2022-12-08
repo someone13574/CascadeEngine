@@ -1,25 +1,38 @@
 #include "application.hpp"
 
-#include "win32_window.hpp"
-#include "xcb_window.hpp"
+#include "win32_window_factory.hpp"
+#include "xcb_window_factory.hpp"
 #include <acorn_logging.hpp>
 
 extern void Cascade_Main(Cascade_Core::Engine_Thread* engine_thread_ptr, void* user_data_ptr);
 
 namespace Cascade_Core
 {
-    Application::Application() : m_engine_thread_manager()
+    Application::Application()
     {
         LOG_INFO << "Core: Initializing Cascade";
 
-        Cascade_Graphics::Vulkan_Graphics_Factory graphics_factory = Cascade_Graphics::Vulkan_Graphics_Factory();
-        m_graphics_ptr = graphics_factory.Create_Graphics();
+        m_engine_thread_manager_ptr = new Engine_Thread_Manager();
 
-        Engine_Thread* application_thread_ptr = m_engine_thread_manager.Create_Engine_Thread("application_cascade_main", (void*)this);
+#ifdef CSD_GRAPHICS_VULKAN
+        m_graphics_factory_ptr = new Cascade_Graphics::Vulkan_Graphics_Factory();
+#else
+#error "No graphics backend selected, define backend with CSD_BACKEND_{backend}"
+#endif
+
+        m_graphics_ptr = m_graphics_factory_ptr->Create_Graphics();
+
+#ifdef __linux__
+        m_window_factory_ptr = new XCB_Window_Factory(m_graphics_ptr, m_engine_thread_manager_ptr, m_graphics_factory_ptr);
+#elif defined _WIN32
+        m_window_factory_ptr = new WIN32_Window_Factory(m_graphics_ptr, m_engine_thread_manager_ptr, m_graphics_factory_ptr);
+#endif
+
+        Engine_Thread* application_thread_ptr = m_engine_thread_manager_ptr->Create_Engine_Thread("application_cascade_main", (void*)this);
         application_thread_ptr->Attach_Start_Function(Cascade_Main);
         application_thread_ptr->Start_Thread();
 
-        m_engine_thread_manager.Wait_For_Threads_To_Finish();
+        m_engine_thread_manager_ptr->Wait_For_Threads_To_Finish();
     }
 
     Application::~Application()
@@ -32,6 +45,8 @@ namespace Cascade_Core
             m_window_ptrs.erase(m_window_ptrs.begin() + i);
         }
 
+        delete m_window_factory_ptr;
+        delete m_graphics_factory_ptr;
         delete m_graphics_ptr;
 
         LOG_TRACE << "Core: Finished destroying application";
@@ -47,17 +62,8 @@ namespace Cascade_Core
         m_application_patch_version = application_patch_version;
     }
 
-    Window* Application::Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height)
+    Window_Factory* Application::Get_Window_Factory()
     {
-#ifdef __linux__
-        XCB_Window_Factory window_factory = XCB_Window_Factory();
-#elif defined _WIN32
-        Win32_Window_Factory window_factory = Win32_Window_Factory();
-#endif
-
-        Window* window_ptr = window_factory.Create_Window(window_title, window_width, window_height, &m_engine_thread_manager, m_graphics_ptr);
-        m_window_ptrs.push_back(window_ptr);
-
-        return window_ptr;
+        return m_window_factory_ptr;
     }
 } // namespace Cascade_Core

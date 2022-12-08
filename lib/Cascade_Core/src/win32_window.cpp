@@ -8,21 +8,20 @@ namespace Cascade_Core
     const static char window_class_name[] = "window_class";
     LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-    Win32_Window::Win32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr)
-        : Window::Window(window_title, window_width, window_height, thread_manager_ptr, graphics_ptr)
+    WIN32_Window::WIN32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr)
+        : Window::Window(window_title, window_width, window_height, graphics_ptr, thread_manager_ptr, m_graphics_factory_ptr)
     {
         m_window_thread_ptr->Start_Thread();
         m_window_thread_ptr->Await_State(Engine_Thread::Thread_State::LOOP_FUNC);
 
-        Cascade_Graphics::Vulkan_Graphics_Factory graphics_factory = Cascade_Graphics::Vulkan_Graphics_Factory();
-        m_renderer_ptr = graphics_factory.Create_Renderer(m_graphics_ptr);
+        m_renderer_ptr = m_graphics_factory_ptr->Create_Renderer(m_graphics_ptr);
     }
 
-    Win32_Window::~Win32_Window()
+    WIN32_Window::~WIN32_Window()
     {
     }
 
-    void Win32_Window::Create_Window()
+    void WIN32_Window::Create_Window()
     {
         LOG_INFO << "Core: Create a Win32 window with title '" << m_window_title << "' and dimensions " << m_window_width << "x" << m_window_height;
 
@@ -46,7 +45,7 @@ namespace Cascade_Core
         }
     }
 
-    void Win32_Window::Process_Events()
+    void WIN32_Window::Process_Events()
     {
         MSG message;
         BOOL get_message_return_value;
@@ -65,11 +64,11 @@ namespace Cascade_Core
         DispatchMessage(&message);
     }
 
-    void Win32_Window::Destroy_Window()
+    void WIN32_Window::Destroy_Window()
     {
     }
 
-    void Win32_Window::Register_Window_Class()
+    void WIN32_Window::Register_Window_Class()
     {
         LOG_DEBUG << "Core: Registering Win32 window class";
 
@@ -107,11 +106,6 @@ namespace Cascade_Core
         }
 
         return 0;
-    }
-
-    Window* Win32_Window_Factory::Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr) const
-    {
-        return new Win32_Window(window_title, window_width, window_height, thread_manager_ptr, graphics_ptr);
     }
 } // namespace Cascade_Core
 

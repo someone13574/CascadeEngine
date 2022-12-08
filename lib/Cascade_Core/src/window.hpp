@@ -13,11 +13,11 @@ namespace Cascade_Core
         uint32_t m_window_width;
         uint32_t m_window_height;
 
-        Engine_Thread* m_window_thread_ptr;
-        Engine_Thread_Manager* m_thread_manager_ptr;
-
         Cascade_Graphics::Renderer* m_renderer_ptr;
         Cascade_Graphics::Graphics* m_graphics_ptr;
+
+        Engine_Thread* m_window_thread_ptr;
+        Engine_Thread_Manager* m_thread_manager_ptr;
 
     protected:
         static void Thread_Start_Function(Engine_Thread* window_thread_ptr, void* window_void_ptr);
@@ -29,14 +29,7 @@ namespace Cascade_Core
         virtual void Destroy_Window() = 0;
 
     public:
-        Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr);
+        Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr);
         virtual ~Window();
-    };
-
-    class Window_Factory
-    {
-    public:
-        virtual ~Window_Factory();
-        virtual Window* Create_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics* graphics_ptr) const = 0;
     };
 } // namespace Cascade_Core

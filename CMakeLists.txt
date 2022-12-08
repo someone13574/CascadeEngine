@@ -19,6 +19,9 @@ elseif (MSVC)
     target_compile_options(cascade_application PRIVATE /W4 /WX)
 endif()
 
+# Set backend to Vulkan
+add_compile_definitions(CSD_GRAPHICS_VULKAN)
+
 # Link core library
 add_subdirectory(lib/Cascade_Core)
 target_link_libraries(cascade_application PUBLIC cascade_core)
