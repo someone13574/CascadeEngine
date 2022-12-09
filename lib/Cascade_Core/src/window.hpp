@@ -29,7 +29,7 @@ namespace Cascade_Core
         virtual void Destroy_Window() = 0;
 
     public:
-        Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr);
+        Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr);
         virtual ~Window();
     };
 } // namespace Cascade_Core

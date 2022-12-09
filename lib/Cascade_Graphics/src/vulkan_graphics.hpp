@@ -10,6 +10,7 @@ namespace Cascade_Graphics
     class Vulkan_Graphics : public Graphics
     {
         friend class Vulkan_Graphics_Factory;
+        friend class Vulkan_Renderer;
 
     private:
         Vulkan::Instance* m_instance_ptr;

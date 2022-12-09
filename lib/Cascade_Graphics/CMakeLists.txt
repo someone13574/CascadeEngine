@@ -2,9 +2,12 @@
 cmake_minimum_required(VERSION 3.16...3.24)
 
 # Creaet a static library for cascade graphics
-add_library(cascade_graphics STATIC src/graphics_factory.hpp
+add_library(cascade_graphics STATIC src/window_info.cpp
+                                    src/xcb_window_info.cpp
+                                    src/graphics_factory.hpp
                                     src/graphics.cpp
                                     src/renderer.cpp
+                                    src/graphics_factory.cpp
                                     src/vulkan_graphics_factory.cpp
                                     src/vulkan_graphics.cpp
                                     src/vulkan_renderer.cpp
@@ -14,6 +17,8 @@ add_library(cascade_graphics STATIC src/graphics_factory.hpp
                                     src/Vulkan_Backend/physical_device.cpp
                                     src/Vulkan_Backend/physical_device_selector.cpp
                                     src/Vulkan_Backend/device.cpp
+                                    src/Vulkan_Backend/surface.cpp
+                                    src/Vulkan_Backend/xcb_surface.cpp
                                     src/Vulkan_Backend/vkresult_translator.cpp
                                     src/Vulkan_Backend/vulkan_header.hpp)
 

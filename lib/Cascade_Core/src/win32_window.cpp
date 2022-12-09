@@ -9,7 +9,7 @@ namespace Cascade_Core
     LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
     WIN32_Window::WIN32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr)
-        : Window::Window(window_title, window_width, window_height, graphics_ptr, thread_manager_ptr, m_graphics_factory_ptr)
+        : Window::Window(window_title, window_width, window_height, graphics_ptr, thread_manager_ptr)
     {
         m_window_thread_ptr->Start_Thread();
         m_window_thread_ptr->Await_State(Engine_Thread::Thread_State::LOOP_FUNC);

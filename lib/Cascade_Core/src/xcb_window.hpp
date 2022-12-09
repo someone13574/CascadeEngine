@@ -4,6 +4,7 @@
 
 #include "engine_thread_manager.hpp"
 #include "window.hpp"
+#include <window_info.hpp>
 #include <xcb/xcb.h>
 
 namespace Cascade_Core
@@ -23,6 +24,8 @@ namespace Cascade_Core
         xcb_intern_atom_cookie_t m_xcb_close_window_cookie;
         xcb_intern_atom_reply_t* m_xcb_close_window_reply_ptr;
         xcb_generic_event_t* m_event_ptr;
+
+        Cascade_Graphics::Window_Info* m_renderer_window_info_ptr;
 
     protected:
         void Create_Window() override;

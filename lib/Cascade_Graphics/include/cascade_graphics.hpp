@@ -1,3 +1,4 @@
 #pragma once
 
-#include "../src/vulkan_graphics_factory.hpp"
+#include "vulkan_graphics_factory.hpp"
+#include "window_info.hpp"
