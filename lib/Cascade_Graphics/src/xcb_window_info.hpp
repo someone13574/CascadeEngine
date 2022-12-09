@@ -7,8 +7,8 @@ namespace Cascade_Graphics
     class XCB_Window_Info : public Window_Info
     {
     private:
-        void** m_connection_ptr;
-        void* m_window_ptr;
+        void** m_connection_ptr; // Pointer to an xcb_connection_t*
+        void* m_window_ptr;      // Pointer to an xcb_window_t
 
     public:
         XCB_Window_Info(uint32_t width, uint32_t height, void** connection_ptr, void* window_ptr);

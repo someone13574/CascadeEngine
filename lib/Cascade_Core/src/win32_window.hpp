@@ -4,6 +4,7 @@
 
 #include "engine_thread_manager.hpp"
 #include "window.hpp"
+#include <window_info.hpp>
 #include <windows.h>
 #include <windowsx.h>
 
@@ -18,6 +19,8 @@ namespace Cascade_Core
 
         HWND m_window;
         HINSTANCE m_instance;
+
+        Cascade_Graphics::Window_Info* m_renderer_window_info_ptr;
 
     protected:
         void Create_Window() override;

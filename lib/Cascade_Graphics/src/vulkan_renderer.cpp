@@ -1,5 +1,6 @@
 #include "vulkan_renderer.hpp"
 
+#include "Vulkan_Backend/win32_surface.hpp"
 #include "Vulkan_Backend/xcb_surface.hpp"
 #include "vulkan_graphics.hpp"
 #include <acorn_logging.hpp>
@@ -16,11 +17,17 @@ namespace Cascade_Graphics
         {
             m_surface_ptr = new Vulkan::XCB_Surface(window_info_ptr, vulkan_graphics_ptr->m_instance_ptr);
         }
+        else if (graphics_platform == Graphics_Platform::WINDOWS_WIN32)
+        {
+            m_surface_ptr = new Vulkan::WIN32_Surface(window_info_ptr, vulkan_graphics_ptr->m_instance_ptr);
+        }
+        else
+        {
+            LOG_FATAL << "Graphics (Vulkan): Unknown platform";
+            exit(EXIT_FAILURE);
+        }
 
         LOG_INFO << "Graphics: Finished initializing renderer with Vulkan backend";
-
-        (void)graphics_platform;
-        (void)window_info_ptr;
     }
 
     Vulkan_Renderer::~Vulkan_Renderer()

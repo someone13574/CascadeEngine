@@ -11,7 +11,7 @@ namespace Cascade_Graphics
 
     Graphics* Vulkan_Graphics_Factory::Create_Graphics() const
     {
-        return new Vulkan_Graphics();
+        return new Vulkan_Graphics(m_graphics_platform);
     }
 
     Renderer* Vulkan_Graphics_Factory::Create_Renderer(Graphics* graphics_ptr, Window_Info* window_info_ptr) const

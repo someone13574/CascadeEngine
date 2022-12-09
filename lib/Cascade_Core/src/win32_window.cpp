@@ -14,7 +14,8 @@ namespace Cascade_Core
         m_window_thread_ptr->Start_Thread();
         m_window_thread_ptr->Await_State(Engine_Thread::Thread_State::LOOP_FUNC);
 
-        m_renderer_ptr = m_graphics_factory_ptr->Create_Renderer(m_graphics_ptr);
+        m_renderer_window_info_ptr = new Cascade_Graphics::WIN32_Window_Info(window_width, window_height, reinterpret_cast<void*>(&m_instance), reinterpret_cast<void*>(&m_window));
+        m_renderer_ptr = m_graphics_factory_ptr->Create_Renderer(m_graphics_ptr, m_renderer_window_info_ptr);
     }
 
     WIN32_Window::~WIN32_Window()

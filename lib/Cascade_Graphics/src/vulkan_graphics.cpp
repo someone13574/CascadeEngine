@@ -2,19 +2,30 @@
 
 #include "Vulkan_Backend/instance_builder.hpp"
 #include "Vulkan_Backend/physical_device_selector.hpp"
+#include "Vulkan_Backend/win32_surface.hpp"
+#include "Vulkan_Backend/xcb_surface.hpp"
 #include <acorn_logging.hpp>
 
 namespace Cascade_Graphics
 {
-    Vulkan_Graphics::Vulkan_Graphics()
+    Vulkan_Graphics::Vulkan_Graphics(Graphics_Platform graphics_platform)
     {
         LOG_INFO << "Graphics: Initializing graphics with Vulkan Backend";
 
-#ifdef __linux__
-        const char* platform_surface_extension = VK_KHR_XCB_SURFACE_EXTENSION_NAME;
-#elif defined _WIN32
-        const char* platform_surface_extension = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
-#endif
+        const char* platform_surface_extension;
+        if (graphics_platform == Graphics_Platform::LINUX_XCB)
+        {
+            platform_surface_extension = Vulkan::XCB_Surface::Get_Surface_Extension_Name();
+        }
+        else if (graphics_platform == Graphics_Platform::WINDOWS_WIN32)
+        {
+            platform_surface_extension = Vulkan::WIN32_Surface::Get_Surface_Extension_Name();
+        }
+        else
+        {
+            LOG_FATAL << "Graphics (Vulkan): Unknown window platform";
+            exit(EXIT_FAILURE);
+        }
 
         m_instance_ptr = Vulkan::Instance_Builder()
                              .Set_Application_Details("test-application", 0)

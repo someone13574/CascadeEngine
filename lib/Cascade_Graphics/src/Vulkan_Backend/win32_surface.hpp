@@ -8,11 +8,11 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        class XCB_Surface : public Surface
+        class WIN32_Surface : public Surface
         {
         public:
-            XCB_Surface(Window_Info* window_info_ptr, Instance* instance_ptr);
-            virtual ~XCB_Surface() = default;
+            WIN32_Surface(Window_Info* window_info_ptr, Instance* instance_ptr);
+            virtual ~WIN32_Surface() = default;
 
             static const char* Get_Surface_Extension_Name();
         };
