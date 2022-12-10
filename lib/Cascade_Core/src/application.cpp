@@ -24,12 +24,10 @@ namespace Cascade_Core
 #error "No graphics backend selected, define backend with CSD_BACKEND_{backend}"
 #endif
 
-        m_graphics_ptr = m_graphics_factory_ptr->Create_Graphics();
-
 #ifdef __linux__
-        m_window_factory_ptr = new XCB_Window_Factory(m_graphics_ptr, m_engine_thread_manager_ptr, m_graphics_factory_ptr);
+        m_window_factory_ptr = new XCB_Window_Factory(&m_graphics_ptr, m_engine_thread_manager_ptr, m_graphics_factory_ptr);
 #elif defined _WIN32
-        m_window_factory_ptr = new WIN32_Window_Factory(m_graphics_ptr, m_engine_thread_manager_ptr, m_graphics_factory_ptr);
+        m_window_factory_ptr = new WIN32_Window_Factory(&m_graphics_ptr, m_engine_thread_manager_ptr, m_graphics_factory_ptr);
 #endif
 
         Engine_Thread* application_thread_ptr = m_engine_thread_manager_ptr->Create_Engine_Thread("application_cascade_main", (void*)this);

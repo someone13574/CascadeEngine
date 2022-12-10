@@ -8,14 +8,19 @@ namespace Cascade_Core
     const static char window_class_name[] = "window_class";
     LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-    WIN32_Window::WIN32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr)
+    WIN32_Window::WIN32_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics** graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr)
         : Window::Window(window_title, window_width, window_height, graphics_ptr, thread_manager_ptr)
     {
+        if (*m_graphics_ptr == nullptr)
+        {
+            *m_graphics_ptr = m_graphics_factory_ptr->Create_Graphics();
+        }
+
         m_window_thread_ptr->Start_Thread();
         m_window_thread_ptr->Await_State(Engine_Thread::Thread_State::LOOP_FUNC);
 
         m_renderer_window_info_ptr = new Cascade_Graphics::WIN32_Window_Info(window_width, window_height, reinterpret_cast<void*>(&m_instance), reinterpret_cast<void*>(&m_window));
-        m_renderer_ptr = m_graphics_factory_ptr->Create_Renderer(m_graphics_ptr, m_renderer_window_info_ptr);
+        m_renderer_ptr = m_graphics_factory_ptr->Create_Renderer(*m_graphics_ptr, m_renderer_window_info_ptr);
     }
 
     WIN32_Window::~WIN32_Window()

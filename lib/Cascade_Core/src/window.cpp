@@ -4,7 +4,7 @@
 
 namespace Cascade_Core
 {
-    Window::Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr)
+    Window::Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics** graphics_ptr, Engine_Thread_Manager* thread_manager_ptr)
         : m_window_title(window_title), m_window_width(window_width), m_window_height(window_height), m_graphics_ptr(graphics_ptr), m_thread_manager_ptr(thread_manager_ptr)
     {
         std::string window_thread_name = "window-thread-" + window_title;
