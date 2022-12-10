@@ -5,7 +5,7 @@
 
 namespace Cascade_Core
 {
-    WIN32_Window_Factory::WIN32_Window_Factory(Cascade_Graphics::Graphics** graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* graphics_factory_ptr)
+    WIN32_Window_Factory::WIN32_Window_Factory(Cascade_Graphics::Graphics** graphics_ptr, Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* graphics_factory_ptr)
         : Window_Factory::Window_Factory(graphics_ptr, thread_manager_ptr, graphics_factory_ptr)
     {
     }

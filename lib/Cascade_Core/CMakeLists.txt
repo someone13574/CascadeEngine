@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.16...3.24)
 # Create a static library for cascade core
 add_library(cascade_core STATIC src/application_factory.cpp
                                 src/application.cpp
-                                src/engine_thread_manager.cpp
-                                src/engine_thread.cpp
+                                src/thread_manager.cpp
+                                src/thread.cpp
                                 src/entry.cpp
                                 src/window.cpp
                                 src/window_factory.cpp
