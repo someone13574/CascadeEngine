@@ -2,7 +2,11 @@
 
 namespace Cascade_Graphics
 {
-    Window_Info::Window_Info(uint32_t window_width, uint32_t window_height) : m_window_width(window_width), m_window_height(window_height)
+    Platform_Info::Platform_Info(Platform platform) : m_platform(platform)
+    {
+    }
+
+    Window_Info::Window_Info(Platform platform, uint32_t window_width, uint32_t window_height) : m_platform(platform), m_window_width(window_width), m_window_height(window_height)
     {
     }
 

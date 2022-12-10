@@ -24,12 +24,14 @@ namespace Cascade_Graphics
 
         struct Queue_Provider
         {
+            bool present_support;          // Whether or not this queue provides present support
             Queue_Requirement requirement; // Requirement that is queue fulfills
             Queue_Usage usage;             // Queue usage by this provider
         };
 
         struct Queue_Set
         {
+            bool present_support;                        // Whether or not this queue set contains a queue which provides present support
             uint32_t provided_queues;                    // Total number of queues this set uses
             std::vector<uint32_t> queue_family_usage;    // Usage of queue families by this set
             std::vector<Queue_Provider> queue_providers; // Array of providers for this set
@@ -45,6 +47,8 @@ namespace Cascade_Graphics
 
                 this->queue_providers.reserve(this->queue_providers.size() + other.queue_providers.size());
                 this->queue_providers.insert(this->queue_providers.end(), other.queue_providers.begin(), other.queue_providers.end());
+
+                this->present_support = this->present_support || other.present_support;
 
                 return *this;
             }

@@ -6,11 +6,16 @@
 #include <cmath>
 #include <functional>
 
+#ifdef __linux__
+#include "../xcb_platform_info.hpp"
+#include <xcb/xcb.h>
+#endif
+
 namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Queue_Selector::Queue_Selector(Physical_Device* physical_device_ptr)
+        Queue_Selector::Queue_Selector(Physical_Device* physical_device_ptr, Platform_Info* platform_info_ptr) : m_platform_info_ptr(platform_info_ptr), m_pyhsical_device_ptr(physical_device_ptr)
         {
             LOG_DEBUG << "Graphics (Vulkan): Getting available queue families for physical device '" << physical_device_ptr->Get_Properties()->deviceName << "'";
 
@@ -18,7 +23,25 @@ namespace Cascade_Graphics
             vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_ptr->Get(), &queue_family_count, nullptr);
 
             m_queue_families.resize(queue_family_count);
+            m_queue_family_present_support.resize(queue_family_count);
             vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_ptr->Get(), &queue_family_count, m_queue_families.data());
+
+            Get_Queue_Family_Present_Support();
+        }
+
+        void Queue_Selector::Get_Queue_Family_Present_Support()
+        {
+            LOG_TRACE << "Graphics (Vulkan): Getting queue family present support";
+
+#ifdef __linux__
+            XCB_Platform_Info* xcb_platform_info_ptr = dynamic_cast<XCB_Platform_Info*>(m_platform_info_ptr);
+
+            for (uint32_t queue_family_index = 0; queue_family_index < m_queue_families.size(); queue_family_index++)
+            {
+                m_queue_family_present_support[queue_family_index] = vkGetPhysicalDeviceXcbPresentationSupportKHR(*m_pyhsical_device_ptr->Get(), queue_family_index, *reinterpret_cast<xcb_connection_t**>(xcb_platform_info_ptr->Get_Connection()),
+                                                                                                                  *reinterpret_cast<xcb_visualid_t*>(xcb_platform_info_ptr->Get_Visual_Id()));
+            }
+#endif
         }
 
         void Queue_Selector::Generate_Sets()
@@ -97,9 +120,11 @@ namespace Cascade_Graphics
                             usage_data.queue_count = provided_queue_count;
 
                             Queue_Provider provider_data = {};
+                            provider_data.present_support = m_queue_family_present_support[usage_data.queue_family_index];
                             provider_data.requirement = m_queue_requirements[requirement_index];
                             provider_data.usage = usage_data;
 
+                            provider_usage_sets.back().present_support = provider_usage_sets.back().present_support || provider_data.present_support;
                             provider_usage_sets.back().provided_queues += provided_queue_count;
                             provider_usage_sets.back().queue_family_usage[provider_sets[provider_set_index][provider_index]] += provided_queue_count;
                             provider_usage_sets.back().queue_providers.push_back(provider_data);
@@ -159,6 +184,14 @@ namespace Cascade_Graphics
                     m_valid_queue_sets.back() += queue_sets_by_requirement[requirement_index][selected_set];
                 }
 
+                // Ensure present support if required
+                if (m_present_queue_required && !m_valid_queue_sets.back().present_support)
+                {
+                    m_valid_queue_sets.erase(m_valid_queue_sets.begin() + combination_index);
+                    continue;
+                }
+
+                // Ensure there is no overallocation of queue families
                 for (uint32_t queue_family_index = 0; queue_family_index < m_queue_families.size(); queue_family_index++)
                 {
                     if (m_queue_families[queue_family_index].queueCount < m_valid_queue_sets.back().queue_family_usage[queue_family_index])
@@ -172,6 +205,8 @@ namespace Cascade_Graphics
 
         Queue_Selector& Queue_Selector::Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority)
         {
+            m_sets_up_to_date = false;
+
             m_queue_requirements.resize(m_queue_requirements.size() + 1);
 
             m_queue_requirements.back() = {};
@@ -183,15 +218,33 @@ namespace Cascade_Graphics
             return *this;
         }
 
+        Queue_Selector& Queue_Selector::Require_Present_Queue()
+        {
+            m_present_queue_required = true;
+            m_sets_up_to_date = false;
+
+            return *this;
+        }
+
         bool Queue_Selector::Meets_Requirements()
         {
-            Generate_Sets();
+            if (!m_sets_up_to_date)
+            {
+                Generate_Sets();
+                m_sets_up_to_date = true;
+            }
 
             return !m_valid_queue_sets.empty();
         }
 
         Queue_Set Queue_Selector::Best()
         {
+            if (!m_sets_up_to_date)
+            {
+                Generate_Sets();
+                m_sets_up_to_date = true;
+            }
+
             return m_valid_queue_sets.front();
         }
     } // namespace Vulkan

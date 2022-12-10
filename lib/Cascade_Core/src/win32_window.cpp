@@ -13,7 +13,9 @@ namespace Cascade_Core
     {
         if (*m_graphics_ptr == nullptr)
         {
+            Cascade_Graphics::WIN32_Platform_Info* platform_info_ptr = new Cascade_Graphics::WIN32_Platform_Info();
             *m_graphics_ptr = m_graphics_factory_ptr->Create_Graphics();
+            delete platform_info_ptr;
         }
 
         m_window_thread_ptr->Start_Thread();

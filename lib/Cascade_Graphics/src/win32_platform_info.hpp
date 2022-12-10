@@ -4,6 +4,13 @@
 
 namespace Cascade_Graphics
 {
+    class WIN32_Platform_Info : public Platform_Info
+    {
+    public:
+        WIN32_Platform_Info();
+        virtual ~WIN32_Platform_Info() = default;
+    };
+
     class WIN32_Window_Info : public Window_Info
     {
     private:

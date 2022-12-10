@@ -10,15 +10,17 @@ namespace Cascade_Core
     {
         if (*m_graphics_ptr == nullptr)
         {
-            LOG_TRACE << "Core: Creating dummy XCB connection for graphics creation";
-            xcb_connection_t* dummy_connection = xcb_connect(nullptr, nullptr);
-            Cascade_Graphics::XCB_Platform_Info* plaform_info_ptr = new Cascade_Graphics::XCB_Platform_Info(reinterpret_cast<void**>(&dummy_connection));
+            LOG_TRACE << "Core: Creating dummy XCB objects for graphics creation";
+            xcb_connection_t* dummy_connection_ptr = xcb_connect(nullptr, nullptr);
+            xcb_visualid_t dummy_visual = xcb_setup_roots_iterator(xcb_get_setup(dummy_connection_ptr)).data->root_visual;
 
-            *m_graphics_ptr = m_graphics_factory_ptr->Create_Graphics(plaform_info_ptr);
+            Cascade_Graphics::XCB_Platform_Info* platform_info_ptr = new Cascade_Graphics::XCB_Platform_Info(reinterpret_cast<void**>(&dummy_connection_ptr), reinterpret_cast<void*>(&dummy_visual));
+
+            *m_graphics_ptr = m_graphics_factory_ptr->Create_Graphics(platform_info_ptr);
 
             LOG_TRACE << "Core: Destroying dummy XCB connection";
-            delete plaform_info_ptr;
-            xcb_disconnect(dummy_connection);
+            delete platform_info_ptr;
+            xcb_disconnect(dummy_connection_ptr);
         }
 
         m_window_thread_ptr->Start_Thread();

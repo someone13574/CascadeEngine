@@ -39,7 +39,8 @@ namespace Cascade_Graphics
                              .Add_Extension(platform_surface_extension)
                              .Build();
 
-        m_physical_device_ptr = Vulkan::Physical_Device_Selector(m_instance_ptr)
+        m_physical_device_ptr = Vulkan::Physical_Device_Selector(m_instance_ptr, platform_info_ptr)
+                                    .Require_Present_Queue()
                                     .Require_Queue_Type("render_queue", VK_QUEUE_COMPUTE_BIT, 1, 1.0)
                                     .Require_Extension(VK_KHR_SWAPCHAIN_EXTENSION_NAME)
                                     .Require_Extension(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME)

@@ -9,7 +9,7 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Physical_Device_Selector::Physical_Device_Selector(Instance* instance_ptr) : m_instance_ptr(instance_ptr)
+        Physical_Device_Selector::Physical_Device_Selector(Instance* instance_ptr, Platform_Info* platform_info_ptr) : m_instance_ptr(instance_ptr), m_platform_info_ptr(platform_info_ptr)
         {
             LOG_INFO << "Graphics (Vulkan): Selecting physical device";
             LOG_DEBUG << "Graphics (Vulkan): Getting available physical devices";
@@ -73,18 +73,25 @@ namespace Cascade_Graphics
             {
                 if (m_physical_device_filter_infos[physical_device_index].queue_selector_ptr == nullptr)
                 {
-                    m_physical_device_filter_infos[physical_device_index].queue_selector_ptr = new Queue_Selector(m_physical_device_filter_infos[physical_device_index].physical_device_ptr);
+                    m_physical_device_filter_infos[physical_device_index].queue_selector_ptr = new Queue_Selector(m_physical_device_filter_infos[physical_device_index].physical_device_ptr, m_platform_info_ptr);
                 }
 
-                if (!m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Add_Queue_Requirement(requirement_label, queue_type, required_queue_count, queue_priority).Meets_Requirements())
+                m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Add_Queue_Requirement(requirement_label, queue_type, required_queue_count, queue_priority);
+            }
+
+            return *this;
+        }
+
+        Physical_Device_Selector& Physical_Device_Selector::Require_Present_Queue()
+        {
+            for (int32_t physical_device_index = static_cast<int32_t>(m_physical_device_filter_infos.size()) - 1; physical_device_index >= 0; physical_device_index--)
+            {
+                if (m_physical_device_filter_infos[physical_device_index].queue_selector_ptr == nullptr)
                 {
-                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' cannot meet queue requirements";
-                    m_physical_device_filter_infos.erase(m_physical_device_filter_infos.begin() + physical_device_index);
+                    m_physical_device_filter_infos[physical_device_index].queue_selector_ptr = new Queue_Selector(m_physical_device_filter_infos[physical_device_index].physical_device_ptr, m_platform_info_ptr);
                 }
-                else
-                {
-                    m_physical_device_filter_infos[physical_device_index].physical_device_ptr->m_queue_set = m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Best();
-                }
+
+                m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Require_Present_Queue();
             }
 
             return *this;
@@ -148,6 +155,25 @@ namespace Cascade_Graphics
             {
                 LOG_FATAL << "Graphics (Vulkan): No physical devices meet requirements";
                 exit(EXIT_FAILURE);
+            }
+
+            for (int32_t physical_device_index = m_physical_device_filter_infos.size() - 1; physical_device_index >= 0; physical_device_index--)
+            {
+                if (m_physical_device_filter_infos[physical_device_index].queue_selector_ptr == nullptr)
+                {
+                    LOG_FATAL << "Graphics (Vulkan): No queue requirements supplied to physical device selector";
+                    exit(EXIT_FAILURE);
+                }
+
+                if (!m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Meets_Requirements())
+                {
+                    LOG_INFO << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' doesn't meet one or more queue requirements";
+                    m_physical_device_filter_infos.erase(m_physical_device_filter_infos.begin() + physical_device_index);
+                }
+                else
+                {
+                    m_physical_device_filter_infos[physical_device_index].physical_device_ptr->m_queue_set = m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Best();
+                }
             }
 
             std::sort(m_physical_device_filter_infos.begin(), m_physical_device_filter_infos.end(),

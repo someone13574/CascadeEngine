@@ -8,12 +8,14 @@ namespace Cascade_Graphics
     {
     private:
         void** m_connection_ptr; // Pointer to an xcb_connection_t*
+        void* m_visual_id_ptr;   // Pointer to an xcb_visualid_t
 
     public:
-        XCB_Platform_Info(void** connection_ptr);
+        XCB_Platform_Info(void** connection_ptr, void* visual_id_ptr);
         virtual ~XCB_Platform_Info() = default;
 
         void** Get_Connection();
+        void* Get_Visual_Id();
     };
 
     class XCB_Window_Info : public Window_Info
