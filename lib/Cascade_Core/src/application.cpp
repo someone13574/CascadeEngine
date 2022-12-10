@@ -16,9 +16,9 @@ namespace Cascade_Core
 
 #ifdef CSD_GRAPHICS_VULKAN
 #ifdef __linux__
-        m_graphics_factory_ptr = new Cascade_Graphics::Vulkan_Graphics_Factory(Cascade_Graphics::Window_Platform::LINUX_XCB);
+        m_graphics_factory_ptr = new Cascade_Graphics::Vulkan_Graphics_Factory(Cascade_Graphics::Platform::LINUX_XCB);
 #elif defined _WIN32
-        m_graphics_factory_ptr = new Cascade_Graphics::Vulkan_Graphics_Factory(Cascade_Graphics::Window_Platform::WINDOWS_WIN32);
+        m_graphics_factory_ptr = new Cascade_Graphics::Vulkan_Graphics_Factory(Cascade_Graphics::Platform::WINDOWS_WIN32);
 #endif
 #else
 #error "No graphics backend selected, define backend with CSD_BACKEND_{backend}"

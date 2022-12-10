@@ -4,6 +4,12 @@
 
 namespace Cascade_Graphics
 {
+    class Platform_Info
+    {
+    public:
+        virtual ~Platform_Info() = default;
+    };
+
     class Window_Info
     {
     protected:

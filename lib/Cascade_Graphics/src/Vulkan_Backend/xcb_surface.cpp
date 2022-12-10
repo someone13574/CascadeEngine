@@ -1,6 +1,6 @@
 #include "xcb_surface.hpp"
 
-#include "../xcb_window_info.hpp"
+#include "../xcb_platform_info.hpp"
 #include "vkresult_translator.hpp"
 #include <acorn_logging.hpp>
 

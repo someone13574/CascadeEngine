@@ -4,7 +4,8 @@
 #include "Vulkan_Backend/instance.hpp"
 #include "Vulkan_Backend/physical_device.hpp"
 #include "graphics.hpp"
-#include "window_platform.hpp"
+#include "platform.hpp"
+#include "platform_info.hpp"
 
 namespace Cascade_Graphics
 {
@@ -19,7 +20,7 @@ namespace Cascade_Graphics
         Vulkan::Device* m_device_ptr;
 
     private:
-        Vulkan_Graphics(Window_Platform window_platform);
+        Vulkan_Graphics(Platform platform, Platform_Info* platform_info_ptr);
 
     public:
         ~Vulkan_Graphics();

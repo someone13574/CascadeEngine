@@ -1,6 +1,6 @@
 #pragma once
 
-#include "window_info.hpp"
+#include "platform_info.hpp"
 
 namespace Cascade_Graphics
 {

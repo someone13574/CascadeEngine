@@ -1,6 +1,6 @@
 #include "win32_surface.hpp"
 
-#include "../win32_window_info.hpp"
+#include "../win32_platform_info.hpp"
 #include "vkresult_translator.hpp"
 #include <acorn_logging.hpp>
 

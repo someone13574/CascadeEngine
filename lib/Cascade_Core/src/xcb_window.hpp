@@ -4,7 +4,7 @@
 
 #include "thread_manager.hpp"
 #include "window.hpp"
-#include <window_info.hpp>
+#include <platform_info.hpp>
 #include <xcb/xcb.h>
 
 namespace Cascade_Core

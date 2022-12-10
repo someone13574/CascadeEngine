@@ -1,4 +1,4 @@
-#include "win32_window_info.hpp"
+#include "win32_platform_info.hpp"
 
 namespace Cascade_Graphics
 {

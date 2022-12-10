@@ -1,9 +1,21 @@
 #pragma once
 
-#include "window_info.hpp"
+#include "platform_info.hpp"
 
 namespace Cascade_Graphics
 {
+    class XCB_Platform_Info : public Platform_Info
+    {
+    private:
+        void** m_connection_ptr; // Pointer to an xcb_connection_t*
+
+    public:
+        XCB_Platform_Info(void** connection_ptr);
+        virtual ~XCB_Platform_Info() = default;
+
+        void** Get_Connection();
+    };
+
     class XCB_Window_Info : public Window_Info
     {
     private:

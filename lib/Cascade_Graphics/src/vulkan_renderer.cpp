@@ -7,17 +7,17 @@
 
 namespace Cascade_Graphics
 {
-    Vulkan_Renderer::Vulkan_Renderer(Graphics* graphics_ptr, Window_Platform window_platform, Window_Info* window_info_ptr) : m_graphics_ptr(graphics_ptr)
+    Vulkan_Renderer::Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr) : m_graphics_ptr(graphics_ptr)
     {
         LOG_INFO << "Graphics: Initializing renderer with Vulkan backend";
 
         Vulkan_Graphics* vulkan_graphics_ptr = static_cast<Vulkan_Graphics*>(graphics_ptr);
 
-        if (window_platform == Window_Platform::LINUX_XCB)
+        if (platform == Platform::LINUX_XCB)
         {
             m_surface_ptr = new Vulkan::XCB_Surface(window_info_ptr, vulkan_graphics_ptr->m_instance_ptr);
         }
-        else if (window_platform == Window_Platform::WINDOWS_WIN32)
+        else if (platform == Platform::WINDOWS_WIN32)
         {
             m_surface_ptr = new Vulkan::WIN32_Surface(window_info_ptr, vulkan_graphics_ptr->m_instance_ptr);
         }
