@@ -21,6 +21,8 @@ add_library(cascade_graphics STATIC src/window_info.cpp
                                     src/Vulkan_Backend/surface.cpp
                                     src/Vulkan_Backend/win32_surface.cpp
                                     src/Vulkan_Backend/xcb_surface.cpp
+                                    src/Vulkan_Backend/swapchain.cpp
+                                    src/Vulkan_Backend/swapchain_builder.cpp
                                     src/Vulkan_Backend/vkresult_translator.cpp
                                     src/Vulkan_Backend/vulkan_header.hpp)
 
