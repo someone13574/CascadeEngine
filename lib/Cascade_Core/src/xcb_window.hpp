@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "engine_thread_manager.hpp"
+#include "thread_manager.hpp"
 #include "window.hpp"
 #include <window_info.hpp>
 #include <xcb/xcb.h>
@@ -33,7 +33,7 @@ namespace Cascade_Core
         void Destroy_Window() override;
 
     private:
-        XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Engine_Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr);
+        XCB_Window(std::string window_title, uint32_t window_width, uint32_t window_height, Cascade_Graphics::Graphics* graphics_ptr, Thread_Manager* thread_manager_ptr, Cascade_Graphics::Graphics_Factory* m_graphics_factory_ptr);
 
     public:
         ~XCB_Window();

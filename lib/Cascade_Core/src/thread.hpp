@@ -9,9 +9,9 @@
 
 namespace Cascade_Core
 {
-    class Engine_Thread
+    class Thread
     {
-        friend class Engine_Thread_Manager;
+        friend class Thread_Manager;
 
     public:
         enum Thread_State
@@ -45,20 +45,20 @@ namespace Cascade_Core
         bool m_start_function_enabled = false;
         bool m_loop_function_enabled = false;
         bool m_exit_function_enabled = false;
-        std::function<void(Engine_Thread*, void*)> m_start_function;
-        std::function<void(Engine_Thread*, void*)> m_loop_function;
-        std::function<void(Engine_Thread*, void*)> m_exit_function;
+        std::function<void(Thread*, void*)> m_start_function;
+        std::function<void(Thread*, void*)> m_loop_function;
+        std::function<void(Thread*, void*)> m_exit_function;
 
     private:
-        Engine_Thread(std::string thread_label, void* user_data_ptr, uint32_t* finished_thread_count_ptr, std::mutex* thread_finished_notify_mutex_ptr, std::condition_variable* thread_finished_notify_ptr);
-        ~Engine_Thread();
+        Thread(std::string thread_label, void* user_data_ptr, uint32_t* finished_thread_count_ptr, std::mutex* thread_finished_notify_mutex_ptr, std::condition_variable* thread_finished_notify_ptr);
+        ~Thread();
 
-        static void Thread_Function(Engine_Thread* instance);
+        static void Thread_Function(Thread* instance);
 
     public:
-        bool Attach_Start_Function(std::function<void(Engine_Thread*, void*)> start_function);
-        bool Attach_Loop_Function(std::function<void(Engine_Thread*, void*)> loop_function, double max_loop_frequency);
-        bool Attach_Exit_Function(std::function<void(Engine_Thread*, void*)> exit_function);
+        bool Attach_Start_Function(std::function<void(Thread*, void*)> start_function);
+        bool Attach_Loop_Function(std::function<void(Thread*, void*)> loop_function, double max_loop_frequency);
+        bool Attach_Exit_Function(std::function<void(Thread*, void*)> exit_function);
 
         void Start_Thread();
         void Exit_Thread();

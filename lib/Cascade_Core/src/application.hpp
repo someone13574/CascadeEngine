@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine_thread_manager.hpp"
+#include "thread_manager.hpp"
 #include "window_factory.hpp"
 #include <cascade_graphics.hpp>
 #include <string>
@@ -18,7 +18,7 @@ namespace Cascade_Core
         uint32_t m_application_minor_version;
         uint32_t m_application_patch_version;
 
-        Engine_Thread_Manager* m_engine_thread_manager_ptr;
+        Thread_Manager* m_thread_manager_ptr;
         Cascade_Graphics::Graphics* m_graphics_ptr = nullptr;
 
         std::vector<Window*> m_window_ptrs;

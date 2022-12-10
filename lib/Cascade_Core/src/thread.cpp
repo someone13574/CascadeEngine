@@ -1,11 +1,11 @@
-#include "engine_thread.hpp"
+#include "thread.hpp"
 
 #include <acorn_logging.hpp>
 #include <algorithm>
 
 namespace Cascade_Core
 {
-    Engine_Thread::Engine_Thread(std::string thread_label, void* user_data_ptr, uint32_t* finished_thread_count_ptr, std::mutex* thread_finished_notify_mutex_ptr, std::condition_variable* thread_finished_notify_ptr)
+    Thread::Thread(std::string thread_label, void* user_data_ptr, uint32_t* finished_thread_count_ptr, std::mutex* thread_finished_notify_mutex_ptr, std::condition_variable* thread_finished_notify_ptr)
         : m_thread_label(thread_label)
         , m_user_data_ptr(user_data_ptr)
         , m_finished_thread_count_ptr(finished_thread_count_ptr)
@@ -15,12 +15,12 @@ namespace Cascade_Core
         LOG_INFO << "Core: Creating thread '" << thread_label << "'";
     }
 
-    Engine_Thread::~Engine_Thread()
+    Thread::~Thread()
     {
         LOG_TRACE << "Core: Destroyed engine thread '" << m_thread_label << "'";
     }
 
-    void Engine_Thread::Thread_Function(Engine_Thread* instance)
+    void Thread::Thread_Function(Thread* instance)
     {
         LOG_INFO << "Core: Starting thread '" << instance->m_thread_label << "'";
 
@@ -55,7 +55,7 @@ namespace Cascade_Core
                 int64_t sleep_for = std::max((int64_t)(1000000.0 / instance->m_max_loop_frequency) - function_execution_time, (int64_t)0);
 
                 std::unique_lock<std::mutex> exit_loop_lock(instance->m_exit_loop_mutex);
-                instance->m_exit_loop_notify.wait_for(exit_loop_lock, std::chrono::microseconds(sleep_for), [instance] { return instance->m_thread_state == Cascade_Core::Engine_Thread::Thread_State::AWAITING_LOOP_EXIT; });
+                instance->m_exit_loop_notify.wait_for(exit_loop_lock, std::chrono::microseconds(sleep_for), [instance] { return instance->m_thread_state == Cascade_Core::Thread::Thread_State::AWAITING_LOOP_EXIT; });
             }
         }
 
@@ -83,7 +83,7 @@ namespace Cascade_Core
         instance->m_state_change_notify.notify_all();
     }
 
-    bool Engine_Thread::Attach_Start_Function(std::function<void(Engine_Thread*, void*)> start_function)
+    bool Thread::Attach_Start_Function(std::function<void(Thread*, void*)> start_function)
     {
         LOG_DEBUG << "Core: Attaching start function to thread '" << m_thread_label << "'";
 
@@ -105,7 +105,7 @@ namespace Cascade_Core
         return true;
     }
 
-    bool Engine_Thread::Attach_Loop_Function(std::function<void(Engine_Thread*, void*)> loop_function, double max_loop_frequency)
+    bool Thread::Attach_Loop_Function(std::function<void(Thread*, void*)> loop_function, double max_loop_frequency)
     {
         LOG_DEBUG << "Core: Attaching loop function to thread '" << m_thread_label << "'";
 
@@ -128,7 +128,7 @@ namespace Cascade_Core
         return true;
     }
 
-    bool Engine_Thread::Attach_Exit_Function(std::function<void(Engine_Thread*, void*)> exit_function)
+    bool Thread::Attach_Exit_Function(std::function<void(Thread*, void*)> exit_function)
     {
         LOG_DEBUG << "Core: Attaching exit function to thread '" << m_thread_label << "'";
 
@@ -150,7 +150,7 @@ namespace Cascade_Core
         return true;
     }
 
-    void Engine_Thread::Start_Thread()
+    void Thread::Start_Thread()
     {
         if (m_thread_state == Thread_State::NOT_STARTED)
         {
@@ -162,7 +162,7 @@ namespace Cascade_Core
         }
     }
 
-    void Engine_Thread::Exit_Thread()
+    void Thread::Exit_Thread()
     {
         LOG_DEBUG << "Core: Exiting thread '" << m_thread_label << "'";
 
@@ -189,7 +189,7 @@ namespace Cascade_Core
         }
     }
 
-    void Engine_Thread::Exit_Thread_Immediate()
+    void Thread::Exit_Thread_Immediate()
     {
         LOG_DEBUG << "Core: Exiting thread '" << m_thread_label << "' without exit function";
 
@@ -221,7 +221,7 @@ namespace Cascade_Core
         }
     }
 
-    void Engine_Thread::Await_State(Thread_State target_state)
+    void Thread::Await_State(Thread_State target_state)
     {
         LOG_TRACE << "Core: Waiting for '" << m_thread_label << "' to reach state " << target_state;
 

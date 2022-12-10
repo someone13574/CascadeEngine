@@ -4,7 +4,7 @@
 #include "xcb_window_factory.hpp"
 #include <acorn_logging.hpp>
 
-extern void Cascade_Main(Cascade_Core::Engine_Thread* engine_thread_ptr, void* user_data_ptr);
+extern void Cascade_Main(Cascade_Core::Thread* thread_ptr, void* user_data_ptr);
 
 namespace Cascade_Core
 {
@@ -12,7 +12,7 @@ namespace Cascade_Core
     {
         LOG_INFO << "Core: Initializing Cascade";
 
-        m_engine_thread_manager_ptr = new Engine_Thread_Manager();
+        m_thread_manager_ptr = new Thread_Manager();
 
 #ifdef CSD_GRAPHICS_VULKAN
 #ifdef __linux__
@@ -27,16 +27,16 @@ namespace Cascade_Core
         m_graphics_ptr = m_graphics_factory_ptr->Create_Graphics();
 
 #ifdef __linux__
-        m_window_factory_ptr = new XCB_Window_Factory(m_graphics_ptr, m_engine_thread_manager_ptr, m_graphics_factory_ptr);
+        m_window_factory_ptr = new XCB_Window_Factory(m_graphics_ptr, m_thread_manager_ptr, m_graphics_factory_ptr);
 #elif defined _WIN32
-        m_window_factory_ptr = new WIN32_Window_Factory(m_graphics_ptr, m_engine_thread_manager_ptr, m_graphics_factory_ptr);
+        m_window_factory_ptr = new WIN32_Window_Factory(m_graphics_ptr, m_thread_manager_ptr, m_graphics_factory_ptr);
 #endif
 
-        Engine_Thread* application_thread_ptr = m_engine_thread_manager_ptr->Create_Engine_Thread("application_cascade_main", (void*)this);
+        Thread* application_thread_ptr = m_thread_manager_ptr->Create_Thread("application_cascade_main", (void*)this);
         application_thread_ptr->Attach_Start_Function(Cascade_Main);
         application_thread_ptr->Start_Thread();
 
-        m_engine_thread_manager_ptr->Wait_For_Threads_To_Finish();
+        m_thread_manager_ptr->Wait_For_Threads_To_Finish();
     }
 
     Application::~Application()
