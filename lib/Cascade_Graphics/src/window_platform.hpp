@@ -2,7 +2,7 @@
 
 namespace Cascade_Graphics
 {
-    enum Graphics_Platform
+    enum Window_Platform
     {
         WINDOWS_WIN32,
         LINUX_XCB

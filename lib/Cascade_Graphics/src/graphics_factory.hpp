@@ -1,19 +1,19 @@
 #pragma once
 
 #include "graphics.hpp"
-#include "graphics_platform.hpp"
 #include "renderer.hpp"
 #include "window_info.hpp"
+#include "window_platform.hpp"
 
 namespace Cascade_Graphics
 {
     class Graphics_Factory
     {
     protected:
-        Graphics_Platform m_graphics_platform;
+        Window_Platform m_window_platform;
 
     public:
-        Graphics_Factory(Graphics_Platform graphics_platform);
+        Graphics_Factory(Window_Platform window_platform);
         virtual ~Graphics_Factory() = default;
 
         virtual Graphics* Create_Graphics() const = 0;

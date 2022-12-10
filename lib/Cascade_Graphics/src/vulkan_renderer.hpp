@@ -2,9 +2,9 @@
 
 #include "Vulkan_Backend/surface.hpp"
 #include "graphics.hpp"
-#include "graphics_platform.hpp"
 #include "renderer.hpp"
 #include "window_info.hpp"
+#include "window_platform.hpp"
 
 namespace Cascade_Graphics
 {
@@ -17,7 +17,7 @@ namespace Cascade_Graphics
         Vulkan::Surface* m_surface_ptr;
 
     private:
-        Vulkan_Renderer(Graphics* graphics_ptr, Graphics_Platform graphics_platform, Window_Info* window_info_ptr);
+        Vulkan_Renderer(Graphics* graphics_ptr, Window_Platform window_platform, Window_Info* window_info_ptr);
 
     public:
         ~Vulkan_Renderer();

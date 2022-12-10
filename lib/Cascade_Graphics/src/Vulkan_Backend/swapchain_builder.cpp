@@ -78,23 +78,23 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Graphics (Vulkan): Building swapchain";
 
-            VkSwapchainCreateInfoKHR swapchain_create_info = {};
-            swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-            swapchain_create_info.pNext = nullptr;
-            swapchain_create_info.flags = 0;
-            swapchain_create_info.surface = *m_surface_ptr->Get();
-            swapchain_create_info.minImageCount;   // Image count selector
-            swapchain_create_info.imageFormat;     // Surface format selector
-            swapchain_create_info.imageColorSpace; // Surface format selector
-            swapchain_create_info.imageExtent;     // Image size selector
-            swapchain_create_info.imageArrayLayers = 1;
-            swapchain_create_info.imageUsage; // Image usage selector
-            swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            swapchain_create_info.
+            // VkSwapchainCreateInfoKHR swapchain_create_info = {};
+            // swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+            // swapchain_create_info.pNext = nullptr;
+            // swapchain_create_info.flags = 0;
+            // swapchain_create_info.surface = *m_surface_ptr->Get();
+            // swapchain_create_info.minImageCount;   // Image count selector
+            // swapchain_create_info.imageFormat;     // Surface format selector
+            // swapchain_create_info.imageColorSpace; // Surface format selector
+            // swapchain_create_info.imageExtent;     // Image size selector
+            // swapchain_create_info.imageArrayLayers = 1;
+            // swapchain_create_info.imageUsage; // Image usage selector
+            // swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            // swapchain_create_info.
 
-                vkQueuePresentKHR()
+            // vkQueuePresentKHR()
 
-                    return m_swapchain_ptr;
+            return m_swapchain_ptr;
         }
     } // namespace Vulkan
 } // namespace Cascade_Graphics

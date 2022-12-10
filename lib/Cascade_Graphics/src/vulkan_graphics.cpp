@@ -8,16 +8,16 @@
 
 namespace Cascade_Graphics
 {
-    Vulkan_Graphics::Vulkan_Graphics(Graphics_Platform graphics_platform)
+    Vulkan_Graphics::Vulkan_Graphics(Window_Platform window_platform)
     {
         LOG_INFO << "Graphics: Initializing graphics with Vulkan Backend";
 
         const char* platform_surface_extension;
-        if (graphics_platform == Graphics_Platform::LINUX_XCB)
+        if (window_platform == Window_Platform::LINUX_XCB)
         {
             platform_surface_extension = Vulkan::XCB_Surface::Get_Surface_Extension_Name();
         }
-        else if (graphics_platform == Graphics_Platform::WINDOWS_WIN32)
+        else if (window_platform == Window_Platform::WINDOWS_WIN32)
         {
             platform_surface_extension = Vulkan::WIN32_Surface::Get_Surface_Extension_Name();
         }
