@@ -14,14 +14,13 @@ namespace Cascade_Graphics
         {
         private:
             VkDevice m_device;
-            Queue_Set m_queues;
 
         public:
             Device(Physical_Device* physical_device_ptr);
             ~Device();
 
         private:
-            static std::vector<VkDeviceQueueCreateInfo> Get_Queue_Create_Information(Queue_Set* queue_set_ptr);
+            static std::vector<VkDeviceQueueCreateInfo> Get_Queue_Create_Information(Device_Queues* device_queues_ptr);
 
         public:
             VkDevice* Get();

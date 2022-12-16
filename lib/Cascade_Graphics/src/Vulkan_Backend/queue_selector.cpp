@@ -237,7 +237,7 @@ namespace Cascade_Graphics
             return !m_valid_queue_sets.empty();
         }
 
-        Queue_Set Queue_Selector::Best()
+        Device_Queues Queue_Selector::Best()
         {
             if (!m_sets_up_to_date)
             {
@@ -245,7 +245,56 @@ namespace Cascade_Graphics
                 m_sets_up_to_date = true;
             }
 
-            return m_valid_queue_sets.front();
+            if (!Meets_Requirements())
+            {
+                LOG_ERROR << "Graphics (Vulkan): No queue combinations meet requirements, check Queue_Selector::Meets_Requirements prior to calling Queue_Selector::Best";
+                exit(EXIT_FAILURE);
+            }
+
+            Device_Queues device_queues = {};
+            device_queues.queue_priorities.resize(m_queue_families.size());
+            device_queues.queue_family_usage.resize(m_queue_families.size());
+            std::vector<Queue_Requirement> unique_queue_requirements;
+
+            for (uint32_t queue_index = 0; queue_index < m_valid_queue_sets.front().queue_providers.size(); queue_index++)
+            {
+                std::vector<Queue_Requirement>::iterator requirement_location = std::find(unique_queue_requirements.begin(), unique_queue_requirements.end(), m_valid_queue_sets.front().queue_providers[queue_index].requirement);
+
+                if (requirement_location == unique_queue_requirements.end())
+                {
+                    unique_queue_requirements.push_back(m_valid_queue_sets.front().queue_providers[queue_index].requirement);
+
+                    device_queues.device_queue_requirements.resize(device_queues.device_queue_requirements.size() + 1);
+                    device_queues.device_queue_requirements.back().requirement_name = unique_queue_requirements.back().requirement_label;
+
+                    device_queues.device_queue_requirements.back().device_queues.resize(device_queues.device_queue_requirements.back().device_queues.size() + 1);
+                    device_queues.device_queue_requirements.back().device_queues.back().priority = m_valid_queue_sets.front().queue_providers[queue_index].requirement.queue_priority;
+                    device_queues.device_queue_requirements.back().device_queues.back().queue_family_index = m_valid_queue_sets.front().queue_providers[queue_index].usage.queue_family_index;
+                    device_queues.device_queue_requirements.back().device_queues.back().index_in_queue_family = device_queues.queue_family_usage[device_queues.device_queue_requirements.back().device_queues.back().queue_family_index];
+                    device_queues.device_queue_requirements.back().device_queues.back().queue_family_properties = m_queue_families[device_queues.device_queue_requirements.back().device_queues.back().queue_family_index];
+
+                    device_queues.queue_priorities[m_valid_queue_sets.front().queue_providers[queue_index].usage.queue_family_index].push_back(m_valid_queue_sets.front().queue_providers[queue_index].requirement.queue_priority);
+                    device_queues.queue_family_usage[device_queues.device_queue_requirements.back().device_queues.back().queue_family_index]++;
+                }
+                else
+                {
+                    uint32_t requirement_index = requirement_location - unique_queue_requirements.begin();
+
+                    device_queues.device_queue_requirements[requirement_index].requirement_name = unique_queue_requirements[requirement_index].requirement_label;
+
+                    device_queues.device_queue_requirements[requirement_index].device_queues.resize(device_queues.device_queue_requirements[requirement_index].device_queues.size() + 1);
+                    device_queues.device_queue_requirements[requirement_index].device_queues.back().priority = m_valid_queue_sets.front().queue_providers[queue_index].requirement.queue_priority;
+                    device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_index = m_valid_queue_sets.front().queue_providers[queue_index].usage.queue_family_index;
+                    device_queues.device_queue_requirements[requirement_index].device_queues.back().index_in_queue_family
+                        = device_queues.queue_family_usage[device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_index];
+                    device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_properties = m_queue_families[device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_index];
+
+                    device_queues.queue_priorities[m_valid_queue_sets.front().queue_providers[queue_index].usage.queue_family_index].push_back(m_valid_queue_sets.front().queue_providers[queue_index].requirement.queue_priority);
+                    device_queues.queue_family_usage[device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_index]++;
+                }
+            }
+
+            return device_queues;
         }
     } // namespace Vulkan
 } // namespace Cascade_Graphics

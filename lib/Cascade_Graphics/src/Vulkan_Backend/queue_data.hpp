@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vulkan_header.hpp"
+
 #include <string>
 #include <vector>
 
@@ -8,51 +9,26 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        struct Queue_Requirement
+        struct Device_Queue
         {
-            std::string requirement_label;       // Label used to identify this requirement in logs
-            uint32_t required_queue_count;       // Number of queues required
-            VkQueueFlagBits required_queue_type; // Type of queue required
-            float queue_priority;                // Priority of the queues created to meet this requirement
+            float priority;
+            uint32_t queue_family_index;
+            uint32_t index_in_queue_family;
+            VkQueueFamilyProperties queue_family_properties;
         };
 
-        struct Queue_Usage
+        struct Device_Queue_Requirement
         {
-            uint32_t queue_family_index; // Index of the queue family this queue is from
-            uint32_t queue_count;        // Number of queues from queue_family_index
+            std::string requirement_name;
+            std::vector<Device_Queue> device_queues;
         };
 
-        struct Queue_Provider
+        struct Device_Queues
         {
-            bool present_support;          // Whether or not this queue provides present support
-            Queue_Requirement requirement; // Requirement that is queue fulfills
-            Queue_Usage usage;             // Queue usage by this provider
+            std::vector<uint32_t> queue_family_usage;
+            std::vector<std::vector<float>> queue_priorities;
+
+            std::vector<Device_Queue_Requirement> device_queue_requirements;
         };
-
-        struct Queue_Set
-        {
-            bool present_support;                        // Whether or not this queue set contains a queue which provides present support
-            uint32_t provided_queues;                    // Total number of queues this set uses
-            std::vector<uint32_t> queue_family_usage;    // Usage of queue families by this set
-            std::vector<Queue_Provider> queue_providers; // Array of providers for this set
-
-            Queue_Set& operator+=(const Queue_Set& other)
-            {
-                this->provided_queues += other.provided_queues;
-
-                for (uint32_t i = 0; i < queue_family_usage.size(); i++)
-                {
-                    this->queue_family_usage[i] += other.queue_family_usage[i];
-                }
-
-                this->queue_providers.reserve(this->queue_providers.size() + other.queue_providers.size());
-                this->queue_providers.insert(this->queue_providers.end(), other.queue_providers.begin(), other.queue_providers.end());
-
-                this->present_support = this->present_support || other.present_support;
-
-                return *this;
-            }
-        };
-
     } // namespace Vulkan
 } // namespace Cascade_Graphics

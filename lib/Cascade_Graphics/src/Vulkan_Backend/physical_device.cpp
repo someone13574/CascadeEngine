@@ -30,9 +30,9 @@ namespace Cascade_Graphics
             return &m_physical_device_features;
         }
 
-        Queue_Set Physical_Device::Get_Queue_Set()
+        Device_Queues Physical_Device::Get_Device_Queues()
         {
-            return m_queue_set;
+            return m_device_queues;
         }
 
         std::vector<const char*> Physical_Device::Get_Device_Extensions()

@@ -11,8 +11,8 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Graphics (Vulkan): Creating device from physical device '" << physical_device_ptr->Get_Properties()->deviceName << "'";
 
-            Queue_Set queue_set = physical_device_ptr->Get_Queue_Set();
-            std::vector<VkDeviceQueueCreateInfo> device_queue_create_informations = Get_Queue_Create_Information(&queue_set);
+            Device_Queues device_queues = physical_device_ptr->Get_Device_Queues();
+            std::vector<VkDeviceQueueCreateInfo> device_queue_create_informations = Get_Queue_Create_Information(&device_queues);
             std::vector<const char*> enabled_device_extensions = physical_device_ptr->Get_Device_Extensions();
 
             VkDeviceCreateInfo device_create_info = {};
@@ -42,23 +42,23 @@ namespace Cascade_Graphics
             vkDestroyDevice(m_device, nullptr);
         }
 
-        std::vector<VkDeviceQueueCreateInfo> Device::Get_Queue_Create_Information(Queue_Set* queue_set_ptr)
+        std::vector<VkDeviceQueueCreateInfo> Device::Get_Queue_Create_Information(Device_Queues* device_queues_ptr)
         {
             LOG_TRACE << "Graphics (Vulkan): Generating device queue create information";
 
             std::vector<VkDeviceQueueCreateInfo> device_queue_create_informations;
 
-            for (uint32_t queue_provider_index = 0; queue_provider_index < queue_set_ptr->queue_providers.size(); queue_provider_index++)
+            for (uint32_t queue_family_index = 0; queue_family_index < device_queues_ptr->queue_family_usage.size(); queue_family_index++)
             {
-                for (uint32_t queue_index = 0; queue_index < queue_set_ptr->queue_providers[queue_provider_index].usage.queue_count; queue_index++)
+                if (device_queues_ptr->queue_family_usage[queue_family_index] != 0)
                 {
                     VkDeviceQueueCreateInfo device_queue_create_info = {};
                     device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
                     device_queue_create_info.pNext = nullptr;
                     device_queue_create_info.flags = 0;
-                    device_queue_create_info.queueFamilyIndex = queue_set_ptr->queue_providers[queue_provider_index].usage.queue_family_index;
+                    device_queue_create_info.queueFamilyIndex = queue_family_index;
                     device_queue_create_info.queueCount = 1;
-                    device_queue_create_info.pQueuePriorities = &queue_set_ptr->queue_providers[queue_provider_index].requirement.queue_priority;
+                    device_queue_create_info.pQueuePriorities = device_queues_ptr->queue_priorities[queue_family_index].data();
 
                     device_queue_create_informations.push_back(device_queue_create_info);
                 }

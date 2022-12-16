@@ -16,7 +16,7 @@ namespace Cascade_Graphics
             VkPhysicalDevice m_physical_device;
             VkPhysicalDeviceProperties m_physical_device_properties;
             VkPhysicalDeviceFeatures m_physical_device_features;
-            Queue_Set m_queue_set;
+            Device_Queues m_device_queues;
             std::vector<const char*> m_enabled_device_extensions;
 
         public:
@@ -26,7 +26,7 @@ namespace Cascade_Graphics
             VkPhysicalDevice* Get();
             VkPhysicalDeviceProperties* Get_Properties();
             VkPhysicalDeviceFeatures* Get_Features();
-            Queue_Set Get_Queue_Set();
+            Device_Queues Get_Device_Queues();
             std::vector<const char*> Get_Device_Extensions();
         };
     } // namespace Vulkan

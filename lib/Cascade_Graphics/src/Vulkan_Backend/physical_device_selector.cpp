@@ -172,7 +172,7 @@ namespace Cascade_Graphics
                 }
                 else
                 {
-                    m_physical_device_filter_infos[physical_device_index].physical_device_ptr->m_queue_set = m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Best();
+                    m_physical_device_filter_infos[physical_device_index].physical_device_ptr->m_device_queues = m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Best();
                 }
             }
 
