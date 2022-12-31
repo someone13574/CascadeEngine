@@ -14,16 +14,18 @@ namespace Cascade_Graphics
         {
         private:
             VkDevice m_device;
+            Device_Queues m_device_queues;
 
         public:
             Device(Physical_Device* physical_device_ptr);
             ~Device();
 
         private:
-            static std::vector<VkDeviceQueueCreateInfo> Get_Queue_Create_Information(Device_Queues* device_queues_ptr);
+            std::vector<VkDeviceQueueCreateInfo> Get_Queue_Create_Information();
 
         public:
             VkDevice* Get();
+            Device_Queues* Get_Device_Queues();
         };
     } // namespace Vulkan
 } // namespace Cascade_Graphics

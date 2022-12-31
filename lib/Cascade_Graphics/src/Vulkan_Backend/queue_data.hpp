@@ -14,6 +14,8 @@ namespace Cascade_Graphics
             float priority;
             uint32_t queue_family_index;
             uint32_t index_in_queue_family;
+
+            VkQueue queue;
             VkQueueFamilyProperties queue_family_properties;
         };
 

@@ -271,6 +271,7 @@ namespace Cascade_Graphics
                     device_queues.device_queue_requirements.back().device_queues.back().priority = m_valid_queue_sets.front().queue_providers[queue_index].requirement.queue_priority;
                     device_queues.device_queue_requirements.back().device_queues.back().queue_family_index = m_valid_queue_sets.front().queue_providers[queue_index].usage.queue_family_index;
                     device_queues.device_queue_requirements.back().device_queues.back().index_in_queue_family = device_queues.queue_family_usage[device_queues.device_queue_requirements.back().device_queues.back().queue_family_index];
+                    device_queues.device_queue_requirements.back().device_queues.back().queue = VK_NULL_HANDLE;
                     device_queues.device_queue_requirements.back().device_queues.back().queue_family_properties = m_queue_families[device_queues.device_queue_requirements.back().device_queues.back().queue_family_index];
 
                     device_queues.queue_priorities[m_valid_queue_sets.front().queue_providers[queue_index].usage.queue_family_index].push_back(m_valid_queue_sets.front().queue_providers[queue_index].requirement.queue_priority);
@@ -287,6 +288,7 @@ namespace Cascade_Graphics
                     device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_index = m_valid_queue_sets.front().queue_providers[queue_index].usage.queue_family_index;
                     device_queues.device_queue_requirements[requirement_index].device_queues.back().index_in_queue_family
                         = device_queues.queue_family_usage[device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_index];
+                    device_queues.device_queue_requirements[requirement_index].device_queues.back().queue = VK_NULL_HANDLE;
                     device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_properties = m_queue_families[device_queues.device_queue_requirements[requirement_index].device_queues.back().queue_family_index];
 
                     device_queues.queue_priorities[m_valid_queue_sets.front().queue_providers[queue_index].usage.queue_family_index].push_back(m_valid_queue_sets.front().queue_providers[queue_index].requirement.queue_priority);
