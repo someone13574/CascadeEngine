@@ -4,15 +4,15 @@
 
 namespace Cascade_Graphics
 {
-    namespace Vulkan
-    {
-        class Swapchain
-        {
-        private:
-            VkSwapchainKHR m_swapchain;
+	namespace Vulkan
+	{
+		class Swapchain
+		{
+		private:
+			VkSwapchainKHR m_swapchain;
 
-        public:
-            VkSwapchainKHR* Get();
-        };
-    } // namespace Vulkan
-} // namespace Cascade_Graphics
+		public:
+			VkSwapchainKHR* Get();
+		};
+	}	 // namespace Vulkan
+}	 // namespace Cascade_Graphics
