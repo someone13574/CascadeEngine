@@ -13,8 +13,6 @@ namespace Cascade_Graphics
 		Swapchain_Builder::Swapchain_Builder(Physical_Device* physical_device_ptr, Surface* surface_ptr) :
 			m_physical_device_ptr(physical_device_ptr), m_surface_ptr(surface_ptr)
 		{
-			m_swapchain_ptr = new Swapchain();
-
 			Get_Surface_Capabilities();
 			Get_Surface_Formats();
 			Get_Present_Modes();
@@ -76,6 +74,14 @@ namespace Cascade_Graphics
 				LOG_FATAL << "Graphics (Vulkan): Failed to get supported present modes with VkResult " << get_present_modes_result << " (" << string_VkResult(get_present_modes_result) << ")";
 				exit(EXIT_FAILURE);
 			}
+		}
+
+		void Swapchain_Builder::Select_Image_Count()
+		{
+			m_image_count = m_surface_capabilities.minImageCount;
+			m_image_count = (m_surface_capabilities.maxImageCount != 0 && m_image_count > m_surface_capabilities.maxImageCount) ? m_surface_capabilities.maxImageCount : m_image_count;
+
+			LOG_DEBUG << "Graphics (Vulkan): Selected swapchain image count of " << m_image_count;
 		}
 
 		Swapchain_Builder& Swapchain_Builder::Select_Image_Format(std::vector<VkSurfaceFormatKHR> preferred_formats)
@@ -185,8 +191,22 @@ namespace Cascade_Graphics
 		{
 			LOG_DEBUG << "Graphics (Vulkan): Building swapchain";
 
-			m_swapchain_ptr = new Swapchain;
-			m_swapchain_ptr->m_device_ptr = device_ptr;
+			Select_Image_Count();
+
+			// Create swapchain object
+			m_swapchain_ptr = new Swapchain(device_ptr, m_image_count, m_surface_format);
+
+			// Create swapchain components
+			Create_Swapchain(device_ptr);
+			Get_Swapchain_Images(device_ptr);
+			Create_Swapchain_Image_Views(device_ptr);
+
+			return m_swapchain_ptr;
+		}
+
+		void Swapchain_Builder::Create_Swapchain(Device* device_ptr)
+		{
+			LOG_TRACE << "Graphics (Vulkan): Creating swapchain";
 
 			// Ensure required properties have been selected
 			assert(m_surface_format.format != VK_FORMAT_UNDEFINED && "Graphics (Vulkan): Surface format selector not called");
@@ -205,10 +225,6 @@ namespace Cascade_Graphics
 
 			std::sort(swapchain_access_queue_families.begin(), swapchain_access_queue_families.end());
 			swapchain_access_queue_families.erase(std::unique(swapchain_access_queue_families.begin(), swapchain_access_queue_families.end()), swapchain_access_queue_families.end());
-
-			// Select image count
-			m_image_count = m_surface_capabilities.minImageCount;
-			m_image_count = (m_surface_capabilities.maxImageCount != 0 && m_image_count > m_surface_capabilities.maxImageCount) ? m_surface_capabilities.maxImageCount : m_image_count;
 
 			// Create swapchain
 			VkSwapchainCreateInfoKHR swapchain_create_info = {};
@@ -237,8 +253,59 @@ namespace Cascade_Graphics
 				LOG_FATAL << "Graphics (Vulkan): Failed to create swapchain with VkResult " << create_swapchain_result << " (" << string_VkResult(create_swapchain_result) << ")";
 				exit(EXIT_FAILURE);
 			}
-
-			return m_swapchain_ptr;
 		}
+
+		void Swapchain_Builder::Get_Swapchain_Images(Device* device_ptr)
+		{
+			LOG_TRACE << "Graphics (Vulkan): Getting swapchain images";
+
+			VkResult get_image_count_result = vkGetSwapchainImagesKHR(*device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, NULL);
+			if (get_image_count_result != VK_SUCCESS && get_image_count_result != VK_INCOMPLETE)
+			{
+				LOG_FATAL << "Graphics (Vulkan): Failed to get number of swapchain images with VkResult " << get_image_count_result << " (" << string_VkResult(get_image_count_result) << ")";
+				exit(EXIT_FAILURE);
+			}
+			assert(m_image_count == m_swapchain_ptr->Get_Image_Count() && "Graphics (Vulkan): Number of images returned from vkGetSwapchainImagesKHR doesn't match specified amount");
+			m_swapchain_ptr->m_swapchain_images.resize(m_image_count);
+
+			VkResult get_swapchain_images_result = vkGetSwapchainImagesKHR(*device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, m_swapchain_ptr->m_swapchain_images.data());
+			if (get_swapchain_images_result != VK_SUCCESS)
+			{
+				LOG_FATAL << "Graphics (Vulkan): Failed to get swapchain images with VkResult " << get_swapchain_images_result << " (" << string_VkResult(get_swapchain_images_result) << ")";
+				exit(EXIT_FAILURE);
+			}
+		}
+
+		void Swapchain_Builder::Create_Swapchain_Image_Views(Device* device_ptr)
+		{
+			LOG_TRACE << "Graphics (Vulkan): Creating swapchain image views";
+
+			m_swapchain_ptr->m_swapchain_image_views.resize(m_image_count);
+
+			for (uint32_t image_view_index = 0; image_view_index < m_image_count; image_view_index++)
+			{
+				VkImageViewCreateInfo image_view_create_info = {};
+				image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+				image_view_create_info.pNext = nullptr;
+				image_view_create_info.flags = 0;
+				image_view_create_info.image = *m_swapchain_ptr->Get_Image(image_view_index);
+				image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+				image_view_create_info.format = m_swapchain_ptr->m_surface_format.format;
+				image_view_create_info.components = {VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY};
+				image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+				image_view_create_info.subresourceRange.baseMipLevel = 0;
+				image_view_create_info.subresourceRange.levelCount = 1;
+				image_view_create_info.subresourceRange.baseArrayLayer = 0;
+				image_view_create_info.subresourceRange.layerCount = 1;
+
+				VkResult create_image_view_result = vkCreateImageView(*device_ptr->Get(), &image_view_create_info, NULL, &m_swapchain_ptr->m_swapchain_image_views[image_view_index]);
+				if (create_image_view_result != VK_SUCCESS)
+				{
+					LOG_FATAL << "Graphics (Vulkan): Failed to create swapchain image view with VkResult " << create_image_view_result << " (" << string_VkResult(create_image_view_result) << ")";
+					exit(EXIT_FAILURE);
+				}
+			}
+		}
+
 	}	 // namespace Vulkan
 }	 // namespace Cascade_Graphics

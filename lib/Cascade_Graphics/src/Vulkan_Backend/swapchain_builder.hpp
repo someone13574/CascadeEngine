@@ -34,6 +34,12 @@ namespace Cascade_Graphics
 			void Get_Surface_Formats();
 			void Get_Present_Modes();
 
+			void Select_Image_Count();
+
+			void Create_Swapchain(Device* device_ptr);
+			void Get_Swapchain_Images(Device* device_ptr);
+			void Create_Swapchain_Image_Views(Device* device_ptr);
+
 		public:
 			Swapchain_Builder& Select_Image_Format(std::vector<VkSurfaceFormatKHR> preferred_formats);
 			Swapchain_Builder& Select_Image_Extent(Window_Info* window_info_ptr);
