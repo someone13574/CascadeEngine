@@ -20,6 +20,7 @@ namespace Cascade_Graphics
 				uint32_t required_queue_count;			// Number of queues required
 				VkQueueFlagBits required_queue_type;	// Type of queue required
 				float queue_priority;					// Priority of the queues created to meet this requirement
+				bool swapchain_access;					// Whether or not this queue requires access to the swapchain
 
 				bool operator==(const Queue_Requirement& other)
 				{
@@ -86,7 +87,7 @@ namespace Cascade_Graphics
 			Queue_Selector(Physical_Device* physical_device_ptr, Platform_Info* platform_info_ptr);
 
 		public:
-			Queue_Selector& Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority);
+			Queue_Selector& Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority, bool swapchain_access);
 			Queue_Selector& Require_Present_Queue();
 
 			bool Meets_Requirements();
