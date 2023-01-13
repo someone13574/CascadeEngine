@@ -23,7 +23,6 @@ add_library(cascade_graphics STATIC src/platform_info.cpp
                                     src/Vulkan_Backend/xcb_surface.cpp
                                     src/Vulkan_Backend/swapchain.cpp
                                     src/Vulkan_Backend/swapchain_builder.cpp
-                                    src/Vulkan_Backend/vkresult_translator.cpp
                                     src/Vulkan_Backend/vulkan_header.hpp)
 
 # Set 'include' as a include directory

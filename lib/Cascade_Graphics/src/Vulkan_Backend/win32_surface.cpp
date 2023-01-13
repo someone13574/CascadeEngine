@@ -1,8 +1,8 @@
 #include "win32_surface.hpp"
 
 #include "../win32_platform_info.hpp"
-#include "vkresult_translator.hpp"
 #include <acorn_logging.hpp>
+#include <vulkan/vk_enum_string_helper.h>
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -31,7 +31,7 @@ namespace Cascade_Graphics
 			VkResult surface_create_result = vkCreateWin32SurfaceKHR(*m_instance_ptr->Get(), &surface_create_info, nullptr, &m_surface);
 			if (surface_create_result != VK_SUCCESS)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to create surface with VkResult " << surface_create_result << " (" << Translate_VkResult(surface_create_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to create surface with VkResult " << surface_create_result << " (" << string_VkResult(surface_create_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 #endif

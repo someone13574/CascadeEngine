@@ -1,6 +1,5 @@
 #include "queue_selector.hpp"
 
-#include "vkresult_translator.hpp"
 #include <acorn_logging.hpp>
 #include <algorithm>
 #include <cmath>

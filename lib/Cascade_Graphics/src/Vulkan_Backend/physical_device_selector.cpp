@@ -1,9 +1,9 @@
 #include "physical_device_selector.hpp"
 
-#include "vkresult_translator.hpp"
 #include <acorn_logging.hpp>
 #include <algorithm>
 #include <string>
+#include <vulkan/vk_enum_string_helper.h>
 
 namespace Cascade_Graphics
 {
@@ -21,7 +21,7 @@ namespace Cascade_Graphics
 			VkResult get_physical_device_count_result = vkEnumeratePhysicalDevices(*instance_ptr->Get(), &physical_device_count, nullptr);
 			if (get_physical_device_count_result != VK_SUCCESS && get_physical_device_count_result != VK_INCOMPLETE)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to get number of physical devices with VkResult " << get_physical_device_count_result << " (" << Translate_VkResult(get_physical_device_count_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to get number of physical devices with VkResult " << get_physical_device_count_result << " (" << string_VkResult(get_physical_device_count_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 
@@ -29,7 +29,7 @@ namespace Cascade_Graphics
 			VkResult get_physical_devices_result = vkEnumeratePhysicalDevices(*instance_ptr->Get(), &physical_device_count, physical_devices.data());
 			if (get_physical_devices_result != VK_SUCCESS && get_physical_devices_result != VK_INCOMPLETE)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to get available physical devices with VkResult " << get_physical_devices_result << " (" << Translate_VkResult(get_physical_devices_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to get available physical devices with VkResult " << get_physical_devices_result << " (" << string_VkResult(get_physical_devices_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 
@@ -49,7 +49,7 @@ namespace Cascade_Graphics
 				if (get_extension_count_result != VK_SUCCESS)
 				{
 					LOG_FATAL << "Graphics (Vulkan): Failed to get number of extensions for physical device '" << physical_device_filter_info.physical_device_ptr->Get_Properties()->deviceName << "' with VkResult " << get_extension_count_result
-							  << " (" << Translate_VkResult(get_extension_count_result) << ")";
+							  << " (" << string_VkResult(get_extension_count_result) << ")";
 					exit(EXIT_FAILURE);
 				}
 
@@ -58,7 +58,7 @@ namespace Cascade_Graphics
 				if (get_extensions_result != VK_SUCCESS)
 				{
 					LOG_FATAL << "Graphics (Vulkan): Failed to get available extensions for physical device '" << physical_device_filter_info.physical_device_ptr->Get_Properties()->deviceName << "' with VkResult " << get_extension_count_result
-							  << " (" << Translate_VkResult(get_extension_count_result) << ")";
+							  << " (" << string_VkResult(get_extension_count_result) << ")";
 					exit(EXIT_FAILURE);
 				}
 

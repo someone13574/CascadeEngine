@@ -1,7 +1,6 @@
 #include "swapchain_builder.hpp"
 
 #include "queue_data.hpp"
-#include "vkresult_translator.hpp"
 #include <acorn_logging.hpp>
 #include <algorithm>
 #include <cassert>
@@ -28,7 +27,7 @@ namespace Cascade_Graphics
 			VkResult get_surface_capabilities_result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &m_surface_capabilities);
 			if (get_surface_capabilities_result != VK_SUCCESS)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to get surface capabilities with VkResult " << get_surface_capabilities_result << " (" << Translate_VkResult(get_surface_capabilities_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to get surface capabilities with VkResult " << get_surface_capabilities_result << " (" << string_VkResult(get_surface_capabilities_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -42,7 +41,7 @@ namespace Cascade_Graphics
 			VkResult get_surface_format_count_result = vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &surface_format_count, nullptr);
 			if (get_surface_format_count_result != VK_SUCCESS)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported surface formats with VkResult " << get_surface_format_count_result << " (" << Translate_VkResult(get_surface_format_count_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported surface formats with VkResult " << get_surface_format_count_result << " (" << string_VkResult(get_surface_format_count_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 
@@ -51,7 +50,7 @@ namespace Cascade_Graphics
 			VkResult get_surface_formats_result = vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &surface_format_count, m_surface_formats.data());
 			if (get_surface_formats_result != VK_SUCCESS)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to get supported surface formats with VkResult " << get_surface_formats_result << " (" << Translate_VkResult(get_surface_formats_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to get supported surface formats with VkResult " << get_surface_formats_result << " (" << string_VkResult(get_surface_formats_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -65,7 +64,7 @@ namespace Cascade_Graphics
 			VkResult get_present_mode_count_result = vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &present_mode_count, nullptr);
 			if (get_present_mode_count_result != VK_SUCCESS)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported present modes with VkResult " << get_present_mode_count_result << " (" << Translate_VkResult(get_present_mode_count_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported present modes with VkResult " << get_present_mode_count_result << " (" << string_VkResult(get_present_mode_count_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 
@@ -74,7 +73,7 @@ namespace Cascade_Graphics
 			VkResult get_present_modes_result = vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &present_mode_count, m_present_modes.data());
 			if (get_present_modes_result != VK_SUCCESS)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to get supported present modes with VkResult " << get_present_modes_result << " (" << Translate_VkResult(get_present_modes_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to get supported present modes with VkResult " << get_present_modes_result << " (" << string_VkResult(get_present_modes_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 		}

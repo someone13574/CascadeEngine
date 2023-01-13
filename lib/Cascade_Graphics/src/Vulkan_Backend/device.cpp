@@ -1,7 +1,7 @@
 #include "device.hpp"
 
-#include "vkresult_translator.hpp"
 #include <acorn_logging.hpp>
+#include <vulkan/vk_enum_string_helper.h>
 
 namespace Cascade_Graphics
 {
@@ -31,7 +31,7 @@ namespace Cascade_Graphics
 			VkResult create_device_result = vkCreateDevice(*physical_device_ptr->Get(), &device_create_info, nullptr, &m_device);
 			if (create_device_result != VK_SUCCESS)
 			{
-				LOG_FATAL << "Graphics (Vulkan): Failed to create device with VkResult " << create_device_result << " (" << Translate_VkResult(create_device_result) << ")";
+				LOG_FATAL << "Graphics (Vulkan): Failed to create device with VkResult " << create_device_result << " (" << string_VkResult(create_device_result) << ")";
 				exit(EXIT_FAILURE);
 			}
 
