@@ -3,9 +3,9 @@
 #include "../platform_info.hpp"
 #include "physical_device.hpp"
 #include "queue_data.hpp"
-#include "vulkan_header.hpp"
 #include <string>
 #include <vector>
+#include <vulkan/vulkan.h>
 
 namespace Cascade_Graphics
 {

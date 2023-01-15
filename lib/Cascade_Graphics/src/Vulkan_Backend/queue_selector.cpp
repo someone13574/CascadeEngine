@@ -15,7 +15,7 @@ namespace Cascade_Graphics
     namespace Vulkan
     {
         Queue_Selector::Queue_Selector(Physical_Device* physical_device_ptr, Platform_Info* platform_info_ptr) :
-            m_platform_info_ptr(platform_info_ptr), m_pyhsical_device_ptr(physical_device_ptr)
+            m_pyhsical_device_ptr(physical_device_ptr), m_platform_info_ptr(platform_info_ptr)
         {
             LOG_DEBUG << "Graphics (Vulkan): Getting available queue families for physical device '" << physical_device_ptr->Get_Properties()->deviceName << "'";
 
