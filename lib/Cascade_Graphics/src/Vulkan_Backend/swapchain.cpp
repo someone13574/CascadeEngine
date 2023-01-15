@@ -1,4 +1,5 @@
 #include "swapchain.hpp"
+
 #include <acorn_logging.hpp>
 #include <cassert>
 

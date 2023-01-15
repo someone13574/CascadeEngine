@@ -1,6 +1,7 @@
 #ifdef __linux__
 
     #include "xcb_window.hpp"
+
     #include <acorn_logging.hpp>
 
 namespace Cascade_Core

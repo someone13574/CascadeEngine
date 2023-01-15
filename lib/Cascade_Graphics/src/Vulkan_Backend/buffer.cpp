@@ -1,4 +1,5 @@
 #include "buffer.hpp"
+
 #include <acorn_logging.hpp>
 #include <algorithm>
 #include <vulkan/vk_enum_string_helper.h>

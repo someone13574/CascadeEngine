@@ -1,6 +1,7 @@
 #ifdef _WIN32
 
     #include "win32_window_factory.hpp"
+
     #include "win32_window.hpp"
 
 namespace Cascade_Core

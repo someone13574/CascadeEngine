@@ -1,6 +1,7 @@
 #ifdef __linux__
 
     #include "xcb_window_factory.hpp"
+
     #include "xcb_window.hpp"
 
 namespace Cascade_Core

@@ -1,4 +1,5 @@
 #include "surface.hpp"
+
 #include <acorn_logging.hpp>
 
 namespace Cascade_Graphics

@@ -1,6 +1,7 @@
 #ifdef _WIN32
 
     #include "win32_window.hpp"
+
     #include <acorn_logging.hpp>
 
 namespace Cascade_Core
