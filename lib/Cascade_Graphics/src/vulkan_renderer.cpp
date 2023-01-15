@@ -9,8 +9,7 @@
 
 namespace Cascade_Graphics
 {
-    Vulkan_Renderer::Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr) :
-        m_graphics_ptr(graphics_ptr)
+    Vulkan_Renderer::Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr)
     {
         LOG_INFO << "Graphics: Initializing renderer with Vulkan backend";
 

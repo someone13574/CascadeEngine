@@ -25,7 +25,6 @@ namespace Cascade_Graphics
         private:
             std::vector<Physical_Device_Filter_Info> m_physical_device_filter_infos;
 
-            Instance* m_instance_ptr;
             Platform_Info* m_platform_info_ptr;
 
         public:

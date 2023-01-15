@@ -10,7 +10,7 @@ namespace Cascade_Graphics
     namespace Vulkan
     {
         Physical_Device_Selector::Physical_Device_Selector(Instance* instance_ptr, Platform_Info* platform_info_ptr) :
-            m_instance_ptr(instance_ptr), m_platform_info_ptr(platform_info_ptr)
+            m_platform_info_ptr(platform_info_ptr)
         {
             LOG_INFO << "Graphics (Vulkan): Selecting physical device";
             LOG_DEBUG << "Graphics (Vulkan): Getting available physical devices";

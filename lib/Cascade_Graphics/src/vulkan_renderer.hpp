@@ -15,7 +15,6 @@ namespace Cascade_Graphics
         friend class Vulkan_Graphics_Factory;
 
     private:
-        Graphics* m_graphics_ptr;
         Vulkan::Surface* m_surface_ptr;
         Vulkan::Swapchain* m_swapchain_ptr;
         Vulkan::Buffer* m_camera_buffer_ptr;
