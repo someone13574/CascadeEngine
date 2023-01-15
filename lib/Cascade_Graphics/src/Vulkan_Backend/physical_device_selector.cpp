@@ -66,7 +66,7 @@ namespace Cascade_Graphics
             }
         }
 
-        Physical_Device_Selector& Physical_Device_Selector::Require_Queue_Type(std::string requirement_label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority, bool swapchain_access)
+        Physical_Device_Selector& Physical_Device_Selector::Require_Queue_Type(std::string requirement_label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority)
         {
             for (int32_t physical_device_index = static_cast<int32_t>(m_physical_device_filter_infos.size()) - 1; physical_device_index >= 0; physical_device_index--)
             {
@@ -75,7 +75,7 @@ namespace Cascade_Graphics
                     m_physical_device_filter_infos[physical_device_index].queue_selector_ptr = new Queue_Selector(m_physical_device_filter_infos[physical_device_index].physical_device_ptr, m_platform_info_ptr);
                 }
 
-                m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Add_Queue_Requirement(requirement_label, queue_type, required_queue_count, queue_priority, swapchain_access);
+                m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Add_Queue_Requirement(requirement_label, queue_type, required_queue_count, queue_priority);
             }
 
             return *this;

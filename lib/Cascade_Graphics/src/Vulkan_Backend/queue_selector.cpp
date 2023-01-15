@@ -201,7 +201,7 @@ namespace Cascade_Graphics
             }
         }
 
-        Queue_Selector& Queue_Selector::Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority, bool swapchain_access)
+        Queue_Selector& Queue_Selector::Add_Queue_Requirement(std::string label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority)
         {
             m_sets_up_to_date = false;
 
@@ -212,7 +212,6 @@ namespace Cascade_Graphics
             m_queue_requirements.back().required_queue_type = queue_type;
             m_queue_requirements.back().required_queue_count = required_queue_count;
             m_queue_requirements.back().queue_priority = queue_priority;
-            m_queue_requirements.back().swapchain_access = swapchain_access;
 
             return *this;
         }

@@ -187,6 +187,23 @@ namespace Cascade_Graphics
             return *this;
         }
 
+        Swapchain_Builder& Swapchain_Builder::Set_Allowed_Queue_Requirements(std::vector<Device_Queue_Requirement*> allowed_queue_requirements)
+        {
+            // Get queues which require access to the swapchain
+            for (uint32_t queue_requirement_index = 0; queue_requirement_index < allowed_queue_requirements.size(); queue_requirement_index++)
+            {
+                for (uint32_t queue_index = 0; queue_index < allowed_queue_requirements[queue_requirement_index]->device_queues.size(); queue_index++)
+                {
+                    m_allowed_queue_families.push_back(allowed_queue_requirements[queue_requirement_index]->device_queues[queue_index].queue_family_index);
+                }
+            }
+
+            std::sort(m_allowed_queue_families.begin(), m_allowed_queue_families.end());
+            m_allowed_queue_families.erase(std::unique(m_allowed_queue_families.begin(), m_allowed_queue_families.end()), m_allowed_queue_families.end());
+
+            return *this;
+        }
+
         Swapchain* Swapchain_Builder::Build(Device* device_ptr)
         {
             LOG_DEBUG << "Graphics (Vulkan): Building swapchain";
@@ -229,7 +246,7 @@ namespace Cascade_Graphics
             // Create swapchain
             VkSwapchainCreateInfoKHR swapchain_create_info = {};
             swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-            swapchain_create_info.pNext = NULL;
+            swapchain_create_info.pNext = nullptr;
             swapchain_create_info.flags = 0;
             swapchain_create_info.surface = m_surface_ptr->Get();
             swapchain_create_info.minImageCount = m_image_count;

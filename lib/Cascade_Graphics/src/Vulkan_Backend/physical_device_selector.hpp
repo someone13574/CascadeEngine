@@ -31,7 +31,7 @@ namespace Cascade_Graphics
             Physical_Device_Selector(Instance* instance_ptr, Platform_Info* platform_info_ptr);
 
         public:
-            Physical_Device_Selector& Require_Queue_Type(std::string requirement_label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority, bool swapchain_access);
+            Physical_Device_Selector& Require_Queue_Type(std::string requirement_label, VkQueueFlagBits queue_type, uint32_t required_queue_count, float queue_priority);
             Physical_Device_Selector& Require_Present_Queue();
 
             Physical_Device_Selector& Require_Extension(const char* extension_name);
