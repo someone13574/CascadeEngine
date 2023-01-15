@@ -11,6 +11,7 @@ namespace Cascade_Graphics
         {
         protected:
             Instance* m_instance_ptr;
+
             VkSurfaceKHR m_surface;
 
         protected:

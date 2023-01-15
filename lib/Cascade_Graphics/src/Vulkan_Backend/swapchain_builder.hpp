@@ -15,9 +15,10 @@ namespace Cascade_Graphics
         class Swapchain_Builder
         {
         private:
-            Swapchain* m_swapchain_ptr;
             Physical_Device* m_physical_device_ptr;
             Surface* m_surface_ptr;
+
+            Swapchain* m_swapchain_ptr;
 
             VkSurfaceCapabilitiesKHR m_surface_capabilities;
             std::vector<VkSurfaceFormatKHR> m_surface_formats;

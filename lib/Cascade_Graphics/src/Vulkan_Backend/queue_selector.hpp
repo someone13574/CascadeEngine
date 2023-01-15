@@ -67,8 +67,8 @@ namespace Cascade_Graphics
             };
 
         private:
-            Platform_Info* m_platform_info_ptr;
             Physical_Device* m_pyhsical_device_ptr;
+            Platform_Info* m_platform_info_ptr;
 
             bool m_sets_up_to_date = false;
             bool m_present_queue_required = false;
