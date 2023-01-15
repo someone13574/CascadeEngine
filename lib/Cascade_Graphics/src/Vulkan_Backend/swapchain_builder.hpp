@@ -3,6 +3,7 @@
 #include "../platform_info.hpp"
 #include "device.hpp"
 #include "physical_device.hpp"
+#include "queue_data.hpp"
 #include "surface.hpp"
 #include "swapchain.hpp"
 #include "vulkan_header.hpp"
@@ -28,6 +29,7 @@ namespace Cascade_Graphics
 			VkExtent2D m_swapchain_extent = {0, 0};
 			VkImageUsageFlags m_swapchain_image_usage = 0;
 			VkPresentModeKHR m_present_mode;
+			std::vector<uint32_t> m_allowed_queue_families;
 
 		private:
 			void Get_Surface_Capabilities();
@@ -45,6 +47,7 @@ namespace Cascade_Graphics
 			Swapchain_Builder& Select_Image_Extent(Window_Info* window_info_ptr);
 			Swapchain_Builder& Set_Swapchain_Image_Usage(VkImageUsageFlags image_usage_flags);
 			Swapchain_Builder& Select_Present_Mode(std::vector<VkPresentModeKHR> preferred_present_modes);
+			Swapchain_Builder& Set_Allowed_Queue_Requirements(std::vector<Device_Queue_Requirement*> allowed_queue_requirements);
 
 		public:
 			Swapchain_Builder(Physical_Device* physical_device_ptr, Surface* surface_ptr);

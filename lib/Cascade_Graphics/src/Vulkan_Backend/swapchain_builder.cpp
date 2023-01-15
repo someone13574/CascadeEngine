@@ -187,6 +187,23 @@ namespace Cascade_Graphics
 			return *this;
 		}
 
+		Swapchain_Builder& Swapchain_Builder::Set_Allowed_Queue_Requirements(std::vector<Device_Queue_Requirement*> allowed_queue_requirements)
+		{
+			// Get queues which require access to the swapchain
+			for (uint32_t queue_requirement_index = 0; queue_requirement_index < allowed_queue_requirements.size(); queue_requirement_index++)
+			{
+				for (uint32_t queue_index = 0; queue_index < allowed_queue_requirements[queue_requirement_index]->device_queues.size(); queue_index++)
+				{
+					m_allowed_queue_families.push_back(allowed_queue_requirements[queue_requirement_index]->device_queues[queue_index].queue_family_index);
+				}
+			}
+
+			std::sort(m_allowed_queue_families.begin(), m_allowed_queue_families.end());
+			m_allowed_queue_families.erase(std::unique(m_allowed_queue_families.begin(), m_allowed_queue_families.end()), m_allowed_queue_families.end());
+
+			return *this;
+		}
+
 		Swapchain* Swapchain_Builder::Build(Device* device_ptr)
 		{
 			LOG_DEBUG << "Graphics (Vulkan): Building swapchain";
@@ -213,19 +230,6 @@ namespace Cascade_Graphics
 			assert(m_swapchain_extent.width != 0 && m_swapchain_extent.height != 0 && "Graphics (Vulkan): Swapchain extent selector not called");
 			assert(m_swapchain_image_usage != 0 && "Graphics (Vulkan): Swapchain image usage flags have not been set");
 
-			// Get queues which require access to the swapchain
-			std::vector<uint32_t> swapchain_access_queue_families;
-			for (uint32_t queue_requirement_index = 0; queue_requirement_index < device_ptr->Get_Device_Queues()->device_queue_requirements.size(); queue_requirement_index++)
-			{
-				for (uint32_t queue_index = 0; queue_index < device_ptr->Get_Device_Queues()->device_queue_requirements[queue_requirement_index].device_queues.size(); queue_index++)
-				{
-					swapchain_access_queue_families.push_back(device_ptr->Get_Device_Queues()->device_queue_requirements[queue_requirement_index].device_queues[queue_index].queue_family_index);
-				}
-			}
-
-			std::sort(swapchain_access_queue_families.begin(), swapchain_access_queue_families.end());
-			swapchain_access_queue_families.erase(std::unique(swapchain_access_queue_families.begin(), swapchain_access_queue_families.end()), swapchain_access_queue_families.end());
-
 			// Create swapchain
 			VkSwapchainCreateInfoKHR swapchain_create_info = {};
 			swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -238,9 +242,9 @@ namespace Cascade_Graphics
 			swapchain_create_info.imageExtent = m_swapchain_extent;
 			swapchain_create_info.imageArrayLayers = 1;
 			swapchain_create_info.imageUsage = m_swapchain_image_usage;
-			swapchain_create_info.imageSharingMode = (swapchain_access_queue_families.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
-			swapchain_create_info.queueFamilyIndexCount = swapchain_access_queue_families.size();
-			swapchain_create_info.pQueueFamilyIndices = swapchain_access_queue_families.data();
+			swapchain_create_info.imageSharingMode = (m_allowed_queue_families.size() == 1) ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT;
+			swapchain_create_info.queueFamilyIndexCount = m_allowed_queue_families.size();
+			swapchain_create_info.pQueueFamilyIndices = m_allowed_queue_families.data();
 			swapchain_create_info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 			swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 			swapchain_create_info.presentMode = m_present_mode;

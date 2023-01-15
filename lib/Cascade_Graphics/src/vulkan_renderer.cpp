@@ -35,6 +35,7 @@ namespace Cascade_Graphics
 							  .Select_Image_Extent(window_info_ptr)
 							  .Set_Swapchain_Image_Usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT)
 							  .Select_Present_Mode(std::vector<VkPresentModeKHR> {VK_PRESENT_MODE_FIFO_RELAXED_KHR, VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR})
+							  .Set_Allowed_Queue_Requirements(std::vector<Vulkan::Device_Queue_Requirement*> {&vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]})
 							  .Build(vulkan_graphics_ptr->m_device_ptr);
 
 		m_camera_buffer_ptr = new Vulkan::Buffer(vulkan_graphics_ptr->m_device_ptr, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, (VkDeviceSize)sizeof(uint32_t), std::vector<Vulkan::Device_Queue_Requirement*> {&vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]}, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
