@@ -62,7 +62,6 @@ namespace Cascade_Core
 
         void Start_Thread();
         void Exit_Thread();
-        void Exit_Thread_Immediate();
 
         void Await_State(Thread_State target_state);
     };

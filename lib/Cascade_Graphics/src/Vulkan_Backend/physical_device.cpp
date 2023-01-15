@@ -11,9 +11,6 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Graphics (Vulkan): Getting physical device properties";
             vkGetPhysicalDeviceProperties(m_physical_device, &m_physical_device_properties);
-
-            LOG_TRACE << "Graphics (Vulkan): Getting physical device features";
-            vkGetPhysicalDeviceFeatures(m_physical_device, &m_physical_device_features);
         }
 
         VkPhysicalDevice* Physical_Device::Get()
@@ -24,11 +21,6 @@ namespace Cascade_Graphics
         VkPhysicalDeviceProperties* Physical_Device::Get_Properties()
         {
             return &m_physical_device_properties;
-        }
-
-        VkPhysicalDeviceFeatures* Physical_Device::Get_Features()
-        {
-            return &m_physical_device_features;
         }
 
         Device_Queues Physical_Device::Get_Device_Queues()

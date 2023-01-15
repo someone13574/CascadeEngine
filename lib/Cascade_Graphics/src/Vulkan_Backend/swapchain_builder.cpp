@@ -290,7 +290,7 @@ namespace Cascade_Graphics
                 image_view_create_info.flags = 0;
                 image_view_create_info.image = *m_swapchain_ptr->Get_Image(image_view_index);
                 image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                image_view_create_info.format = m_swapchain_ptr->m_surface_format.format;
+                image_view_create_info.format = m_swapchain_ptr->Get_Surface_Format().format;
                 image_view_create_info.components = {VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY};
                 image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 image_view_create_info.subresourceRange.baseMipLevel = 0;

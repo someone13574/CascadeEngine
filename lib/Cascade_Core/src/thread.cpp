@@ -186,38 +186,6 @@ namespace Cascade_Core
         }
     }
 
-    void Thread::Exit_Thread_Immediate()
-    {
-        LOG_DEBUG << "Core: Exiting thread '" << m_thread_label << "' without exit function";
-
-        if (m_thread_state == Thread_State::NOT_STARTED)
-        {
-            m_start_function_enabled = false;
-            m_loop_function_enabled = false;
-            m_exit_function_enabled = false;
-
-            Start_Thread();
-            return;
-        }
-        else if (m_thread_state == Thread_State::START_FUNC)
-        {
-            m_loop_function_enabled = false;
-            m_exit_function_enabled = false;
-            return;
-        }
-        else if (m_thread_state == Thread_State::LOOP_FUNC)
-        {
-            {
-                std::scoped_lock<std::mutex> exit_loop_lock(m_exit_loop_mutex);
-                m_exit_function_enabled = false;
-                m_thread_state = Thread_State::AWAITING_LOOP_EXIT;
-            }
-            m_exit_loop_notify.notify_all();
-
-            return;
-        }
-    }
-
     void Thread::Await_State(Thread_State target_state)
     {
         LOG_TRACE << "Core: Waiting for '" << m_thread_label << "' to reach state " << target_state;
