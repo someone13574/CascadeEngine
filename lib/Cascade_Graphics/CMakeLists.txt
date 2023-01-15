@@ -23,7 +23,8 @@ add_library(cascade_graphics STATIC src/platform_info.cpp
                                     src/Vulkan_Backend/xcb_surface.cpp
                                     src/Vulkan_Backend/swapchain.cpp
                                     src/Vulkan_Backend/swapchain_builder.cpp
-                                    src/Vulkan_Backend/buffer.cpp)
+                                    src/Vulkan_Backend/buffer.cpp
+                                    src/Vulkan_Backend/compute_pipeline.cpp)
 
 # Set 'include' as a include directory
 target_include_directories(cascade_graphics PUBLIC include)
@@ -47,3 +48,9 @@ target_link_libraries(cascade_graphics PUBLIC acorn_logging)
 find_package(Vulkan REQUIRED)
 target_link_libraries(cascade_graphics PUBLIC ${Vulkan_LIBRARIES})
 target_include_directories(cascade_graphics PUBLIC ${Vulkan_INCLUDE_DIRS})
+
+# Link Shaderc
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SHADERC REQUIRED shaderc)
+target_link_libraries(cascade_graphics PUBLIC ${SHADERC_LIBRARIES})
+target_link_directories(cascade_graphics PUBLIC ${SHADERC_INCLUDE_DIRS})

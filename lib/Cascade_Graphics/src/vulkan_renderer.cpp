@@ -39,6 +39,8 @@ namespace Cascade_Graphics
 
         m_camera_buffer_ptr = new Vulkan::Buffer(vulkan_graphics_ptr->m_device_ptr, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, (VkDeviceSize)sizeof(uint32_t), std::vector<Vulkan::Device_Queue_Requirement*> {&vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]}, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
 
+        m_rendering_pipeline_ptr = new Vulkan::Compute_Pipeline(vulkan_graphics_ptr->m_device_ptr, "../lib/Cascade_Graphics/src/Vulkan_Backend/Shaders/render.comp");
+
         LOG_INFO << "Graphics: Finished initializing renderer with Vulkan backend";
     }
 
@@ -46,6 +48,7 @@ namespace Cascade_Graphics
     {
         LOG_INFO << "Graphics: Destroying Vulkan renderer objects";
 
+        delete m_rendering_pipeline_ptr;
         delete m_camera_buffer_ptr;
         delete m_swapchain_ptr;
         delete m_surface_ptr;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vulkan_Backend/buffer.hpp"
+#include "Vulkan_Backend/compute_pipeline.hpp"
 #include "Vulkan_Backend/surface.hpp"
 #include "Vulkan_Backend/swapchain.hpp"
 #include "graphics.hpp"
@@ -18,6 +19,7 @@ namespace Cascade_Graphics
         Vulkan::Surface* m_surface_ptr;
         Vulkan::Swapchain* m_swapchain_ptr;
         Vulkan::Buffer* m_camera_buffer_ptr;
+        Vulkan::Compute_Pipeline* m_rendering_pipeline_ptr;
 
     private:
         Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr);
