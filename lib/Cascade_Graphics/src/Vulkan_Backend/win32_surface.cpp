@@ -31,7 +31,7 @@ namespace Cascade_Graphics
             VkResult surface_create_result = vkCreateWin32SurfaceKHR(*m_instance_ptr->Get(), &surface_create_info, NULL, &m_surface);
             if (surface_create_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to create surface with VkResult " << surface_create_result << " (" << string_VkResult(surface_create_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to create surface with VkResult " << string_VkResult(surface_create_result);
                 exit(EXIT_FAILURE);
             }
 #endif

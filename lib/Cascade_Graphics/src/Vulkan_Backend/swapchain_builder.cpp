@@ -25,7 +25,7 @@ namespace Cascade_Graphics
             VkResult get_surface_capabilities_result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &m_surface_capabilities);
             if (get_surface_capabilities_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get surface capabilities with VkResult " << get_surface_capabilities_result << " (" << string_VkResult(get_surface_capabilities_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get surface capabilities with VkResult " << string_VkResult(get_surface_capabilities_result);
                 exit(EXIT_FAILURE);
             }
         }
@@ -39,7 +39,7 @@ namespace Cascade_Graphics
             VkResult get_surface_format_count_result = vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &surface_format_count, NULL);
             if (get_surface_format_count_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported surface formats with VkResult " << get_surface_format_count_result << " (" << string_VkResult(get_surface_format_count_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported surface formats with VkResult " << string_VkResult(get_surface_format_count_result);
                 exit(EXIT_FAILURE);
             }
 
@@ -48,7 +48,7 @@ namespace Cascade_Graphics
             VkResult get_surface_formats_result = vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &surface_format_count, m_surface_formats.data());
             if (get_surface_formats_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get supported surface formats with VkResult " << get_surface_formats_result << " (" << string_VkResult(get_surface_formats_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get supported surface formats with VkResult " << string_VkResult(get_surface_formats_result);
                 exit(EXIT_FAILURE);
             }
         }
@@ -62,7 +62,7 @@ namespace Cascade_Graphics
             VkResult get_present_mode_count_result = vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &present_mode_count, NULL);
             if (get_present_mode_count_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported present modes with VkResult " << get_present_mode_count_result << " (" << string_VkResult(get_present_mode_count_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported present modes with VkResult " << string_VkResult(get_present_mode_count_result);
                 exit(EXIT_FAILURE);
             }
 
@@ -71,7 +71,7 @@ namespace Cascade_Graphics
             VkResult get_present_modes_result = vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &present_mode_count, m_present_modes.data());
             if (get_present_modes_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get supported present modes with VkResult " << get_present_modes_result << " (" << string_VkResult(get_present_modes_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get supported present modes with VkResult " << string_VkResult(get_present_modes_result);
                 exit(EXIT_FAILURE);
             }
         }
@@ -250,7 +250,7 @@ namespace Cascade_Graphics
             VkResult create_swapchain_result = vkCreateSwapchainKHR(*device_ptr->Get(), &swapchain_create_info, NULL, &m_swapchain_ptr->m_swapchain);
             if (create_swapchain_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to create swapchain with VkResult " << create_swapchain_result << " (" << string_VkResult(create_swapchain_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to create swapchain with VkResult " << string_VkResult(create_swapchain_result);
                 exit(EXIT_FAILURE);
             }
         }
@@ -262,7 +262,7 @@ namespace Cascade_Graphics
             VkResult get_image_count_result = vkGetSwapchainImagesKHR(*device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, NULL);
             if (get_image_count_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get number of swapchain images with VkResult " << get_image_count_result << " (" << string_VkResult(get_image_count_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get number of swapchain images with VkResult " << string_VkResult(get_image_count_result);
                 exit(EXIT_FAILURE);
             }
             assert(m_image_count == m_swapchain_ptr->Get_Image_Count() && "Graphics (Vulkan): Number of images returned from vkGetSwapchainImagesKHR doesn't match specified amount");
@@ -271,7 +271,7 @@ namespace Cascade_Graphics
             VkResult get_swapchain_images_result = vkGetSwapchainImagesKHR(*device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, m_swapchain_ptr->m_swapchain_images.data());
             if (get_swapchain_images_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get swapchain images with VkResult " << get_swapchain_images_result << " (" << string_VkResult(get_swapchain_images_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get swapchain images with VkResult " << string_VkResult(get_swapchain_images_result);
                 exit(EXIT_FAILURE);
             }
         }
@@ -301,7 +301,7 @@ namespace Cascade_Graphics
                 VkResult create_image_view_result = vkCreateImageView(*device_ptr->Get(), &image_view_create_info, NULL, &m_swapchain_ptr->m_swapchain_image_views[image_view_index]);
                 if (create_image_view_result != VK_SUCCESS)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to create swapchain image view with VkResult " << create_image_view_result << " (" << string_VkResult(create_image_view_result) << ")";
+                    LOG_FATAL << "Graphics (Vulkan): Failed to create swapchain image view with VkResult " << string_VkResult(create_image_view_result);
                     exit(EXIT_FAILURE);
                 }
             }

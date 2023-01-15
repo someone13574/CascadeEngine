@@ -40,7 +40,7 @@ namespace Cascade_Graphics
             VkResult create_buffer_result = vkCreateBuffer(*m_device_ptr->Get(), &buffer_create_info, NULL, &m_buffer);
             if (create_buffer_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to create buffer with VkResult " << create_buffer_result << " (" << string_VkResult(create_buffer_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to create buffer with VkResult " << string_VkResult(create_buffer_result);
                 exit(EXIT_FAILURE);
             }
 

@@ -37,7 +37,7 @@ namespace Cascade_Graphics
             VkResult get_available_layer_count_result = vkEnumerateInstanceLayerProperties(&available_layer_count, NULL);
             if (get_available_layer_count_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get number of available instance layers with VkResult " << get_available_layer_count_result << " (" << string_VkResult(get_available_layer_count_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get number of available instance layers with VkResult " << string_VkResult(get_available_layer_count_result);
                 exit(EXIT_FAILURE);
             }
             available_layers.resize(available_layer_count);
@@ -45,7 +45,7 @@ namespace Cascade_Graphics
             VkResult get_available_layers_result = vkEnumerateInstanceLayerProperties(&available_layer_count, available_layers.data());
             if (get_available_layers_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to get available instance layers with VkResult " << get_available_layers_result << " (" << string_VkResult(get_available_layers_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to get available instance layers with VkResult " << string_VkResult(get_available_layers_result);
                 exit(EXIT_FAILURE);
             }
 
@@ -101,10 +101,9 @@ namespace Cascade_Graphics
 
                 uint32_t available_extensions_in_layer_count;
                 VkResult get_extension_count_in_layer_result = vkEnumerateInstanceExtensionProperties(layer_name, &available_extensions_in_layer_count, NULL);
-                if (get_extension_count_in_layer_result != VK_SUCCESS)
+                if (get_extension_count_in_layer_result != VK_SUCCESS && get_extension_count_in_layer_result != VK_INCOMPLETE)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to get number of available instance extensions in layer '" << layer_name << "' with VkResult " << get_extension_count_in_layer_result << " ("
-                              << string_VkResult(get_extension_count_in_layer_result) << ")";
+                    LOG_FATAL << "Graphics (Vulkan): Failed to get number of available instance extensions in layer '" << layer_name << "' with VkResult " << string_VkResult(get_extension_count_in_layer_result);
                     exit(EXIT_FAILURE);
                 }
 
@@ -112,7 +111,7 @@ namespace Cascade_Graphics
                 VkResult get_extensions_in_layer = vkEnumerateInstanceExtensionProperties(layer_name, &available_extensions_in_layer_count, available_extensions_in_layer.data());
                 if (get_extensions_in_layer != VK_SUCCESS)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to get available instance extensions in layer '" << layer_name << "' with VkResult " << get_extension_count_in_layer_result << " (" << string_VkResult(get_extension_count_in_layer_result)
+                    LOG_FATAL << "Graphics (Vulkan): Failed to get available instance extensions in layer '" << layer_name << "' with VkResult " << string_VkResult(get_extension_count_in_layer_result)
                               << ")";
                     exit(EXIT_FAILURE);
                 }
@@ -220,7 +219,7 @@ namespace Cascade_Graphics
             VkResult create_instance_result = vkCreateInstance(&instance_create_info, NULL, m_instance_ptr->Get());
             if (create_instance_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Call to vkCreateInstance failed with VkResult " << create_instance_result << " (" << string_VkResult(create_instance_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Call to vkCreateInstance failed with VkResult " << string_VkResult(create_instance_result);
                 exit(EXIT_FAILURE);
             }
 

@@ -33,7 +33,7 @@ namespace Cascade_Graphics
             VkResult create_device_result = vkCreateDevice(*physical_device_ptr->Get(), &device_create_info, NULL, &m_device);
             if (create_device_result != VK_SUCCESS)
             {
-                LOG_FATAL << "Graphics (Vulkan): Failed to create device with VkResult " << create_device_result << " (" << string_VkResult(create_device_result) << ")";
+                LOG_FATAL << "Graphics (Vulkan): Failed to create device with VkResult " << string_VkResult(create_device_result);
                 exit(EXIT_FAILURE);
             }
 
@@ -188,7 +188,7 @@ namespace Cascade_Graphics
                 VkResult memory_allocate_result = vkAllocateMemory(m_device, &memory_allocate_info, NULL, &device_memory);
                 if (memory_allocate_result != VK_SUCCESS)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to allocate buffer memory with VkResult " << memory_allocate_result << " (" << string_VkResult(memory_allocate_result) << ")";
+                    LOG_FATAL << "Graphics (Vulkan): Failed to allocate buffer memory with VkResult " << string_VkResult(memory_allocate_result);
                     exit(EXIT_FAILURE);
                 }
 
@@ -198,7 +198,7 @@ namespace Cascade_Graphics
                 VkResult bind_buffer_memory_result = vkBindBufferMemory(m_device, *buffer_ptr, device_memory, 0);
                 if (bind_buffer_memory_result != VK_SUCCESS)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to bind memory to buffer with VkResult " << bind_buffer_memory_result << " (" << string_VkResult(bind_buffer_memory_result) << ")";
+                    LOG_FATAL << "Graphics (Vulkan): Failed to bind memory to buffer with VkResult " << string_VkResult(bind_buffer_memory_result);
                     exit(EXIT_FAILURE);
                 }
 
@@ -222,7 +222,7 @@ namespace Cascade_Graphics
                 VkResult memory_allocate_result = vkAllocateMemory(m_device, &memory_allocate_info, NULL, &device_memory);
                 if (memory_allocate_result != VK_SUCCESS)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to allocate buffer memory with VkResult " << memory_allocate_result << " (" << string_VkResult(memory_allocate_result) << ")";
+                    LOG_FATAL << "Graphics (Vulkan): Failed to allocate buffer memory with VkResult " << string_VkResult(memory_allocate_result);
                     exit(EXIT_FAILURE);
                 }
 
@@ -232,7 +232,7 @@ namespace Cascade_Graphics
                 VkResult bind_buffer_memory_result = vkBindBufferMemory(m_device, *buffer_ptr, device_memory, 0);
                 if (bind_buffer_memory_result != VK_SUCCESS)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to bind memory to buffer with VkResult " << bind_buffer_memory_result << " (" << string_VkResult(bind_buffer_memory_result) << ")";
+                    LOG_FATAL << "Graphics (Vulkan): Failed to bind memory to buffer with VkResult " << string_VkResult(bind_buffer_memory_result);
                     exit(EXIT_FAILURE);
                 }
 
