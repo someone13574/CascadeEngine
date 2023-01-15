@@ -14,7 +14,7 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Graphics (Vulkan): Destroying instance";
 
-            vkDestroyInstance(m_instance, nullptr);
+            vkDestroyInstance(m_instance, NULL);
 
             LOG_TRACE << "Graphics (Vulkan): Finished destroying instance";
         }

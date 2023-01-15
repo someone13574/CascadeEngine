@@ -22,12 +22,12 @@ namespace Cascade_Graphics
 
             VkXcbSurfaceCreateInfoKHR surface_create_info = {};
             surface_create_info.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-            surface_create_info.pNext = nullptr;
+            surface_create_info.pNext = NULL;
             surface_create_info.flags = 0;
             surface_create_info.connection = *reinterpret_cast<xcb_connection_t**>(xcb_window_info_ptr->Get_Connection());
             surface_create_info.window = *reinterpret_cast<xcb_window_t*>(xcb_window_info_ptr->Get_Window());
 
-            VkResult surface_create_result = vkCreateXcbSurfaceKHR(*m_instance_ptr->Get(), &surface_create_info, nullptr, &m_surface);
+            VkResult surface_create_result = vkCreateXcbSurfaceKHR(*m_instance_ptr->Get(), &surface_create_info, NULL, &m_surface);
             if (surface_create_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to create surface with VkResult " << surface_create_result << " (" << string_VkResult(surface_create_result) << ")";

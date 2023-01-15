@@ -19,18 +19,18 @@ namespace Cascade_Graphics
 
             VkDeviceCreateInfo device_create_info = {};
             device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-            device_create_info.pNext = nullptr;
+            device_create_info.pNext = NULL;
             device_create_info.flags = 0;
             device_create_info.queueCreateInfoCount = static_cast<uint32_t>(device_queue_create_informations.size());
             device_create_info.pQueueCreateInfos = device_queue_create_informations.data();
             device_create_info.enabledLayerCount = 0;
-            device_create_info.ppEnabledLayerNames = nullptr;
+            device_create_info.ppEnabledLayerNames = NULL;
             device_create_info.enabledExtensionCount = static_cast<uint32_t>(enabled_device_extensions.size());
             device_create_info.ppEnabledExtensionNames = enabled_device_extensions.data();
-            device_create_info.pEnabledFeatures = nullptr;
+            device_create_info.pEnabledFeatures = NULL;
 
             // Create device
-            VkResult create_device_result = vkCreateDevice(*physical_device_ptr->Get(), &device_create_info, nullptr, &m_device);
+            VkResult create_device_result = vkCreateDevice(*physical_device_ptr->Get(), &device_create_info, NULL, &m_device);
             if (create_device_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to create device with VkResult " << create_device_result << " (" << string_VkResult(create_device_result) << ")";
@@ -52,7 +52,7 @@ namespace Cascade_Graphics
         {
             LOG_DEBUG << "Graphics (Vulkan): Destroying device";
 
-            vkDestroyDevice(m_device, nullptr);
+            vkDestroyDevice(m_device, NULL);
         }
 
         std::vector<VkDeviceQueueCreateInfo> Device::Get_Queue_Create_Information()
@@ -67,7 +67,7 @@ namespace Cascade_Graphics
                 {
                     VkDeviceQueueCreateInfo device_queue_create_info = {};
                     device_queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                    device_queue_create_info.pNext = nullptr;
+                    device_queue_create_info.pNext = NULL;
                     device_queue_create_info.flags = 0;
                     device_queue_create_info.queueFamilyIndex = queue_family_index;
                     device_queue_create_info.queueCount = 1;

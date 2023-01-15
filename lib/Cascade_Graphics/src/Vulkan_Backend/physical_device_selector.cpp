@@ -18,7 +18,7 @@ namespace Cascade_Graphics
             uint32_t physical_device_count;
             std::vector<VkPhysicalDevice> physical_devices;
 
-            VkResult get_physical_device_count_result = vkEnumeratePhysicalDevices(*instance_ptr->Get(), &physical_device_count, nullptr);
+            VkResult get_physical_device_count_result = vkEnumeratePhysicalDevices(*instance_ptr->Get(), &physical_device_count, NULL);
             if (get_physical_device_count_result != VK_SUCCESS && get_physical_device_count_result != VK_INCOMPLETE)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of physical devices with VkResult " << get_physical_device_count_result << " (" << string_VkResult(get_physical_device_count_result) << ")";
@@ -45,7 +45,7 @@ namespace Cascade_Graphics
                 LOG_TRACE << "Graphics (Vulkan): Getting supported device extensions";
 
                 uint32_t device_extension_count;
-                VkResult get_extension_count_result = vkEnumerateDeviceExtensionProperties(*physical_device_filter_info.physical_device_ptr->Get(), nullptr, &device_extension_count, nullptr);
+                VkResult get_extension_count_result = vkEnumerateDeviceExtensionProperties(*physical_device_filter_info.physical_device_ptr->Get(), NULL, &device_extension_count, NULL);
                 if (get_extension_count_result != VK_SUCCESS)
                 {
                     LOG_FATAL << "Graphics (Vulkan): Failed to get number of extensions for physical device '" << physical_device_filter_info.physical_device_ptr->Get_Properties()->deviceName << "' with VkResult " << get_extension_count_result
@@ -54,7 +54,7 @@ namespace Cascade_Graphics
                 }
 
                 physical_device_filter_info.available_extensions.resize(device_extension_count);
-                VkResult get_extensions_result = vkEnumerateDeviceExtensionProperties(*physical_device_filter_info.physical_device_ptr->Get(), nullptr, &device_extension_count, physical_device_filter_info.available_extensions.data());
+                VkResult get_extensions_result = vkEnumerateDeviceExtensionProperties(*physical_device_filter_info.physical_device_ptr->Get(), NULL, &device_extension_count, physical_device_filter_info.available_extensions.data());
                 if (get_extensions_result != VK_SUCCESS)
                 {
                     LOG_FATAL << "Graphics (Vulkan): Failed to get available extensions for physical device '" << physical_device_filter_info.physical_device_ptr->Get_Properties()->deviceName << "' with VkResult " << get_extension_count_result
@@ -72,7 +72,7 @@ namespace Cascade_Graphics
         {
             for (int32_t physical_device_index = static_cast<int32_t>(m_physical_device_filter_infos.size()) - 1; physical_device_index >= 0; physical_device_index--)
             {
-                if (m_physical_device_filter_infos[physical_device_index].queue_selector_ptr == nullptr)
+                if (!m_physical_device_filter_infos[physical_device_index].queue_selector_ptr)
                 {
                     m_physical_device_filter_infos[physical_device_index].queue_selector_ptr = new Queue_Selector(m_physical_device_filter_infos[physical_device_index].physical_device_ptr, m_platform_info_ptr);
                 }
@@ -87,7 +87,7 @@ namespace Cascade_Graphics
         {
             for (int32_t physical_device_index = static_cast<int32_t>(m_physical_device_filter_infos.size()) - 1; physical_device_index >= 0; physical_device_index--)
             {
-                if (m_physical_device_filter_infos[physical_device_index].queue_selector_ptr == nullptr)
+                if (!m_physical_device_filter_infos[physical_device_index].queue_selector_ptr)
                 {
                     m_physical_device_filter_infos[physical_device_index].queue_selector_ptr = new Queue_Selector(m_physical_device_filter_infos[physical_device_index].physical_device_ptr, m_platform_info_ptr);
                 }
@@ -160,7 +160,7 @@ namespace Cascade_Graphics
 
             for (int32_t physical_device_index = m_physical_device_filter_infos.size() - 1; physical_device_index >= 0; physical_device_index--)
             {
-                if (m_physical_device_filter_infos[physical_device_index].queue_selector_ptr == nullptr)
+                if (!m_physical_device_filter_infos[physical_device_index].queue_selector_ptr)
                 {
                     LOG_FATAL << "Graphics (Vulkan): No queue requirements supplied to physical device selector";
                     exit(EXIT_FAILURE);

@@ -36,7 +36,7 @@ namespace Cascade_Graphics
 
             uint32_t surface_format_count;
 
-            VkResult get_surface_format_count_result = vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &surface_format_count, nullptr);
+            VkResult get_surface_format_count_result = vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &surface_format_count, NULL);
             if (get_surface_format_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported surface formats with VkResult " << get_surface_format_count_result << " (" << string_VkResult(get_surface_format_count_result) << ")";
@@ -59,7 +59,7 @@ namespace Cascade_Graphics
 
             uint32_t present_mode_count;
 
-            VkResult get_present_mode_count_result = vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &present_mode_count, nullptr);
+            VkResult get_present_mode_count_result = vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &present_mode_count, NULL);
             if (get_present_mode_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported present modes with VkResult " << get_present_mode_count_result << " (" << string_VkResult(get_present_mode_count_result) << ")";
@@ -229,7 +229,7 @@ namespace Cascade_Graphics
             // Create swapchain
             VkSwapchainCreateInfoKHR swapchain_create_info = {};
             swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-            swapchain_create_info.pNext = nullptr;
+            swapchain_create_info.pNext = NULL;
             swapchain_create_info.flags = 0;
             swapchain_create_info.surface = *m_surface_ptr->Get();
             swapchain_create_info.minImageCount = m_image_count;
@@ -286,7 +286,7 @@ namespace Cascade_Graphics
             {
                 VkImageViewCreateInfo image_view_create_info = {};
                 image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-                image_view_create_info.pNext = nullptr;
+                image_view_create_info.pNext = NULL;
                 image_view_create_info.flags = 0;
                 image_view_create_info.image = *m_swapchain_ptr->Get_Image(image_view_index);
                 image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;

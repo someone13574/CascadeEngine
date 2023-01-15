@@ -15,7 +15,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Graphics (Vulkan): Destroying surface";
 
-            vkDestroySurfaceKHR(*m_instance_ptr->Get(), m_surface, nullptr);
+            vkDestroySurfaceKHR(*m_instance_ptr->Get(), m_surface, NULL);
         }
 
         VkSurfaceKHR* Surface::Get()
