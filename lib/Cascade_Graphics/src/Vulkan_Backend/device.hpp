@@ -13,6 +13,8 @@ namespace Cascade_Graphics
 		class Device
 		{
 		private:
+			Physical_Device* m_physical_device_ptr;
+
 			VkDevice m_device;
 			Device_Queues m_device_queues;
 
@@ -24,6 +26,8 @@ namespace Cascade_Graphics
 			std::vector<VkDeviceQueueCreateInfo> Get_Queue_Create_Information();
 
 		public:
+			VkDeviceMemory Allocate_Buffer_Memory(VkBuffer* buffer_ptr, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties);
+
 			VkDevice* Get();
 			Device_Queues* Get_Device_Queues();
 		};

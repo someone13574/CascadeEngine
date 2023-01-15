@@ -1,5 +1,6 @@
 #include "vulkan_renderer.hpp"
 
+#include "Vulkan_Backend/queue_data.hpp"
 #include "Vulkan_Backend/swapchain_builder.hpp"
 #include "Vulkan_Backend/win32_surface.hpp"
 #include "Vulkan_Backend/xcb_surface.hpp"
@@ -36,6 +37,8 @@ namespace Cascade_Graphics
 							  .Select_Present_Mode(std::vector<VkPresentModeKHR> {VK_PRESENT_MODE_FIFO_RELAXED_KHR, VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR})
 							  .Build(vulkan_graphics_ptr->m_device_ptr);
 
+		m_camera_buffer_ptr = new Vulkan::Buffer(vulkan_graphics_ptr->m_device_ptr, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, (VkDeviceSize)sizeof(uint32_t), std::vector<Vulkan::Device_Queue_Requirement*> {&vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]}, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, VK_MEMORY_PROPERTY_HOST_CACHED_BIT);
+
 		LOG_INFO << "Graphics: Finished initializing renderer with Vulkan backend";
 	}
 
@@ -43,6 +46,7 @@ namespace Cascade_Graphics
 	{
 		LOG_INFO << "Graphics: Destroying Vulkan renderer objects";
 
+		delete m_camera_buffer_ptr;
 		delete m_swapchain_ptr;
 		delete m_surface_ptr;
 
