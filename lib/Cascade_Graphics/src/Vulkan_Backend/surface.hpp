@@ -5,21 +5,21 @@
 
 namespace Cascade_Graphics
 {
-	namespace Vulkan
-	{
-		class Surface
-		{
-		protected:
-			Instance* m_instance_ptr;
-			VkSurfaceKHR m_surface;
+    namespace Vulkan
+    {
+        class Surface
+        {
+        protected:
+            Instance* m_instance_ptr;
+            VkSurfaceKHR m_surface;
 
-		protected:
-			Surface(Instance* instance_ptr);
+        protected:
+            Surface(Instance* instance_ptr);
 
-		public:
-			virtual ~Surface();
+        public:
+            virtual ~Surface();
 
-			VkSurfaceKHR* Get();
-		};
-	}	 // namespace Vulkan
-}	 // namespace Cascade_Graphics
+            VkSurfaceKHR* Get();
+        };
+    }    // namespace Vulkan
+}    // namespace Cascade_Graphics

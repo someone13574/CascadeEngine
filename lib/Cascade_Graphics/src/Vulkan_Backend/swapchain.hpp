@@ -6,35 +6,35 @@
 
 namespace Cascade_Graphics
 {
-	namespace Vulkan
-	{
-		class Swapchain_Builder;
+    namespace Vulkan
+    {
+        class Swapchain_Builder;
 
-		class Swapchain
-		{
-			friend class Swapchain_Builder;
+        class Swapchain
+        {
+            friend class Swapchain_Builder;
 
-		private:
-			Device* m_device_ptr;
+        private:
+            Device* m_device_ptr;
 
-			VkSwapchainKHR m_swapchain;
-			std::vector<VkImage> m_swapchain_images;
-			std::vector<VkImageView> m_swapchain_image_views;
+            VkSwapchainKHR m_swapchain;
+            std::vector<VkImage> m_swapchain_images;
+            std::vector<VkImageView> m_swapchain_image_views;
 
-			uint32_t m_image_count;
-			VkSurfaceFormatKHR m_surface_format;
+            uint32_t m_image_count;
+            VkSurfaceFormatKHR m_surface_format;
 
-		private:
-			Swapchain(Device* device_ptr, uint32_t image_count, VkSurfaceFormatKHR surface_format);
+        private:
+            Swapchain(Device* device_ptr, uint32_t image_count, VkSurfaceFormatKHR surface_format);
 
-		public:
-			~Swapchain();
+        public:
+            ~Swapchain();
 
-			VkSwapchainKHR* Get();
-			VkImage* Get_Image(uint32_t image_index);
+            VkSwapchainKHR* Get();
+            VkImage* Get_Image(uint32_t image_index);
 
-			uint32_t Get_Image_Count();
-			VkSurfaceFormatKHR Get_Surface_Format();
-		};
-	}	 // namespace Vulkan
-}	 // namespace Cascade_Graphics
+            uint32_t Get_Image_Count();
+            VkSurfaceFormatKHR Get_Surface_Format();
+        };
+    }    // namespace Vulkan
+}    // namespace Cascade_Graphics

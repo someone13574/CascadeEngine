@@ -9,20 +9,20 @@
 
 namespace Cascade_Graphics
 {
-	class Vulkan_Graphics : public Graphics
-	{
-		friend class Vulkan_Graphics_Factory;
-		friend class Vulkan_Renderer;
+    class Vulkan_Graphics : public Graphics
+    {
+        friend class Vulkan_Graphics_Factory;
+        friend class Vulkan_Renderer;
 
-	private:
-		Vulkan::Instance* m_instance_ptr;
-		Vulkan::Physical_Device* m_physical_device_ptr;
-		Vulkan::Device* m_device_ptr;
+    private:
+        Vulkan::Instance* m_instance_ptr;
+        Vulkan::Physical_Device* m_physical_device_ptr;
+        Vulkan::Device* m_device_ptr;
 
-	private:
-		Vulkan_Graphics(Platform platform, Platform_Info* platform_info_ptr);
+    private:
+        Vulkan_Graphics(Platform platform, Platform_Info* platform_info_ptr);
 
-	public:
-		~Vulkan_Graphics();
-	};
-}	 // namespace Cascade_Graphics
+    public:
+        ~Vulkan_Graphics();
+    };
+}    // namespace Cascade_Graphics

@@ -2,13 +2,13 @@
 
 namespace Cascade_Core
 {
-	Application* Application_Factory::Construct_Application()
-	{
-		return new Application();
-	}
+    Application* Application_Factory::Construct_Application()
+    {
+        return new Application();
+    }
 
-	void Application_Factory::Destroy_Application(Application* application_ptr)
-	{
-		delete application_ptr;
-	}
-}	 // namespace Cascade_Core
+    void Application_Factory::Destroy_Application(Application* application_ptr)
+    {
+        delete application_ptr;
+    }
+}    // namespace Cascade_Core

@@ -4,22 +4,22 @@
 
 namespace Cascade_Graphics
 {
-	namespace Vulkan
-	{
-		class Instance
-		{
-			friend class Instance_Builder;
+    namespace Vulkan
+    {
+        class Instance
+        {
+            friend class Instance_Builder;
 
-		private:
-			VkInstance m_instance;
+        private:
+            VkInstance m_instance;
 
-		private:
-			Instance();
+        private:
+            Instance();
 
-		public:
-			~Instance();
+        public:
+            ~Instance();
 
-			VkInstance* Get();
-		};
-	}	 // namespace Vulkan
-}	 // namespace Cascade_Graphics
+            VkInstance* Get();
+        };
+    }    // namespace Vulkan
+}    // namespace Cascade_Graphics

@@ -10,20 +10,20 @@
 
 namespace Cascade_Graphics
 {
-	class Vulkan_Renderer : public Renderer
-	{
-		friend class Vulkan_Graphics_Factory;
+    class Vulkan_Renderer : public Renderer
+    {
+        friend class Vulkan_Graphics_Factory;
 
-	private:
-		Graphics* m_graphics_ptr;
-		Vulkan::Surface* m_surface_ptr;
-		Vulkan::Swapchain* m_swapchain_ptr;
-		Vulkan::Buffer* m_camera_buffer_ptr;
+    private:
+        Graphics* m_graphics_ptr;
+        Vulkan::Surface* m_surface_ptr;
+        Vulkan::Swapchain* m_swapchain_ptr;
+        Vulkan::Buffer* m_camera_buffer_ptr;
 
-	private:
-		Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr);
+    private:
+        Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr);
 
-	public:
-		~Vulkan_Renderer();
-	};
-}	 // namespace Cascade_Graphics
+    public:
+        ~Vulkan_Renderer();
+    };
+}    // namespace Cascade_Graphics

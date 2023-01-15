@@ -3,23 +3,23 @@
 
 namespace Cascade_Graphics
 {
-	namespace Vulkan
-	{
-		Surface::Surface(Instance* instance_ptr) :
-			m_instance_ptr(instance_ptr)
-		{
-		}
+    namespace Vulkan
+    {
+        Surface::Surface(Instance* instance_ptr) :
+            m_instance_ptr(instance_ptr)
+        {
+        }
 
-		Surface::~Surface()
-		{
-			LOG_TRACE << "Graphics (Vulkan): Destroying surface";
+        Surface::~Surface()
+        {
+            LOG_TRACE << "Graphics (Vulkan): Destroying surface";
 
-			vkDestroySurfaceKHR(*m_instance_ptr->Get(), m_surface, nullptr);
-		}
+            vkDestroySurfaceKHR(*m_instance_ptr->Get(), m_surface, nullptr);
+        }
 
-		VkSurfaceKHR* Surface::Get()
-		{
-			return &m_surface;
-		}
-	}	 // namespace Vulkan
-}	 // namespace Cascade_Graphics
+        VkSurfaceKHR* Surface::Get()
+        {
+            return &m_surface;
+        }
+    }    // namespace Vulkan
+}    // namespace Cascade_Graphics
