@@ -26,7 +26,7 @@ namespace Cascade_Graphics
         public:
             virtual ~Surface();
 
-            VkSurfaceKHR* Get();
+            VkSurfaceKHR Get();
         };
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

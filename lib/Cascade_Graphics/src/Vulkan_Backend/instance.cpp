@@ -19,9 +19,9 @@ namespace Cascade_Graphics
             LOG_TRACE << "Graphics (Vulkan): Finished destroying instance";
         }
 
-        VkInstance* Instance::Get()
+        VkInstance Instance::Get()
         {
-            return &m_instance;
+            return m_instance;
         }
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

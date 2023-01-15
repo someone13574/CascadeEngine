@@ -216,7 +216,7 @@ namespace Cascade_Graphics
             instance_create_info.enabledExtensionCount = static_cast<uint32_t>(m_enabled_extensions.size());
             instance_create_info.ppEnabledExtensionNames = m_enabled_extensions.data();
 
-            VkResult create_instance_result = vkCreateInstance(&instance_create_info, NULL, m_instance_ptr->Get());
+            VkResult create_instance_result = vkCreateInstance(&instance_create_info, NULL, &m_instance_ptr->m_instance);
             if (create_instance_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Call to vkCreateInstance failed with VkResult " << string_VkResult(create_instance_result);

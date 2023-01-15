@@ -13,14 +13,14 @@ namespace Cascade_Graphics
             vkGetPhysicalDeviceProperties(m_physical_device, &m_physical_device_properties);
         }
 
-        VkPhysicalDevice* Physical_Device::Get()
+        VkPhysicalDevice Physical_Device::Get()
         {
-            return &m_physical_device;
+            return m_physical_device;
         }
 
-        VkPhysicalDeviceProperties* Physical_Device::Get_Properties()
+        VkPhysicalDeviceProperties Physical_Device::Get_Properties()
         {
-            return &m_physical_device_properties;
+            return m_physical_device_properties;
         }
 
         Device_Queues Physical_Device::Get_Device_Queues()

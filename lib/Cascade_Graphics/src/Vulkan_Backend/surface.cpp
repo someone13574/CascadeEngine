@@ -15,12 +15,12 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Graphics (Vulkan): Destroying surface";
 
-            vkDestroySurfaceKHR(*m_instance_ptr->Get(), m_surface, NULL);
+            vkDestroySurfaceKHR(m_instance_ptr->Get(), m_surface, NULL);
         }
 
-        VkSurfaceKHR* Surface::Get()
+        VkSurfaceKHR Surface::Get()
         {
-            return &m_surface;
+            return m_surface;
         }
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

@@ -32,9 +32,9 @@ namespace Cascade_Graphics
             std::vector<VkDeviceQueueCreateInfo> Get_Queue_Create_Information();
 
         public:
-            VkDeviceMemory Allocate_Buffer_Memory(VkBuffer* buffer_ptr, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties);
+            VkDeviceMemory Allocate_Buffer_Memory(VkBuffer buffer, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties);
 
-            VkDevice* Get();
+            VkDevice Get();
             Device_Queues* Get_Device_Queues();
         };
     }    // namespace Vulkan

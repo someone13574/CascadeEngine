@@ -28,8 +28,8 @@ namespace Cascade_Graphics
             Physical_Device(VkPhysicalDevice physical_device);
 
         public:
-            VkPhysicalDevice* Get();
-            VkPhysicalDeviceProperties* Get_Properties();
+            VkPhysicalDevice Get();
+            VkPhysicalDeviceProperties Get_Properties();
             Device_Queues Get_Device_Queues();
             std::vector<const char*> Get_Device_Extensions();
         };

@@ -16,22 +16,22 @@ namespace Cascade_Graphics
 
             for (uint32_t image_view_index = 0; image_view_index < m_image_count; image_view_index++)
             {
-                vkDestroyImageView(*m_device_ptr->Get(), m_swapchain_image_views[image_view_index], NULL);
+                vkDestroyImageView(m_device_ptr->Get(), m_swapchain_image_views[image_view_index], NULL);
             }
 
-            vkDestroySwapchainKHR(*m_device_ptr->Get(), m_swapchain, NULL);
+            vkDestroySwapchainKHR(m_device_ptr->Get(), m_swapchain, NULL);
         }
 
-        VkSwapchainKHR* Swapchain::Get()
+        VkSwapchainKHR Swapchain::Get()
         {
-            return &m_swapchain;
+            return m_swapchain;
         }
 
-        VkImage* Swapchain::Get_Image(uint32_t image_index)
+        VkImage Swapchain::Get_Image(uint32_t image_index)
         {
             assert(image_index < m_image_count && "Graphics (Vulkan): Image index out of range");
 
-            return &m_swapchain_images[image_index];
+            return m_swapchain_images[image_index];
         }
 
         uint32_t Swapchain::Get_Image_Count()

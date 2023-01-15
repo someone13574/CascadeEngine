@@ -18,7 +18,7 @@ namespace Cascade_Graphics
             uint32_t physical_device_count;
             std::vector<VkPhysicalDevice> physical_devices;
 
-            VkResult get_physical_device_count_result = vkEnumeratePhysicalDevices(*instance_ptr->Get(), &physical_device_count, NULL);
+            VkResult get_physical_device_count_result = vkEnumeratePhysicalDevices(instance_ptr->Get(), &physical_device_count, NULL);
             if (get_physical_device_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of physical devices with VkResult " << string_VkResult(get_physical_device_count_result);
@@ -26,7 +26,7 @@ namespace Cascade_Graphics
             }
 
             physical_devices.resize(physical_device_count);
-            VkResult get_physical_devices_result = vkEnumeratePhysicalDevices(*instance_ptr->Get(), &physical_device_count, physical_devices.data());
+            VkResult get_physical_devices_result = vkEnumeratePhysicalDevices(instance_ptr->Get(), &physical_device_count, physical_devices.data());
             if (get_physical_devices_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get available physical devices with VkResult " << string_VkResult(get_physical_devices_result);
@@ -45,18 +45,18 @@ namespace Cascade_Graphics
                 LOG_TRACE << "Graphics (Vulkan): Getting supported device extensions";
 
                 uint32_t device_extension_count;
-                VkResult get_extension_count_result = vkEnumerateDeviceExtensionProperties(*physical_device_filter_info.physical_device_ptr->Get(), NULL, &device_extension_count, NULL);
+                VkResult get_extension_count_result = vkEnumerateDeviceExtensionProperties(physical_device_filter_info.physical_device_ptr->Get(), NULL, &device_extension_count, NULL);
                 if (get_extension_count_result != VK_SUCCESS)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to get number of extensions for physical device '" << physical_device_filter_info.physical_device_ptr->Get_Properties()->deviceName << "' with VkResult " << string_VkResult(get_extension_count_result);
+                    LOG_FATAL << "Graphics (Vulkan): Failed to get number of extensions for physical device '" << physical_device_filter_info.physical_device_ptr->Get_Properties().deviceName << "' with VkResult " << string_VkResult(get_extension_count_result);
                     exit(EXIT_FAILURE);
                 }
 
                 physical_device_filter_info.available_extensions.resize(device_extension_count);
-                VkResult get_extensions_result = vkEnumerateDeviceExtensionProperties(*physical_device_filter_info.physical_device_ptr->Get(), NULL, &device_extension_count, physical_device_filter_info.available_extensions.data());
+                VkResult get_extensions_result = vkEnumerateDeviceExtensionProperties(physical_device_filter_info.physical_device_ptr->Get(), NULL, &device_extension_count, physical_device_filter_info.available_extensions.data());
                 if (get_extensions_result != VK_SUCCESS)
                 {
-                    LOG_FATAL << "Graphics (Vulkan): Failed to get available extensions for physical device '" << physical_device_filter_info.physical_device_ptr->Get_Properties()->deviceName << "' with VkResult " << string_VkResult(get_extension_count_result);
+                    LOG_FATAL << "Graphics (Vulkan): Failed to get available extensions for physical device '" << physical_device_filter_info.physical_device_ptr->Get_Properties().deviceName << "' with VkResult " << string_VkResult(get_extension_count_result);
                     exit(EXIT_FAILURE);
                 }
 
@@ -113,12 +113,12 @@ namespace Cascade_Graphics
 
                 if (!found_extension)
                 {
-                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' doesn't support required extension '" << extension_name << "'";
+                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties().deviceName << "' doesn't support required extension '" << extension_name << "'";
                     m_physical_device_filter_infos.erase(m_physical_device_filter_infos.begin() + physical_device_index);
                 }
                 else
                 {
-                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' supports required extension '" << extension_name << "'";
+                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties().deviceName << "' supports required extension '" << extension_name << "'";
                     m_physical_device_filter_infos[physical_device_index].physical_device_ptr->m_enabled_device_extensions.push_back(extension_name);
                 }
             }
@@ -132,14 +132,14 @@ namespace Cascade_Graphics
 
             for (uint32_t physical_device_index = 0; physical_device_index < m_physical_device_filter_infos.size(); physical_device_index++)
             {
-                if (m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+                if (m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties().deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
                 {
-                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' is dedicated, +" << add_score;
+                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties().deviceName << "' is dedicated, +" << add_score;
                     m_physical_device_filter_infos[physical_device_index].score += add_score;
                 }
                 else
                 {
-                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' isn't dedicated, +0";
+                    LOG_TRACE << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties().deviceName << "' isn't dedicated, +0";
                 }
             }
 
@@ -166,7 +166,7 @@ namespace Cascade_Graphics
 
                 if (!m_physical_device_filter_infos[physical_device_index].queue_selector_ptr->Meets_Requirements())
                 {
-                    LOG_INFO << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties()->deviceName << "' doesn't meet one or more queue requirements";
+                    LOG_INFO << "Graphics (Vulkan): Physical device '" << m_physical_device_filter_infos[physical_device_index].physical_device_ptr->Get_Properties().deviceName << "' doesn't meet one or more queue requirements";
                     m_physical_device_filter_infos.erase(m_physical_device_filter_infos.begin() + physical_device_index);
                 }
                 else
@@ -178,7 +178,7 @@ namespace Cascade_Graphics
             std::sort(m_physical_device_filter_infos.begin(), m_physical_device_filter_infos.end(), [](const Physical_Device_Filter_Info& left_hand_size, const Physical_Device_Filter_Info& right_hand_side)
                       { return left_hand_size.score > right_hand_side.score; });
 
-            LOG_INFO << "Graphics (Vulkan): Selected physical device '" << m_physical_device_filter_infos.front().physical_device_ptr->Get_Properties()->deviceName << "'";
+            LOG_INFO << "Graphics (Vulkan): Selected physical device '" << m_physical_device_filter_infos.front().physical_device_ptr->Get_Properties().deviceName << "'";
 
             return m_physical_device_filter_infos.front().physical_device_ptr;
         }

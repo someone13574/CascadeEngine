@@ -25,7 +25,7 @@ namespace Cascade_Graphics
         public:
             ~Instance();
 
-            VkInstance* Get();
+            VkInstance Get();
         };
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

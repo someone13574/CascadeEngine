@@ -22,7 +22,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Graphics (Vulkan): Getting swapchain surface capabilities";
 
-            VkResult get_surface_capabilities_result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &m_surface_capabilities);
+            VkResult get_surface_capabilities_result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device_ptr->Get(), m_surface_ptr->Get(), &m_surface_capabilities);
             if (get_surface_capabilities_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get surface capabilities with VkResult " << string_VkResult(get_surface_capabilities_result);
@@ -36,7 +36,7 @@ namespace Cascade_Graphics
 
             uint32_t surface_format_count;
 
-            VkResult get_surface_format_count_result = vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &surface_format_count, NULL);
+            VkResult get_surface_format_count_result = vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device_ptr->Get(), m_surface_ptr->Get(), &surface_format_count, NULL);
             if (get_surface_format_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported surface formats with VkResult " << string_VkResult(get_surface_format_count_result);
@@ -45,7 +45,7 @@ namespace Cascade_Graphics
 
             m_surface_formats.resize(surface_format_count);
 
-            VkResult get_surface_formats_result = vkGetPhysicalDeviceSurfaceFormatsKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &surface_format_count, m_surface_formats.data());
+            VkResult get_surface_formats_result = vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device_ptr->Get(), m_surface_ptr->Get(), &surface_format_count, m_surface_formats.data());
             if (get_surface_formats_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get supported surface formats with VkResult " << string_VkResult(get_surface_formats_result);
@@ -59,7 +59,7 @@ namespace Cascade_Graphics
 
             uint32_t present_mode_count;
 
-            VkResult get_present_mode_count_result = vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &present_mode_count, NULL);
+            VkResult get_present_mode_count_result = vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device_ptr->Get(), m_surface_ptr->Get(), &present_mode_count, NULL);
             if (get_present_mode_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of supported present modes with VkResult " << string_VkResult(get_present_mode_count_result);
@@ -68,7 +68,7 @@ namespace Cascade_Graphics
 
             m_present_modes.resize(present_mode_count);
 
-            VkResult get_present_modes_result = vkGetPhysicalDeviceSurfacePresentModesKHR(*m_physical_device_ptr->Get(), *m_surface_ptr->Get(), &present_mode_count, m_present_modes.data());
+            VkResult get_present_modes_result = vkGetPhysicalDeviceSurfacePresentModesKHR(m_physical_device_ptr->Get(), m_surface_ptr->Get(), &present_mode_count, m_present_modes.data());
             if (get_present_modes_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get supported present modes with VkResult " << string_VkResult(get_present_modes_result);
@@ -231,7 +231,7 @@ namespace Cascade_Graphics
             swapchain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
             swapchain_create_info.pNext = NULL;
             swapchain_create_info.flags = 0;
-            swapchain_create_info.surface = *m_surface_ptr->Get();
+            swapchain_create_info.surface = m_surface_ptr->Get();
             swapchain_create_info.minImageCount = m_image_count;
             swapchain_create_info.imageFormat = m_surface_format.format;
             swapchain_create_info.imageColorSpace = m_surface_format.colorSpace;
@@ -247,7 +247,7 @@ namespace Cascade_Graphics
             swapchain_create_info.clipped = VK_TRUE;
             swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
 
-            VkResult create_swapchain_result = vkCreateSwapchainKHR(*device_ptr->Get(), &swapchain_create_info, NULL, &m_swapchain_ptr->m_swapchain);
+            VkResult create_swapchain_result = vkCreateSwapchainKHR(device_ptr->Get(), &swapchain_create_info, NULL, &m_swapchain_ptr->m_swapchain);
             if (create_swapchain_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to create swapchain with VkResult " << string_VkResult(create_swapchain_result);
@@ -259,7 +259,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Graphics (Vulkan): Getting swapchain images";
 
-            VkResult get_image_count_result = vkGetSwapchainImagesKHR(*device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, NULL);
+            VkResult get_image_count_result = vkGetSwapchainImagesKHR(device_ptr->Get(), m_swapchain_ptr->Get(), &m_image_count, NULL);
             if (get_image_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of swapchain images with VkResult " << string_VkResult(get_image_count_result);
@@ -268,7 +268,7 @@ namespace Cascade_Graphics
             assert(m_image_count == m_swapchain_ptr->Get_Image_Count() && "Graphics (Vulkan): Number of images returned from vkGetSwapchainImagesKHR doesn't match specified amount");
             m_swapchain_ptr->m_swapchain_images.resize(m_image_count);
 
-            VkResult get_swapchain_images_result = vkGetSwapchainImagesKHR(*device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, m_swapchain_ptr->m_swapchain_images.data());
+            VkResult get_swapchain_images_result = vkGetSwapchainImagesKHR(device_ptr->Get(), m_swapchain_ptr->Get(), &m_image_count, m_swapchain_ptr->m_swapchain_images.data());
             if (get_swapchain_images_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get swapchain images with VkResult " << string_VkResult(get_swapchain_images_result);
@@ -288,7 +288,7 @@ namespace Cascade_Graphics
                 image_view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
                 image_view_create_info.pNext = NULL;
                 image_view_create_info.flags = 0;
-                image_view_create_info.image = *m_swapchain_ptr->Get_Image(image_view_index);
+                image_view_create_info.image = m_swapchain_ptr->Get_Image(image_view_index);
                 image_view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
                 image_view_create_info.format = m_swapchain_ptr->Get_Surface_Format().format;
                 image_view_create_info.components = {VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY};
@@ -298,7 +298,7 @@ namespace Cascade_Graphics
                 image_view_create_info.subresourceRange.baseArrayLayer = 0;
                 image_view_create_info.subresourceRange.layerCount = 1;
 
-                VkResult create_image_view_result = vkCreateImageView(*device_ptr->Get(), &image_view_create_info, NULL, &m_swapchain_ptr->m_swapchain_image_views[image_view_index]);
+                VkResult create_image_view_result = vkCreateImageView(device_ptr->Get(), &image_view_create_info, NULL, &m_swapchain_ptr->m_swapchain_image_views[image_view_index]);
                 if (create_image_view_result != VK_SUCCESS)
                 {
                     LOG_FATAL << "Graphics (Vulkan): Failed to create swapchain image view with VkResult " << string_VkResult(create_image_view_result);

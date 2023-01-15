@@ -37,7 +37,7 @@ namespace Cascade_Graphics
             buffer_create_info.queueFamilyIndexCount = buffer_access_queue_families.size();
             buffer_create_info.pQueueFamilyIndices = buffer_access_queue_families.data();
 
-            VkResult create_buffer_result = vkCreateBuffer(*m_device_ptr->Get(), &buffer_create_info, NULL, &m_buffer);
+            VkResult create_buffer_result = vkCreateBuffer(m_device_ptr->Get(), &buffer_create_info, NULL, &m_buffer);
             if (create_buffer_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to create buffer with VkResult " << string_VkResult(create_buffer_result);
@@ -45,15 +45,15 @@ namespace Cascade_Graphics
             }
 
             // Allocate and bind memory
-            m_device_memory = m_device_ptr->Allocate_Buffer_Memory(&m_buffer, required_memory_properties, preferred_memory_properties);
+            m_device_memory = m_device_ptr->Allocate_Buffer_Memory(m_buffer, required_memory_properties, preferred_memory_properties);
         }
 
         Buffer::~Buffer()
         {
             LOG_TRACE << "Graphics (Vulkan): Destroying buffer";
 
-            vkDestroyBuffer(*m_device_ptr->Get(), m_buffer, NULL);
-            vkFreeMemory(*m_device_ptr->Get(), m_device_memory, NULL);
+            vkDestroyBuffer(m_device_ptr->Get(), m_buffer, NULL);
+            vkFreeMemory(m_device_ptr->Get(), m_device_memory, NULL);
         }
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

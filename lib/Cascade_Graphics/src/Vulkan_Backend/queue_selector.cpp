@@ -17,14 +17,14 @@ namespace Cascade_Graphics
         Queue_Selector::Queue_Selector(Physical_Device* physical_device_ptr, Platform_Info* platform_info_ptr) :
             m_pyhsical_device_ptr(physical_device_ptr), m_platform_info_ptr(platform_info_ptr)
         {
-            LOG_DEBUG << "Graphics (Vulkan): Getting available queue families for physical device '" << physical_device_ptr->Get_Properties()->deviceName << "'";
+            LOG_DEBUG << "Graphics (Vulkan): Getting available queue families for physical device '" << physical_device_ptr->Get_Properties().deviceName << "'";
 
             uint32_t queue_family_count;
-            vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_ptr->Get(), &queue_family_count, NULL);
+            vkGetPhysicalDeviceQueueFamilyProperties(physical_device_ptr->Get(), &queue_family_count, NULL);
 
             m_queue_families.resize(queue_family_count);
             m_queue_family_present_support.resize(queue_family_count);
-            vkGetPhysicalDeviceQueueFamilyProperties(*physical_device_ptr->Get(), &queue_family_count, m_queue_families.data());
+            vkGetPhysicalDeviceQueueFamilyProperties(physical_device_ptr->Get(), &queue_family_count, m_queue_families.data());
 
             Get_Queue_Family_Present_Support();
         }
@@ -38,7 +38,7 @@ namespace Cascade_Graphics
 
             for (uint32_t queue_family_index = 0; queue_family_index < m_queue_families.size(); queue_family_index++)
             {
-                m_queue_family_present_support[queue_family_index] = vkGetPhysicalDeviceXcbPresentationSupportKHR(*m_pyhsical_device_ptr->Get(), queue_family_index, *reinterpret_cast<xcb_connection_t**>(xcb_platform_info_ptr->Get_Connection()), *reinterpret_cast<xcb_visualid_t*>(xcb_platform_info_ptr->Get_Visual_Id()));
+                m_queue_family_present_support[queue_family_index] = vkGetPhysicalDeviceXcbPresentationSupportKHR(m_pyhsical_device_ptr->Get(), queue_family_index, *reinterpret_cast<xcb_connection_t**>(xcb_platform_info_ptr->Get_Connection()), *reinterpret_cast<xcb_visualid_t*>(xcb_platform_info_ptr->Get_Visual_Id()));
             }
 #endif
         }

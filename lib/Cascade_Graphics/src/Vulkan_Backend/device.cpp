@@ -11,7 +11,7 @@ namespace Cascade_Graphics
         Device::Device(Physical_Device* physical_device_ptr) :
             m_physical_device_ptr(physical_device_ptr)
         {
-            LOG_INFO << "Graphics (Vulkan): Creating device from physical device '" << physical_device_ptr->Get_Properties()->deviceName << "'";
+            LOG_INFO << "Graphics (Vulkan): Creating device from physical device '" << physical_device_ptr->Get_Properties().deviceName << "'";
 
             m_device_queues = physical_device_ptr->Get_Device_Queues();
             std::vector<VkDeviceQueueCreateInfo> device_queue_create_informations = Get_Queue_Create_Information();
@@ -30,7 +30,7 @@ namespace Cascade_Graphics
             device_create_info.pEnabledFeatures = NULL;
 
             // Create device
-            VkResult create_device_result = vkCreateDevice(*physical_device_ptr->Get(), &device_create_info, NULL, &m_device);
+            VkResult create_device_result = vkCreateDevice(physical_device_ptr->Get(), &device_create_info, NULL, &m_device);
             if (create_device_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to create device with VkResult " << string_VkResult(create_device_result);
@@ -80,7 +80,7 @@ namespace Cascade_Graphics
             return device_queue_create_informations;
         }
 
-        VkDeviceMemory Device::Allocate_Buffer_Memory(VkBuffer* buffer_ptr, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties)
+        VkDeviceMemory Device::Allocate_Buffer_Memory(VkBuffer buffer, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties)
         {
             LOG_TRACE << "Graphics (Vulkan): Allocating buffer memory";
 
@@ -93,7 +93,7 @@ namespace Cascade_Graphics
             memory_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
             memory_properties.pNext = &memory_budget_properties;
 
-            vkGetPhysicalDeviceMemoryProperties2(*m_physical_device_ptr->Get(), &memory_properties);
+            vkGetPhysicalDeviceMemoryProperties2(m_physical_device_ptr->Get(), &memory_properties);
 
             // Get buffer memory requirements
             VkMemoryDedicatedRequirements memory_dedicated_requirements = {};
@@ -107,7 +107,7 @@ namespace Cascade_Graphics
             VkBufferMemoryRequirementsInfo2 buffer_memory_requirements = {};
             buffer_memory_requirements.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_REQUIREMENTS_INFO_2;
             buffer_memory_requirements.pNext = NULL;
-            buffer_memory_requirements.buffer = *buffer_ptr;
+            buffer_memory_requirements.buffer = buffer;
 
             vkGetBufferMemoryRequirements2(m_device, &buffer_memory_requirements, &memory_requirements);
 
@@ -175,7 +175,7 @@ namespace Cascade_Graphics
                 memory_dedicated_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
                 memory_dedicated_allocate_info.pNext = NULL;
                 memory_dedicated_allocate_info.image = VK_NULL_HANDLE;
-                memory_dedicated_allocate_info.buffer = *buffer_ptr;
+                memory_dedicated_allocate_info.buffer = buffer;
 
                 VkMemoryAllocateInfo memory_allocate_info = {};
                 memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -195,7 +195,7 @@ namespace Cascade_Graphics
                 LOG_TRACE << "Graphics (Vulkan): Successfully allocated buffer memory. Binding...";
 
                 // Bind allocated memory to buffer
-                VkResult bind_buffer_memory_result = vkBindBufferMemory(m_device, *buffer_ptr, device_memory, 0);
+                VkResult bind_buffer_memory_result = vkBindBufferMemory(m_device, buffer, device_memory, 0);
                 if (bind_buffer_memory_result != VK_SUCCESS)
                 {
                     LOG_FATAL << "Graphics (Vulkan): Failed to bind memory to buffer with VkResult " << string_VkResult(bind_buffer_memory_result);
@@ -229,7 +229,7 @@ namespace Cascade_Graphics
                 LOG_TRACE << "Graphics (Vulkan): Successfully allocated buffer memory. Binding...";
 
                 // Bind allocated memory to buffer
-                VkResult bind_buffer_memory_result = vkBindBufferMemory(m_device, *buffer_ptr, device_memory, 0);
+                VkResult bind_buffer_memory_result = vkBindBufferMemory(m_device, buffer, device_memory, 0);
                 if (bind_buffer_memory_result != VK_SUCCESS)
                 {
                     LOG_FATAL << "Graphics (Vulkan): Failed to bind memory to buffer with VkResult " << string_VkResult(bind_buffer_memory_result);
@@ -242,9 +242,9 @@ namespace Cascade_Graphics
             }
         }
 
-        VkDevice* Device::Get()
+        VkDevice Device::Get()
         {
-            return &m_device;
+            return m_device;
         }
 
         Device_Queues* Device::Get_Device_Queues()
