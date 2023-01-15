@@ -19,7 +19,7 @@ namespace Cascade_Graphics
             std::vector<VkPhysicalDevice> physical_devices;
 
             VkResult get_physical_device_count_result = vkEnumeratePhysicalDevices(*instance_ptr->Get(), &physical_device_count, NULL);
-            if (get_physical_device_count_result != VK_SUCCESS && get_physical_device_count_result != VK_INCOMPLETE)
+            if (get_physical_device_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of physical devices with VkResult " << get_physical_device_count_result << " (" << string_VkResult(get_physical_device_count_result) << ")";
                 exit(EXIT_FAILURE);
@@ -27,7 +27,7 @@ namespace Cascade_Graphics
 
             physical_devices.resize(physical_device_count);
             VkResult get_physical_devices_result = vkEnumeratePhysicalDevices(*instance_ptr->Get(), &physical_device_count, physical_devices.data());
-            if (get_physical_devices_result != VK_SUCCESS && get_physical_devices_result != VK_INCOMPLETE)
+            if (get_physical_devices_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get available physical devices with VkResult " << get_physical_devices_result << " (" << string_VkResult(get_physical_devices_result) << ")";
                 exit(EXIT_FAILURE);

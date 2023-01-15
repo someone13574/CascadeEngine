@@ -260,7 +260,7 @@ namespace Cascade_Graphics
             LOG_TRACE << "Graphics (Vulkan): Getting swapchain images";
 
             VkResult get_image_count_result = vkGetSwapchainImagesKHR(*device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, NULL);
-            if (get_image_count_result != VK_SUCCESS && get_image_count_result != VK_INCOMPLETE)
+            if (get_image_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of swapchain images with VkResult " << get_image_count_result << " (" << string_VkResult(get_image_count_result) << ")";
                 exit(EXIT_FAILURE);
