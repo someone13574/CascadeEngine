@@ -12,9 +12,11 @@ namespace Cascade_Graphics
         {
             LOG_INFO << "Vulkan Backend: Creating logical device";
 
+            float queue_priority = 1.0f;
+
             std::set<const char*> required_extensions_set = physical_device_wrapper_ptr->Get_Required_Extensions();
             std::vector<const char*> required_extensions(required_extensions_set.begin(), required_extensions_set.end());
-            std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos = queue_manager_ptr->Generate_Device_Queue_Create_Infos();
+            std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos = queue_manager_ptr->Generate_Device_Queue_Create_Infos(&queue_priority);
 
             VkDeviceCreateInfo device_create_info = {};
             device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

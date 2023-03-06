@@ -222,11 +222,10 @@ namespace Cascade_Graphics
             }
         }
 
-        std::vector<VkDeviceQueueCreateInfo> Queue_Manager::Generate_Device_Queue_Create_Infos()
+        std::vector<VkDeviceQueueCreateInfo> Queue_Manager::Generate_Device_Queue_Create_Infos(float* priority)
         {
             LOG_INFO << "Vulkan Backend: Generating device queue create infos";
 
-            float queue_priority = 1.0;
             std::vector<VkDeviceQueueCreateInfo> device_queue_create_infos;
             std::vector<uint32_t> unique_queue_families = Get_Unique_Queue_Families(m_required_queues);
             int32_t protected_queue_family_index = (m_required_queues & Queue_Types::PROTECTED_QUEUE) ? m_queue_family_indices.protected_family_index.value() : -1;
@@ -241,7 +240,7 @@ namespace Cascade_Graphics
                 device_queue_create_infos.back().flags = ((int32_t)unique_queue_families[i] == protected_queue_family_index) ? VK_DEVICE_QUEUE_CREATE_PROTECTED_BIT : 0;
                 device_queue_create_infos.back().queueFamilyIndex = unique_queue_families[i];
                 device_queue_create_infos.back().queueCount = 1;
-                device_queue_create_infos.back().pQueuePriorities = &queue_priority;
+                device_queue_create_infos.back().pQueuePriorities = priority;
             }
 
             return device_queue_create_infos;

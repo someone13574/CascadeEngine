@@ -48,7 +48,7 @@ namespace Cascade_Graphics
             bool Has_Required_Queues(VkPhysicalDevice* physical_device_ptr);
             void Get_Queue_Families(VkPhysicalDevice* physical_device_ptr);
             void Get_Device_Queue_Handles(VkDevice* device_ptr);
-            std::vector<VkDeviceQueueCreateInfo> Generate_Device_Queue_Create_Infos();
+            std::vector<VkDeviceQueueCreateInfo> Generate_Device_Queue_Create_Infos(float* priority);
 
             VkQueue* Get_Queue(Queue_Types queue_type);
             uint32_t Get_Queue_Family_Index(Queue_Types queue_type);
