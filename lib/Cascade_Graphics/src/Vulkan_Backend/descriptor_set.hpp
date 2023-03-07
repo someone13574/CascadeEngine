@@ -6,9 +6,8 @@
     #define VK_USE_PLATFORM_WIN32_KHR
 #endif
 
-#include "descriptor_set.hpp"
+#include "descriptor.hpp"
 #include "device.hpp"
-#include <string>
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -16,19 +15,20 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        class Compute_Pipeline
+        class Descriptor_Set
         {
         private:
             Device* m_device_ptr;
 
-            VkPipeline m_pipeline;
-
-        private:
-            VkShaderModule Compile_Shader(std::string shader_path);
+            VkDescriptorSet m_descriptor_set;
+            VkDescriptorPool m_descriptor_pool;
+            VkDescriptorSetLayout m_descriptor_set_layout;
 
         public:
-            Compute_Pipeline(Device* device_ptr, std::string shader_path, std::vector<Descriptor_Set*> descriptor_sets);
-            ~Compute_Pipeline();
+            Descriptor_Set(Device* device_ptr, std::vector<Descriptor> descriptors);
+            ~Descriptor_Set();
+
+            VkDescriptorSetLayout Get_Layout();
         };
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

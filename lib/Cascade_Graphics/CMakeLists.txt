@@ -24,7 +24,9 @@ add_library(cascade_graphics STATIC src/platform_info.cpp
                                     src/Vulkan_Backend/swapchain.cpp
                                     src/Vulkan_Backend/swapchain_builder.cpp
                                     src/Vulkan_Backend/buffer.cpp
-                                    src/Vulkan_Backend/compute_pipeline.cpp)
+                                    src/Vulkan_Backend/compute_pipeline.cpp
+                                    src/Vulkan_Backend/descriptor.cpp
+                                    src/Vulkan_Backend/descriptor_set.cpp)
 
 # Set 'include' as a include directory
 target_include_directories(cascade_graphics PUBLIC include)

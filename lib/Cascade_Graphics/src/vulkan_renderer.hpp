@@ -2,6 +2,7 @@
 
 #include "Vulkan_Backend/buffer.hpp"
 #include "Vulkan_Backend/compute_pipeline.hpp"
+#include "Vulkan_Backend/descriptor_set.hpp"
 #include "Vulkan_Backend/surface.hpp"
 #include "Vulkan_Backend/swapchain.hpp"
 #include "graphics.hpp"
@@ -19,6 +20,7 @@ namespace Cascade_Graphics
         Vulkan::Surface* m_surface_ptr;
         Vulkan::Swapchain* m_swapchain_ptr;
         Vulkan::Buffer* m_camera_buffer_ptr;
+        Vulkan::Descriptor_Set* m_rendering_descriptor_set_ptr;
         Vulkan::Compute_Pipeline* m_rendering_pipeline_ptr;
 
     private:

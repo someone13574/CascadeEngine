@@ -10,18 +10,24 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Compute_Pipeline::Compute_Pipeline(Device* device_ptr, std::string shader_path) :
+        Compute_Pipeline::Compute_Pipeline(Device* device_ptr, std::string shader_path, std::vector<Descriptor_Set*> descriptor_sets) :
             m_device_ptr(device_ptr)
         {
             LOG_DEBUG << "Graphics (Vulkan): Creating compute pipeline";
             LOG_TRACE << "Graphics (Vulkan): Creating pipeline layout";
 
+            std::vector<VkDescriptorSetLayout> descriptor_set_layouts(descriptor_sets.size());
+            for (uint32_t descriptor_set_index = 0; descriptor_set_index < descriptor_sets.size(); descriptor_set_index++)
+            {
+                descriptor_set_layouts[descriptor_set_index] = descriptor_sets[descriptor_set_index]->Get_Layout();
+            }
+
             VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
             pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
             pipeline_layout_create_info.pNext = NULL;
             pipeline_layout_create_info.flags = 0;
-            pipeline_layout_create_info.setLayoutCount = 0;
-            pipeline_layout_create_info.pSetLayouts = NULL;
+            pipeline_layout_create_info.setLayoutCount = descriptor_set_layouts.size();
+            pipeline_layout_create_info.pSetLayouts = descriptor_set_layouts.data();
             pipeline_layout_create_info.pushConstantRangeCount = 0;
             pipeline_layout_create_info.pPushConstantRanges = NULL;
 
@@ -73,6 +79,8 @@ namespace Cascade_Graphics
 
         Compute_Pipeline::~Compute_Pipeline()
         {
+            LOG_TRACE << "Graphics (Vulkan): Destroying compute pipeline";
+
             vkDestroyPipeline(m_device_ptr->Get(), m_pipeline, NULL);
         }
 

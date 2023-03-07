@@ -26,6 +26,8 @@ namespace Cascade_Graphics
         public:
             Buffer(Device* device_ptr, VkBufferUsageFlags buffer_usage_flags, VkDeviceSize buffer_size, std::vector<Device_Queue_Requirement*> queue_requirements_with_access, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties);
             ~Buffer();
+
+            VkBuffer Get_Buffer();
         };
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

@@ -55,5 +55,10 @@ namespace Cascade_Graphics
             vkDestroyBuffer(m_device_ptr->Get(), m_buffer, NULL);
             vkFreeMemory(m_device_ptr->Get(), m_device_memory, NULL);
         }
+
+        VkBuffer Buffer::Get_Buffer()
+        {
+            return m_buffer;
+        }
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics
