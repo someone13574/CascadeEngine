@@ -7,8 +7,8 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
-        Swapchain::Swapchain(Device* device_ptr, uint32_t image_count, VkSurfaceFormatKHR surface_format) :
-            m_device_ptr(device_ptr), m_image_count(image_count), m_surface_format(surface_format) {}
+        Swapchain::Swapchain(Device* device_ptr, uint32_t image_count, VkExtent2D image_extent, VkSurfaceFormatKHR surface_format) :
+            m_device_ptr(device_ptr), m_image_count(image_count), m_image_extent(image_extent), m_surface_format(surface_format) {}
 
         Swapchain::~Swapchain()
         {
@@ -34,9 +34,21 @@ namespace Cascade_Graphics
             return m_swapchain_images[image_index];
         }
 
+        Image* Swapchain::Get_Image_Object(uint32_t image_index)
+        {
+            assert(image_index < m_image_count && "Graphics (Vulkan): Image index out of range");
+
+            return new Image(m_swapchain_images[image_index], m_swapchain_image_views[image_index]);
+        }
+
         uint32_t Swapchain::Get_Image_Count()
         {
             return m_image_count;
+        }
+
+        VkExtent2D Swapchain::Get_Image_Extent()
+        {
+            return m_image_extent;
         }
 
         VkSurfaceFormatKHR Swapchain::Get_Surface_Format()

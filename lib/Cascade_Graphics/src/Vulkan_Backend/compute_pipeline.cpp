@@ -31,9 +31,7 @@ namespace Cascade_Graphics
             pipeline_layout_create_info.pushConstantRangeCount = 0;
             pipeline_layout_create_info.pPushConstantRanges = NULL;
 
-            VkPipelineLayout pipeline_layout;
-
-            VkResult create_pipeline_layout_result = vkCreatePipelineLayout(m_device_ptr->Get(), &pipeline_layout_create_info, NULL, &pipeline_layout);
+            VkResult create_pipeline_layout_result = vkCreatePipelineLayout(m_device_ptr->Get(), &pipeline_layout_create_info, NULL, &m_pipeline_layout);
             if (create_pipeline_layout_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to create pipeline layout with VkResult " << string_VkResult(create_pipeline_layout_result);
@@ -60,7 +58,7 @@ namespace Cascade_Graphics
             compute_pipeline_create_info.pNext = NULL;
             compute_pipeline_create_info.flags = 0;
             compute_pipeline_create_info.stage = shader_stage_create_info;
-            compute_pipeline_create_info.layout = pipeline_layout;
+            compute_pipeline_create_info.layout = m_pipeline_layout;
             compute_pipeline_create_info.basePipelineHandle = VK_NULL_HANDLE;
             compute_pipeline_create_info.basePipelineIndex = 0;
 
@@ -71,9 +69,8 @@ namespace Cascade_Graphics
                 exit(EXIT_FAILURE);
             }
 
-            LOG_TRACE << "Graphics (Vulkan): Cleaning up VkPipelineLayout and VkShaderModule";
+            LOG_TRACE << "Graphics (Vulkan): Cleaning up VkShaderModule";
 
-            vkDestroyPipelineLayout(m_device_ptr->Get(), pipeline_layout, NULL);
             vkDestroyShaderModule(m_device_ptr->Get(), shader_module, NULL);
         }
 
@@ -81,6 +78,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Graphics (Vulkan): Destroying compute pipeline";
 
+            vkDestroyPipelineLayout(m_device_ptr->Get(), m_pipeline_layout, NULL);
             vkDestroyPipeline(m_device_ptr->Get(), m_pipeline, NULL);
         }
 
@@ -151,6 +149,16 @@ namespace Cascade_Graphics
             }
 
             return shader_module;
+        }
+
+        VkPipeline Compute_Pipeline::Get()
+        {
+            return m_pipeline;
+        }
+
+        VkPipelineLayout Compute_Pipeline::Get_Layout()
+        {
+            return m_pipeline_layout;
         }
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

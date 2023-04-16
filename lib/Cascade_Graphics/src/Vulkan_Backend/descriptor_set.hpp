@@ -28,6 +28,7 @@ namespace Cascade_Graphics
             Descriptor_Set(Device* device_ptr, std::vector<Descriptor> descriptors);
             ~Descriptor_Set();
 
+            VkDescriptorSet* Get();
             VkDescriptorSetLayout Get_Layout();
         };
     }    // namespace Vulkan

@@ -7,6 +7,7 @@
 #endif
 
 #include "device.hpp"
+#include "image.hpp"
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -28,18 +29,21 @@ namespace Cascade_Graphics
             std::vector<VkImageView> m_swapchain_image_views;
 
             uint32_t m_image_count;
+            VkExtent2D m_image_extent;
             VkSurfaceFormatKHR m_surface_format;
 
         private:
-            Swapchain(Device* device_ptr, uint32_t image_count, VkSurfaceFormatKHR surface_format);
+            Swapchain(Device* device_ptr, uint32_t image_count, VkExtent2D image_extent, VkSurfaceFormatKHR surface_format);
 
         public:
             ~Swapchain();
 
             VkSwapchainKHR Get();
             VkImage Get_Image(uint32_t image_index);
+            Image* Get_Image_Object(uint32_t image_index);
 
             uint32_t Get_Image_Count();
+            VkExtent2D Get_Image_Extent();
             VkSurfaceFormatKHR Get_Surface_Format();
         };
     }    // namespace Vulkan

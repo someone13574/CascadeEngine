@@ -19,6 +19,19 @@ namespace Cascade_Graphics
             m_descriptor_buffer_info = std::move(descriptor_buffer_info);
         }
 
+        Descriptor::Descriptor(Image* image_ptr, VkDescriptorType descriptor_type) :
+            m_descriptor_type(descriptor_type)
+        {
+            LOG_TRACE << "Graphics (Vulkan): Creating image descriptor";
+
+            VkDescriptorImageInfo descriptor_image_info = {};
+            descriptor_image_info.sampler = image_ptr->Get_Sampler();
+            descriptor_image_info.imageView = image_ptr->Get_Image_View();
+            descriptor_image_info.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+            m_descriptor_image_info = std::move(descriptor_image_info);
+        }
+
         VkDescriptorType Descriptor::Get_Descriptor_Type()
         {
             return m_descriptor_type;

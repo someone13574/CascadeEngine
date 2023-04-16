@@ -33,6 +33,7 @@ namespace Cascade_Graphics
 
         public:
             VkDeviceMemory Allocate_Buffer_Memory(VkBuffer buffer, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties);
+            VkDeviceMemory Allocate_Image_Memory(VkImage image, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties);
 
             VkDevice Get();
             Device_Queues* Get_Device_Queues();

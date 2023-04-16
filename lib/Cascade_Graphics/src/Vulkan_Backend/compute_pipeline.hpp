@@ -22,6 +22,7 @@ namespace Cascade_Graphics
             Device* m_device_ptr;
 
             VkPipeline m_pipeline;
+            VkPipelineLayout m_pipeline_layout;
 
         private:
             VkShaderModule Compile_Shader(std::string shader_path);
@@ -29,6 +30,9 @@ namespace Cascade_Graphics
         public:
             Compute_Pipeline(Device* device_ptr, std::string shader_path, std::vector<Descriptor_Set*> descriptor_sets);
             ~Compute_Pipeline();
+
+            VkPipeline Get();
+            VkPipelineLayout Get_Layout();
         };
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

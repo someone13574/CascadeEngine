@@ -13,7 +13,7 @@ namespace Cascade_Graphics
         {
             LOG_DEBUG << "Graphics (Vulkan): Creating buffer";
 
-            // Get queues which require access to the swapchain
+            // Get queues which require access to the buffer
             std::vector<uint32_t> buffer_access_queue_families;
             for (uint32_t queue_requirement_index = 0; queue_requirement_index < queue_requirements_with_access.size(); queue_requirement_index++)
             {

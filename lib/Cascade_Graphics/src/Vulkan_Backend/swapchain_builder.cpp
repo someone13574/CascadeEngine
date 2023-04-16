@@ -211,7 +211,7 @@ namespace Cascade_Graphics
             Select_Image_Count();
 
             // Create swapchain object
-            m_swapchain_ptr = new Swapchain(device_ptr, m_image_count, m_surface_format);
+            m_swapchain_ptr = new Swapchain(device_ptr, m_image_count, m_swapchain_extent, m_surface_format);
 
             // Create swapchain components
             Create_Swapchain(device_ptr);

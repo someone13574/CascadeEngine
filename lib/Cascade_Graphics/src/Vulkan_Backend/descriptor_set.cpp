@@ -10,6 +10,8 @@ namespace Cascade_Graphics
         Descriptor_Set::Descriptor_Set(Device* device_ptr, std::vector<Descriptor> descriptors) :
             m_device_ptr(device_ptr)
         {
+            LOG_DEBUG << "Graphics (Vulkan): Creating descriptor set with " << descriptors.size() << " descriptors";
+
             // Create descriptor set layout
             std::vector<VkDescriptorSetLayoutBinding> descriptor_set_layout_bindings(descriptors.size());
             for (uint32_t binding_index = 0; binding_index < descriptor_set_layout_bindings.size(); binding_index++)
@@ -76,8 +78,8 @@ namespace Cascade_Graphics
             }
 
             // Update descriptor sets with information
-            std::vector<VkWriteDescriptorSet> write_descriptor_sets;
-            for (uint32_t binding_index = 0; binding_index < write_descriptor_sets.size(); binding_index++)
+            std::vector<VkWriteDescriptorSet> write_descriptor_sets(descriptors.size());
+            for (uint32_t binding_index = 0; binding_index < descriptors.size(); binding_index++)
             {
                 write_descriptor_sets[binding_index] = {};
                 write_descriptor_sets[binding_index].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -101,6 +103,11 @@ namespace Cascade_Graphics
 
             vkDestroyDescriptorSetLayout(m_device_ptr->Get(), m_descriptor_set_layout, nullptr);
             vkDestroyDescriptorPool(m_device_ptr->Get(), m_descriptor_pool, nullptr);
+        }
+
+        VkDescriptorSet* Descriptor_Set::Get()
+        {
+            return &m_descriptor_set;
         }
 
         VkDescriptorSetLayout Descriptor_Set::Get_Layout()

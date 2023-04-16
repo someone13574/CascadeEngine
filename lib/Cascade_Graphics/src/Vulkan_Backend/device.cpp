@@ -242,6 +242,171 @@ namespace Cascade_Graphics
             }
         }
 
+        VkDeviceMemory Device::Allocate_Image_Memory(VkImage image, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties)
+        {
+            LOG_TRACE << "Graphics (Vulkan): Allocating image memory";
+
+            // Get physical device memory properties
+            VkPhysicalDeviceMemoryBudgetPropertiesEXT memory_budget_properties = {};
+            memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
+            memory_budget_properties.pNext = NULL;
+
+            VkPhysicalDeviceMemoryProperties2 memory_properties = {};
+            memory_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+            memory_properties.pNext = &memory_budget_properties;
+
+            vkGetPhysicalDeviceMemoryProperties2(m_physical_device_ptr->Get(), &memory_properties);
+
+            // Get image memory requirements
+            VkMemoryDedicatedRequirements memory_dedicated_requirements = {};
+            memory_dedicated_requirements.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS;
+            memory_dedicated_requirements.pNext = NULL;
+
+            VkMemoryRequirements2 memory_requirements = {};
+            memory_requirements.sType = VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2;
+            memory_requirements.pNext = &memory_dedicated_requirements;
+
+            VkImageMemoryRequirementsInfo2 image_memory_requirements = {};
+            image_memory_requirements.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2;
+            image_memory_requirements.pNext = NULL;
+            image_memory_requirements.image = image;
+
+            vkGetImageMemoryRequirements2(m_device, &image_memory_requirements, &memory_requirements);
+
+            // Select best memory type
+            int32_t best_memory_type_index = -1;
+            int32_t best_memory_type_score = -1;
+            VkDeviceSize best_memory_type_remaining_space = 0;
+
+            for (uint32_t memory_type_index = 0; memory_type_index < memory_properties.memoryProperties.memoryTypeCount; memory_type_index++)
+            {
+                // Check if the memory type is supported for this resource
+                if (!(memory_requirements.memoryRequirements.memoryTypeBits & (1 << memory_type_index)))
+                {
+                    LOG_TRACE << "Graphics (Vulkan): Memory type " << memory_type_index << " rejected for not being supported by resource";
+                    continue;
+                }
+
+                // Check that all required properties are present
+                if ((memory_properties.memoryProperties.memoryTypes[memory_type_index].propertyFlags & required_memory_properties) != required_memory_properties)
+                {
+                    LOG_TRACE << "Graphics (Vulkan): Memory type " << memory_type_index << " rejected for not having all required properties present";
+                    continue;
+                }
+
+                // Check that there is sufficient memory budget remaining
+                VkDeviceSize remaining_heap_budget = memory_budget_properties.heapBudget[memory_properties.memoryProperties.memoryTypes[memory_type_index].heapIndex];
+                if (remaining_heap_budget < memory_requirements.memoryRequirements.size)
+                {
+                    LOG_TRACE << "Graphics (Vulkan): Memory type " << memory_type_index << " rejected for insufficient memory budget";
+                    continue;
+                }
+
+                // Rate memory type based on properties
+                int32_t memory_type_properties_score = std::bitset<32>(memory_properties.memoryProperties.memoryTypes[memory_type_index].propertyFlags & preferred_memory_properties).count();
+                if (memory_type_properties_score < best_memory_type_score)
+                {
+                    continue;
+                }
+                else if (memory_type_properties_score == best_memory_type_score)
+                {
+                    // Break tie with remaining heap space
+                    if (remaining_heap_budget < best_memory_type_remaining_space)
+                    {
+                        continue;
+                    }
+                }
+
+                // Select this memory type as new best
+                best_memory_type_index = memory_type_index;
+                best_memory_type_score = memory_type_properties_score;
+                best_memory_type_remaining_space = remaining_heap_budget;
+            }
+
+            // Check that a valid memory type was found
+            if (best_memory_type_index == -1)
+            {
+                LOG_ERROR << "Graphics (Vulkan): A memory type meeting the required property flags of " << string_VkMemoryPropertyFlags(required_memory_properties) << " was not found";
+                exit(EXIT_FAILURE);
+            }
+
+            // Select dedicated or normal allocation
+            if (memory_dedicated_requirements.prefersDedicatedAllocation || memory_dedicated_requirements.requiresDedicatedAllocation)
+            {
+                LOG_TRACE << "Graphics (Vulkan): Using dedicated allocation";
+
+                // Dedicated allocation
+                VkMemoryDedicatedAllocateInfo memory_dedicated_allocate_info = {};
+                memory_dedicated_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
+                memory_dedicated_allocate_info.pNext = NULL;
+                memory_dedicated_allocate_info.image = image;
+                memory_dedicated_allocate_info.buffer = VK_NULL_HANDLE;
+
+                VkMemoryAllocateInfo memory_allocate_info = {};
+                memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+                memory_allocate_info.pNext = &memory_dedicated_allocate_info;
+                memory_allocate_info.allocationSize = memory_requirements.memoryRequirements.size;
+                memory_allocate_info.memoryTypeIndex = best_memory_type_index;
+
+                VkDeviceMemory device_memory;
+
+                VkResult memory_allocate_result = vkAllocateMemory(m_device, &memory_allocate_info, NULL, &device_memory);
+                if (memory_allocate_result != VK_SUCCESS)
+                {
+                    LOG_FATAL << "Graphics (Vulkan): Failed to allocate image memory with VkResult " << string_VkResult(memory_allocate_result);
+                    exit(EXIT_FAILURE);
+                }
+
+                LOG_TRACE << "Graphics (Vulkan): Successfully allocated image memory. Binding...";
+
+                // Bind allocated memory to image
+                VkResult bind_image_memory_result = vkBindImageMemory(m_device, image, device_memory, 0);
+                if (bind_image_memory_result != VK_SUCCESS)
+                {
+                    LOG_FATAL << "Graphics (Vulkan): Failed to bind memory to image with VkResult " << string_VkResult(bind_image_memory_result);
+                    exit(EXIT_FAILURE);
+                }
+
+                LOG_TRACE << "Graphics (Vulkan): Finished binding memory to image";
+
+                return device_memory;
+            }
+            else
+            {
+                LOG_TRACE << "Graphics (Vulkan): Using standard allocation";
+
+                // Normal allocation
+                VkMemoryAllocateInfo memory_allocate_info = {};
+                memory_allocate_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+                memory_allocate_info.pNext = NULL;
+                memory_allocate_info.allocationSize = memory_requirements.memoryRequirements.size;
+                memory_allocate_info.memoryTypeIndex = best_memory_type_index;
+
+                VkDeviceMemory device_memory;
+
+                VkResult memory_allocate_result = vkAllocateMemory(m_device, &memory_allocate_info, NULL, &device_memory);
+                if (memory_allocate_result != VK_SUCCESS)
+                {
+                    LOG_FATAL << "Graphics (Vulkan): Failed to allocate image memory with VkResult " << string_VkResult(memory_allocate_result);
+                    exit(EXIT_FAILURE);
+                }
+
+                LOG_TRACE << "Graphics (Vulkan): Successfully allocated image memory. Binding...";
+
+                // Bind allocated memory to image
+                VkResult bind_image_memory_result = vkBindImageMemory(m_device, image, device_memory, 0);
+                if (bind_image_memory_result != VK_SUCCESS)
+                {
+                    LOG_FATAL << "Graphics (Vulkan): Failed to bind memory to image with VkResult " << string_VkResult(bind_image_memory_result);
+                    exit(EXIT_FAILURE);
+                }
+
+                LOG_TRACE << "Graphics (Vulkan): Finished binding memory to image";
+
+                return device_memory;
+            }
+        }
+
         VkDevice Device::Get()
         {
             return m_device;
