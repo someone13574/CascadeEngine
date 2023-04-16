@@ -26,6 +26,7 @@ namespace Cascade_Graphics
             Surface* m_surface_ptr;
 
             Swapchain* m_swapchain_ptr;
+            Swapchain* m_old_swapchain_ptr = NULL;
 
             VkSurfaceCapabilitiesKHR m_surface_capabilities;
             std::vector<VkSurfaceFormatKHR> m_surface_formats;
@@ -50,6 +51,7 @@ namespace Cascade_Graphics
             void Create_Swapchain_Image_Views(Device* device_ptr);
 
         public:
+            Swapchain_Builder& Set_Old_Swapchain(Swapchain* old_swapchain_ptr);
             Swapchain_Builder& Select_Image_Format(std::vector<VkSurfaceFormatKHR> preferred_formats);
             Swapchain_Builder& Select_Image_Extent(Window_Info* window_info_ptr);
             Swapchain_Builder& Set_Swapchain_Image_Usage(VkImageUsageFlags image_usage_flags);

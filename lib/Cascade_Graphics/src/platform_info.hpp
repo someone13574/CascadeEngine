@@ -33,5 +33,6 @@ namespace Cascade_Graphics
 
         uint32_t Get_Window_Width();
         uint32_t Get_Window_Height();
+        virtual void Update_Window_Info() = 0;
     };
 }    // namespace Cascade_Graphics

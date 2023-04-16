@@ -26,6 +26,7 @@ namespace Cascade_Core
         static void Window_Thread_Exit_Function(Thread* window_thread_ptr, void* window_void_ptr);
 
         static void Rendering_Thread_Loop_Function(Thread* rendering_thread_ptr, void* renderer_void_ptr_ptr);
+        static void Rendering_Thread_Exit_Function(Thread* rendering_thread_ptr, void* renderer_void_ptr_ptr);
 
         virtual void Create_Window() = 0;
         virtual void Process_Events() = 0;

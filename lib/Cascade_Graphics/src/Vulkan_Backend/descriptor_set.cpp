@@ -8,7 +8,7 @@ namespace Cascade_Graphics
     namespace Vulkan
     {
         Descriptor_Set::Descriptor_Set(Device* device_ptr, std::vector<Descriptor> descriptors) :
-            m_device_ptr(device_ptr)
+            m_device_ptr(device_ptr), m_descriptors(descriptors)
         {
             LOG_DEBUG << "Graphics (Vulkan): Creating descriptor set with " << descriptors.size() << " descriptors";
 
@@ -115,5 +115,37 @@ namespace Cascade_Graphics
             return m_descriptor_set_layout;
         }
 
+        void Descriptor_Set::Update_Image_Descriptor(uint32_t descriptor_index, Image* image_ptr)
+        {
+            if (!m_descriptors[descriptor_index].Get_Image_Descriptor_Info())
+            {
+                LOG_ERROR << "Graphics (Vulkan): Descriptor at index " << descriptor_index << " is not an image descriptor";
+                exit(EXIT_FAILURE);
+            }
+
+            m_descriptors[descriptor_index].m_descriptor_image_info.value().imageView = image_ptr->Get_Image_View();
+            m_descriptors[descriptor_index].m_descriptor_image_info.value().sampler = image_ptr->Get_Sampler();
+        }
+
+        void Descriptor_Set::Update()
+        {
+            std::vector<VkWriteDescriptorSet> write_descriptor_sets(m_descriptors.size());
+            for (uint32_t binding_index = 0; binding_index < m_descriptors.size(); binding_index++)
+            {
+                write_descriptor_sets[binding_index] = {};
+                write_descriptor_sets[binding_index].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                write_descriptor_sets[binding_index].pNext = NULL;
+                write_descriptor_sets[binding_index].dstSet = m_descriptor_set;
+                write_descriptor_sets[binding_index].dstBinding = binding_index;
+                write_descriptor_sets[binding_index].dstArrayElement = 0;
+                write_descriptor_sets[binding_index].descriptorCount = 1;
+                write_descriptor_sets[binding_index].descriptorType = m_descriptors[binding_index].Get_Descriptor_Type();
+                write_descriptor_sets[binding_index].pImageInfo = m_descriptors[binding_index].Get_Image_Descriptor_Info();
+                write_descriptor_sets[binding_index].pBufferInfo = m_descriptors[binding_index].Get_Buffer_Descriptor_Info();
+                write_descriptor_sets[binding_index].pTexelBufferView = nullptr;
+            }
+
+            vkUpdateDescriptorSets(m_device_ptr->Get(), write_descriptor_sets.size(), write_descriptor_sets.data(), 0, NULL);
+        }
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

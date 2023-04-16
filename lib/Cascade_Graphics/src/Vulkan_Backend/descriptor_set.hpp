@@ -20,6 +20,7 @@ namespace Cascade_Graphics
         private:
             Device* m_device_ptr;
 
+            std::vector<Descriptor> m_descriptors;
             VkDescriptorSet m_descriptor_set;
             VkDescriptorPool m_descriptor_pool;
             VkDescriptorSetLayout m_descriptor_set_layout;
@@ -30,6 +31,9 @@ namespace Cascade_Graphics
 
             VkDescriptorSet* Get();
             VkDescriptorSetLayout Get_Layout();
+
+            void Update_Image_Descriptor(uint32_t descriptor_index, Image* image_ptr);
+            void Update();
         };
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

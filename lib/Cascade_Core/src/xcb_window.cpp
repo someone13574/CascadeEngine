@@ -84,6 +84,7 @@ namespace Cascade_Core
                 {
                     LOG_INFO << "Core: Received close window event in window '" << m_window_title << "'";
                     m_rendering_thread_ptr->Exit_Thread();
+                    m_rendering_thread_ptr->Await_State(Thread::Thread_State::FINISHED);
                     m_window_thread_ptr->Exit_Thread();
                 }
                 break;

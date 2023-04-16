@@ -16,6 +16,7 @@ namespace Cascade_Core
         std::string rendering_thread_name = "rendering-thread-" + window_title;
         m_rendering_thread_ptr = m_thread_manager_ptr->Create_Thread(rendering_thread_name, &m_renderer_ptr);
         m_rendering_thread_ptr->Attach_Loop_Function(Rendering_Thread_Loop_Function, -1.0);
+        m_rendering_thread_ptr->Attach_Exit_Function(Rendering_Thread_Exit_Function);
     }
 
     Window::~Window()
@@ -44,8 +45,6 @@ namespace Cascade_Core
 
         Window* window_ptr = (Window*)window_void_ptr;
         window_ptr->Destroy_Window();
-
-        delete window_ptr->m_renderer_ptr;
     }
 
     void Window::Rendering_Thread_Loop_Function(Thread* rendering_thread_ptr, void* renderer_void_ptr_ptr)
@@ -54,5 +53,13 @@ namespace Cascade_Core
 
         Cascade_Graphics::Renderer* renderer_ptr = *(Cascade_Graphics::Renderer**)renderer_void_ptr_ptr;
         renderer_ptr->Render_Frame();
+    }
+
+    void Window::Rendering_Thread_Exit_Function(Thread* rendering_thread_ptr, void* renderer_void_ptr_ptr)
+    {
+        (void)rendering_thread_ptr;
+
+        Cascade_Graphics::Renderer* renderer_ptr = *(Cascade_Graphics::Renderer**)renderer_void_ptr_ptr;
+        delete renderer_ptr;
     }
 }    // namespace Cascade_Core

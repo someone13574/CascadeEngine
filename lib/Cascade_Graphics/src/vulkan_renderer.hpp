@@ -22,6 +22,7 @@ namespace Cascade_Graphics
 
     private:
         Vulkan_Graphics* m_vulkan_graphics_ptr;
+        Window_Info* m_window_info_ptr;
 
         Vulkan::Surface* m_surface_ptr;
         Vulkan::Swapchain* m_swapchain_ptr;
@@ -37,6 +38,8 @@ namespace Cascade_Graphics
 
     private:
         Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr);
+
+        void Recreate_Swapchain();
 
     public:
         ~Vulkan_Renderer();

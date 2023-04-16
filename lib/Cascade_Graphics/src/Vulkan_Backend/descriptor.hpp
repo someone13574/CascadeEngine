@@ -15,8 +15,12 @@ namespace Cascade_Graphics
 {
     namespace Vulkan
     {
+        class Descriptor_Set;
+
         class Descriptor
         {
+            friend class Descriptor_Set;
+
         private:
             VkDescriptorType m_descriptor_type;
 

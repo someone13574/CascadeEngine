@@ -30,5 +30,7 @@ namespace Cascade_Graphics
 
         void** Get_Connection();
         void* Get_Window();
+
+        void Update_Window_Info() override;
     };
 }    // namespace Cascade_Graphics

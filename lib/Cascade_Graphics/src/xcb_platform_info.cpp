@@ -1,4 +1,9 @@
 #include "xcb_platform_info.hpp"
+#include <acorn_logging.hpp>
+
+#ifdef __linux__
+    #include <xcb/xcb.h>
+#endif
 
 namespace Cascade_Graphics
 {
@@ -30,5 +35,29 @@ namespace Cascade_Graphics
     void* XCB_Window_Info::Get_Window()
     {
         return m_window_ptr;
+    }
+
+    void XCB_Window_Info::Update_Window_Info()
+    {
+#ifdef __linux__
+        xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(*reinterpret_cast<xcb_connection_t**>(m_connection_ptr), *reinterpret_cast<xcb_window_t*>(m_window_ptr));
+        xcb_generic_error_t* error = nullptr;
+        xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(*reinterpret_cast<xcb_connection_t**>(m_connection_ptr), geometry_cookie, &error);
+
+        if (error != NULL)
+        {
+            LOG_FATAL << "Core: XCB request check failed with error code " << error->error_code;
+            exit(EXIT_FAILURE);
+        }
+
+        if (geometry_reply == NULL)
+        {
+            LOG_FATAL << "Core: XCB geometry reply is NULL";
+            exit(EXIT_FAILURE);
+        }
+
+        m_window_width = geometry_reply->width;
+        m_window_height = geometry_reply->height;
+#endif
     }
 }    // namespace Cascade_Graphics

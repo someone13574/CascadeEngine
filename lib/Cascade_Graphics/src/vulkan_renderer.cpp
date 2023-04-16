@@ -13,7 +13,7 @@
 namespace Cascade_Graphics
 {
     Vulkan_Renderer::Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr) :
-        m_vulkan_graphics_ptr(static_cast<Vulkan_Graphics*>(graphics_ptr))
+        m_vulkan_graphics_ptr(static_cast<Vulkan_Graphics*>(graphics_ptr)), m_window_info_ptr(window_info_ptr)
     {
         LOG_INFO << "Graphics: Initializing renderer with Vulkan backend";
 
@@ -94,7 +94,12 @@ namespace Cascade_Graphics
     {
         LOG_INFO << "Graphics: Destroying Vulkan renderer objects";
 
-        vkDeviceWaitIdle(m_vulkan_graphics_ptr->m_device_ptr->Get());
+        VkResult device_wait_idle_result = vkDeviceWaitIdle(m_vulkan_graphics_ptr->m_device_ptr->Get());
+        if (device_wait_idle_result != VK_SUCCESS)
+        {
+            LOG_FATAL << "Graphics (Vulkan): Failed to wait for device idle with code " << device_wait_idle_result << " (" << string_VkResult(device_wait_idle_result) << ")";
+            exit(EXIT_FAILURE);
+        }
 
         delete m_rendering_complete_semaphores_ptr;
         delete m_image_available_semaphores_ptr;
@@ -116,6 +121,94 @@ namespace Cascade_Graphics
         LOG_INFO << "Graphics: Finished destroying Vulkan renderer objects";
     }
 
+    void Vulkan_Renderer::Recreate_Swapchain()
+    {
+        LOG_WARN << "Graphics (Vulkan): Recreating swapchain";
+
+        // Wait for idle
+        VkResult device_wait_idle_result = vkDeviceWaitIdle(m_vulkan_graphics_ptr->m_device_ptr->Get());
+        if (device_wait_idle_result != VK_SUCCESS)
+        {
+            LOG_FATAL << "Graphics (Vulkan): Failed to wait for device idle with code " << device_wait_idle_result << " (" << string_VkResult(device_wait_idle_result) << ")";
+            exit(EXIT_FAILURE);
+        }
+
+        // Create new swapchain
+        uint32_t old_swapchain_image_count = m_swapchain_ptr->Get_Image_Count();
+        m_window_info_ptr->Update_Window_Info();
+        Vulkan::Swapchain* new_swapchain = Vulkan::Swapchain_Builder(m_vulkan_graphics_ptr->m_physical_device_ptr, m_surface_ptr)
+                                               .Set_Old_Swapchain(m_swapchain_ptr)
+                                               .Select_Image_Format(std::vector<VkSurfaceFormatKHR> {{VK_FORMAT_R8G8B8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}})
+                                               .Select_Image_Extent(m_window_info_ptr)
+                                               .Set_Swapchain_Image_Usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT)
+                                               .Select_Present_Mode(std::vector<VkPresentModeKHR> {VK_PRESENT_MODE_FIFO_RELAXED_KHR, VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR})
+                                               .Set_Allowed_Queue_Requirements(std::vector<Vulkan::Device_Queue_Requirement*> {&m_vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]})
+                                               .Build(m_vulkan_graphics_ptr->m_device_ptr);
+        delete m_swapchain_ptr;
+        m_swapchain_ptr = new_swapchain;
+
+        std::vector<Vulkan::Image*>
+            swapchain_images;
+        for (uint32_t swapchain_image_index = 0; swapchain_image_index < m_swapchain_ptr->Get_Image_Count(); swapchain_image_index++)
+        {
+            swapchain_images.push_back(m_swapchain_ptr->Get_Image_Object(swapchain_image_index));
+        }
+
+        if (old_swapchain_image_count != m_swapchain_ptr->Get_Image_Count())
+        {
+            LOG_ERROR << "Graphics (Vulkan): FIXME: New swapchain has differing image count";
+            exit(EXIT_FAILURE);
+        }
+
+        // Recreate images
+        for (uint32_t image_index = 0; image_index < m_swapchain_ptr->Get_Image_Count(); image_index++)
+        {
+            delete m_render_target_ptrs[image_index];
+            m_render_target_ptrs[image_index] = new Vulkan::Image(m_vulkan_graphics_ptr->m_device_ptr, m_swapchain_ptr->Get_Surface_Format().format, m_swapchain_ptr->Get_Image_Extent(), VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, std::vector<Vulkan::Device_Queue_Requirement*> {&m_vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]}, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 0);
+        }
+
+        // Update descriptor sets
+        for (uint32_t image_index = 0; image_index < m_swapchain_ptr->Get_Image_Count(); image_index++)
+        {
+            m_rendering_descriptor_set_ptrs[image_index]->Update_Image_Descriptor(0, m_render_target_ptrs[image_index]);
+            m_rendering_descriptor_set_ptrs[image_index]->Update();
+        }
+
+        // Recreate pipeline
+        delete m_rendering_pipeline_ptr;
+        m_rendering_pipeline_ptr = new Vulkan::Compute_Pipeline(m_vulkan_graphics_ptr->m_device_ptr, "../lib/Cascade_Graphics/src/Vulkan_Backend/Shaders/render.comp", m_rendering_descriptor_set_ptrs);
+
+        // Recreate and rerecord command buffers
+        delete m_rendering_command_buffers_ptr;
+        m_rendering_command_buffers_ptr = new Vulkan::Command_Buffer(m_vulkan_graphics_ptr->m_device_ptr, m_rendering_pipeline_ptr, m_swapchain_ptr->Get_Image_Count(), m_vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0].device_queues[0].queue_family_index);
+        for (uint32_t i = 0; i < m_swapchain_ptr->Get_Image_Count(); i++)
+        {
+            m_rendering_command_buffers_ptr->Bind_Descriptor_Set(m_rendering_descriptor_set_ptrs[i], i);
+
+            m_rendering_command_buffers_ptr->Add_Image(m_render_target_ptrs[i]);
+            m_rendering_command_buffers_ptr->Add_Image(swapchain_images[i]);
+
+            m_rendering_command_buffers_ptr->Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT)->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+        }
+        m_rendering_command_buffers_ptr->Dispatch_Compute_Shader(std::ceil(m_swapchain_ptr->Get_Image_Extent().width / 32.0), std::ceil(m_swapchain_ptr->Get_Image_Extent().height / 32.0), 1);
+        for (uint32_t i = 0; i < m_swapchain_ptr->Get_Image_Count(); i++)
+        {
+            m_rendering_command_buffers_ptr->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT)
+                ->Copy_Image(m_render_target_ptrs[i], swapchain_images[i], m_swapchain_ptr->Get_Image_Extent().width, m_swapchain_ptr->Get_Image_Extent().height)
+                ->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT)
+                ->Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT);
+        }
+        m_rendering_command_buffers_ptr->Finish_Recording();
+
+        // Create synchronization objects
+        delete m_rendering_complete_semaphores_ptr;
+        delete m_image_available_semaphores_ptr;
+        delete m_command_buffer_complete_fences_ptr;
+        m_rendering_complete_semaphores_ptr = new Vulkan::Semaphore(m_vulkan_graphics_ptr->m_device_ptr, m_swapchain_ptr->Get_Image_Count());
+        m_image_available_semaphores_ptr = new Vulkan::Semaphore(m_vulkan_graphics_ptr->m_device_ptr, m_swapchain_ptr->Get_Image_Count());
+        m_command_buffer_complete_fences_ptr = new Vulkan::Fence(m_vulkan_graphics_ptr->m_device_ptr, m_swapchain_ptr->Get_Image_Count(), true);
+    }
+
     void Vulkan_Renderer::Render_Frame()
     {
         // Block cpu until this command buffer is idle again (blocks cpu, can be moved after acquire image?)
@@ -125,7 +218,12 @@ namespace Cascade_Graphics
         // Get the next swapchain image
         uint32_t image_index;
         VkResult acquire_next_image_result = vkAcquireNextImageKHR(m_vulkan_graphics_ptr->m_device_ptr->Get(), *m_swapchain_ptr->Get(), UINT32_MAX, *m_image_available_semaphores_ptr->Get(m_active_command_buffer_index), VK_NULL_HANDLE, &image_index);
-        if (acquire_next_image_result != VK_SUCCESS)
+        if (acquire_next_image_result == VK_ERROR_OUT_OF_DATE_KHR)
+        {
+            Recreate_Swapchain();
+            return;
+        }
+        else if (acquire_next_image_result != VK_SUCCESS)
         {
             LOG_FATAL << "Graphics (Vulkan): Failed to acquire next swapchain image with code " << acquire_next_image_result << " (" << string_VkResult(acquire_next_image_result) << ")";
             exit(EXIT_FAILURE);
@@ -164,7 +262,12 @@ namespace Cascade_Graphics
         present_info.pResults = nullptr;
 
         VkResult queue_present_result = vkQueuePresentKHR(m_vulkan_graphics_ptr->m_device_ptr->Get_Device_Queues()->device_queue_requirements[0].device_queues[0].queue, &present_info);
-        if (queue_present_result != VK_SUCCESS)
+        if (queue_present_result == VK_ERROR_OUT_OF_DATE_KHR || queue_present_result == VK_SUBOPTIMAL_KHR)
+        {
+            Recreate_Swapchain();
+            return;
+        }
+        else if (queue_present_result != VK_SUCCESS)
         {
             LOG_FATAL << "Graphics (Vulkan): Failed to present swapchain code " << queue_present_result << " (" << string_VkResult(queue_present_result) << ")";
             exit(EXIT_FAILURE);

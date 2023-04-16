@@ -84,6 +84,15 @@ namespace Cascade_Graphics
             LOG_DEBUG << "Graphics (Vulkan): Selected swapchain image count of " << m_image_count;
         }
 
+        Swapchain_Builder& Swapchain_Builder::Set_Old_Swapchain(Swapchain* old_swapchain_ptr)
+        {
+            LOG_TRACE << "Graphics (Vulkan): Setting old swapchain";
+
+            m_old_swapchain_ptr = old_swapchain_ptr;
+
+            return *this;
+        }
+
         Swapchain_Builder& Swapchain_Builder::Select_Image_Format(std::vector<VkSurfaceFormatKHR> preferred_formats)
         {
             LOG_DEBUG << "Graphics (Vulkan): Selecting surface format";
@@ -262,7 +271,7 @@ namespace Cascade_Graphics
             swapchain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
             swapchain_create_info.presentMode = m_present_mode;
             swapchain_create_info.clipped = VK_TRUE;
-            swapchain_create_info.oldSwapchain = VK_NULL_HANDLE;
+            swapchain_create_info.oldSwapchain = (m_old_swapchain_ptr) ? *m_old_swapchain_ptr->Get() : VK_NULL_HANDLE;
 
             VkResult create_swapchain_result = vkCreateSwapchainKHR(device_ptr->Get(), &swapchain_create_info, NULL, &m_swapchain_ptr->m_swapchain);
             if (create_swapchain_result != VK_SUCCESS)
