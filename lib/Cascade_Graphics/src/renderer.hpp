@@ -6,5 +6,7 @@ namespace Cascade_Graphics
     {
     public:
         virtual ~Renderer();
+
+        virtual void Render_Frame() = 0;
     };
 }    // namespace Cascade_Graphics

@@ -48,6 +48,8 @@ namespace Cascade_Graphics
             Command_Buffer* Dispatch_Compute_Shader(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
             Command_Buffer* Copy_Image(Image* src_image_ptr, Image* dst_image_ptr, uint32_t width, uint32_t height);
             Command_Buffer* Finish_Recording();
+
+            VkCommandBuffer* Get(uint32_t index = 0);
         };
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics

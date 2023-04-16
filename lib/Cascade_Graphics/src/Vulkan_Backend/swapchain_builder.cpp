@@ -276,7 +276,7 @@ namespace Cascade_Graphics
         {
             LOG_TRACE << "Graphics (Vulkan): Getting swapchain images";
 
-            VkResult get_image_count_result = vkGetSwapchainImagesKHR(device_ptr->Get(), m_swapchain_ptr->Get(), &m_image_count, NULL);
+            VkResult get_image_count_result = vkGetSwapchainImagesKHR(device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, NULL);
             if (get_image_count_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get number of swapchain images with VkResult " << string_VkResult(get_image_count_result);
@@ -285,7 +285,7 @@ namespace Cascade_Graphics
             assert(m_image_count == m_swapchain_ptr->Get_Image_Count() && "Graphics (Vulkan): Number of images returned from vkGetSwapchainImagesKHR doesn't match specified amount");
             m_swapchain_ptr->m_swapchain_images.resize(m_image_count);
 
-            VkResult get_swapchain_images_result = vkGetSwapchainImagesKHR(device_ptr->Get(), m_swapchain_ptr->Get(), &m_image_count, m_swapchain_ptr->m_swapchain_images.data());
+            VkResult get_swapchain_images_result = vkGetSwapchainImagesKHR(device_ptr->Get(), *m_swapchain_ptr->Get(), &m_image_count, m_swapchain_ptr->m_swapchain_images.data());
             if (get_swapchain_images_result != VK_SUCCESS)
             {
                 LOG_FATAL << "Graphics (Vulkan): Failed to get swapchain images with VkResult " << string_VkResult(get_swapchain_images_result);

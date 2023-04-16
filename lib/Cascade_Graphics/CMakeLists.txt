@@ -28,7 +28,9 @@ add_library(cascade_graphics STATIC src/platform_info.cpp
                                     src/Vulkan_Backend/compute_pipeline.cpp
                                     src/Vulkan_Backend/descriptor.cpp
                                     src/Vulkan_Backend/descriptor_set.cpp
-                                    src/Vulkan_Backend/command_buffer.cpp)
+                                    src/Vulkan_Backend/command_buffer.cpp
+                                    src/Vulkan_Backend/semaphore.cpp
+                                    src/Vulkan_Backend/fence.cpp)
 
 # Set 'include' as a include directory
 target_include_directories(cascade_graphics PUBLIC include)

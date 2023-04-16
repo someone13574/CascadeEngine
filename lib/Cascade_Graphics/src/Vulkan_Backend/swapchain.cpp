@@ -22,9 +22,9 @@ namespace Cascade_Graphics
             vkDestroySwapchainKHR(m_device_ptr->Get(), m_swapchain, NULL);
         }
 
-        VkSwapchainKHR Swapchain::Get()
+        VkSwapchainKHR* Swapchain::Get()
         {
-            return m_swapchain;
+            return &m_swapchain;
         }
 
         VkImage Swapchain::Get_Image(uint32_t image_index)

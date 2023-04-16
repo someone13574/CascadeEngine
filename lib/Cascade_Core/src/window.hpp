@@ -17,12 +17,15 @@ namespace Cascade_Core
         Cascade_Graphics::Graphics** m_graphics_ptr;
 
         Thread* m_window_thread_ptr;
+        Thread* m_rendering_thread_ptr;
         Thread_Manager* m_thread_manager_ptr;
 
     protected:
-        static void Thread_Start_Function(Thread* window_thread_ptr, void* window_void_ptr);
-        static void Thread_Loop_Function(Thread* window_thread_ptr, void* window_void_ptr);
-        static void Thread_Exit_Function(Thread* window_thread_ptr, void* window_void_ptr);
+        static void Window_Thread_Start_Function(Thread* window_thread_ptr, void* window_void_ptr);
+        static void Window_Thread_Loop_Function(Thread* window_thread_ptr, void* window_void_ptr);
+        static void Window_Thread_Exit_Function(Thread* window_thread_ptr, void* window_void_ptr);
+
+        static void Rendering_Thread_Loop_Function(Thread* rendering_thread_ptr, void* renderer_void_ptr_ptr);
 
         virtual void Create_Window() = 0;
         virtual void Process_Events() = 0;

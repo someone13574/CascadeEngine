@@ -38,7 +38,7 @@ namespace Cascade_Graphics
         public:
             ~Swapchain();
 
-            VkSwapchainKHR Get();
+            VkSwapchainKHR* Get();
             VkImage Get_Image(uint32_t image_index);
             Image* Get_Image_Object(uint32_t image_index);
 

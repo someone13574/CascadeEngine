@@ -9,16 +9,20 @@ namespace Cascade_Core
     {
         std::string window_thread_name = "window-thread-" + window_title;
         m_window_thread_ptr = m_thread_manager_ptr->Create_Thread(window_thread_name, (void*)this);
-        m_window_thread_ptr->Attach_Start_Function(Thread_Start_Function);
-        m_window_thread_ptr->Attach_Loop_Function(Thread_Loop_Function, -1.0);
-        m_window_thread_ptr->Attach_Exit_Function(Thread_Exit_Function);
+        m_window_thread_ptr->Attach_Start_Function(Window_Thread_Start_Function);
+        m_window_thread_ptr->Attach_Loop_Function(Window_Thread_Loop_Function, -1.0);
+        m_window_thread_ptr->Attach_Exit_Function(Window_Thread_Exit_Function);
+
+        std::string rendering_thread_name = "rendering-thread-" + window_title;
+        m_rendering_thread_ptr = m_thread_manager_ptr->Create_Thread(rendering_thread_name, &m_renderer_ptr);
+        m_rendering_thread_ptr->Attach_Loop_Function(Rendering_Thread_Loop_Function, -1.0);
     }
 
     Window::~Window()
     {
     }
 
-    void Window::Thread_Start_Function(Thread* window_thread_ptr, void* window_void_ptr)
+    void Window::Window_Thread_Start_Function(Thread* window_thread_ptr, void* window_void_ptr)
     {
         (void)window_thread_ptr;
 
@@ -26,7 +30,7 @@ namespace Cascade_Core
         window_ptr->Create_Window();
     }
 
-    void Window::Thread_Loop_Function(Thread* window_thread_ptr, void* window_void_ptr)
+    void Window::Window_Thread_Loop_Function(Thread* window_thread_ptr, void* window_void_ptr)
     {
         (void)window_thread_ptr;
 
@@ -34,7 +38,7 @@ namespace Cascade_Core
         window_ptr->Process_Events();
     }
 
-    void Window::Thread_Exit_Function(Thread* window_thread_ptr, void* window_void_ptr)
+    void Window::Window_Thread_Exit_Function(Thread* window_thread_ptr, void* window_void_ptr)
     {
         (void)window_thread_ptr;
 
@@ -42,5 +46,13 @@ namespace Cascade_Core
         window_ptr->Destroy_Window();
 
         delete window_ptr->m_renderer_ptr;
+    }
+
+    void Window::Rendering_Thread_Loop_Function(Thread* rendering_thread_ptr, void* renderer_void_ptr_ptr)
+    {
+        (void)rendering_thread_ptr;
+
+        Cascade_Graphics::Renderer* renderer_ptr = *(Cascade_Graphics::Renderer**)renderer_void_ptr_ptr;
+        renderer_ptr->Render_Frame();
     }
 }    // namespace Cascade_Core

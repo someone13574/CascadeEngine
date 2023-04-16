@@ -29,6 +29,9 @@ namespace Cascade_Core
 
         m_renderer_window_info_ptr = new Cascade_Graphics::XCB_Window_Info(window_width, window_height, reinterpret_cast<void**>(&m_xcb_connection_ptr), reinterpret_cast<void*>(&m_xcb_window));
         m_renderer_ptr = m_graphics_factory_ptr->Create_Renderer(*m_graphics_ptr, m_renderer_window_info_ptr);
+
+        m_rendering_thread_ptr->Start_Thread();
+        m_rendering_thread_ptr->Await_State(Thread::Thread_State::FINISHED);
     }
 
     XCB_Window::~XCB_Window()
@@ -80,6 +83,7 @@ namespace Cascade_Core
                 if ((*(xcb_client_message_event_t*)m_event_ptr).data.data32[0] == (*m_xcb_close_window_reply_ptr).atom)
                 {
                     LOG_INFO << "Core: Received close window event in window '" << m_window_title << "'";
+                    m_rendering_thread_ptr->Exit_Thread();
                     m_window_thread_ptr->Exit_Thread();
                 }
                 break;

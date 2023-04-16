@@ -250,5 +250,10 @@ namespace Cascade_Graphics
 
             return this;
         }
+
+        VkCommandBuffer* Command_Buffer::Get(uint32_t index)
+        {
+            return &m_command_buffers[index];
+        }
     }    // namespace Vulkan
 }    // namespace Cascade_Graphics
