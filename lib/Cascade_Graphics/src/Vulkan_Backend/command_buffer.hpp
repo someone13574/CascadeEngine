@@ -41,13 +41,13 @@ namespace Cascade_Graphics
             ~Command_Buffer();
 
         public:
-            Command_Buffer* Bind_Descriptor_Set(Descriptor_Set* descriptor_set_ptr, int32_t command_buffer_index = -1);
-            Command_Buffer* Add_Image(Image* image_ptr, int32_t command_buffer_index = -1);
+            Command_Buffer& Bind_Descriptor_Set(Descriptor_Set* descriptor_set_ptr, int32_t command_buffer_index = -1);
+            Command_Buffer& Add_Image(Image* image_ptr, int32_t command_buffer_index = -1);
 
-            Command_Buffer* Image_Memory_Barrier(Image* image_ptr, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
-            Command_Buffer* Dispatch_Compute_Shader(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
-            Command_Buffer* Copy_Image(Image* src_image_ptr, Image* dst_image_ptr, uint32_t width, uint32_t height);
-            Command_Buffer* Finish_Recording();
+            Command_Buffer& Image_Memory_Barrier(Image* image_ptr, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags);
+            Command_Buffer& Dispatch_Compute_Shader(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z);
+            Command_Buffer& Copy_Image(Image* src_image_ptr, Image* dst_image_ptr, uint32_t width, uint32_t height);
+            Command_Buffer& Finish_Recording();
 
             VkCommandBuffer* Get(uint32_t index = 0);
         };

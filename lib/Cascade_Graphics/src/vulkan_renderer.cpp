@@ -69,15 +69,15 @@ namespace Cascade_Graphics
             m_rendering_command_buffers_ptr->Add_Image(m_render_target_ptrs[i]);
             m_rendering_command_buffers_ptr->Add_Image(swapchain_images[i]);
 
-            m_rendering_command_buffers_ptr->Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT)->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            m_rendering_command_buffers_ptr->Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT).Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         }
         m_rendering_command_buffers_ptr->Dispatch_Compute_Shader(std::ceil(m_swapchain_ptr->Get_Image_Extent().width / 32.0), std::ceil(m_swapchain_ptr->Get_Image_Extent().height / 32.0), 1);
         for (uint32_t i = 0; i < m_swapchain_ptr->Get_Image_Count(); i++)
         {
             m_rendering_command_buffers_ptr->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT)
-                ->Copy_Image(m_render_target_ptrs[i], swapchain_images[i], m_swapchain_ptr->Get_Image_Extent().width, m_swapchain_ptr->Get_Image_Extent().height)
-                ->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT)
-                ->Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                .Copy_Image(m_render_target_ptrs[i], swapchain_images[i], m_swapchain_ptr->Get_Image_Extent().width, m_swapchain_ptr->Get_Image_Extent().height)
+                .Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT)
+                .Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT);
         }
         m_rendering_command_buffers_ptr->Finish_Recording();
 
@@ -123,7 +123,7 @@ namespace Cascade_Graphics
 
     void Vulkan_Renderer::Recreate_Swapchain()
     {
-        LOG_WARN << "Graphics (Vulkan): Recreating swapchain";
+        LOG_INFO << "Graphics (Vulkan): Recreating swapchain";
 
         // Wait for idle
         VkResult device_wait_idle_result = vkDeviceWaitIdle(m_vulkan_graphics_ptr->m_device_ptr->Get());
@@ -188,15 +188,15 @@ namespace Cascade_Graphics
             m_rendering_command_buffers_ptr->Add_Image(m_render_target_ptrs[i]);
             m_rendering_command_buffers_ptr->Add_Image(swapchain_images[i]);
 
-            m_rendering_command_buffers_ptr->Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT)->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            m_rendering_command_buffers_ptr->Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_WRITE_BIT, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT).Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
         }
         m_rendering_command_buffers_ptr->Dispatch_Compute_Shader(std::ceil(m_swapchain_ptr->Get_Image_Extent().width / 32.0), std::ceil(m_swapchain_ptr->Get_Image_Extent().height / 32.0), 1);
         for (uint32_t i = 0; i < m_swapchain_ptr->Get_Image_Count(); i++)
         {
             m_rendering_command_buffers_ptr->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_TRANSFER_BIT)
-                ->Copy_Image(m_render_target_ptrs[i], swapchain_images[i], m_swapchain_ptr->Get_Image_Extent().width, m_swapchain_ptr->Get_Image_Extent().height)
-                ->Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT)
-                ->Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT);
+                .Copy_Image(m_render_target_ptrs[i], swapchain_images[i], m_swapchain_ptr->Get_Image_Extent().width, m_swapchain_ptr->Get_Image_Extent().height)
+                .Image_Memory_Barrier(m_render_target_ptrs[i], VK_ACCESS_NONE, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_TRANSFER_BIT)
+                .Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT);
         }
         m_rendering_command_buffers_ptr->Finish_Recording();
 

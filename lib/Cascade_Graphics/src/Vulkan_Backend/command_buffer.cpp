@@ -76,7 +76,7 @@ namespace Cascade_Graphics
             vkDestroyCommandPool(m_device_ptr->Get(), m_command_pool, NULL);
         }
 
-        Command_Buffer* Command_Buffer::Bind_Descriptor_Set(Descriptor_Set* descriptor_set_ptr, int32_t command_buffer_index)
+        Command_Buffer& Command_Buffer::Bind_Descriptor_Set(Descriptor_Set* descriptor_set_ptr, int32_t command_buffer_index)
         {
             if (command_buffer_index == -1)
             {
@@ -90,10 +90,10 @@ namespace Cascade_Graphics
                 vkCmdBindDescriptorSets(m_command_buffers[command_buffer_index], VK_PIPELINE_BIND_POINT_COMPUTE, m_pipeline_ptr->Get_Layout(), 0, 1, descriptor_set_ptr->Get(), 0, NULL);
             }
 
-            return this;
+            return *this;
         }
 
-        Command_Buffer* Command_Buffer::Add_Image(Image* image_ptr, int32_t command_buffer_index)
+        Command_Buffer& Command_Buffer::Add_Image(Image* image_ptr, int32_t command_buffer_index)
         {
             if (command_buffer_index == -1)
             {
@@ -107,10 +107,10 @@ namespace Cascade_Graphics
                 m_command_buffer_images[command_buffer_index].push_back(std::make_tuple(image_ptr, Command_Buffer::Image_State {0, VK_IMAGE_LAYOUT_UNDEFINED, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT}, Command_Buffer::Image_State {0, VK_IMAGE_LAYOUT_UNDEFINED, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT}));
             }
 
-            return this;
+            return *this;
         }
 
-        Command_Buffer* Command_Buffer::Image_Memory_Barrier(Image* image_ptr, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags)
+        Command_Buffer& Command_Buffer::Image_Memory_Barrier(Image* image_ptr, VkAccessFlags access_flags, VkImageLayout image_layout, VkPipelineStageFlags pipeline_stage_flags)
         {
             LOG_TRACE << "Graphics (Vulkan): Recording image memory barrier in compute shader";
 
@@ -161,10 +161,10 @@ namespace Cascade_Graphics
                 LOG_WARN << "Graphics (Vulkan): A memory barrier was created for an unadded image";
             }
 
-            return this;
+            return *this;
         }
 
-        Command_Buffer* Command_Buffer::Dispatch_Compute_Shader(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z)
+        Command_Buffer& Command_Buffer::Dispatch_Compute_Shader(uint32_t group_count_x, uint32_t group_count_y, uint32_t group_count_z)
         {
             for (uint32_t command_buffer_index = 0; command_buffer_index < m_command_buffers.size(); command_buffer_index++)
             {
@@ -173,10 +173,10 @@ namespace Cascade_Graphics
                 vkCmdDispatch(m_command_buffers[command_buffer_index], group_count_x, group_count_y, group_count_z);
             }
 
-            return this;
+            return *this;
         }
 
-        Command_Buffer* Command_Buffer::Copy_Image(Image* src_image_ptr, Image* dst_image_ptr, uint32_t width, uint32_t height)
+        Command_Buffer& Command_Buffer::Copy_Image(Image* src_image_ptr, Image* dst_image_ptr, uint32_t width, uint32_t height)
         {
             LOG_TRACE << "Graphics (Vulkan): Recording image copy operation";
 
@@ -231,10 +231,10 @@ namespace Cascade_Graphics
                 LOG_WARN << "Graphics (Vulkan): The source or destionation image could not be found for copy operation recording";
             }
 
-            return this;
+            return *this;
         }
 
-        Command_Buffer* Command_Buffer::Finish_Recording()
+        Command_Buffer& Command_Buffer::Finish_Recording()
         {
             for (uint32_t command_buffer_index = 0; command_buffer_index < m_command_buffers.size(); command_buffer_index++)
             {
@@ -248,7 +248,7 @@ namespace Cascade_Graphics
                 }
             }
 
-            return this;
+            return *this;
         }
 
         VkCommandBuffer* Command_Buffer::Get(uint32_t index)
