@@ -119,7 +119,7 @@ namespace Cascade_Graphics
             compile_options.SetSourceLanguage(shaderc_source_language_glsl);
 
             shaderc::SpvCompilationResult compilation_result;
-            compilation_result = compiler.CompileGlslToSpv(shader_source, shaderc_shader_kind::shaderc_compute_shader, shader_path.c_str(), compile_options);
+            compilation_result = compiler.CompileGlslToSpv(shader_source, shaderc_shader_kind::shaderc_glsl_compute_shader, shader_path.c_str(), compile_options);
 
             if (compilation_result.GetCompilationStatus() != shaderc_compilation_status_success)
             {
