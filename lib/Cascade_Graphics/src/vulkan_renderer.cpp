@@ -41,7 +41,7 @@ namespace Cascade_Graphics
                               .Select_Image_Format(std::vector<VkSurfaceFormatKHR> {{VK_FORMAT_R8G8B8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}})
                               .Select_Image_Extent(window_info_ptr)
                               .Set_Swapchain_Image_Usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT)
-                              .Select_Present_Mode(std::vector<VkPresentModeKHR> {VK_PRESENT_MODE_FIFO_RELAXED_KHR, VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR})
+                              .Select_Present_Mode(std::vector<VkPresentModeKHR> {VK_PRESENT_MODE_IMMEDIATE_KHR})
                               .Set_Allowed_Queue_Requirements(std::vector<Vulkan::Device_Queue_Requirement*> {&m_vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]})
                               .Build(m_vulkan_graphics_ptr->m_device_ptr);
 
@@ -158,7 +158,7 @@ namespace Cascade_Graphics
                                                .Select_Image_Format(std::vector<VkSurfaceFormatKHR> {{VK_FORMAT_R8G8B8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR}})
                                                .Select_Image_Extent(m_window_info_ptr)
                                                .Set_Swapchain_Image_Usage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT)
-                                               .Select_Present_Mode(std::vector<VkPresentModeKHR> {VK_PRESENT_MODE_FIFO_RELAXED_KHR, VK_PRESENT_MODE_MAILBOX_KHR, VK_PRESENT_MODE_IMMEDIATE_KHR, VK_PRESENT_MODE_FIFO_KHR})
+                                               .Select_Present_Mode(std::vector<VkPresentModeKHR> {VK_PRESENT_MODE_IMMEDIATE_KHR})
                                                .Set_Allowed_Queue_Requirements(std::vector<Vulkan::Device_Queue_Requirement*> {&m_vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]})
                                                .Build(m_vulkan_graphics_ptr->m_device_ptr);
         delete m_swapchain_ptr;
@@ -191,10 +191,6 @@ namespace Cascade_Graphics
             m_rendering_descriptor_set_ptrs[image_index]->Update();
         }
 
-        // Recreate pipeline
-        delete m_rendering_pipeline_ptr;
-        m_rendering_pipeline_ptr = new Vulkan::Compute_Pipeline(m_vulkan_graphics_ptr->m_device_ptr, "../lib/Cascade_Graphics/src/Vulkan_Backend/Shaders/render.comp", m_rendering_descriptor_set_ptrs);
-
         // Recreate and rerecord command buffers
         delete m_rendering_command_buffers_ptr;
         m_rendering_command_buffers_ptr = new Vulkan::Command_Buffer(m_vulkan_graphics_ptr->m_device_ptr, m_rendering_pipeline_ptr, m_swapchain_ptr->Get_Image_Count(), m_vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0].device_queues[0].queue_family_index);
@@ -216,14 +212,6 @@ namespace Cascade_Graphics
                 .Image_Memory_Barrier(swapchain_images[i], VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_TRANSFER_BIT);
         }
         m_rendering_command_buffers_ptr->Finish_Recording();
-
-        // Create synchronization objects
-        delete m_rendering_complete_semaphores_ptr;
-        delete m_image_available_semaphores_ptr;
-        delete m_command_buffer_complete_fences_ptr;
-        m_rendering_complete_semaphores_ptr = new Vulkan::Semaphore(m_vulkan_graphics_ptr->m_device_ptr, m_swapchain_ptr->Get_Image_Count());
-        m_image_available_semaphores_ptr = new Vulkan::Semaphore(m_vulkan_graphics_ptr->m_device_ptr, m_swapchain_ptr->Get_Image_Count());
-        m_command_buffer_complete_fences_ptr = new Vulkan::Fence(m_vulkan_graphics_ptr->m_device_ptr, m_swapchain_ptr->Get_Image_Count(), true);
     }
 
     void Vulkan_Renderer::Render_Frame()
@@ -242,6 +230,7 @@ namespace Cascade_Graphics
         if (acquire_next_image_result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             Recreate_Swapchain();
+            m_active_command_buffer_index = (m_active_command_buffer_index + 1) % m_swapchain_ptr->Get_Image_Count();
             return;
         }
         else if (acquire_next_image_result != VK_SUCCESS)
@@ -286,6 +275,7 @@ namespace Cascade_Graphics
         if (queue_present_result == VK_ERROR_OUT_OF_DATE_KHR || queue_present_result == VK_SUBOPTIMAL_KHR)
         {
             Recreate_Swapchain();
+            m_active_command_buffer_index = (m_active_command_buffer_index + 1) % m_swapchain_ptr->Get_Image_Count();
             return;
         }
         else if (queue_present_result != VK_SUCCESS)

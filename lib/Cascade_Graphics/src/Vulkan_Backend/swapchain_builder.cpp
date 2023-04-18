@@ -78,7 +78,7 @@ namespace Cascade_Graphics
 
         void Swapchain_Builder::Select_Image_Count()
         {
-            m_image_count = m_surface_capabilities.minImageCount;
+            m_image_count = m_surface_capabilities.minImageCount + 1;
             m_image_count = (m_surface_capabilities.maxImageCount != 0 && m_image_count > m_surface_capabilities.maxImageCount) ? m_surface_capabilities.maxImageCount : m_image_count;
 
             LOG_DEBUG << "Graphics (Vulkan): Selected swapchain image count of " << m_image_count;
