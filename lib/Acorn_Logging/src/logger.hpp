@@ -17,6 +17,8 @@ namespace Acorn_Logging
         template<class T>
         Disable operator<<(T type)
         {
+            (void)type;
+
             return *this;
         }
     };
