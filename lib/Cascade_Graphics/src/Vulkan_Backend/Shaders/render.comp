@@ -5,8 +5,30 @@ layout(local_size_x = 32, local_size_y = 32) in;
 // bindings
 layout(binding = 0, rgba8) uniform image2D render_target;
 
+layout(binding = 1) uniform Camera_Data
+{
+    float matrix_x0; // *
+    float matrix_x1;
+    float matrix_x2;
+    float matrix_y0;
+    float matrix_y1; // *
+    float matrix_y2;
+    float matrix_z0;
+    float matrix_z1;
+    float matrix_z2; // *
+
+    float origin_x;
+    float origin_y;
+    float origin_z;
+} camera_data;
+
 void main()
 {
-    vec4 color = vec4(gl_GlobalInvocationID.x & gl_GlobalInvocationID.y);
-    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), color);
+    vec2 texture_size = imageSize(render_target);
+    vec2 uv = (-texture_size + 2.0 * (gl_GlobalInvocationID.xy + vec2(0.5, 0.5))) / texture_size.y;
+
+    vec3 ray_origin = vec3(camera_data.origin_x, camera_data.origin_y, camera_data.origin_z);
+    vec3 ray_direction = normalize(vec3(uv.x, -uv.y, 1.0) * mat3x3(camera_data.matrix_x0, camera_data.matrix_x1, camera_data.matrix_x2, camera_data.matrix_y0, camera_data.matrix_y1, camera_data.matrix_y2, camera_data.matrix_z0, camera_data.matrix_z1, camera_data.matrix_z2));
+
+    imageStore(render_target, ivec2(gl_GlobalInvocationID.xy), vec4(ray_direction, 1.0));
 }

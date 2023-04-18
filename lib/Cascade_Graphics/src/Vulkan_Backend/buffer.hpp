@@ -22,10 +22,14 @@ namespace Cascade_Graphics
 
             VkBuffer m_buffer;
             VkDeviceMemory m_device_memory;
+            VkMemoryPropertyFlags m_memory_properties;
 
         public:
             Buffer(Device* device_ptr, VkBufferUsageFlags buffer_usage_flags, VkDeviceSize buffer_size, std::vector<Device_Queue_Requirement*> queue_requirements_with_access, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties);
             ~Buffer();
+
+        public:
+            void Direct_Upload_To_Buffer(void* data, size_t data_size);
 
             VkBuffer Get_Buffer();
         };

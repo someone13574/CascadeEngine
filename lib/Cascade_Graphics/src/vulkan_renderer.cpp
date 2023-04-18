@@ -1,5 +1,6 @@
 #include "vulkan_renderer.hpp"
 
+#include "Data_Types/vector_3.hpp"
 #include "Vulkan_Backend/buffer.hpp"
 #include "Vulkan_Backend/descriptor.hpp"
 #include "Vulkan_Backend/queue_data.hpp"
@@ -13,9 +14,12 @@
 namespace Cascade_Graphics
 {
     Vulkan_Renderer::Vulkan_Renderer(Graphics* graphics_ptr, Platform platform, Window_Info* window_info_ptr) :
-        m_vulkan_graphics_ptr(static_cast<Vulkan_Graphics*>(graphics_ptr)), m_window_info_ptr(window_info_ptr)
+        m_vulkan_graphics_ptr(static_cast<Vulkan_Graphics*>(graphics_ptr)), m_window_info_ptr(window_info_ptr), m_camera(Vector_3<double>(0.0, 0.0, 0.0), Vector_3<double>(1.0, 0.0, 0.0))
     {
         LOG_INFO << "Graphics: Initializing renderer with Vulkan backend";
+
+        m_camera.Set_Position(Vector_3<double>(-5.0, 0.0, 0.0));
+        m_camera.Look_At(Vector_3<double>(0.0, 0.0, 0.0));
 
         // Create a surface
         if (platform == Platform::LINUX_XCB)
@@ -52,8 +56,18 @@ namespace Cascade_Graphics
         for (uint32_t render_target_index = 0; render_target_index < m_swapchain_ptr->Get_Image_Count(); render_target_index++)
         {
             m_render_target_ptrs.push_back(new Vulkan::Image(m_vulkan_graphics_ptr->m_device_ptr, m_swapchain_ptr->Get_Surface_Format().format, m_swapchain_ptr->Get_Image_Extent(), VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, std::vector<Vulkan::Device_Queue_Requirement*> {&m_vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]}, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 0));
+        }
 
-            std::vector<Vulkan::Descriptor> rendering_descriptors = {Vulkan::Descriptor(m_render_target_ptrs[render_target_index], VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)};
+        // Create camera buffer
+        for (uint32_t camera_buffer_index = 0; camera_buffer_index < m_swapchain_ptr->Get_Image_Count(); camera_buffer_index++)
+        {
+            m_camera_buffer_ptrs.push_back(new Vulkan::Buffer(m_vulkan_graphics_ptr->m_device_ptr, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, sizeof(Camera::GPU_Camera_Data), std::vector<Vulkan::Device_Queue_Requirement*> {&m_vulkan_graphics_ptr->m_physical_device_ptr->Get_Device_Queues().device_queue_requirements[0]}, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT));
+        }
+
+        // Create descriptor sets
+        for (uint32_t descriptor_set_index = 0; descriptor_set_index < m_swapchain_ptr->Get_Image_Count(); descriptor_set_index++)
+        {
+            std::vector<Vulkan::Descriptor> rendering_descriptors = {Vulkan::Descriptor(m_render_target_ptrs[descriptor_set_index], VK_DESCRIPTOR_TYPE_STORAGE_IMAGE), Vulkan::Descriptor(m_camera_buffer_ptrs[descriptor_set_index], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)};
             m_rendering_descriptor_set_ptrs.push_back(new Vulkan::Descriptor_Set(m_vulkan_graphics_ptr->m_device_ptr, rendering_descriptors));
         }
 
@@ -102,18 +116,21 @@ namespace Cascade_Graphics
         }
 
         delete m_rendering_complete_semaphores_ptr;
+
         delete m_image_available_semaphores_ptr;
         delete m_command_buffer_complete_fences_ptr;
         delete m_rendering_command_buffers_ptr;
         delete m_rendering_pipeline_ptr;
 
-        for (uint32_t i = 0; i < m_render_target_ptrs.size(); i++)
+        for (uint32_t i = 0; i < m_swapchain_ptr->Get_Image_Count(); i++)
         {
             delete m_rendering_descriptor_set_ptrs[i];
             delete m_render_target_ptrs[i];
+            delete m_camera_buffer_ptrs[i];
         }
         m_rendering_descriptor_set_ptrs.clear();
         m_render_target_ptrs.clear();
+        m_camera_buffer_ptrs.clear();
 
         delete m_swapchain_ptr;
         delete m_surface_ptr;
@@ -214,6 +231,10 @@ namespace Cascade_Graphics
         // Block cpu until this command buffer is idle again (blocks cpu, can be moved after acquire image?)
         vkWaitForFences(m_vulkan_graphics_ptr->m_device_ptr->Get(), 1, m_command_buffer_complete_fences_ptr->Get(m_active_command_buffer_index), VK_TRUE, UINT32_MAX);
         vkResetFences(m_vulkan_graphics_ptr->m_device_ptr->Get(), 1, m_command_buffer_complete_fences_ptr->Get(m_active_command_buffer_index));
+
+        // Update camera buffer
+        Camera::GPU_Camera_Data camera_data = m_camera.Get_GPU_Camera_Data();
+        m_camera_buffer_ptrs[m_active_command_buffer_index]->Direct_Upload_To_Buffer(&camera_data, sizeof(Camera::GPU_Camera_Data));
 
         // Get the next swapchain image
         uint32_t image_index;

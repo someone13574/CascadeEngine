@@ -80,7 +80,7 @@ namespace Cascade_Graphics
             return device_queue_create_informations;
         }
 
-        VkDeviceMemory Device::Allocate_Buffer_Memory(VkBuffer buffer, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties)
+        VkDeviceMemory Device::Allocate_Buffer_Memory(VkBuffer buffer, VkMemoryPropertyFlags required_memory_properties, VkMemoryPropertyFlags preferred_memory_properties, VkMemoryPropertyFlags* applied_memory_properties)
         {
             LOG_TRACE << "Graphics (Vulkan): Allocating buffer memory";
 
@@ -164,6 +164,9 @@ namespace Cascade_Graphics
                 LOG_FATAL << "Graphics (Vulkan): A memory type meeting the required property flags of " << string_VkMemoryPropertyFlags(required_memory_properties) << " was not found";
                 exit(EXIT_FAILURE);
             }
+
+            // Set memory properties
+            *applied_memory_properties = memory_properties.memoryProperties.memoryTypes[best_memory_type_index].propertyFlags;
 
             // Select dedicated or normal allocation
             if (memory_dedicated_requirements.prefersDedicatedAllocation || memory_dedicated_requirements.requiresDedicatedAllocation)

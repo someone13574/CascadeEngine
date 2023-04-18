@@ -2,6 +2,7 @@
 
 #include <acorn_logging.hpp>
 #include <algorithm>
+#include <cstring>
 #include <vulkan/vk_enum_string_helper.h>
 
 namespace Cascade_Graphics
@@ -45,7 +46,7 @@ namespace Cascade_Graphics
             }
 
             // Allocate and bind memory
-            m_device_memory = m_device_ptr->Allocate_Buffer_Memory(m_buffer, required_memory_properties, preferred_memory_properties);
+            m_device_memory = m_device_ptr->Allocate_Buffer_Memory(m_buffer, required_memory_properties, preferred_memory_properties, &m_memory_properties);
         }
 
         Buffer::~Buffer()
@@ -54,6 +55,37 @@ namespace Cascade_Graphics
 
             vkDestroyBuffer(m_device_ptr->Get(), m_buffer, NULL);
             vkFreeMemory(m_device_ptr->Get(), m_device_memory, NULL);
+        }
+
+        void Buffer::Direct_Upload_To_Buffer(void* data, size_t data_size)
+        {
+            // Ensure buffer memory is host visible
+            if (~m_memory_properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)
+            {
+                LOG_ERROR << "Graphics (Vulkan): Direct buffer uploads require host visible memory";
+                exit(EXIT_FAILURE);
+            }
+
+            if (~m_memory_properties & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)
+            {
+                LOG_ERROR << "fuck";
+                exit(EXIT_FAILURE);
+            }
+
+            // Map buffer memory
+            void* mapped_memory;
+            VkResult map_memory_result = vkMapMemory(m_device_ptr->Get(), m_device_memory, 0, data_size, 0, &mapped_memory);
+            if (map_memory_result != VK_SUCCESS)
+            {
+                LOG_FATAL << "Graphics (Vulkan): Failed to map buffer memory with code " << map_memory_result << " (" << string_VkResult(map_memory_result) << ")";
+                exit(EXIT_FAILURE);
+            }
+
+            // Copy data
+            memcpy(mapped_memory, data, data_size);
+
+            // Unmap memory
+            vkUnmapMemory(m_device_ptr->Get(), m_device_memory);
         }
 
         VkBuffer Buffer::Get_Buffer()

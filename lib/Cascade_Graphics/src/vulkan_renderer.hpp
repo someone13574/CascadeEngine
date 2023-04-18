@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Vulkan_Backend/buffer.hpp"
 #include "Vulkan_Backend/command_buffer.hpp"
 #include "Vulkan_Backend/compute_pipeline.hpp"
 #include "Vulkan_Backend/descriptor_set.hpp"
@@ -8,6 +9,7 @@
 #include "Vulkan_Backend/semaphore.hpp"
 #include "Vulkan_Backend/surface.hpp"
 #include "Vulkan_Backend/swapchain.hpp"
+#include "camera.hpp"
 #include "graphics.hpp"
 #include "platform.hpp"
 #include "platform_info.hpp"
@@ -33,6 +35,9 @@ namespace Cascade_Graphics
         Vulkan::Semaphore* m_rendering_complete_semaphores_ptr;
         Vulkan::Semaphore* m_image_available_semaphores_ptr;
         Vulkan::Fence* m_command_buffer_complete_fences_ptr;
+        std::vector<Vulkan::Buffer*> m_camera_buffer_ptrs;
+
+        Camera m_camera;
 
         uint32_t m_active_command_buffer_index = 0;
 
