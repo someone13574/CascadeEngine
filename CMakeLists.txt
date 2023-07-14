@@ -6,7 +6,7 @@ project(Cascade VERSION 0.7.0
                 LANGUAGES CXX)
 
 # Add an executable for a test application
-add_executable(cascade_application src/main.cpp)
+add_executable(cascade_application application/src/main.cpp)
 
 # Require C++ 17
 target_compile_features(cascade_application PRIVATE cxx_std_17)
