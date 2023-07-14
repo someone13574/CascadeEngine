@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <type_traits>
 
 namespace Cascade_Graphics
@@ -25,6 +26,26 @@ namespace Cascade_Graphics
         {
             static_assert(std::is_arithmetic<Convert_T>::value, "Vector: Cannot convert to a vector of this type");
             return Vector_3<Convert_T>((Convert_T)m_x, (Convert_T)m_y, (Convert_T)m_z);
+        }
+
+        Vector_T* operator[](uint32_t index)
+        {
+            if (index == 0)
+            {
+                return &m_x;
+            }
+            else if (index == 1)
+            {
+                return &m_y;
+            }
+            else if (index == 2)
+            {
+                return &m_z;
+            }
+            else
+            {
+                exit(EXIT_FAILURE);
+            }
         }
 
         template<typename Scalar_T>

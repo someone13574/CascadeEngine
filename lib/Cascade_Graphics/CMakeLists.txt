@@ -2,7 +2,8 @@
 cmake_minimum_required(VERSION 3.16...3.24)
 
 # Creaet a static library for cascade graphics
-add_library(cascade_graphics STATIC src/camera.cpp
+add_library(cascade_graphics STATIC src/object.cpp
+                                    src/camera.cpp
                                     src/platform_info.cpp
                                     src/win32_platform_info.cpp
                                     src/xcb_platform_info.cpp
